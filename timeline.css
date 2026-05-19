@@ -10,19 +10,48 @@
   scroll-margin-bottom:140px;
 }
 
-/* 日期分区 */
-.tl-date-section{
-  margin-bottom:28px;
+/* 日期分区 — 不同天之间加大间距 */
+.tl-day-section-head{
+  margin-bottom:16px;
+  padding-top:20px;
   position:relative;
 }
-.tl-date-section.is-today .tl-day-big{
+.tl-gap-divider + .tl-day-section-head{
+  padding-top:0;
+}
+.tl-day-section-head.is-today .tl-day-big{
   color:var(--my-brand-red);
 }
-.tl-date-section.phase-period .tl-rail-dot.period,
-.tl-date-section.phase-period .tl-rail-dot{
-  background:var(--my-brand-red);
-  border-color:var(--my-brand-red);
-  box-shadow:0 0 0 2px var(--my-bg), 0 0 0 4px rgba(255,77,136,0.10);
+
+/* 连续时间轴竖线 */
+.tl-rail-continuous{
+  position:relative;
+}
+.tl-rail-continuous::before{
+  content:'';
+  position:absolute;
+  left:6px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(0,0,0,0.08);
+  pointer-events:none;
+  z-index:0;
+}
+.tl-rail-break{
+  position:relative;
+  z-index:1;
+}
+.tl-rail-break::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:14px;
+  background:var(--my-bg);
+  z-index:2;
+  pointer-events:none;
 }
 
 /* 日标题 — 大号日期 + 周期条 */
@@ -80,17 +109,15 @@
 .tl-cycle-chip.preg{color:var(--my-purple);background:var(--my-purple-soft)}
 .tl-cycle-chip.baby{color:var(--my-success);background:var(--my-success-soft)}
 
-/* 左侧竖线 — 仅保留圆点，时刻在卡片外上方 */
-.tl-rail-track{
-  position:relative;
-}
+/* 左侧竖线 — 圆点 + 连续主轴 */
 .tl-rail-node{
   display:flex;
   gap:6px;
   padding-bottom:14px;
   position:relative;
+  z-index:1;
 }
-.tl-rail-node.is-last{padding-bottom:4px}
+.tl-rail-node.is-feed-last{padding-bottom:4px}
 .tl-rail-marker{
   width:14px;
   flex-shrink:0;
@@ -99,40 +126,18 @@
   align-items:center;
   position:relative;
   padding-top:2px;
+  z-index:1;
 }
 .tl-rail-dot{
   width:6px;
   height:6px;
   border-radius:50%;
-  background:var(--my-surface);
-  border:1.5px solid rgba(0,0,0,0.16);
+  background:rgba(255,77,136,0.32);
+  border:1.5px solid rgba(255,77,136,0.48);
   margin-top:0;
   z-index:1;
   flex-shrink:0;
   box-shadow:0 0 0 2px var(--my-bg);
-}
-.tl-rail-marker::after{
-  content:'';
-  position:absolute;
-  top:10px;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:-14px;
-  width:1px;
-  background:linear-gradient(180deg, rgba(255,77,136,0.22) 0%, rgba(0,0,0,0.06) 100%);
-}
-.tl-rail-node.is-last .tl-rail-marker::after{display:none}
-.tl-rail-dot.period{
-  background:var(--my-brand-red);
-  border-color:var(--my-brand-red);
-}
-.tl-rail-dot.lut{
-  border-color:var(--phase-lut);
-  background:var(--phase-lut-soft);
-}
-.tl-rail-dot.foll{
-  border-color:var(--phase-foll);
-  background:var(--phase-foll-soft);
 }
 .tl-rail-body{
   flex:1;
@@ -450,16 +455,6 @@
   color:var(--my-text-tertiary);
   letter-spacing:1px;
   position:relative;
-}
-.tl-gap-divider::before{
-  content:'';
-  position:absolute;
-  left:-26px;
-  top:50%;
-  width:1px;
-  height:20px;
-  background:rgba(0,0,0,0.07);
-  transform:translateY(-50%);
 }
 
 /* 今日引导 */
@@ -901,11 +896,6 @@
 }
 
 /* === 语音记录 & 美柚姐姐分析卡片 === */
-.tl-rail-dot.ai{
-  background:var(--my-brand-red);
-  border-color:var(--my-brand-red);
-  box-shadow:0 0 0 2px var(--my-bg), 0 0 0 4px rgba(255,77,136,0.18);
-}
 .tl-card{
   background:#ffffff;
   border-radius:14px;

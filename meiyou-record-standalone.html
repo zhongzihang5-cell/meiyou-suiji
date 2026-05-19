@@ -1252,19 +1252,48 @@ html,body{
   scroll-margin-bottom:140px;
 }
 
-/* 日期分区 */
-.tl-date-section{
-  margin-bottom:28px;
+/* 日期分区 — 不同天之间加大间距 */
+.tl-day-section-head{
+  margin-bottom:16px;
+  padding-top:20px;
   position:relative;
 }
-.tl-date-section.is-today .tl-day-big{
+.tl-gap-divider + .tl-day-section-head{
+  padding-top:0;
+}
+.tl-day-section-head.is-today .tl-day-big{
   color:var(--my-brand-red);
 }
-.tl-date-section.phase-period .tl-rail-dot.period,
-.tl-date-section.phase-period .tl-rail-dot{
-  background:var(--my-brand-red);
-  border-color:var(--my-brand-red);
-  box-shadow:0 0 0 2px var(--my-bg), 0 0 0 4px rgba(255,77,136,0.10);
+
+/* 连续时间轴竖线 */
+.tl-rail-continuous{
+  position:relative;
+}
+.tl-rail-continuous::before{
+  content:'';
+  position:absolute;
+  left:6px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(0,0,0,0.08);
+  pointer-events:none;
+  z-index:0;
+}
+.tl-rail-break{
+  position:relative;
+  z-index:1;
+}
+.tl-rail-break::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:14px;
+  background:var(--my-bg);
+  z-index:2;
+  pointer-events:none;
 }
 
 /* 日标题 — 大号日期 + 周期条 */
@@ -1322,17 +1351,15 @@ html,body{
 .tl-cycle-chip.preg{color:var(--my-purple);background:var(--my-purple-soft)}
 .tl-cycle-chip.baby{color:var(--my-success);background:var(--my-success-soft)}
 
-/* 左侧竖线 — 仅保留圆点，时刻在卡片外上方 */
-.tl-rail-track{
-  position:relative;
-}
+/* 左侧竖线 — 圆点 + 连续主轴 */
 .tl-rail-node{
   display:flex;
   gap:6px;
   padding-bottom:14px;
   position:relative;
+  z-index:1;
 }
-.tl-rail-node.is-last{padding-bottom:4px}
+.tl-rail-node.is-feed-last{padding-bottom:4px}
 .tl-rail-marker{
   width:14px;
   flex-shrink:0;
@@ -1341,40 +1368,18 @@ html,body{
   align-items:center;
   position:relative;
   padding-top:2px;
+  z-index:1;
 }
 .tl-rail-dot{
   width:6px;
   height:6px;
   border-radius:50%;
-  background:var(--my-surface);
-  border:1.5px solid rgba(0,0,0,0.16);
+  background:rgba(255,77,136,0.32);
+  border:1.5px solid rgba(255,77,136,0.48);
   margin-top:0;
   z-index:1;
   flex-shrink:0;
   box-shadow:0 0 0 2px var(--my-bg);
-}
-.tl-rail-marker::after{
-  content:'';
-  position:absolute;
-  top:10px;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:-14px;
-  width:1px;
-  background:linear-gradient(180deg, rgba(255,77,136,0.22) 0%, rgba(0,0,0,0.06) 100%);
-}
-.tl-rail-node.is-last .tl-rail-marker::after{display:none}
-.tl-rail-dot.period{
-  background:var(--my-brand-red);
-  border-color:var(--my-brand-red);
-}
-.tl-rail-dot.lut{
-  border-color:var(--phase-lut);
-  background:var(--phase-lut-soft);
-}
-.tl-rail-dot.foll{
-  border-color:var(--phase-foll);
-  background:var(--phase-foll-soft);
 }
 .tl-rail-body{
   flex:1;
@@ -1692,16 +1697,6 @@ html,body{
   color:var(--my-text-tertiary);
   letter-spacing:1px;
   position:relative;
-}
-.tl-gap-divider::before{
-  content:'';
-  position:absolute;
-  left:-26px;
-  top:50%;
-  width:1px;
-  height:20px;
-  background:rgba(0,0,0,0.07);
-  transform:translateY(-50%);
 }
 
 /* 今日引导 */
@@ -2143,11 +2138,6 @@ html,body{
 }
 
 /* === 语音记录 & 美柚姐姐分析卡片 === */
-.tl-rail-dot.ai{
-  background:var(--my-brand-red);
-  border-color:var(--my-brand-red);
-  box-shadow:0 0 0 2px var(--my-bg), 0 0 0 4px rgba(255,77,136,0.18);
-}
 .tl-card{
   background:#ffffff;
   border-radius:14px;
@@ -3139,8 +3129,20 @@ const TIMELINE_BLOCKS = [
         body:'今天状态不错，去跑了三公里，出汗之后心情也好了很多。',
         tags:[
           { label:'跑步', cat:'fitness' },
-          { label:'愉快', cat:'mood' },
+          { label:'心情 愉快', cat:'mood' },
         ],
+      },
+      {
+        kind:'rec', id:'e-514-2', time:'21:20',
+        body:'晚上听了会儿播客，整个人慢下来不少，打算十一点前睡。',
+        tags:[
+          { label:'心情 放松', cat:'mood' },
+        ],
+        aiNote:{
+          tone:'green',
+          icon:'💡',
+          text:'卵泡期睡眠相对稳定时，第二天精力往往更好；你今晚准备早睡，是个不错的习惯。',
+        },
       },
     ],
   },
@@ -4427,12 +4429,12 @@ function CycleDayHeader({day}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isLast, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, children}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
   return (
-    <div className={'tl-rail-node'+(isLast?' is-last':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
         <span className={'tl-rail-dot'+dotCls}/>
       </div>
@@ -4708,7 +4710,7 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, isNew, onGuideChip, phaseKind, isLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, isNew, onGuideChip, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
   const cycleDay = item.cycleDay;
 
   let body = null;
@@ -4741,7 +4743,7 @@ function TimelineItem({item, isNew, onGuideChip, phaseKind, isLast, sisterPlayAn
     <TimelineRailNode
       phaseKind={phaseKind}
       railDot={item.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
-      isLast={isLast}
+      isFeedLast={isFeedLast}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
@@ -4811,30 +4813,43 @@ function WeeklyCard({item}){
   );
 }
 
-function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
+function resolveTimelineLastItemId(blocks, sisterCycleDone){
+  const ids = [];
+  blocks.forEach(block=>{
+    if(block.type !== 'day') return;
+    const items = (block.items || block.entries || []).filter(it=>{
+      if(!it.hiddenUntilSisterDone) return true;
+      return sisterCycleDone;
+    });
+    items.forEach(it=>ids.push(it.id));
+  });
+  return ids[ids.length - 1];
+}
+
+function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
   const items = (day.items || day.entries || []).filter(it=>{
     if(!it.hiddenUntilSisterDone) return true;
     return sisterCycleDone;
   });
   const phaseCls = day.phaseKind || '';
   return (
-    <div className={'tl-date-section'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
-      <CycleDayHeader day={day}/>
-      <div className="tl-rail-track">
-        {items.map((it,i)=>(
-          <TimelineItem
-            key={it.id}
-            item={it}
-            isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
-            phaseKind={day.phaseKind}
-            isLast={i === items.length - 1}
-            onGuideChip={onGuideChip}
-            sisterPlayAnimation={sisterPlayAnimation}
-            onSisterCycleComplete={onSisterCycleComplete}
-          />
-        ))}
+    <>
+      <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
+        <CycleDayHeader day={day}/>
       </div>
-    </div>
+      {items.map(it=>(
+        <TimelineItem
+          key={it.id}
+          item={it}
+          isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
+          phaseKind={day.phaseKind}
+          isFeedLast={it.id === lastItemId}
+          onGuideChip={onGuideChip}
+          sisterPlayAnimation={sisterPlayAnimation}
+          onSisterCycleComplete={onSisterCycleComplete}
+        />
+      ))}
+    </>
   );
 }
 
@@ -4854,39 +4869,56 @@ function CycleStartMarker({block}){
 }
 
 function TimelineStream({blocks, endRef, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
+  const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone);
+
   return (
     <div className="tl-feed">
-      {blocks.map((block, i)=>{
-        if(block.type === 'day'){
-          return (
-            <TimelineDateSection
-              key={block.id}
-              day={block}
-              onGuideChip={onGuideChip}
-              sisterPlayAnimation={sisterPlayAnimation}
-              sisterCycleDone={sisterCycleDone}
-              onSisterCycleComplete={onSisterCycleComplete}
-            />
-          );
-        }
-        if(block.type === 'cycle-start'){
-          return <CycleStartMarker key={block.id} block={block}/>;
-        }
-        if(block.type === 'gap'){
-          return (
-            <div key={block.id || ('gap-'+i)} className="tl-gap-divider">
-              · · ·  {block.label}  · · ·
-            </div>
-          );
-        }
-        if(block.type === 'cycle-sum'){
-          return <CycleSumCard key={block.id} item={block}/>;
-        }
-        if(block.type === 'weekly'){
-          return <WeeklyCard key={block.id} item={block}/>;
-        }
-        return null;
-      })}
+      <div className="tl-rail-continuous">
+        {blocks.map((block, i)=>{
+          if(block.type === 'day'){
+            return (
+              <TimelineDateSection
+                key={block.id}
+                day={block}
+                onGuideChip={onGuideChip}
+                sisterPlayAnimation={sisterPlayAnimation}
+                sisterCycleDone={sisterCycleDone}
+                onSisterCycleComplete={onSisterCycleComplete}
+                lastItemId={lastItemId}
+              />
+            );
+          }
+          if(block.type === 'cycle-start'){
+            return (
+              <div key={block.id} className="tl-rail-break">
+                <CycleStartMarker block={block}/>
+              </div>
+            );
+          }
+          if(block.type === 'gap'){
+            return (
+              <div key={block.id || ('gap-'+i)} className="tl-gap-divider tl-rail-break">
+                · · ·  {block.label}  · · ·
+              </div>
+            );
+          }
+          if(block.type === 'cycle-sum'){
+            return (
+              <div key={block.id} className="tl-rail-break">
+                <CycleSumCard item={block}/>
+              </div>
+            );
+          }
+          if(block.type === 'weekly'){
+            return (
+              <div key={block.id} className="tl-rail-break">
+                <WeeklyCard item={block}/>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
       <div ref={endRef} className="tl-feed-end" aria-hidden="true"/>
     </div>
   );
@@ -4940,7 +4972,7 @@ Object.assign(window, {
   TimelineDateSection, TimelineStream, CycleStartMarker,
   formatNowTime, formatVoiceDur,
   appendTodayEntry, appendTimelineEntry,
-  resolveEntryDayId, resolveDayHint,
+  resolveEntryDayId, resolveDayHint, resolveTimelineLastItemId,
 });
 
 </script>

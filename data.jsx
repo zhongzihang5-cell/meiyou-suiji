@@ -173,8 +173,20 @@ const TIMELINE_BLOCKS = [
         body:'今天状态不错，去跑了三公里，出汗之后心情也好了很多。',
         tags:[
           { label:'跑步', cat:'fitness' },
-          { label:'愉快', cat:'mood' },
+          { label:'心情 愉快', cat:'mood' },
         ],
+      },
+      {
+        kind:'rec', id:'e-514-2', time:'21:20',
+        body:'晚上听了会儿播客，整个人慢下来不少，打算十一点前睡。',
+        tags:[
+          { label:'心情 放松', cat:'mood' },
+        ],
+        aiNote:{
+          tone:'green',
+          icon:'💡',
+          text:'卵泡期睡眠相对稳定时，第二天精力往往更好；你今晚准备早睡，是个不错的习惯。',
+        },
       },
     ],
   },

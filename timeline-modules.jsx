@@ -29,12 +29,12 @@ function CycleDayHeader({day}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isLast, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, children}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
   return (
-    <div className={'tl-rail-node'+(isLast?' is-last':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
         <span className={'tl-rail-dot'+dotCls}/>
       </div>
@@ -310,7 +310,7 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, isNew, onGuideChip, phaseKind, isLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, isNew, onGuideChip, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
   const cycleDay = item.cycleDay;
 
   let body = null;
@@ -343,7 +343,7 @@ function TimelineItem({item, isNew, onGuideChip, phaseKind, isLast, sisterPlayAn
     <TimelineRailNode
       phaseKind={phaseKind}
       railDot={item.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
-      isLast={isLast}
+      isFeedLast={isFeedLast}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>

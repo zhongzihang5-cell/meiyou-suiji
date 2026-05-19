@@ -52,30 +52,43 @@ function WeeklyCard({item}){
   );
 }
 
-function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
+function resolveTimelineLastItemId(blocks, sisterCycleDone){
+  const ids = [];
+  blocks.forEach(block=>{
+    if(block.type !== 'day') return;
+    const items = (block.items || block.entries || []).filter(it=>{
+      if(!it.hiddenUntilSisterDone) return true;
+      return sisterCycleDone;
+    });
+    items.forEach(it=>ids.push(it.id));
+  });
+  return ids[ids.length - 1];
+}
+
+function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
   const items = (day.items || day.entries || []).filter(it=>{
     if(!it.hiddenUntilSisterDone) return true;
     return sisterCycleDone;
   });
   const phaseCls = day.phaseKind || '';
   return (
-    <div className={'tl-date-section'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
-      <CycleDayHeader day={day}/>
-      <div className="tl-rail-track">
-        {items.map((it,i)=>(
-          <TimelineItem
-            key={it.id}
-            item={it}
-            isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
-            phaseKind={day.phaseKind}
-            isLast={i === items.length - 1}
-            onGuideChip={onGuideChip}
-            sisterPlayAnimation={sisterPlayAnimation}
-            onSisterCycleComplete={onSisterCycleComplete}
-          />
-        ))}
+    <>
+      <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
+        <CycleDayHeader day={day}/>
       </div>
-    </div>
+      {items.map(it=>(
+        <TimelineItem
+          key={it.id}
+          item={it}
+          isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
+          phaseKind={day.phaseKind}
+          isFeedLast={it.id === lastItemId}
+          onGuideChip={onGuideChip}
+          sisterPlayAnimation={sisterPlayAnimation}
+          onSisterCycleComplete={onSisterCycleComplete}
+        />
+      ))}
+    </>
   );
 }
 
@@ -95,39 +108,56 @@ function CycleStartMarker({block}){
 }
 
 function TimelineStream({blocks, endRef, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
+  const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone);
+
   return (
     <div className="tl-feed">
-      {blocks.map((block, i)=>{
-        if(block.type === 'day'){
-          return (
-            <TimelineDateSection
-              key={block.id}
-              day={block}
-              onGuideChip={onGuideChip}
-              sisterPlayAnimation={sisterPlayAnimation}
-              sisterCycleDone={sisterCycleDone}
-              onSisterCycleComplete={onSisterCycleComplete}
-            />
-          );
-        }
-        if(block.type === 'cycle-start'){
-          return <CycleStartMarker key={block.id} block={block}/>;
-        }
-        if(block.type === 'gap'){
-          return (
-            <div key={block.id || ('gap-'+i)} className="tl-gap-divider">
-              · · ·  {block.label}  · · ·
-            </div>
-          );
-        }
-        if(block.type === 'cycle-sum'){
-          return <CycleSumCard key={block.id} item={block}/>;
-        }
-        if(block.type === 'weekly'){
-          return <WeeklyCard key={block.id} item={block}/>;
-        }
-        return null;
-      })}
+      <div className="tl-rail-continuous">
+        {blocks.map((block, i)=>{
+          if(block.type === 'day'){
+            return (
+              <TimelineDateSection
+                key={block.id}
+                day={block}
+                onGuideChip={onGuideChip}
+                sisterPlayAnimation={sisterPlayAnimation}
+                sisterCycleDone={sisterCycleDone}
+                onSisterCycleComplete={onSisterCycleComplete}
+                lastItemId={lastItemId}
+              />
+            );
+          }
+          if(block.type === 'cycle-start'){
+            return (
+              <div key={block.id} className="tl-rail-break">
+                <CycleStartMarker block={block}/>
+              </div>
+            );
+          }
+          if(block.type === 'gap'){
+            return (
+              <div key={block.id || ('gap-'+i)} className="tl-gap-divider tl-rail-break">
+                · · ·  {block.label}  · · ·
+              </div>
+            );
+          }
+          if(block.type === 'cycle-sum'){
+            return (
+              <div key={block.id} className="tl-rail-break">
+                <CycleSumCard item={block}/>
+              </div>
+            );
+          }
+          if(block.type === 'weekly'){
+            return (
+              <div key={block.id} className="tl-rail-break">
+                <WeeklyCard item={block}/>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
       <div ref={endRef} className="tl-feed-end" aria-hidden="true"/>
     </div>
   );
@@ -181,5 +211,5 @@ Object.assign(window, {
   TimelineDateSection, TimelineStream, CycleStartMarker,
   formatNowTime, formatVoiceDur,
   appendTodayEntry, appendTimelineEntry,
-  resolveEntryDayId, resolveDayHint,
+  resolveEntryDayId, resolveDayHint, resolveTimelineLastItemId,
 });
