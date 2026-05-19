@@ -5,10 +5,15 @@
   flex-direction:column;
   gap:0;
 }
+.tl-feed-end{
+  height:1px;
+  scroll-margin-bottom:140px;
+}
 
 /* 日期分区 */
 .tl-date-section{
-  margin-bottom:22px;
+  margin-bottom:24px;
+  position:relative;
 }
 .tl-date-section.is-today .date-num{
   color:var(--my-brand-red);
@@ -22,17 +27,17 @@
   padding:0 2px;
 }
 .date-num{
-  font-size:26px;
+  font-size:28px;
   font-weight:500;
   color:var(--my-text-primary);
-  letter-spacing:-0.5px;
+  letter-spacing:-0.8px;
   line-height:1;
   font-variant-numeric:tabular-nums;
 }
 .date-info{
   font-size:13px;
   color:var(--my-text-secondary);
-  padding-bottom:1px;
+  padding-bottom:2px;
 }
 .date-tag{
   margin-left:auto;
@@ -52,13 +57,14 @@
 /* 记录卡片 */
 .rec{
   background:var(--my-surface);
-  border-radius:var(--r-md);
-  padding:16px 18px;
-  margin-bottom:10px;
+  border-radius:16px;
+  padding:18px 20px;
+  margin-bottom:12px;
   box-shadow:0 1px 8px rgba(0,0,0,0.035);
-  border:0.5px solid rgba(0,0,0,0.04);
-  transition:transform 0.15s;
+  border:0.5px solid rgba(0,0,0,0.03);
+  transition:transform 0.15s, box-shadow 0.15s;
 }
+.rec:last-child{margin-bottom:0}
 .rec:active{transform:scale(0.985)}
 .rec-time{
   font-size:11px;
@@ -69,7 +75,7 @@
 }
 .rec-body{
   font-size:15px;
-  line-height:1.68;
+  line-height:1.7;
   color:var(--my-text-primary);
   margin-bottom:12px;
   word-break:break-word;
@@ -78,8 +84,8 @@
 /* 照片 */
 .rec-img{
   width:100%;
-  height:148px;
-  border-radius:var(--r-sm);
+  height:160px;
+  border-radius:12px;
   margin-bottom:12px;
   overflow:hidden;
 }
@@ -89,16 +95,16 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:36px;
+  font-size:40px;
 }
 .rec-img-ph.warm{
-  background:linear-gradient(135deg,#ffe4ec 0%,#ffd6e0 45%,#ffc8d6 100%);
+  background:linear-gradient(135deg,#ffe4ec 0%,#ffd6e0 40%,#ffc8d6 100%);
 }
 .rec-img-ph.cool{
-  background:linear-gradient(135deg,#e8f0fe 0%,#dce8f8 45%,#d0e0f2 100%);
+  background:linear-gradient(135deg,#e8f0fe 0%,#dce8f8 40%,#d0e0f2 100%);
 }
 .rec-img-ph.green{
-  background:linear-gradient(135deg,#e4f7ec 0%,#d4f0e2 45%,#c8eada 100%);
+  background:linear-gradient(135deg,#e4f7ec 0%,#d4f0e2 40%,#c8eada 100%);
 }
 
 /* 标签 */
@@ -106,58 +112,90 @@
   display:flex;
   flex-wrap:wrap;
   gap:6px;
-  margin-bottom:12px;
+  margin-bottom:0;
 }
 .rec-tag{
   display:inline-flex;
   align-items:center;
   gap:3px;
   font-size:12px;
-  padding:4px 11px;
+  padding:4px 12px;
   border-radius:var(--r-pill);
   background:rgba(0,0,0,0.03);
   color:var(--my-text-secondary);
   line-height:1.35;
 }
+.rec-body-voice{
+  font-size:14px;color:var(--my-text-secondary);
+  margin-top:-4px;
+}
+.rec-voice{
+  width:100%;
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;margin-bottom:10px;
+  background:var(--my-bg);border-radius:var(--r-sm);
+  border:0.5px solid var(--my-line);cursor:pointer;font:inherit;text-align:left;
+}
+.rec-voice-play{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  background:var(--my-brand-red);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.rec-voice-bars{flex:1;display:flex;align-items:center;gap:2px;height:22px}
+.rec-voice-bars span{width:2px;border-radius:1px;background:var(--my-brand-red);opacity:0.45}
+.rec-voice-bars span:nth-child(odd){height:6px}
+.rec-voice-bars span:nth-child(3n){height:10px}
+.rec-voice-bars span:nth-child(4n){height:14px}
+.rec-voice.playing .rec-voice-bars span{
+  animation:voiceBar 0.8s ease-in-out infinite;
+  animation-delay:calc(var(--i) * 0.04s);
+}
+@keyframes voiceBar{
+  0%,100%{transform:scaleY(0.5);opacity:0.35}
+  50%{transform:scaleY(1);opacity:0.85}
+}
+.rec-voice-dur{font-size:11px;color:var(--my-text-tertiary);font-variant-numeric:tabular-nums}
+
 .rec-tag.content{
   background:rgba(255,77,136,0.06);
   color:var(--my-text-secondary);
 }
 .rec-tag.ai{
-  background:var(--my-link-soft);
+  background:rgba(79,124,174,0.06);
   color:var(--my-link);
 }
 .rec-tag .ai-badge{
   font-size:9px;
-  background:rgba(79,124,174,0.14);
+  background:rgba(79,124,174,0.12);
   padding:1px 4px;
   border-radius:4px;
-  margin-left:2px;
+  margin-left:1px;
   font-weight:500;
 }
 
 /* AI 批注 */
 .ai-anno{
-  padding:12px 14px;
-  border-radius:var(--r-sm);
+  margin-top:12px;
+  padding:14px 16px;
+  border-radius:12px;
   font-size:13px;
-  line-height:1.62;
+  line-height:1.65;
   color:var(--my-text-secondary);
 }
-.ai-anno.green-bg{background:var(--my-success-soft)}
-.ai-anno.yellow-bg{background:var(--my-warning-soft)}
+.ai-anno.green-bg{background:rgba(46,189,110,0.07)}
+.ai-anno.yellow-bg{background:rgba(240,160,32,0.07)}
 .ai-anno.brand-bg{background:var(--my-brand-soft);color:var(--my-text-primary)}
 .ai-anno .anno-icon{margin-right:4px}
 
 /* 周期摘要 */
 .cycle-sum{
   background:var(--my-surface);
-  border-radius:var(--r-md);
-  padding:18px 20px;
-  margin-bottom:10px;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:12px;
   box-shadow:0 1px 8px rgba(0,0,0,0.035);
-  border:0.5px solid rgba(0,0,0,0.04);
-  border-left:3px solid var(--my-success);
+  border:0.5px solid rgba(0,0,0,0.03);
+  border-left:4px solid var(--my-success);
 }
 .cycle-sum.warn{border-left-color:var(--my-warning)}
 .cs-head{
@@ -166,7 +204,7 @@
   gap:8px;
   margin-bottom:8px;
 }
-.cs-icon{font-size:16px;line-height:1}
+.cs-icon{font-size:18px;line-height:1}
 .cs-title{
   font-size:15px;
   font-weight:500;
@@ -175,7 +213,7 @@
 .cs-body{
   font-size:13px;
   color:var(--my-text-secondary);
-  line-height:1.62;
+  line-height:1.65;
   margin-bottom:10px;
 }
 .cs-link{
@@ -188,11 +226,11 @@
 /* 周报 */
 .weekly-card{
   background:var(--my-surface);
-  border-radius:var(--r-md);
-  padding:14px 18px;
-  margin-bottom:10px;
+  border-radius:16px;
+  padding:16px 20px;
+  margin-bottom:12px;
   box-shadow:0 1px 8px rgba(0,0,0,0.035);
-  border:0.5px solid rgba(0,0,0,0.04);
+  border:0.5px solid rgba(0,0,0,0.03);
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -202,7 +240,7 @@
 .weekly-card:active{transform:scale(0.985)}
 .wk-left{display:flex;align-items:center;gap:12px}
 .wk-icon{
-  width:40px;height:40px;border-radius:var(--r-sm);
+  width:40px;height:40px;border-radius:12px;
   background:var(--my-brand-soft);
   display:flex;align-items:center;justify-content:center;
   font-size:18px;
@@ -214,7 +252,7 @@
 /* 时间间隔 */
 .tl-gap-divider{
   text-align:center;
-  padding:14px 0 10px;
+  padding:16px 0 8px;
   font-size:11px;
   color:var(--my-text-tertiary);
   letter-spacing:2px;
@@ -222,24 +260,34 @@
 
 /* 今日引导 */
 .tl-today-guide{
+  background:var(--my-surface);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:12px;
+  box-shadow:0 1px 8px rgba(0,0,0,0.035);
+  border:0.5px solid rgba(0,0,0,0.03);
   display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  padding:18px 12px;
+  align-items:flex-start;
+  gap:12px;
 }
 .tl-today-guide-icon{
-  width:24px;height:24px;
+  width:32px;height:32px;
   border-radius:50%;
-  background:rgba(255,77,136,0.06);
-  color:rgba(255,77,136,0.42);
+  background:linear-gradient(135deg,#ffe4ec,#ffd6e0);
+  color:var(--my-brand-red);
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
 }
 .tl-today-guide-text{
-  font-size:12px;
-  color:var(--my-text-tertiary);
-  line-height:1.4;
+  font-size:14px;
+  color:var(--my-text-primary);
+  line-height:1.6;
+  padding-top:4px;
+}
+.tl-today-guide-text em{
+  font-style:normal;
+  color:var(--my-brand-red);
+  font-weight:500;
 }
 
 /* 流头部 */

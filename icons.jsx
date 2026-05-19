@@ -105,6 +105,17 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
         <path d="M5 12l5 5L20 7"/>
       </svg>
     );
+    case 'play': return (
+      <svg {...common} fill="currentColor" stroke="none">
+        <path d="M9 7.5v9l8-4.5-8-4.5z"/>
+      </svg>
+    );
+    case 'pause': return (
+      <svg {...common} fill="currentColor" stroke="none">
+        <rect x="8" y="7" width="3" height="10" rx="0.5"/>
+        <rect x="13" y="7" width="3" height="10" rx="0.5"/>
+      </svg>
+    );
     case 'leaf': return (
       <svg {...common}>
         <path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/>

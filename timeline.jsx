@@ -1,10 +1,34 @@
 // ============ 时间轴 — 分日 · 单条记录 · AI 批注 ============
 
+function VoiceBar({voice}){
+  const I = window.Icon;
+  const [playing, setPlaying] = React.useState(false);
+  return (
+    <button
+      type="button"
+      className={'rec-voice'+(playing?' playing':'')}
+      onClick={()=>setPlaying(p=>!p)}
+      aria-label={playing?'暂停':'播放语音'}
+    >
+      <span className="rec-voice-play">
+        <I name={playing?'pause':'play'} size={13}/>
+      </span>
+      <span className="rec-voice-bars" aria-hidden="true">
+        {Array.from({length:22}).map((_,j)=>(<span key={j} style={{'--i':j}}/>))}
+      </span>
+      <span className="rec-voice-dur">{voice.duration}</span>
+    </button>
+  );
+}
+
 function RecordCard({entry, isNew}){
   return (
     <div className={'rec'+(isNew?' fade-in':'')}>
       {entry.time && <div className="rec-time">{entry.time}</div>}
-      <div className="rec-body">{entry.body}</div>
+      {entry.voice && <VoiceBar voice={entry.voice}/>}
+      {entry.body && (
+        <div className={'rec-body'+(entry.voice?' rec-body-voice':'')}>{entry.body}</div>
+      )}
       {entry.photo && (
         <div className="rec-img">
           <div className={'rec-img-ph '+(entry.photoTone||'warm')}>
@@ -84,7 +108,9 @@ function TimelineDateSection({day}){
           <span className="tl-today-guide-icon">
             <I name="pen" size={13} stroke={1.6}/>
           </span>
-          <span className="tl-today-guide-text">写下今日点滴，AI 会帮你整理</span>
+          <span className="tl-today-guide-text">
+            经期<em>第 3 天</em>，经量通常开始减少了。今天感觉怎么样？
+          </span>
         </div>
       )}
       {(day.entries || []).map(e=>(
@@ -94,8 +120,7 @@ function TimelineDateSection({day}){
   );
 }
 
-function TimelineStream({blocks}){
-  const I = window.Icon;
+function TimelineStream({blocks, endRef}){
   return (
     <div className="tl-feed">
       {blocks.map((block, i)=>{
@@ -117,6 +142,7 @@ function TimelineStream({blocks}){
         }
         return null;
       })}
+      <div ref={endRef} className="tl-feed-end" aria-hidden="true"/>
     </div>
   );
 }
@@ -126,9 +152,31 @@ function formatNowTime(){
   return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 }
 
-function appendTodayEntry(blocks, entry){
+function formatVoiceDur(sec){
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m+':'+String(s).padStart(2,'0');
+}
+
+function resolveEntryDayId(text, blocks){
+  const days = blocks.filter(b=>b.type==='day');
+  const todayIdx = days.findIndex(d=>d.isToday);
+  if(/前天/.test(text) && todayIdx > 1) return days[todayIdx - 2].id;
+  if(/昨天|昨晚/.test(text) && todayIdx > 0) return days[todayIdx - 1].id;
+  return days.find(d=>d.isToday)?.id || days[days.length - 1]?.id;
+}
+
+function resolveDayHint(text, blocks, dayId){
+  const day = blocks.find(b=>b.type==='day' && b.id===dayId);
+  if(!day || day.isToday) return '';
+  if(/昨天|昨晚|前天/.test(text)) return day.date;
+  return '';
+}
+
+function appendTimelineEntry(blocks, entry, opts={}){
+  const dayId = opts.dayId || resolveEntryDayId(entry.body || '', blocks);
   return blocks.map(b=>{
-    if(b.type !== 'day' || !b.isToday) return b;
+    if(b.type !== 'day' || b.id !== dayId) return b;
     return {
       ...b,
       entries: [...(b.entries || []), entry],
@@ -136,8 +184,14 @@ function appendTodayEntry(blocks, entry){
   });
 }
 
+function appendTodayEntry(blocks, entry){
+  return appendTimelineEntry(blocks, entry);
+}
+
 Object.assign(window, {
-  RecordCard, CycleSumCard, WeeklyCard,
+  VoiceBar, RecordCard, CycleSumCard, WeeklyCard,
   TimelineDateSection, TimelineStream,
-  formatNowTime, appendTodayEntry,
+  formatNowTime, formatVoiceDur,
+  appendTodayEntry, appendTimelineEntry,
+  resolveEntryDayId, resolveDayHint,
 });

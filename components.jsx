@@ -206,8 +206,9 @@ function CycleReport({item}){
 }
 
 // ============ Tab bar ============
-// Order: 美柚 / 记录 / 随记(center) / 返现 / 我
+// Order: 美柚 / 日历 / 记录(center) / 返现 / 我
 function TabBar({active='note'}){
+  const I = window.Icon;
   const tabs = [
     {id:'home', label:'美柚', custom:(
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -215,8 +216,8 @@ function TabBar({active='note'}){
         <path d="M12 3.5c1.5-1.5 3-1.5 3 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
       </svg>
     )},
-    {id:'rec', label:'记录', custom:<span className="tile">19</span>},
-    {id:'note', label:'点滴', custom:(
+    {id:'cal', label:'日历', custom:<I name="calendar" size={22} stroke={1.6}/>},
+    {id:'note', label:'记录', custom:(
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path d="M14 4l5 5-9 9H5v-5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
         <path d="M13 5l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>

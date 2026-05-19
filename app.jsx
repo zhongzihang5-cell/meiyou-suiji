@@ -1,11 +1,6 @@
 const { useState, useEffect, useRef } = React;
 
-const SCENE_VOICE_SYNC = {
-  period: ['经量','心情'],
-  follicular: ['状态','睡眠'],
-  pregnancy: ['胎动','体重'],
-  parenting: ['喂养','睡眠'],
-};
+const DEMO_VOICE_SCRIPT = '哎，昨天月经来了，昨天肚子不太舒服';
 
 const TAG_EMOJI = {
   period:'🩸', pain:'😖', flow:'🩸', 'flow-low':'💧',
@@ -19,7 +14,14 @@ function buildInitialTurns(ctx){
   ];
 }
 
-function buildTimelineEntry(text, hits){
+function shouldShowAnalysis(hits, analysis){
+  if(!analysis || !hits.length) return false;
+  if(analysis.tone === 'warn') return true;
+  if(hits.some(h=>h.kind==='period')) return true;
+  return false;
+}
+
+function buildTimelineEntry(text, hits, opts={}){
   const analysis = hits.length ? window.chooseAnalysis(hits) : null;
   const toneMap = { warn:'yellow', brand:'brand', good:'green' };
   const contentTypes = window.extractContentTypes(text);
@@ -32,18 +34,22 @@ function buildTimelineEntry(text, hits){
     label: c.label,
     content: true,
   }));
-  return {
+  const entry = {
     id:'e-'+Date.now(),
     time: window.formatNowTime(),
     body: text,
     isNew: true,
     tags: [...contentTags, ...topicTags],
-    aiNote: analysis ? {
+  };
+  if(shouldShowAnalysis(hits, analysis)){
+    entry.aiNote = {
       tone: toneMap[analysis.tone] || 'green',
       icon: analysis.points?.[0]?.icon || '💡',
       text: analysis.points?.map(p=>p.text).join(' ') || analysis.title,
-    } : undefined,
-  };
+    };
+  }
+  if(opts.voice) entry.voice = opts.voice;
+  return entry;
 }
 
 function App(){
@@ -59,6 +65,8 @@ function App(){
   const [toasts, setToasts] = useState([]);
   const [listening, setListening] = useState(false);
   const [showPhoto, setShowPhoto] = useState(false);
+  const streamRef = useRef(null);
+  const timelineEndRef = useRef(null);
 
   useEffect(()=>{
     setTurns(buildInitialTurns(ctx));
@@ -71,10 +79,37 @@ function App(){
     if(!draft.trim()){ setLivePreview(null); return; }
     const tm = setTimeout(()=>{
       const hits = window.extractKeywords(draft);
-      setLivePreview(hits[0] || null);
-    }, 350);
+      if(!hits.length){ setLivePreview(null); return; }
+      const dayId = window.resolveEntryDayId(draft, timeline);
+      const dayHint = window.resolveDayHint(draft, timeline, dayId);
+      setLivePreview({
+        labels: hits.map(h=>window.buildSyncDisplayLabel(h, draft)),
+        dayHint,
+      });
+    }, 300);
     return ()=>clearTimeout(tm);
-  }, [draft]);
+  }, [draft, timeline]);
+
+  const scrollTimelineToEnd = (behavior='smooth')=>{
+    requestAnimationFrame(()=>{
+      const el = streamRef.current;
+      if(!el) return;
+      if(behavior === 'auto'){
+        el.scrollTop = el.scrollHeight;
+      } else {
+        el.scrollTo({ top: el.scrollHeight, behavior:'smooth' });
+      }
+    });
+  };
+
+  useEffect(()=>{
+    const t = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
+    return ()=>clearTimeout(t);
+  }, []);
+
+  useEffect(()=>{
+    scrollTimelineToEnd('smooth');
+  }, [timeline]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -87,8 +122,29 @@ function App(){
 
   const stripSuggest = (prev)=> prev.filter((x,i)=>!(x.type==='suggest' && i===prev.length-1));
 
-  const pushToTimeline = (entry)=>{
-    setTimeline(blocks=>window.appendTodayEntry(blocks, entry));
+  const buildSyncItems = (text, hits)=>{
+    const dayId = window.resolveEntryDayId(text, timeline);
+    const dayHint = window.resolveDayHint(text, timeline, dayId);
+    return hits.map(h=>({
+      label: window.buildSyncDisplayLabel(h, text),
+      dayHint,
+    }));
+  };
+
+  const appendFollowUp = (hits)=>{
+    const follow = window.pickFollowUp(hits, ctx);
+    setTimeout(()=>{
+      setTurns(prev=>[
+        ...prev,
+        { type:'nudge', text: follow.text, isNew:true },
+        { type:'suggest', items: follow.chips },
+      ]);
+    }, 420);
+  };
+
+  const pushToTimeline = (entry, text)=>{
+    const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
   const submitText = (textOverride)=>{
@@ -96,7 +152,7 @@ function App(){
     if(!text) return;
 
     const hits = window.extractKeywords(text);
-    const syncLabels = hits.map(h=>h.syncLabel || h.label);
+    const syncItemsBuilt = buildSyncItems(text, hits);
 
     setTurns(prev=>[
       ...stripSuggest(prev),
@@ -105,48 +161,52 @@ function App(){
     setDraft('');
     setLivePreview(null);
 
-    if(syncLabels.length){
+    if(syncItemsBuilt.length){
       setSyncItems([]);
-      setTimeout(()=>setSyncItems(syncLabels), 80);
+      setTimeout(()=>setSyncItems(syncItemsBuilt), 80);
+      appendFollowUp(hits);
+    } else {
+      setTimeout(()=>{
+        setTurns(prev=>[...prev, { type:'nudge', text: ctx.followUp, isNew:true }]);
+      }, 450);
     }
 
-    setTimeout(()=>{
-      setTurns(prev=>[...prev, { type:'ai', text: ctx.followUp, isNew:true }]);
-    }, syncLabels.length ? 800 : 450);
+    pushToTimeline(buildTimelineEntry(text, hits), text);
 
-    pushToTimeline(buildTimelineEntry(text, hits));
-
-    if(syncLabels.length){
-      pushToast({ text:'已同步到记录', tags: syncLabels.slice(0,2) });
+    if(syncItemsBuilt.length){
+      const tags = syncItemsBuilt.map(s=>s.label);
+      pushToast({ text:'已记录', tags: tags.slice(0,2) });
     } else {
-      pushToast({ text:'已保存到点滴' });
+      pushToast({ text:'已保存到记录' });
     }
   };
 
   const submitVoice = (transcript, durSec)=>{
     setListening(false);
-    const syncLabels = SCENE_VOICE_SYNC[t.scene] || SCENE_VOICE_SYNC.period;
+    const text = transcript.trim();
+    const hits = window.extractKeywords(text);
+    const syncItemsBuilt = buildSyncItems(text, hits);
 
     setTurns(prev=>[
       ...stripSuggest(prev),
-      { type:'user', text: transcript, isNew:true },
+      { type:'user', text, isNew:true },
     ]);
     setSyncItems([]);
-    setTimeout(()=>setSyncItems(syncLabels), 100);
+    setTimeout(()=>setSyncItems(syncItemsBuilt.length ? syncItemsBuilt : [{ label:'语音', dayHint:'' }]), 100);
 
-    pushToTimeline({
-      id:'e-'+Date.now(),
-      time: window.formatNowTime(),
-      body: transcript,
-      isNew: true,
-      tags: syncLabels.map(l=>({ emoji:'·', label:l })),
-      aiNote:{
-        tone:'green', icon:'💡',
-        text:'语音已转写并关联到今日记录，小柚会持续观察本周期变化。',
-      },
-    });
+    if(syncItemsBuilt.length){
+      appendFollowUp(hits);
+    }
 
-    pushToast({ text:'语音已转写', tags: syncLabels.slice(0,2) });
+    pushToTimeline(buildTimelineEntry(text, hits, {
+      voice: { duration: window.formatVoiceDur(durSec) },
+    }), text);
+
+    if(syncItemsBuilt.length){
+      pushToast({ text:'已记录', tags: syncItemsBuilt.map(s=>s.label).slice(0,2) });
+    } else {
+      pushToast({ text:'语音已转写' });
+    }
   };
 
   const submitPhoto = ()=>{
@@ -159,8 +219,8 @@ function App(){
       photo:true, photoTone:'warm', photoEmoji:'🌸',
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
-    });
-    pushToast({ text:'照片已加入点滴' });
+    }, '');
+    pushToast({ text:'照片已加入记录' });
   };
 
   const sceneForHealth = {
@@ -183,11 +243,11 @@ function App(){
       <StatusBar/>
 
       <div className={'suiji-shell'+(cloudExpanded?' suiji-shell--cloud-open':'')}>
-        <div className="suiji-stream">
+        <div className="suiji-stream" ref={streamRef}>
           <div className="stream-header">
             <div>
-              <h1 className="stream-title">点滴</h1>
-              <p className="stream-sub">我和我身体的空间</p>
+              <h1 className="stream-title">记录</h1>
+              <p className="stream-sub">情绪 · 身体 · 体重</p>
             </div>
             <div className="stream-actions">
               <button className="stream-action" aria-label="日历">
@@ -205,7 +265,7 @@ function App(){
             </div>
           )}
 
-          <TimelineStream blocks={timeline}/>
+          <TimelineStream blocks={timeline} endRef={timelineEndRef}/>
         </div>
 
         <CloudPublisher
@@ -227,6 +287,7 @@ function App(){
       {listening && (
         <ListeningOverlay
           ctx={ctx}
+          script={DEMO_VOICE_SCRIPT}
           onCancel={()=>setListening(false)}
           onDone={submitVoice}
         />

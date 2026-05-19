@@ -6,7 +6,7 @@ const KEYWORDS = [
         {icon:'🩸', text:'今天为本次经期的第 1 天，已更新周期数据。'},
         {icon:'☕', text:'今天少喝凉的、辛辣，多喝温水。'},
       ]} },
-  { match:['痛','肚子疼','腹痛','痛经','疼'], label:'痛经', kind:'pain', syncLabel:'痛经',
+  { match:['痛','肚子疼','腹痛','痛经','疼','不舒服'], label:'痛经', kind:'pain', syncLabel:'痛经',
     analysis:{ tone:'warn', title:'痛经记录已提醒',
       points:[
         {icon:'⚠️', text:'上周期同期没有痛经记录，这次需要留意。'},
@@ -83,6 +83,41 @@ function chooseAnalysis(hits){
   return (warn||hits[0]).analysis;
 }
 
+function buildSyncDisplayLabel(hit, text){
+  if(hit.kind==='period' && /来了|来例假|来姨妈|大姨妈来/.test(text)) return '月经来了';
+  if(hit.kind==='period') return '经期开始';
+  return hit.syncLabel || hit.label;
+}
+
+function pickFollowUp(hits, ctx){
+  const kinds = new Set(hits.map(h=>h.kind));
+  if(kinds.has('period') && kinds.has('pain')){
+    return {
+      text:'今天还疼吗？量怎么样？',
+      chips:['好多了','还是有点疼','量挺多的'],
+    };
+  }
+  if(kinds.has('period')){
+    return {
+      text:'量怎么样？有没有哪里不舒服？',
+      chips:['量正常','有点疼','量挺多'],
+    };
+  }
+  if(kinds.has('pain')){
+    return {
+      text:'是隐隐作痛，还是阵发性疼？',
+      chips:['隐隐的','比较疼','吃了止痛药'],
+    };
+  }
+  if(kinds.has('sleep')){
+    return {
+      text:'是入睡难，还是容易醒？',
+      chips:['入睡难','容易醒','睡够了但累'],
+    };
+  }
+  return { text: ctx.followUp, chips: ctx.chips.slice(0, 3) };
+}
+
 // ---------- Scene context ----------
 const SCENE_CONTEXT = {
   period: {
@@ -91,7 +126,7 @@ const SCENE_CONTEXT = {
     status:'good', healthTitle:'本次周期正常', healthDesc:'较上周期更规律',
     openPrompt:'今天阴天，经期第 3 天。此刻身体有什么感受？',
     followUp:'是身体累，还是心里也压着什么事？',
-    chips:['身体还好','有点心事','写点日记','睡不太好'],
+    chips:['身体还好','有点心事','昨天月经来了，肚子不舒服','睡不太好'],
   },
   follicular: {
     weather:{ icon:'🌤', text:'晴 26°C', mood:'舒适' },
@@ -119,56 +154,41 @@ const SCENE_CONTEXT = {
   },
 };
 
-// ---------- Timeline blocks (分日 + 单条记录) ----------
+// ---------- Timeline blocks (分日 + 单条记录) — 旧→新，越往下越近 ----------
 const TIMELINE_BLOCKS = [
   {
-    type:'day', id:'d-5-19', date:'5/19', weekday:'周一', isToday:true,
-    phaseTag:'经期第3天', phaseKind:'period',
-    entries:[],
+    type:'cycle-sum', id:'cs-prev', tone:'warn',
+    icon:'🟡',
+    title:'上次周期总结 · 轻微波动',
+    body:'周期 30 天，较前次延长 2 天。经期持续 6 天，经量偏多。痛经记录 2 次。建议关注趋势变化。',
+    link:'查看完整分析 ›',
   },
+  { type:'gap', id:'gap-2', label:'上个周期' },
   {
-    type:'day', id:'d-5-18', date:'5/18', weekday:'周日',
-    phaseTag:'经期第2天', phaseKind:'period',
+    type:'day', id:'d-5-08', date:'5/8', weekday:'周四',
+    phaseTag:'卵泡期', phaseKind:'foll',
     entries:[
       {
-        id:'e-518-1', time:'21:30',
-        body:'下午开会的时候肚子突然很疼，吃了颗布洛芬才扛过去。量还挺多的，换了三次 😩',
+        id:'e-508-1', time:'19:20',
+        body:'今天心情不错，就是有点想偷懒，体重好像轻了一斤。',
         tags:[
-          {emoji:'🌿', label:'身体', content:true},
-          {emoji:'😖', label:'痛经·重度'},
-          {emoji:'💊', label:'布洛芬'},
-          {emoji:'🩸', label:'经量多'},
-          {emoji:'⏰', label:'午后发作', ai:true},
-        ],
-        aiNote:{
-          tone:'yellow', icon:'⚠️',
-          text:'上个周期全程没有服药，这次第 2 天就需要止痛，痛经有加重趋势。已连续 2 个周期第 2 天最痛。',
-        },
-      },
-      {
-        id:'e-518-2', time:'08:12',
-        body:'昨晚又没睡好，半夜醒了两次 😪',
-        tags:[
-          {emoji:'🌿', label:'身体', content:true},
-          {emoji:'😴', label:'睡眠差'},
-          {emoji:'🌙', label:'夜醒 2 次', ai:true},
-        ],
-        aiNote:{
-          tone:'green', icon:'💡',
-          text:'过去 3 个周期在经期前 2 天都有睡眠变差的记录，这可能与激素波动有关。',
-        },
-      },
-      {
-        id:'e-518-3', time:'22:40',
-        body:'不知道为什么今天特别容易多想，躺在床上一直在想工作上的事，有点烦。',
-        tags:[
-          {emoji:'💭', label:'心事', content:true},
           {emoji:'💛', label:'情绪', content:true},
+          {emoji:'⚖️', label:'体重'},
         ],
-        aiNote:{
-          tone:'brand', icon:'💛',
-          text:'经期前后情绪敏感很常见。如果愿意，可以多说一点——是事情本身，还是身体也在影响心情？',
-        },
+      },
+    ],
+  },
+  { type:'gap', id:'gap-1', label:'4 天前' },
+  {
+    type:'day', id:'d-5-13', date:'5/13', weekday:'周二',
+    entries:[
+      {
+        id:'e-513-1', time:'20:45',
+        body:'吃完火锅拉肚子了 😂 不知道跟快来月经有没有关系',
+        tags:[
+          {emoji:'🍽️', label:'辛辣'},
+          {emoji:'🚽', label:'腹泻'},
+        ],
       },
     ],
   },
@@ -188,63 +208,55 @@ const TIMELINE_BLOCKS = [
       {
         id:'e-517-1', time:'14:20',
         body:'来啦～ 肚子隐隐有点不舒服但还行',
-        photo:true, photoTone:'warm', photoEmoji:'🌸',
         tags:[
           {emoji:'🩸', label:'经期开始'},
           {emoji:'😖', label:'轻微不适'},
         ],
-        aiNote:{
-          tone:'green', icon:'💡',
-          text:'第 1 天轻微不适，与过去 5 个周期的开始状态一致，无需担心。',
-        },
       },
     ],
   },
-  { type:'gap', id:'gap-1', label:'4 天前' },
   {
-    type:'day', id:'d-5-13', date:'5/13', weekday:'周二',
+    type:'day', id:'d-5-18', date:'5/18', weekday:'周日',
+    phaseTag:'经期第2天', phaseKind:'period',
     entries:[
       {
-        id:'e-513-1', time:'20:45',
-        body:'吃完火锅拉肚子了 😂 不知道跟快来月经有没有关系',
+        id:'e-518-2', time:'08:12',
+        voice:{ duration:'0:18' },
+        body:'昨晚又没睡好，半夜醒了两次，心里有点烦，翻来覆去的。',
         tags:[
-          {emoji:'🍽️', label:'辛辣'},
-          {emoji:'🚽', label:'腹泻'},
+          {emoji:'😴', label:'睡眠差'},
+          {emoji:'💭', label:'心事', content:true},
         ],
-        aiNote:{
-          tone:'green', icon:'💡',
-          text:'经前 4 天出现腹泻，上个周期经前 3 天也有类似记录。经前腹泻与前列腺素升高有关，属常见现象。',
-        },
       },
-    ],
-  },
-  {
-    type:'day', id:'d-5-08', date:'5/8', weekday:'周四',
-    phaseTag:'卵泡期', phaseKind:'foll',
-    entries:[
       {
-        id:'e-508-1', time:'19:20',
-        body:'最近皮肤状态巨好，痘痘全消了，想记下来。',
-        photo:true, photoTone:'green', photoEmoji:'✨',
+        id:'e-518-1', time:'21:30',
+        body:'下午开会的时候肚子突然很疼，吃了颗布洛芬才扛过去。量还挺多的，换了三次 😩',
         tags:[
-          {emoji:'📔', label:'日记', content:true},
           {emoji:'🌿', label:'身体', content:true},
-          {emoji:'✨', label:'皮肤变好'},
+          {emoji:'😖', label:'痛经·重度'},
+          {emoji:'💊', label:'布洛芬'},
+          {emoji:'🩸', label:'经量多'},
+          {emoji:'⏰', label:'午后发作', ai:true},
         ],
         aiNote:{
-          tone:'green', icon:'💡',
-          text:'经期结束后雌激素回升，皮肤状态改善是正常的。上个周期这个阶段你也记录了类似感受。',
+          tone:'yellow', icon:'⚠️',
+          text:'上个周期全程没有服药，这次第 2 天就需要止痛，痛经有加重趋势。已连续 2 个周期第 2 天最痛。',
         },
+      },
+      {
+        id:'e-518-3', time:'22:40',
+        body:'不知道为什么今天特别容易多想，躺在床上一直在想工作上的事，有点烦。',
+        tags:[
+          {emoji:'💭', label:'心事', content:true},
+          {emoji:'💛', label:'情绪', content:true},
+        ],
       },
     ],
   },
-  { type:'gap', id:'gap-2', label:'上个周期' },
   {
-    type:'cycle-sum', id:'cs-prev', tone:'warn',
-    icon:'🟡',
-    title:'上次周期总结 · 轻微波动',
-    body:'周期 30 天，较前次延长 2 天。经期持续 6 天，经量偏多。痛经记录 2 次。建议关注趋势变化。',
-    link:'查看完整分析 ›',
+    type:'day', id:'d-5-19', date:'5/19', weekday:'周一', isToday:true,
+    phaseTag:'经期第3天', phaseKind:'period',
+    entries:[],
   },
 ];
 
@@ -305,6 +317,8 @@ window.extractKeywords = extractKeywords;
 window.extractContentTypes = extractContentTypes;
 window.CONTENT_TYPES = CONTENT_TYPES;
 window.chooseAnalysis = chooseAnalysis;
+window.buildSyncDisplayLabel = buildSyncDisplayLabel;
+window.pickFollowUp = pickFollowUp;
 window.SCENE_CONTEXT = SCENE_CONTEXT;
 window.TIMELINE_BLOCKS = TIMELINE_BLOCKS;
 window.DAILY_CARDS = DAILY_CARDS;

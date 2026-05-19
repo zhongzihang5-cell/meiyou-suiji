@@ -16,12 +16,16 @@ function CloudPublisher({
 
   if(!expanded){
     return (
-      <button className="cloud-mini" onClick={onToggle} aria-label="展开点滴">
-        <span className="cloud-mini-glow"/>
-        <span className="cloud-mini-icon"><I name="pen" size={15} stroke={1.7}/></span>
-        <span className="cloud-mini-text">今天，想记录点什么…</span>
-        <span className="cloud-mini-chevron"><I name="arrow" size={14} stroke={2}/></span>
-      </button>
+      <div className="cloud-mini-row">
+        <button className="cloud-mini-mic" onClick={onVoice} aria-label="语音记录">
+          <I name="mic" size={18} stroke={1.8}/>
+        </button>
+        <button className="cloud-mini" onClick={onToggle} aria-label="展开记录">
+          <span className="cloud-mini-glow"/>
+          <span className="cloud-mini-text">今天，想记录点什么…</span>
+          <span className="cloud-mini-chevron"><I name="arrow" size={14} stroke={2}/></span>
+        </button>
+      </div>
     );
   }
 
@@ -55,6 +59,11 @@ function CloudPublisher({
                 <div key={i} className={'cloud-ai'+(turn.isNew?' fade-in':'')}>{turn.text}</div>
               );
             }
+            if(turn.type==='nudge'){
+              return (
+                <p key={i} className={'cloud-nudge'+(turn.isNew?' fade-in':'')}>{turn.text}</p>
+              );
+            }
             if(turn.type==='user'){
               return (
                 <div key={i} className={'cloud-user'+(turn.isNew?' fade-in':'')}>{turn.text}</div>
@@ -75,21 +84,38 @@ function CloudPublisher({
           })}
 
           {syncItems.length > 0 && (
-            <div className="cloud-sync-row">
-              {syncItems.map((s,i)=>(
-                <div key={i} className="cloud-sync-pill" style={{animationDelay:(i*0.08)+'s'}}>
-                  <span className="cloud-sync-check"><I name="check" size={10} stroke={2.8}/></span>
-                  已记录 <em>{s}</em>
-                </div>
-              ))}
+            <div className="cloud-sync-lite fade-in">
+              <span className="cloud-sync-lite-mark">
+                <I name="check" size={10} stroke={2.6}/>
+                已记录
+              </span>
+              <div className="cloud-sync-tags">
+                {syncItems.map((s,i)=>(
+                  <span
+                    key={i}
+                    className="cloud-sync-tag"
+                    style={{animationDelay:(0.06 + i * 0.08)+'s'}}
+                  >
+                    {typeof s === 'string' ? s : s.label}
+                  </span>
+                ))}
+              </div>
+              {syncItems[0]?.dayHint && (
+                <span className="cloud-sync-date">{syncItems[0].dayHint}</span>
+              )}
             </div>
           )}
         </div>
 
-        {livePreview && (
-          <div className="cloud-live-tag">
-            <span className="cloud-live-dot"/>
-            识别到 · {livePreview.label}
+        {livePreview && livePreview.labels?.length > 0 && (
+          <div className="cloud-live-row">
+            <div className="cloud-live-tag">
+              <span className="cloud-live-dot"/>
+              识别到 · {livePreview.labels.join(' · ')}
+            </div>
+            {livePreview.dayHint && (
+              <span className="cloud-live-date">将记到 {livePreview.dayHint}</span>
+            )}
           </div>
         )}
 
@@ -116,17 +142,16 @@ function CloudPublisher({
               }}
             />
           </div>
+          <button className="cloud-ib voice always" onClick={onVoice} aria-label="语音">
+            <span className="cloud-vwf">
+              {[5,9,12,9,5,8,11].map((h,j)=><span key={j} style={{height:h+'px'}}/>)}
+            </span>
+          </button>
           {draft.trim() ? (
             <button className="cloud-ib send on" onClick={onSend} aria-label="发送">
               <I name="send" size={16} stroke={2}/>
             </button>
-          ) : (
-            <button className="cloud-ib voice" onClick={onVoice} aria-label="语音">
-              <span className="cloud-vwf">
-                {[5,9,12,9,5,8,11].map((h,j)=><span key={j} style={{height:h+'px'}}/>)}
-              </span>
-            </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -134,11 +159,11 @@ function CloudPublisher({
 }
 
 // ============ 聆听层（全屏，仅录音时） ============
-function ListeningOverlay({ctx, onCancel, onDone}){
+function ListeningOverlay({ctx, onCancel, onDone, script}){
   const I = window.Icon;
   const [sec, setSec] = React.useState(0);
   const [partial, setPartial] = React.useState('');
-  const script = '今天感觉还行，量比昨天少了一些，肚子也不太疼了。';
+  const line = script || '哎，昨天月经来了，昨天肚子不太舒服';
 
   React.useEffect(()=>{
     const id = setInterval(()=>setSec(s=>s+1), 1000);
@@ -149,18 +174,18 @@ function ListeningOverlay({ctx, onCancel, onDone}){
     let i = 0;
     const id = setInterval(()=>{
       i++;
-      setPartial(script.slice(0, i));
-      if(i >= script.length) clearInterval(id);
+      setPartial(line.slice(0, i));
+      if(i >= line.length) clearInterval(id);
     }, 160);
     return ()=>clearInterval(id);
-  },[]);
+  }, [line]);
 
   return (
     <div className="listen-overlay">
       <button className="listen-close" onClick={onCancel} aria-label="关闭">
         <I name="close" size={24} stroke={1.5}/>
       </button>
-      <div className="listen-title">点滴正在听<span className="dots">······</span></div>
+      <div className="listen-title">正在听你说<span className="dots">······</span></div>
       {ctx && (
         <div className="listen-ctx">{ctx.cycle.label} · {ctx.cycle.sub}</div>
       )}
@@ -169,7 +194,7 @@ function ListeningOverlay({ctx, onCancel, onDone}){
         <div className="orb"/>
         {partial && <div className="listen-transcript">「{partial}」</div>}
       </div>
-      <button className="listen-mic" onClick={()=>onDone(partial || script, sec)}>
+      <button className="listen-mic" onClick={()=>onDone(partial || line, sec)}>
         <I name="mic" size={26} stroke={1.7}/>
       </button>
     </div>
