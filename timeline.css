@@ -1068,6 +1068,10 @@
   background:rgba(255,77,136,0.10);
   color:#c2185b;
 }
+.tl-tag.tone-neutral{
+  background:rgba(0,0,0,0.04);
+  color:rgba(0,0,0,0.62);
+}
 .tl-tag.tone-coral{
   background:rgba(255,138,90,0.12);
   color:#b85c38;

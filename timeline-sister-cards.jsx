@@ -17,10 +17,10 @@ function TlCardTime({time}){
 
 const TAG_TONES = {
   period:'brand', flow:'brand',
-  symptom:'coral', care:'sun',
-  mood:'lavender',
-  sleep:'sky',
-  fitness:'mint', appetite:'mint', weight:'mint', diet:'mint',
+  symptom:'neutral', care:'neutral',
+  mood:'neutral',
+  sleep:'neutral',
+  fitness:'neutral', appetite:'neutral', weight:'neutral', diet:'neutral',
 };
 
 const TAG_CAT_EMOJI = {
@@ -73,12 +73,12 @@ function resolveTag(tag){
   const preset = TAG_REGISTRY[label] || {};
   const cat = tag.cat || preset.cat || inferTagCat(label);
   const emoji = tag.emoji || preset.emoji || TAG_CAT_EMOJI[cat] || '·';
-  const tone = tag.tone || TAG_TONES[cat] || 'brand';
+  const tone = tag.tone || TAG_TONES[cat] || 'neutral';
   return { label, emoji, cat, tone };
 }
 
 function inferTagTone(label){
-  return TAG_TONES[inferTagCat(label)] || 'brand';
+  return TAG_TONES[inferTagCat(label)] || 'neutral';
 }
 
 function tagLabel(t){

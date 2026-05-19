@@ -2310,6 +2310,10 @@ html,body{
   background:rgba(255,77,136,0.10);
   color:#c2185b;
 }
+.tl-tag.tone-neutral{
+  background:rgba(0,0,0,0.04);
+  color:rgba(0,0,0,0.62);
+}
 .tl-tag.tone-coral{
   background:rgba(255,138,90,0.12);
   color:#b85c38;
@@ -3208,10 +3212,9 @@ const TIMELINE_BLOCKS = [
         voice:{ duration:'0:35' },
         body:'早上称了一下 52.4，比昨天轻了一点。昨晚睡得不太好，大概六个半钟头吧。',
         tags:[
-          { label:'体重 52.4 kg', cat:'weight' },
-          { label:'睡眠偏少 · 约 6.5 小时', cat:'sleep' },
+          { label:'体重', cat:'weight' },
+          { label:'睡眠', cat:'sleep' },
         ],
-        tagLayout:'rows',
       },
       {
         kind:'wellness', id:'t-517', time:'08:00',
@@ -4051,10 +4054,10 @@ function TlCardTime({time}){
 
 const TAG_TONES = {
   period:'brand', flow:'brand',
-  symptom:'coral', care:'sun',
-  mood:'lavender',
-  sleep:'sky',
-  fitness:'mint', appetite:'mint', weight:'mint', diet:'mint',
+  symptom:'neutral', care:'neutral',
+  mood:'neutral',
+  sleep:'neutral',
+  fitness:'neutral', appetite:'neutral', weight:'neutral', diet:'neutral',
 };
 
 const TAG_CAT_EMOJI = {
@@ -4107,7 +4110,7 @@ function resolveTag(tag){
   const preset = TAG_REGISTRY[label] || {};
   const cat = tag.cat || preset.cat || inferTagCat(label);
   const emoji = tag.emoji || preset.emoji || TAG_CAT_EMOJI[cat] || '·';
-  const tone = tag.tone || TAG_TONES[cat] || 'brand';
+  const tone = tag.tone || TAG_TONES[cat] || 'neutral';
   return { label, emoji, cat, tone };
 }
 

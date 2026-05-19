@@ -252,10 +252,9 @@ const TIMELINE_BLOCKS = [
         voice:{ duration:'0:35' },
         body:'早上称了一下 52.4，比昨天轻了一点。昨晚睡得不太好，大概六个半钟头吧。',
         tags:[
-          { label:'体重 52.4 kg', cat:'weight' },
-          { label:'睡眠偏少 · 约 6.5 小时', cat:'sleep' },
+          { label:'体重', cat:'weight' },
+          { label:'睡眠', cat:'sleep' },
         ],
-        tagLayout:'rows',
       },
       {
         kind:'wellness', id:'t-517', time:'08:00',
