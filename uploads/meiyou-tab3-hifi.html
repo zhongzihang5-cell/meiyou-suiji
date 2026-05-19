@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>美柚 · 随记</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --pink:#ff4d88;
+  --pink-06:rgba(255,77,136,0.06);
+  --pink-12:rgba(255,77,136,0.12);
+  --pink-20:rgba(255,77,136,0.20);
+  --green:#2ebd6e;
+  --green-bg:rgba(46,189,110,0.07);
+  --yellow:#f0a020;
+  --yellow-bg:rgba(240,160,32,0.07);
+  --red:#ff4d4d;
+  --bg:#f5f3ef;
+  --white:#fff;
+  --card:#fff;
+  --t1:rgba(0,0,0,0.82);
+  --t2:rgba(0,0,0,0.52);
+  --t3:rgba(0,0,0,0.28);
+  --t4:rgba(0,0,0,0.12);
+  --divider:rgba(0,0,0,0.05);
+  --shadow:0 1px 8px rgba(0,0,0,0.035);
+  --r8:8px;
+  --r12:12px;
+  --r16:16px;
+}
+
+body{
+  font-family:'PingFang SC',-apple-system,'SF Pro Text','Helvetica Neue',sans-serif;
+  background:var(--bg);
+  color:var(--t1);
+  max-width:390px;
+  margin:0 auto;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ========== STATUS BAR ========== */
+.status-bar-fake{
+  height:54px;
+  background:linear-gradient(180deg,#fff0f4 0%,#fff5f8 100%);
+}
+
+/* ========== TOP HEADER ========== */
+.page-header{
+  background:linear-gradient(180deg,#fff5f8 0%,#fdf0ee 40%,var(--bg) 100%);
+  padding:0 20px 20px;
+}
+.header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+.page-title{
+  font-size:22px;
+  font-weight:600;
+  color:var(--t1);
+  letter-spacing:-0.3px;
+}
+.header-icons{
+  display:flex;
+  gap:16px;
+  align-items:center;
+}
+.header-icon{
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  color:var(--t2);
+  cursor:pointer;
+}
+
+/* ========== STATUS CARD ========== */
+.status-card{
+  background:var(--white);
+  border-radius:var(--r16);
+  padding:18px 20px;
+  box-shadow:var(--shadow);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+  transition:transform 0.15s;
+}
+.status-card:active{transform:scale(0.985)}
+.sc-left{display:flex;align-items:center;gap:14px}
+.sc-dot{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.sc-dot.green{background:var(--green-bg)}
+.sc-dot.yellow{background:var(--yellow-bg)}
+.sc-title{font-size:16px;font-weight:500;color:var(--t1);margin-bottom:2px}
+.sc-desc{font-size:12px;color:var(--t2)}
+.sc-arrow{font-size:20px;color:var(--t3);font-weight:300}
+
+/* ========== MAIN SCROLL AREA ========== */
+.scroll-area{
+  padding:16px 16px 160px;
+}
+
+/* ========== AI GUIDE CARD ========== */
+.guide-card{
+  background:var(--white);
+  border-radius:var(--r16);
+  padding:20px;
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
+}
+.guide-text{
+  font-size:15px;
+  color:var(--t1);
+  line-height:1.6;
+  margin-bottom:14px;
+}
+.guide-text em{
+  font-style:normal;
+  color:var(--pink);
+  font-weight:500;
+}
+.guide-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.guide-btn{
+  padding:8px 18px;
+  background:var(--pink-06);
+  color:var(--pink);
+  border:none;
+  border-radius:80px;
+  font-size:13px;
+  font-family:inherit;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background 0.12s;
+}
+.guide-btn:active{background:var(--pink-12)}
+
+/* ========== DATE SECTION ========== */
+.date-section{margin-bottom:24px}
+.date-head{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin-bottom:12px;
+  padding:0 2px;
+}
+.date-num{
+  font-size:28px;
+  font-weight:700;
+  color:var(--t1);
+  letter-spacing:-1px;
+  line-height:1;
+}
+.date-info{
+  font-size:13px;
+  color:var(--t2);
+  padding-bottom:2px;
+}
+.date-tag{
+  margin-left:auto;
+  font-size:11px;
+  color:var(--pink);
+  background:var(--pink-06);
+  padding:3px 10px;
+  border-radius:80px;
+  font-weight:500;
+}
+
+/* ========== RECORD CARD ========== */
+.rec{
+  background:var(--card);
+  border-radius:var(--r16);
+  padding:18px 20px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow);
+}
+.rec-time{font-size:11px;color:var(--t3);margin-bottom:8px}
+.rec-body{font-size:15px;line-height:1.7;color:var(--t1);margin-bottom:12px}
+
+/* photo placeholder */
+.rec-img{
+  width:100%;
+  height:160px;
+  border-radius:var(--r12);
+  margin-bottom:12px;
+  overflow:hidden;
+  position:relative;
+}
+.rec-img-inner{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.rec-img-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;
+}
+.rec-img-placeholder.warm{
+  background:linear-gradient(135deg,#ffe4ec 0%,#ffd6e0 40%,#ffc8d6 100%);
+}
+.rec-img-placeholder.cool{
+  background:linear-gradient(135deg,#e8f0fe 0%,#dce8f8 40%,#d0e0f2 100%);
+}
+.rec-img-placeholder.green{
+  background:linear-gradient(135deg,#e4f7ec 0%,#d4f0e2 40%,#c8eada 100%);
+}
+
+/* tags */
+.rec-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:12px;
+}
+.tag{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  font-size:12px;
+  padding:4px 12px;
+  border-radius:80px;
+  background:rgba(0,0,0,0.03);
+  color:var(--t2);
+}
+.tag.ai{
+  background:rgba(79,124,174,0.06);
+  color:#4f7cae;
+}
+.tag .badge{
+  font-size:9px;
+  background:rgba(79,124,174,0.12);
+  padding:1px 4px;
+  border-radius:4px;
+  margin-left:1px;
+  font-weight:500;
+}
+
+/* AI note / annotation */
+.ai-anno{
+  padding:14px 16px;
+  border-radius:var(--r12);
+  font-size:13px;
+  line-height:1.65;
+  color:var(--t2);
+}
+.ai-anno.green-bg{background:var(--green-bg)}
+.ai-anno.yellow-bg{background:var(--yellow-bg)}
+.ai-anno .anno-icon{margin-right:4px}
+
+/* ========== CYCLE SUMMARY CARD ========== */
+.cycle-sum{
+  background:var(--white);
+  border-radius:var(--r16);
+  padding:20px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow);
+  border-left:4px solid var(--green);
+}
+.cycle-sum.warn{border-left-color:var(--yellow)}
+.cs-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cs-icon{font-size:18px}
+.cs-title{font-size:15px;font-weight:600;color:var(--t1)}
+.cs-body{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:10px}
+.cs-link{font-size:12px;color:var(--pink);font-weight:500;cursor:pointer}
+
+/* ========== WEEKLY REPORT CARD ========== */
+.weekly{
+  background:var(--white);
+  border-radius:var(--r16);
+  padding:16px 20px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+}
+.weekly:active{transform:scale(0.985)}
+.wk-left{display:flex;align-items:center;gap:12px}
+.wk-icon{
+  width:40px;height:40px;border-radius:var(--r12);
+  background:var(--pink-06);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.wk-title{font-size:14px;font-weight:500;color:var(--t1)}
+.wk-sub{font-size:11px;color:var(--t3);margin-top:2px}
+.wk-action{font-size:13px;color:var(--pink);font-weight:500}
+
+/* ========== GAP LABEL ========== */
+.gap{
+  text-align:center;
+  padding:16px 0 8px;
+  font-size:11px;
+  color:var(--t3);
+  letter-spacing:2px;
+}
+
+/* ========== INPUT BAR ========== */
+.input-bar{
+  position:fixed;
+  bottom:78px;
+  left:50%;transform:translateX(-50%);
+  width:100%;max-width:390px;
+  background:var(--white);
+  padding:8px 14px 10px;
+  border-top:0.5px solid var(--divider);
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  z-index:90;
+}
+.ib-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg);border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;color:var(--t2);flex-shrink:0;cursor:pointer;
+}
+.ib-btn:active{background:rgba(0,0,0,0.06)}
+.ib-field{
+  flex:1;min-height:36px;max-height:72px;
+  padding:8px 16px;
+  border-radius:20px;
+  border:0.5px solid rgba(0,0,0,0.07);
+  background:var(--bg);
+  font-size:15px;font-family:inherit;color:var(--t1);
+  resize:none;outline:none;line-height:1.35;
+}
+.ib-field::placeholder{color:var(--t3);font-size:14px}
+.ib-field:focus{border-color:var(--pink);background:var(--white)}
+.ib-send{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--pink);border:none;color:#fff;
+  font-size:16px;flex-shrink:0;cursor:pointer;
+  opacity:0.3;transition:opacity 0.15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.ib-send.on{opacity:1}
+
+/* ========== BOTTOM TAB BAR ========== */
+.tab-bar{
+  position:fixed;
+  bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:390px;
+  height:78px;
+  background:var(--white);
+  border-top:0.5px solid var(--divider);
+  display:flex;
+  align-items:flex-start;
+  padding-top:6px;
+  padding-bottom:env(safe-area-inset-bottom,16px);
+  z-index:100;
+}
+.tab-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  cursor:pointer;
+  position:relative;
+}
+.tab-icon{
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  position:relative;
+}
+.tab-icon svg{width:24px;height:24px}
+.tab-label{
+  font-size:10px;
+  color:var(--t3);
+  font-weight:400;
+}
+.tab-item.active .tab-label{
+  color:var(--pink);
+  font-weight:500;
+}
+/* active indicator */
+.tab-item.active .tab-icon{color:var(--pink)}
+
+/* tab icons as simple circles/shapes for prototype */
+.ti-circle{
+  width:24px;height:24px;border-radius:50%;
+  border:2px solid var(--t3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+}
+.tab-item.active .ti-circle{border-color:var(--pink);color:var(--pink)}
+
+/* calendar badge on record tab */
+.tab-badge{
+  position:absolute;
+  top:-2px;right:-6px;
+  min-width:16px;height:16px;
+  background:var(--pink);
+  color:#fff;
+  font-size:9px;
+  font-weight:600;
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 4px;
+}
+
+/* ========== EMPTY STATE ========== */
+.empty{
+  text-align:center;
+  padding:56px 40px 32px;
+}
+.empty-icon{
+  width:80px;height:80px;
+  margin:0 auto 20px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ffe4ec,#ffd6e0);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;
+}
+.empty-title{font-size:18px;font-weight:500;margin-bottom:8px;color:var(--t1)}
+.empty-desc{font-size:13px;color:var(--t3);line-height:1.7}
+
+/* ========== SCENE SWITCH (demo only) ========== */
+.demo-bar{
+  position:fixed;top:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:390px;
+  display:flex;gap:0;
+  background:rgba(0,0,0,0.75);
+  z-index:200;
+  overflow-x:auto;
+  backdrop-filter:blur(12px);
+}
+.demo-bar::-webkit-scrollbar{display:none}
+.demo-tab{
+  flex:1;
+  padding:10px 8px;
+  font-size:11px;
+  color:rgba(255,255,255,0.5);
+  background:transparent;border:none;
+  cursor:pointer;white-space:nowrap;
+  font-family:inherit;
+  text-align:center;
+}
+.demo-tab.on{color:#fff;font-weight:600}
+
+.scene{display:none}
+.scene.show{display:block}
+</style>
+</head>
+<body>
+
+<!-- Demo scene switch -->
+<div class="demo-bar">
+  <button class="demo-tab on" onclick="go('a')">经期中</button>
+  <button class="demo-tab" onclick="go('b')">非经期</button>
+  <button class="demo-tab" onclick="go('c')">新用户</button>
+</div>
+
+<!-- ==================== SCENE A: 经期中 ==================== -->
+<div class="scene show" id="sa">
+  <div class="status-bar-fake"></div>
+  <div class="page-header">
+    <div class="header-row">
+      <div class="page-title">随记</div>
+      <div class="header-icons">
+        <div class="header-icon">📅</div>
+        <div class="header-icon">⚙️</div>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="sc-left">
+        <div class="sc-dot green">🟢</div>
+        <div>
+          <div class="sc-title">本周期正常</div>
+          <div class="sc-desc">经期第3天 · 较上周期更规律</div>
+        </div>
+      </div>
+      <span class="sc-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- Today -->
+    <div class="date-section">
+      <div class="date-head">
+        <span class="date-num">5/19</span>
+        <span class="date-info">周一 · 今天</span>
+        <span class="date-tag">经期第3天</span>
+      </div>
+      <div class="guide-card">
+        <div class="guide-text">经期<em>第3天</em>，经量通常开始减少了。<br>今天感觉怎么样？</div>
+        <div class="guide-actions">
+          <button class="guide-btn">还不错 👍</button>
+          <button class="guide-btn">有点疼</button>
+          <button class="guide-btn">量还挺多</button>
+          <button class="guide-btn">心情不好</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yesterday -->
+    <div class="date-section">
+      <div class="date-head">
+        <span class="date-num">5/18</span>
+        <span class="date-info">周日</span>
+        <span class="date-tag">经期第2天</span>
+      </div>
+
+      <div class="rec">
+        <div class="rec-time">21:30</div>
+        <div class="rec-body">下午开会的时候肚子突然很疼，吃了颗布洛芬才扛过去。量还挺多的，换了三次 😩</div>
+        <div class="rec-tags">
+          <span class="tag">😖 痛经·重度</span>
+          <span class="tag">💊 布洛芬</span>
+          <span class="tag">🩸 经量多</span>
+          <span class="tag ai">⏰ 午后发作 <span class="badge">AI</span></span>
+        </div>
+        <div class="ai-anno yellow-bg">
+          <span class="anno-icon">⚠️</span> 上个周期全程没有服药，这次第2天就需要止痛，痛经有加重趋势。已连续2个周期第2天最痛。
+        </div>
+      </div>
+
+      <div class="rec">
+        <div class="rec-time">08:12</div>
+        <div class="rec-body">昨晚又没睡好，半夜醒了两次 😪</div>
+        <div class="rec-tags">
+          <span class="tag">😴 睡眠差</span>
+          <span class="tag ai">🌙 夜醒2次 <span class="badge">AI</span></span>
+        </div>
+        <div class="ai-anno green-bg">
+          <span class="anno-icon">💡</span> 过去3个周期在经期前2天都有睡眠变差的记录，这可能与激素波动有关。
+        </div>
+      </div>
+    </div>
+
+    <!-- Day before -->
+    <div class="date-section">
+      <div class="date-head">
+        <span class="date-num">5/17</span>
+        <span class="date-info">周六</span>
+        <span class="date-tag">经期第1天</span>
+      </div>
+
+      <div class="cycle-sum">
+        <div class="cs-head">
+          <span class="cs-icon">🟢</span>
+          <span class="cs-title">本次周期开始 · 整体正常</span>
+        </div>
+        <div class="cs-body">周期28天，与上次持平。基于过去6个周期数据，周期规律性持续改善。</div>
+        <span class="cs-link">查看完整分析 ›</span>
+      </div>
+
+      <div class="rec">
+        <div class="rec-time">14:20</div>
+        <div class="rec-body">来啦～ 肚子隐隐有点不舒服但还行</div>
+        <div class="rec-img">
+          <div class="rec-img-placeholder warm">🌸</div>
+        </div>
+        <div class="rec-tags">
+          <span class="tag">🩸 经期开始</span>
+          <span class="tag">😖 轻微不适</span>
+        </div>
+        <div class="ai-anno green-bg">
+          <span class="anno-icon">💡</span> 第1天轻微不适，与过去5个周期的开始状态一致，无需担心。
+        </div>
+      </div>
+    </div>
+
+    <div class="gap">· · ·  4天前  · · ·</div>
+
+    <div class="date-section">
+      <div class="date-head">
+        <span class="date-num">5/13</span>
+        <span class="date-info">周二</span>
+      </div>
+      <div class="rec">
+        <div class="rec-time">20:45</div>
+        <div class="rec-body">吃完火锅拉肚子了😂 不知道跟快来月经有没有关系</div>
+        <div class="rec-tags">
+          <span class="tag">🍽️ 辛辣</span>
+          <span class="tag">🚽 腹泻</span>
+        </div>
+        <div class="ai-anno green-bg">
+          <span class="anno-icon">💡</span> 经前4天出现腹泻，上个周期经前3天也有类似记录。经前腹泻与前列腺素升高有关，属常见现象。
+        </div>
+      </div>
+    </div>
+
+    <div class="weekly">
+      <div class="wk-left">
+        <div class="wk-icon">📊</div>
+        <div>
+          <div class="wk-title">5月第2周 · 周报</div>
+          <div class="wk-sub">5/5 - 5/11</div>
+        </div>
+      </div>
+      <span class="wk-action">查看 ›</span>
+    </div>
+
+    <div class="gap">· · ·  上个周期  · · ·</div>
+
+    <div class="cycle-sum warn">
+      <div class="cs-head">
+        <span class="cs-icon">🟡</span>
+        <span class="cs-title">上次周期总结 · 轻微波动</span>
+      </div>
+      <div class="cs-body">周期30天，较前次延长2天。经期持续6天，经量偏多。痛经记录2次。建议关注趋势变化。</div>
+      <span class="cs-link">查看完整分析 ›</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ==================== SCENE B: 非经期 ==================== -->
+<div class="scene" id="sb">
+  <div class="status-bar-fake"></div>
+  <div class="page-header">
+    <div class="header-row">
+      <div class="page-title">随记</div>
+      <div class="header-icons">
+        <div class="header-icon">📅</div>
+        <div class="header-icon">⚙️</div>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="sc-left">
+        <div class="sc-dot green">🟢</div>
+        <div>
+          <div class="sc-title">卵泡期 · 状态良好</div>
+          <div class="sc-desc">距下次经期约16天</div>
+        </div>
+      </div>
+      <span class="sc-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+    <div class="date-section">
+      <div class="date-head">
+        <span class="date-num">5/19</span>
+        <span class="date-info">周一 · 今天</span>
+      </div>
+      <div class="guide-card">
+        <div class="guide-text">卵泡期是一个月里<em>精力最充沛</em>的阶段 ✨<br>今天有什么想记下的吗？</div>
+        <div class="guide-actions">
+          <button class="guide-btn">状态挺好的</button>
+          <button class="guide-btn">皮肤不错</button>
+          <button class="guide-btn">有点不舒服</button>
+          <button class="guide-btn">拍张照片 📷</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="date-section">
+      <div class="date-head">
+        <span class="date-num">5/16</span>
+        <span class="date-info">周五</span>
+      </div>
+      <div class="rec">
+        <div class="rec-time">19:20</div>
+        <div class="rec-body">最近皮肤状态巨好，痘痘全消了，发个自拍纪念一下</div>
+        <div class="rec-img">
+          <div class="rec-img-placeholder green">✨</div>
+        </div>
+        <div class="rec-tags">
+          <span class="tag">✨ 皮肤变好</span>
+        </div>
+        <div class="ai-anno green-bg">
+          <span class="anno-icon">💡</span> 经期结束后雌激素回升，皮肤状态改善是正常的。上个周期这个阶段你也记录了类似感受 😊
+        </div>
+      </div>
+    </div>
+
+    <div class="gap">· · ·  5天前  · · ·</div>
+
+    <div class="date-section">
+      <div class="date-head">
+        <span class="date-num">5/11</span>
+        <span class="date-info">周日</span>
+        <span class="date-tag">经期结束</span>
+      </div>
+      <div class="cycle-sum">
+        <div class="cs-head">
+          <span class="cs-icon">🟢</span>
+          <span class="cs-title">上次经期总结 · 正常</span>
+        </div>
+        <div class="cs-body">经期5天，经量正常，痛经1次（轻微）。较上周期有改善，整体趋势向好。</div>
+        <span class="cs-link">查看完整分析 ›</span>
+      </div>
+    </div>
+
+    <div class="weekly">
+      <div class="wk-left">
+        <div class="wk-icon">📊</div>
+        <div>
+          <div class="wk-title">5月第2周 · 周报</div>
+          <div class="wk-sub">5/5 - 5/11</div>
+        </div>
+      </div>
+      <span class="wk-action">查看 ›</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCENE C: 新用户 ==================== -->
+<div class="scene" id="sc">
+  <div class="status-bar-fake"></div>
+  <div class="page-header" style="padding-bottom:0">
+    <div class="header-row">
+      <div class="page-title">随记</div>
+      <div class="header-icons">
+        <div class="header-icon">⚙️</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty">
+    <div class="empty-icon">🌱</div>
+    <div class="empty-title">你的身体空间</div>
+    <div class="empty-desc">随手记下身体的感受<br>AI帮你整理、关联和分析<br>记得越多，越了解自己</div>
+  </div>
+
+  <div style="padding:0 16px 160px">
+    <div class="guide-card">
+      <div class="guide-text">试试记一条？</div>
+      <div class="guide-actions">
+        <button class="guide-btn">今天来月经了</button>
+        <button class="guide-btn">有点肚子疼</button>
+        <button class="guide-btn">拍张照片 📷</button>
+        <button class="guide-btn">心情不好</button>
+        <button class="guide-btn">昨晚没睡好</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== INPUT BAR ========== -->
+<div class="input-bar">
+  <button class="ib-btn">📷</button>
+  <button class="ib-btn">🎤</button>
+  <textarea class="ib-field" placeholder="记录一下…" rows="1" oninput="rz(this);ts(this)"></textarea>
+  <button class="ib-send" id="sb2">↑</button>
+</div>
+
+<!-- ========== BOTTOM TAB BAR ========== -->
+<div class="tab-bar">
+  <div class="tab-item">
+    <div class="tab-icon"><div class="ti-circle" style="font-size:14px">柚</div></div>
+    <div class="tab-label">美柚</div>
+  </div>
+  <div class="tab-item">
+    <div class="tab-icon">
+      <div class="ti-circle" style="font-size:11px;font-weight:600">19</div>
+    </div>
+    <div class="tab-label">记录</div>
+  </div>
+  <div class="tab-item active">
+    <div class="tab-icon">
+      <div class="ti-circle" style="border-style:dashed">✎</div>
+    </div>
+    <div class="tab-label">随记</div>
+  </div>
+  <div class="tab-item">
+    <div class="tab-icon"><div class="ti-circle">¥</div></div>
+    <div class="tab-label">返现</div>
+  </div>
+  <div class="tab-item">
+    <div class="tab-icon"><div class="ti-circle">我</div></div>
+    <div class="tab-label">我</div>
+  </div>
+</div>
+
+<script>
+function go(id){
+  document.querySelectorAll('.scene').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.demo-tab').forEach(e=>e.classList.remove('on'));
+  document.getElementById('s'+id).classList.add('show');
+  event.target.classList.add('on');
+  window.scrollTo(0,0);
+}
+function rz(e){e.style.height='auto';e.style.height=Math.min(e.scrollHeight,72)+'px'}
+function ts(e){document.getElementById('sb2').classList.toggle('on',!!e.value.trim())}
+</script>
+
+</body>
+</html>
