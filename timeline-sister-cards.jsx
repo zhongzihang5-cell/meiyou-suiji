@@ -111,24 +111,27 @@ function RecordedTags({tags, layout}){
 function AiNoteSection({aiNote}){
   if(!aiNote) return null;
   const tone = aiNote.tone || 'green';
-  if(aiNote.items?.length){
-    return (
-      <div className={'tl-combo-ai '+tone+'-bg'}>
-        <ul className="tl-combo-ai-list">
-          {aiNote.items.map((line, i)=>(
-            <li key={i}>{line}</li>
-          ))}
-        </ul>
-        {aiNote.total && (
-          <div className="tl-combo-ai-total">{aiNote.total}</div>
-        )}
-      </div>
-    );
-  }
+  const icon = aiNote.icon || '💡';
+
   return (
     <div className={'tl-combo-ai '+tone+'-bg'}>
-      {aiNote.icon && <span className="tl-combo-ai-icon">{aiNote.icon}</span>}
-      <p className="tl-combo-ai-text">{aiNote.text}</p>
+      <span className="tl-combo-ai-icon" aria-hidden="true">{icon}</span>
+      <div className="tl-combo-ai-body">
+        {aiNote.items?.length ? (
+          <>
+            <ul className="tl-combo-ai-list">
+              {aiNote.items.map((line, i)=>(
+                <li key={i}>{line}</li>
+              ))}
+            </ul>
+            {aiNote.total && (
+              <div className="tl-combo-ai-total">{aiNote.total}</div>
+            )}
+          </>
+        ) : (
+          <p className="tl-combo-ai-text">{aiNote.text}</p>
+        )}
+      </div>
     </div>
   );
 }
