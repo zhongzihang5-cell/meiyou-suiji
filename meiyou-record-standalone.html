@@ -1006,6 +1006,7 @@ html,body{
   display:flex;align-items:center;justify-content:center;
   position:relative;
   z-index:3;
+  touch-action:manipulation;
   transition:transform 0.32s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.2s;
 }
 .dock-fab:active{transform:scale(0.92)}
@@ -1051,13 +1052,14 @@ html,body{
     opacity 0.18s ease;
 }
 .dock-fan-stage.open .dock-fan-node{
-  transform:translate(var(--fx), var(--fy)) scale(1);
   opacity:1;
   visibility:visible;
-  transition-delay:var(--delay);
   pointer-events:auto;
+  animation:fanPop 0.45s cubic-bezier(0.34,1.45,0.64,1) both;
+  animation-delay:var(--delay);
 }
 .dock-fan-stage.closing .dock-fan-node{
+  animation:none;
   transform:translate(0,0) scale(0.12);
   opacity:0;
   transition-delay:var(--close-delay);
@@ -1117,15 +1119,12 @@ html,body{
   white-space:nowrap;
 }
 
-.dock-fan-stage.open .dock-fan-node{
-  animation:fanPop 0.45s cubic-bezier(0.34,1.45,0.64,1) both;
-  animation-delay:var(--delay);
-}
 @keyframes fanPop{
   0%{transform:translate(calc(var(--fx)*0.1), calc(var(--fy)*0.1)) scale(0.2);opacity:0}
   55%{transform:translate(calc(var(--fx)*1.06), calc(var(--fy)*1.06)) scale(1.06);opacity:1}
   100%{transform:translate(var(--fx), var(--fy)) scale(1);opacity:1}
 }
+
 .dock-fan-stage.closing .dock-fab{
   animation:magnetSnap 0.34s cubic-bezier(0.55,0.06,0.68,0.9) both;
 }
@@ -1852,7 +1851,6 @@ html,body{
 
 /* ============ 时间轴内联引导 ============ */
 .tl-rail-guide{
-  margin-top:16px;
   padding:0 0 4px;
 }
 .tl-rail-guide-text{
@@ -5082,6 +5080,15 @@ function fanArcPos(index, total, radius){
 function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
   /* 180° 左半圆 / 5 项 / 50px 圆：R ≥ 50/(2·sin22.5°) ≈ 66 */
   const r = items.length >= 5 ? 76 : 64;
+  const fabTapLock = React.useRef(false);
+
+  const handleFabTap = (e)=>{
+    e.preventDefault();
+    if(fabTapLock.current) return;
+    fabTapLock.current = true;
+    onToggle(!open);
+    window.setTimeout(()=>{ fabTapLock.current = false; }, 360);
+  };
 
   return (
     <div className={'dock-fan dock-fan-corner'+(open?' open':'')+(closing?' closing':'')}>
@@ -5121,7 +5128,7 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
         <button
           type="button"
           className={'dock-fab dock-fab-media'+(open?' open':'')}
-          onClick={()=>onToggle(!open)}
+          onPointerUp={handleFabTap}
           aria-expanded={open}
           aria-label={open ? '收起' : '快捷发布'}
         >
@@ -5145,14 +5152,19 @@ function DockPublisher({
   const [recSec, setRecSec] = React.useState(0);
   const recTimer = React.useRef(null);
 
+  const quickOpenedAt = React.useRef(0);
+
   const toggleQuick = (next)=>{
     if(next === undefined) next = !quickOpen;
     if(next){
+      if(quickOpen || quickClosing) return;
+      quickOpenedAt.current = Date.now();
       setQuickClosing(false);
       setQuickOpen(true);
       return;
     }
     if(!quickOpen || quickClosing) return;
+    if(Date.now() - quickOpenedAt.current < 380) return;
     setQuickClosing(true);
     setTimeout(()=>{
       setQuickOpen(false);

@@ -27,6 +27,15 @@ function fanArcPos(index, total, radius){
 function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
   /* 180° 左半圆 / 5 项 / 50px 圆：R ≥ 50/(2·sin22.5°) ≈ 66 */
   const r = items.length >= 5 ? 76 : 64;
+  const fabTapLock = React.useRef(false);
+
+  const handleFabTap = (e)=>{
+    e.preventDefault();
+    if(fabTapLock.current) return;
+    fabTapLock.current = true;
+    onToggle(!open);
+    window.setTimeout(()=>{ fabTapLock.current = false; }, 360);
+  };
 
   return (
     <div className={'dock-fan dock-fan-corner'+(open?' open':'')+(closing?' closing':'')}>
@@ -66,7 +75,7 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
         <button
           type="button"
           className={'dock-fab dock-fab-media'+(open?' open':'')}
-          onClick={()=>onToggle(!open)}
+          onPointerUp={handleFabTap}
           aria-expanded={open}
           aria-label={open ? '收起' : '快捷发布'}
         >
@@ -90,14 +99,19 @@ function DockPublisher({
   const [recSec, setRecSec] = React.useState(0);
   const recTimer = React.useRef(null);
 
+  const quickOpenedAt = React.useRef(0);
+
   const toggleQuick = (next)=>{
     if(next === undefined) next = !quickOpen;
     if(next){
+      if(quickOpen || quickClosing) return;
+      quickOpenedAt.current = Date.now();
       setQuickClosing(false);
       setQuickOpen(true);
       return;
     }
     if(!quickOpen || quickClosing) return;
+    if(Date.now() - quickOpenedAt.current < 380) return;
     setQuickClosing(true);
     setTimeout(()=>{
       setQuickOpen(false);
