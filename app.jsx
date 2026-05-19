@@ -1,18 +1,9 @@
 const { useState, useEffect, useRef } = React;
 
-const DEMO_VOICE_SCRIPT = '哎，昨天月经来了，昨天肚子不太舒服';
-
 const TAG_EMOJI = {
   period:'🩸', pain:'😖', flow:'🩸', 'flow-low':'💧',
   sleep:'😴', mood:'💛', med:'💊',
 };
-
-function buildInitialTurns(ctx){
-  return [
-    { type:'prompt', text: ctx.openPrompt },
-    { type:'suggest', items: ctx.chips },
-  ];
-}
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -49,6 +40,7 @@ function buildTimelineEntry(text, hits, opts={}){
     };
   }
   if(opts.voice) entry.voice = opts.voice;
+  if(opts.quickTag) entry.tags = [{ emoji: opts.quickTag.emoji, label: opts.quickTag.label }, ...entry.tags];
   return entry;
 }
 
@@ -56,21 +48,59 @@ function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const ctx = window.SCENE_CONTEXT[t.scene] || window.SCENE_CONTEXT.period;
 
-  const [cloudExpanded, setCloudExpanded] = useState(false);
-  const [turns, setTurns] = useState(()=>buildInitialTurns(ctx));
   const [syncItems, setSyncItems] = useState([]);
+  const [nudge, setNudge] = useState('');
+  const [suggestChips, setSuggestChips] = useState([]);
   const [draft, setDraft] = useState('');
   const [livePreview, setLivePreview] = useState(null);
   const [timeline, setTimeline] = useState(window.TIMELINE_BLOCKS);
   const [toasts, setToasts] = useState([]);
-  const [listening, setListening] = useState(false);
   const [showPhoto, setShowPhoto] = useState(false);
+  const [activeTab, setActiveTab] = useState('cal');
+  const [showAnalysisNotice, setShowAnalysisNotice] = useState(false);
+  const [sisterPlayAnimation, setSisterPlayAnimation] = useState(0);
+  const [sisterCycleDone, setSisterCycleDone] = useState(true);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
 
+  const scrollToSisterAnalysis = ()=>{
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        const stream = streamRef.current;
+        const el = document.getElementById('sister-analysis-anchor');
+        if(stream && el){
+          const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - 32;
+          stream.scrollTo({ top: Math.max(0, top), behavior:'smooth' });
+        } else if(el){
+          el.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
+      }, 180);
+    });
+  };
+
+  const openSisterAnalysis = ()=>{
+    setShowAnalysisNotice(false);
+    setSisterCycleDone(false);
+    setSisterPlayAnimation(n=>n + 1);
+    setActiveTab('note');
+    scrollToSisterAnalysis();
+  };
+
+  const handleSisterCycleComplete = React.useCallback(()=>{
+    setSisterCycleDone(true);
+    requestAnimationFrame(()=>{
+      setTimeout(()=>scrollTimelineToEnd('smooth'), 120);
+    });
+  }, []);
+
   useEffect(()=>{
-    setTurns(buildInitialTurns(ctx));
+    if(sisterPlayAnimation > 0) setSisterCycleDone(false);
+  }, [sisterPlayAnimation]);
+
+  useEffect(()=>{
     setSyncItems([]);
+    setNudge('');
+    setSuggestChips([]);
     setDraft('');
     setLivePreview(null);
   }, [t.scene]);
@@ -94,22 +124,17 @@ function App(){
     requestAnimationFrame(()=>{
       const el = streamRef.current;
       if(!el) return;
-      if(behavior === 'auto'){
-        el.scrollTop = el.scrollHeight;
-      } else {
-        el.scrollTo({ top: el.scrollHeight, behavior:'smooth' });
-      }
+      if(behavior === 'auto') el.scrollTop = el.scrollHeight;
+      else el.scrollTo({ top: el.scrollHeight, behavior:'smooth' });
     });
   };
 
   useEffect(()=>{
-    const t = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
-    return ()=>clearTimeout(t);
+    const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
+    return ()=>clearTimeout(tm);
   }, []);
 
-  useEffect(()=>{
-    scrollTimelineToEnd('smooth');
-  }, [timeline]);
+  useEffect(()=>{ scrollTimelineToEnd('smooth'); }, [timeline]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -120,26 +145,26 @@ function App(){
     }, 2400);
   };
 
-  const stripSuggest = (prev)=> prev.filter((x,i)=>!(x.type==='suggest' && i===prev.length-1));
-
   const buildSyncItems = (text, hits)=>{
-    const dayId = window.resolveEntryDayId(text, timeline);
-    const dayHint = window.resolveDayHint(text, timeline, dayId);
+    const dayHint = window.resolveDayHint(text, timeline, window.resolveEntryDayId(text, timeline));
     return hits.map(h=>({
       label: window.buildSyncDisplayLabel(h, text),
       dayHint,
     }));
   };
 
-  const appendFollowUp = (hits)=>{
+  const showFollowUp = (hits)=>{
     const follow = window.pickFollowUp(hits, ctx);
     setTimeout(()=>{
-      setTurns(prev=>[
-        ...prev,
-        { type:'nudge', text: follow.text, isNew:true },
-        { type:'suggest', items: follow.chips },
-      ]);
-    }, 420);
+      setNudge(follow.text);
+      setSuggestChips(follow.chips);
+    }, 380);
+  };
+
+  const clearFeedback = ()=>{
+    setSyncItems([]);
+    setNudge('');
+    setSuggestChips([]);
   };
 
   const pushToTimeline = (entry, text)=>{
@@ -147,71 +172,54 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
-  const submitText = (textOverride)=>{
+  const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
 
+    clearFeedback();
     const hits = window.extractKeywords(text);
-    const syncItemsBuilt = buildSyncItems(text, hits);
+    const syncBuilt = buildSyncItems(text, hits);
 
-    setTurns(prev=>[
-      ...stripSuggest(prev),
-      { type:'user', text, isNew:true },
-    ]);
     setDraft('');
     setLivePreview(null);
 
-    if(syncItemsBuilt.length){
-      setSyncItems([]);
-      setTimeout(()=>setSyncItems(syncItemsBuilt), 80);
-      appendFollowUp(hits);
+    if(syncBuilt.length){
+      setTimeout(()=>setSyncItems(syncBuilt), 60);
+      showFollowUp(hits);
+      pushToast({ text:'已记录', tags: syncBuilt.map(s=>s.label).slice(0,2) });
     } else {
-      setTimeout(()=>{
-        setTurns(prev=>[...prev, { type:'nudge', text: ctx.followUp, isNew:true }]);
-      }, 450);
+      pushToast({ text:'已保存' });
     }
 
-    pushToTimeline(buildTimelineEntry(text, hits), text);
-
-    if(syncItemsBuilt.length){
-      const tags = syncItemsBuilt.map(s=>s.label);
-      pushToast({ text:'已记录', tags: tags.slice(0,2) });
-    } else {
-      pushToast({ text:'已保存到记录' });
-    }
+    pushToTimeline(buildTimelineEntry(text, hits, opts), text);
   };
 
   const submitVoice = (transcript, durSec)=>{
-    setListening(false);
     const text = transcript.trim();
+    clearFeedback();
     const hits = window.extractKeywords(text);
-    const syncItemsBuilt = buildSyncItems(text, hits);
+    const syncBuilt = buildSyncItems(text, hits);
 
-    setTurns(prev=>[
-      ...stripSuggest(prev),
-      { type:'user', text, isNew:true },
-    ]);
-    setSyncItems([]);
-    setTimeout(()=>setSyncItems(syncItemsBuilt.length ? syncItemsBuilt : [{ label:'语音', dayHint:'' }]), 100);
-
-    if(syncItemsBuilt.length){
-      appendFollowUp(hits);
+    if(syncBuilt.length){
+      setTimeout(()=>setSyncItems(syncBuilt), 60);
+      showFollowUp(hits);
+      pushToast({ text:'已记录', tags: syncBuilt.map(s=>s.label).slice(0,2) });
+    } else {
+      pushToast({ text:'语音已转写' });
     }
 
     pushToTimeline(buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     }), text);
+  };
 
-    if(syncItemsBuilt.length){
-      pushToast({ text:'已记录', tags: syncItemsBuilt.map(s=>s.label).slice(0,2) });
-    } else {
-      pushToast({ text:'语音已转写' });
-    }
+  const submitQuickMark = (mark)=>{
+    submitText(mark.text, { quickTag: { emoji: mark.emoji, label: mark.label } });
   };
 
   const submitPhoto = ()=>{
     setShowPhoto(false);
-    setTurns(prev=>[...stripSuggest(prev), { type:'user', text:'📷 添加了一张照片', isNew:true }]);
+    clearFeedback();
     pushToTimeline({
       id:'e-'+Date.now(),
       time: window.formatNowTime(),
@@ -220,7 +228,7 @@ function App(){
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
     }, '');
-    pushToast({ text:'照片已加入记录' });
+    pushToast({ text:'照片已加入' });
   };
 
   const sceneForHealth = {
@@ -242,7 +250,23 @@ function App(){
     <div className="phone">
       <StatusBar/>
 
-      <div className={'suiji-shell'+(cloudExpanded?' suiji-shell--cloud-open':'')}>
+      {activeTab === 'cal' && (
+        <CalendarPage
+          onAnalysisReady={()=>setShowAnalysisNotice(true)}
+          onPeriodReset={()=>setShowAnalysisNotice(false)}
+        />
+      )}
+
+      <FloatNotice
+        show={showAnalysisNotice && activeTab === 'cal'}
+        onOpen={openSisterAnalysis}
+        onClose={()=>setShowAnalysisNotice(false)}
+      />
+
+      <div
+        className={'suiji-shell suiji-shell--scene'+(activeTab !== 'note' ? ' app-view-hidden' : '')}
+        aria-hidden={activeTab !== 'note'}
+      >
         <div className="suiji-stream" ref={streamRef}>
           <div className="stream-header">
             <div>
@@ -250,10 +274,15 @@ function App(){
               <p className="stream-sub">情绪 · 身体 · 体重</p>
             </div>
             <div className="stream-actions">
-              <button className="stream-action" aria-label="日历">
+              <button
+                className="stream-action"
+                aria-label="日历"
+                type="button"
+                onClick={()=>setActiveTab('cal')}
+              >
                 <I name="calendar" size={20} stroke={1.7}/>
               </button>
-              <button className="stream-action" aria-label="搜索">
+              <button className="stream-action" aria-label="搜索" type="button">
                 <I name="search" size={20} stroke={1.7}/>
               </button>
             </div>
@@ -265,37 +294,35 @@ function App(){
             </div>
           )}
 
-          <TimelineStream blocks={timeline} endRef={timelineEndRef}/>
+          <TimelineStream
+            blocks={timeline}
+            endRef={timelineEndRef}
+            onGuideChip={(c)=>submitText(c)}
+            sisterPlayAnimation={sisterPlayAnimation}
+            sisterCycleDone={sisterCycleDone}
+            onSisterCycleComplete={handleSisterCycleComplete}
+          />
         </div>
 
-        <CloudPublisher
-          ctx={ctx}
-          expanded={cloudExpanded}
-          onToggle={()=>setCloudExpanded(v=>!v)}
-          turns={turns}
-          syncItems={syncItems}
+        <DockPublisher
           draft={draft}
           onDraft={setDraft}
           onSend={()=>submitText()}
           onChip={(c)=>submitText(c)}
-          onVoice={()=>setListening(true)}
+          onQuickMark={submitQuickMark}
+          onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
+          syncItems={syncItems}
+          nudge={nudge}
+          suggestChips={suggestChips}
           livePreview={livePreview}
         />
       </div>
 
-      {listening && (
-        <ListeningOverlay
-          ctx={ctx}
-          script={DEMO_VOICE_SCRIPT}
-          onCancel={()=>setListening(false)}
-          onDone={submitVoice}
-        />
-      )}
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      <TabBar active="note"/>
+      <TabBar active={activeTab} onChange={setActiveTab}/>
 
       <TP>
         <TS label="场景">
@@ -318,15 +345,6 @@ function App(){
               {value:'analysis', label:'顶部红绿灯'},
             ]}
             onChange={(v)=>setTweak('entry', v)}
-          />
-          <TR
-            label="云朵"
-            value={cloudExpanded ? 'open' : 'mini'}
-            options={[
-              {value:'open', label:'展开'},
-              {value:'mini', label:'收起'},
-            ]}
-            onChange={(v)=>setCloudExpanded(v==='open')}
           />
         </TS>
       </TP>

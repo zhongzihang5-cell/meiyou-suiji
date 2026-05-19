@@ -1,58 +1,25 @@
 // ============ 时间轴 — 分日 · 单条记录 · AI 批注 ============
 
 function VoiceBar({voice}){
-  const I = window.Icon;
-  const [playing, setPlaying] = React.useState(false);
-  return (
-    <button
-      type="button"
-      className={'rec-voice'+(playing?' playing':'')}
-      onClick={()=>setPlaying(p=>!p)}
-      aria-label={playing?'暂停':'播放语音'}
-    >
-      <span className="rec-voice-play">
-        <I name={playing?'pause':'play'} size={13}/>
-      </span>
-      <span className="rec-voice-bars" aria-hidden="true">
-        {Array.from({length:22}).map((_,j)=>(<span key={j} style={{'--i':j}}/>))}
-      </span>
-      <span className="rec-voice-dur">{voice.duration}</span>
-    </button>
-  );
+  return <TlVoiceBar voice={voice}/>;
 }
 
 function RecordCard({entry, isNew}){
+  const tags = entry.tags || [];
+
   return (
-    <div className={'rec'+(isNew?' fade-in':'')}>
-      {entry.time && <div className="rec-time">{entry.time}</div>}
-      {entry.voice && <VoiceBar voice={entry.voice}/>}
-      {entry.body && (
-        <div className={'rec-body'+(entry.voice?' rec-body-voice':'')}>{entry.body}</div>
-      )}
-      {entry.photo && (
-        <div className="rec-img">
-          <div className={'rec-img-ph '+(entry.photoTone||'warm')}>
-            {entry.photoEmoji || '🌸'}
-          </div>
-        </div>
-      )}
-      {entry.tags && entry.tags.length > 0 && (
-        <div className="rec-tags">
-          {entry.tags.map((t,i)=>(
-            <span key={i} className={'rec-tag'+(t.ai?' ai':'')+(t.content?' content':'')}>
-              {t.emoji && <span>{t.emoji} </span>}
-              {t.label}
-              {t.ai && <span className="ai-badge">AI</span>}
-            </span>
-          ))}
-        </div>
-      )}
-      {entry.aiNote && (
-        <div className={'ai-anno '+(entry.aiNote.tone||'green')+'-bg'}>
-          {entry.aiNote.icon && <span className="anno-icon">{entry.aiNote.icon}</span>}
-          {entry.aiNote.text}
-        </div>
-      )}
+    <div className={'tl-combo-card'+(isNew?' fade-in':'')+(entry.aiNote?' has-ai':'')}>
+      <div className="tl-combo-body">
+        {entry.voice && <VoiceBar voice={entry.voice}/>}
+        {entry.body && (
+          <div className={'rec-body'+(entry.voice?' rec-body-voice':'')+(entry.photo?' rec-body-photo':'')}>{entry.body}</div>
+        )}
+        <RecordPhoto photo={entry.photo}/>
+        {tags.length > 0 && (
+          <RecordedTags tags={tags} layout={entry.tagLayout}/>
+        )}
+      </div>
+      <AiNoteSection aiNote={entry.aiNote}/>
     </div>
   );
 }
@@ -85,47 +52,66 @@ function WeeklyCard({item}){
   );
 }
 
-function TimelineDateSection({day}){
-  const I = window.Icon;
+function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
+  const items = (day.items || day.entries || []).filter(it=>{
+    if(!it.hiddenUntilSisterDone) return true;
+    return sisterCycleDone;
+  });
   const phaseCls = day.phaseKind || '';
   return (
-    <div className={'tl-date-section'+(day.isToday?' is-today':'')}>
-      <div className="date-head">
-        <span className="date-num">{day.date}</span>
-        <span className="date-info">
-          {day.weekday}{day.isToday ? ' · 今天' : ''}
-        </span>
-        {day.phaseTag && (
-          <span className={'date-tag '+phaseCls}>{day.phaseTag}</span>
-        )}
+    <div className={'tl-date-section'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
+      <CycleDayHeader day={day}/>
+      <div className="tl-rail-track">
+        {items.map((it,i)=>(
+          <TimelineItem
+            key={it.id}
+            item={it}
+            isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
+            phaseKind={day.phaseKind}
+            isLast={i === items.length - 1}
+            onGuideChip={onGuideChip}
+            sisterPlayAnimation={sisterPlayAnimation}
+            onSisterCycleComplete={onSisterCycleComplete}
+          />
+        ))}
       </div>
-      {(day.extras || []).map((x,j)=>{
-        if(x.type==='cycle-sum') return <CycleSumCard key={x.id||j} item={x}/>;
-        return null;
-      })}
-      {day.isToday && (!day.entries || day.entries.length === 0) && (
-        <div className="tl-today-guide">
-          <span className="tl-today-guide-icon">
-            <I name="pen" size={13} stroke={1.6}/>
-          </span>
-          <span className="tl-today-guide-text">
-            经期<em>第 3 天</em>，经量通常开始减少了。今天感觉怎么样？
-          </span>
-        </div>
-      )}
-      {(day.entries || []).map(e=>(
-        <RecordCard key={e.id} entry={e} isNew={e.isNew}/>
-      ))}
     </div>
   );
 }
 
-function TimelineStream({blocks, endRef}){
+function CycleStartMarker({block}){
+  return (
+    <div className="tl-cycle-start">
+      <div className="tl-cycle-start-marker" aria-hidden="true">
+        <span className="tl-cycle-start-dot"/>
+      </div>
+      <div className="tl-cycle-start-body">
+        <span className="tl-cycle-start-icon">🩸</span>
+        <span className="tl-cycle-start-text">{block.label || '本次周期开始'}</span>
+        {block.sub && <span className="tl-cycle-start-sub">{block.sub}</span>}
+      </div>
+    </div>
+  );
+}
+
+function TimelineStream({blocks, endRef, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
   return (
     <div className="tl-feed">
       {blocks.map((block, i)=>{
         if(block.type === 'day'){
-          return <TimelineDateSection key={block.id} day={block}/>;
+          return (
+            <TimelineDateSection
+              key={block.id}
+              day={block}
+              onGuideChip={onGuideChip}
+              sisterPlayAnimation={sisterPlayAnimation}
+              sisterCycleDone={sisterCycleDone}
+              onSisterCycleComplete={onSisterCycleComplete}
+            />
+          );
+        }
+        if(block.type === 'cycle-start'){
+          return <CycleStartMarker key={block.id} block={block}/>;
         }
         if(block.type === 'gap'){
           return (
@@ -177,9 +163,11 @@ function appendTimelineEntry(blocks, entry, opts={}){
   const dayId = opts.dayId || resolveEntryDayId(entry.body || '', blocks);
   return blocks.map(b=>{
     if(b.type !== 'day' || b.id !== dayId) return b;
+    const list = b.items || b.entries || [];
     return {
       ...b,
-      entries: [...(b.entries || []), entry],
+      items: [...list, entry],
+      entries: undefined,
     };
   });
 }
@@ -190,7 +178,7 @@ function appendTodayEntry(blocks, entry){
 
 Object.assign(window, {
   VoiceBar, RecordCard, CycleSumCard, WeeklyCard,
-  TimelineDateSection, TimelineStream,
+  TimelineDateSection, TimelineStream, CycleStartMarker,
   formatNowTime, formatVoiceDur,
   appendTodayEntry, appendTimelineEntry,
   resolveEntryDayId, resolveDayHint,

@@ -207,7 +207,7 @@ function CycleReport({item}){
 
 // ============ Tab bar ============
 // Order: 美柚 / 日历 / 记录(center) / 返现 / 我
-function TabBar({active='note'}){
+function TabBar({active='note', onChange}){
   const I = window.Icon;
   const tabs = [
     {id:'home', label:'美柚', custom:(
@@ -240,7 +240,13 @@ function TabBar({active='note'}){
   return (
     <div className="tabbar">
       {tabs.map(t=>(
-        <div key={t.id} className={'tab'+(active===t.id?' active':'')}>
+        <div
+          key={t.id}
+          className={'tab'+(active===t.id?' active':'')}
+          onClick={()=>onChange && onChange(t.id)}
+          role="button"
+          tabIndex={0}
+        >
           <div className="tab-ico">{t.custom}</div>
           <div className="tab-lbl">{t.label}</div>
           {t.notif && <span className="notif"></span>}

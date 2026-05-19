@@ -42,6 +42,12 @@ const KEYWORDS = [
         {icon:'💊', text:'本周期第 1 次服止痛药，比上次提前 1 天。'},
         {icon:'📋', text:'连续 2 周期后会汇总给你看。'},
       ]} },
+  { match:['体重','称重','kg','公斤','斤'], label:'体重', kind:'weight', syncLabel:'体重',
+    analysis:{ tone:'good', title:'已记录体重',
+      points:[{icon:'⚖️', text:'会纳入本周体重趋势分析。'}]} },
+  { match:['卡路里','热量','kcal','吃了','午餐','晚餐','早餐','沙拉','鸡胸'], label:'饮食', kind:'food', syncLabel:'卡路里',
+    analysis:{ tone:'good', title:'饮食记录',
+      points:[{icon:'🍽️', text:'AI 正在估算热量与营养结构。'}]} },
 ];
 
 // 内容类型 — 日记 / 心事 / 情绪 / 身体 / 人际（非社交标签）
@@ -122,11 +128,11 @@ function pickFollowUp(hits, ctx){
 const SCENE_CONTEXT = {
   period: {
     weather:{ icon:'☁️', text:'多云 22°C', mood:'偏凉' },
-    cycle:{ label:'经期', sub:'第 3 天', kind:'period', dayNum:'D3' },
-    status:'good', healthTitle:'本次周期正常', healthDesc:'较上周期更规律',
-    openPrompt:'今天阴天，经期第 3 天。此刻身体有什么感受？',
-    followUp:'是身体累，还是心里也压着什么事？',
-    chips:['身体还好','有点心事','昨天月经来了，肚子不舒服','睡不太好'],
+    cycle:{ label:'经期', sub:'第 1 天', kind:'period', dayNum:'D1' },
+    status:'good', healthTitle:'本次周期正常', healthDesc:'经量偏少，整体状态平稳',
+    openPrompt:'早上好～今天身体怎么样？昨晚睡得好吗？',
+    followUp:'是身体感受，还是饮食或睡眠？',
+    chips:['身体还好','有点不舒服','睡得很好','没睡好'],
   },
   follicular: {
     weather:{ icon:'🌤', text:'晴 26°C', mood:'舒适' },
@@ -154,109 +160,145 @@ const SCENE_CONTEXT = {
   },
 };
 
-// ---------- Timeline blocks (分日 + 单条记录) — 旧→新，越往下越近 ----------
+// ---------- 场景时间轴 — 分日叙事 Demo ----------
+// 经前记录在上，5/18 经期第 1 天为最底部最新记录（语音 + 周期分析 + 晚间记录）
 const TIMELINE_BLOCKS = [
+  { type:'gap', id:'gap-top', label:'上个周期 · 4/22 – 5/13' },
   {
-    type:'cycle-sum', id:'cs-prev', tone:'warn',
-    icon:'🟡',
-    title:'上次周期总结 · 轻微波动',
-    body:'周期 30 天，较前次延长 2 天。经期持续 6 天，经量偏多。痛经记录 2 次。建议关注趋势变化。',
-    link:'查看完整分析 ›',
-  },
-  { type:'gap', id:'gap-2', label:'上个周期' },
-  {
-    type:'day', id:'d-5-08', date:'5/8', weekday:'周四',
-    phaseTag:'卵泡期', phaseKind:'foll',
-    entries:[
+    type:'day', id:'d-5-14', date:'5/14', weekday:'周三',
+    phaseTag:'卵泡期第 8 天', phaseKind:'foll', cycleDay:22, cycleLen:28,
+    items:[
       {
-        id:'e-508-1', time:'19:20',
-        body:'今天心情不错，就是有点想偷懒，体重好像轻了一斤。',
+        kind:'rec', id:'e-514-1', time:'07:45',
+        body:'今天状态不错，去跑了三公里，出汗之后心情也好了很多。',
         tags:[
-          {emoji:'💛', label:'情绪', content:true},
-          {emoji:'⚖️', label:'体重'},
+          { label:'跑步', cat:'fitness' },
+          { label:'愉快', cat:'mood' },
         ],
       },
     ],
   },
-  { type:'gap', id:'gap-1', label:'4 天前' },
   {
-    type:'day', id:'d-5-13', date:'5/13', weekday:'周二',
-    entries:[
+    type:'day', id:'d-5-15', date:'5/15', weekday:'周四',
+    phaseTag:'黄体期第 8 天', phaseKind:'lut', cycleDay:27, cycleLen:28,
+    items:[
       {
-        id:'e-513-1', time:'20:45',
-        body:'吃完火锅拉肚子了 😂 不知道跟快来月经有没有关系',
-        tags:[
-          {emoji:'🍽️', label:'辛辣'},
-          {emoji:'🚽', label:'腹泻'},
+        kind:'rec', id:'e-515-2', time:'12:00',
+        photo:{ src:'assets/meal-519.png', alt:'午餐记录' },
+        tags:[{ label:'饮食', cat:'diet' }],
+        aiNote:{
+          tone:'green',
+          items:[
+            '香煎鸡胸肉 100g',
+            '炒土豆丝 1 盘',
+            '炒青菜 1 盘',
+            '杂粮饭 1 碗',
+          ],
+          total:'总卡路里 766 kcal',
+        },
+      },
+      {
+        kind:'weekly', id:'w-515', time:'18:00',
+        range:'5/9 – 5/15',
+        overview:'本周心情整体平稳，经前一日略有低落。',
+        panels:[
+          {
+            id:'mood', type:'mood', icon:'💜', title:'心情趋势',
+            moodTrend:[
+              {d:'一', v:3},{d:'二', v:4},{d:'三', v:3},
+              {d:'四', v:2},{d:'五', v:3},{d:'六', v:3},{d:'日', v:3},
+            ],
+            summary:'本周心情整体平稳，经前一日（周四）略有低落，与经前激素变化一致。',
+          },
+          {
+            id:'weight', type:'weight', icon:'⚖️', title:'体重变化',
+            weightDelta:'↓ 0.4 kg',
+            weightTrend:[
+              {d:'一', v:52.9},{d:'二', v:52.8},{d:'三', v:52.7},
+              {d:'四', v:52.6},{d:'五', v:52.5},{d:'六', v:52.4},{d:'日', v:52.4},
+            ],
+            summary:'体重较上周缓降 0.4kg，处于经前正常波动范围，无需过度关注。',
+          },
+          {
+            id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
+            sleepTrend:[
+              {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
+              {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.8},{d:'日', v:6.5},
+            ],
+            summary:'本周平均睡眠约 6.7 小时，经前一晚偏短，建议睡前减少屏幕时间。',
+          },
         ],
       },
     ],
   },
   {
     type:'day', id:'d-5-17', date:'5/17', weekday:'周六',
-    phaseTag:'经期第1天', phaseKind:'period',
-    extras:[
+    phaseTag:'黄体期第 9 天', phaseKind:'lut', cycleDay:28, cycleLen:28,
+    items:[
       {
-        type:'cycle-sum', id:'cs-517',
-        icon:'🟢',
-        title:'本次周期开始 · 整体正常',
-        body:'周期 28 天，与上次持平。基于过去 6 个周期数据，周期规律性持续改善。',
-        link:'查看完整分析 ›',
-      },
-    ],
-    entries:[
-      {
-        id:'e-517-1', time:'14:20',
-        body:'来啦～ 肚子隐隐有点不舒服但还行',
+        kind:'rec', id:'e-517-w', time:'08:00',
+        voice:{ duration:'0:35' },
+        body:'早上称了一下 52.4，比昨天轻了一点。昨晚睡得不太好，大概六个半钟头吧。',
         tags:[
-          {emoji:'🩸', label:'经期开始'},
-          {emoji:'😖', label:'轻微不适'},
+          { label:'体重 52.4 kg', cat:'weight' },
+          { label:'睡眠偏少 · 约 6.5 小时', cat:'sleep' },
+        ],
+        tagLayout:'rows',
+      },
+      {
+        kind:'wellness', id:'t-517', time:'08:00',
+        cardLabel:'体重 · 睡眠分析',
+        cardLabelKind:'ai',
+        overview:'体重略降、睡眠偏少，经前均属正常波动。',
+        panels:[
+          {
+            id:'weight', type:'weight', icon:'⚖️', title:'体重变化',
+            weightDelta:'↓ 0.1 kg',
+            weightTrend:[
+              {d:'一', v:52.9},{d:'二', v:52.8},{d:'三', v:52.7},
+              {d:'四', v:52.6},{d:'五', v:52.5},{d:'六', v:52.4},
+            ],
+            summary:'较昨日略降 0.1kg，处于经前正常波动范围。',
+          },
+          {
+            id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
+            sleepTrend:[
+              {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
+              {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.5},
+            ],
+            summary:'昨晚约 6.5 小时，较前几日偏短。',
+          },
         ],
       },
     ],
   },
   {
-    type:'day', id:'d-5-18', date:'5/18', weekday:'周日',
-    phaseTag:'经期第2天', phaseKind:'period',
-    entries:[
+    type:'day', id:'d-5-18', date:'5/18', weekday:'周日', isToday:true,
+    phaseTag:'经期第 1 天', phaseKind:'period', cycleDay:1, periodLen:5,
+    items:[
       {
-        id:'e-518-2', time:'08:12',
-        voice:{ duration:'0:18' },
-        body:'昨晚又没睡好，半夜醒了两次，心里有点烦，翻来覆去的。',
+        kind:'voice-card', id:'e-518-1a', time:'16:00',
+        voice:{ duration:'12"' },
+        voiceText:'今天月经来了，量不算多，肚子有点闷闷的胀，腰也有点酸，心情还行就是有点懒得动。',
         tags:[
-          {emoji:'😴', label:'睡眠差'},
-          {emoji:'💭', label:'心事', content:true},
+          { label:'月经来了', cat:'period' },
+          { label:'经量 偏少', cat:'flow' },
+          { label:'腹胀', cat:'symptom' },
+          { label:'腰酸', cat:'symptom' },
+          { label:'心情 平静', cat:'mood' },
         ],
       },
       {
-        id:'e-518-1', time:'21:30',
-        body:'下午开会的时候肚子突然很疼，吃了颗布洛芬才扛过去。量还挺多的，换了三次 😩',
-        tags:[
-          {emoji:'🌿', label:'身体', content:true},
-          {emoji:'😖', label:'痛经·重度'},
-          {emoji:'💊', label:'布洛芬'},
-          {emoji:'🩸', label:'经量多'},
-          {emoji:'⏰', label:'午后发作', ai:true},
-        ],
-        aiNote:{
-          tone:'yellow', icon:'⚠️',
-          text:'上个周期全程没有服药，这次第 2 天就需要止痛，痛经有加重趋势。已连续 2 个周期第 2 天最痛。',
-        },
+        kind:'sister-card', id:'e-518-1b', time:'16:00', railDot:'ai',
       },
       {
-        id:'e-518-3', time:'22:40',
-        body:'不知道为什么今天特别容易多想，躺在床上一直在想工作上的事，有点烦。',
-        tags:[
-          {emoji:'💭', label:'心事', content:true},
-          {emoji:'💛', label:'情绪', content:true},
-        ],
+        kind:'guide', id:'g-518-post', time:'16:05',
+        hiddenUntilSisterDone:true,
+        tone:'soft',
+        text:'经期刚开始，肚子和腰有点不舒服很正常。今晚想怎么照顾自己？',
+        chips:['热敷一下','早点休息','还行，不用特别做什么'],
       },
     ],
-  },
-  {
-    type:'day', id:'d-5-19', date:'5/19', weekday:'周一', isToday:true,
-    phaseTag:'经期第3天', phaseKind:'period',
-    entries:[],
   },
 ];
 
