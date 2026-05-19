@@ -124,6 +124,13 @@
   z-index:1;
 }
 .tl-rail-node.is-feed-last{padding-bottom:4px}
+.tl-rail-node.is-guide{
+  padding-top:16px;
+  align-items:flex-start;
+}
+.tl-rail-node.is-guide .tl-rail-marker{
+  padding-top:6px;
+}
 .tl-rail-marker{
   width:14px;
   flex-shrink:0;
@@ -601,7 +608,18 @@
   background:var(--my-bg);color:var(--my-text-secondary);
 }
 
-/* ============ 今日引导（浅提示 + 按钮） ============ */
+/* ============ 时间轴内联引导 ============ */
+.tl-rail-guide{
+  padding:0 0 4px;
+}
+.tl-rail-guide-text{
+  margin:0;
+  font-size:13px;
+  line-height:1.55;
+  color:var(--my-text-tertiary);
+}
+
+/* ============ 今日引导（旧卡片，保留兼容） ============ */
 .tl-guide-card{
   margin-bottom:0;
   padding:14px 16px 16px;

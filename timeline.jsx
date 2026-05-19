@@ -65,7 +65,7 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
+function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
   const items = (day.items || day.entries || []).filter(it=>{
     if(!it.hiddenUntilSisterDone) return true;
     return sisterCycleDone;
@@ -83,7 +83,6 @@ function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycle
           isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
           phaseKind={day.phaseKind}
           isFeedLast={it.id === lastItemId}
-          onGuideChip={onGuideChip}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
         />
@@ -107,7 +106,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone);
 
   return (
@@ -119,7 +118,6 @@ function TimelineStream({blocks, endRef, onGuideChip, sisterPlayAnimation, siste
               <TimelineDateSection
                 key={block.id}
                 day={block}
-                onGuideChip={onGuideChip}
                 sisterPlayAnimation={sisterPlayAnimation}
                 sisterCycleDone={sisterCycleDone}
                 onSisterCycleComplete={onSisterCycleComplete}

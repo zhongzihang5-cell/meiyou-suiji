@@ -53,7 +53,7 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
                 '--delay': (0.02 + i * 0.045)+'s',
                 '--close-delay': ((items.length - 1 - i) * 0.028)+'s',
               }}
-              onClick={()=>{ onPick(item); onToggle(false); }}
+              onClick={()=> onPick(item)}
               aria-label={item.label}
             >
               <span className="dock-fan-node-ico dock-fan-node-ico--stack">
@@ -97,7 +97,7 @@ function DockPublisher({
       setQuickOpen(true);
       return;
     }
-    if(!quickOpen) return;
+    if(!quickOpen || quickClosing) return;
     setQuickClosing(true);
     setTimeout(()=>{
       setQuickOpen(false);

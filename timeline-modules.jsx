@@ -29,12 +29,12 @@ function CycleDayHeader({day}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
         <span className={'tl-rail-dot'+dotCls}/>
       </div>
@@ -87,18 +87,10 @@ function ModulePlaceholder({mod, cycleDay}){
   );
 }
 
-function TodayGuideCard({item, onChip, isNew}){
-  const soft = item.tone === 'soft';
+function TodayGuideCard({item, isNew}){
   return (
-    <div className={'tl-guide-card'+(soft?' is-soft':'')+(isNew?' fade-in':'')}>
-      <p className="tl-guide-text">{item.text}</p>
-      {item.chips && item.chips.length > 0 && (
-        <div className="tl-guide-chips">
-          {item.chips.map((c,i)=>(
-            <button key={i} className="tl-guide-chip" onClick={()=>onChip?.(c)}>{c}</button>
-          ))}
-        </div>
-      )}
+    <div className={'tl-rail-guide'+(isNew?' fade-in':'')}>
+      <p className="tl-rail-guide-text">{item.text}</p>
     </div>
   );
 }
@@ -332,24 +324,27 @@ function getNodeCaption(item){
 
 function TimelineItemWrap({item, children}){
   const cap = getNodeCaption(item);
+  const showCaption = item.kind !== 'guide';
   return (
     <div className="tl-node-stack">
-      <TlNodeCaption
-        time={item.time}
-        label={cap?.label}
-        labelKind={cap?.kind}
-      />
+      {showCaption && (
+        <TlNodeCaption
+          time={item.time}
+          label={cap?.label}
+          labelKind={cap?.kind}
+        />
+      )}
       {children}
     </div>
   );
 }
 
-function TimelineItem({item, isNew, onGuideChip, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
   const cycleDay = item.cycleDay;
 
   let body = null;
   if(item.kind === 'guide'){
-    body = <TodayGuideCard item={item} onChip={onGuideChip} isNew={isNew}/>;
+    body = <TodayGuideCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card'){
@@ -378,6 +373,7 @@ function TimelineItem({item, isNew, onGuideChip, phaseKind, isFeedLast, sisterPl
       phaseKind={phaseKind}
       railDot={item.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
       isFeedLast={isFeedLast}
+      nodeKind={item.kind}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>

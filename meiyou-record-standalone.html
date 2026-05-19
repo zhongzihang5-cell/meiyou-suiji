@@ -1366,6 +1366,13 @@ html,body{
   z-index:1;
 }
 .tl-rail-node.is-feed-last{padding-bottom:4px}
+.tl-rail-node.is-guide{
+  padding-top:16px;
+  align-items:flex-start;
+}
+.tl-rail-node.is-guide .tl-rail-marker{
+  padding-top:6px;
+}
 .tl-rail-marker{
   width:14px;
   flex-shrink:0;
@@ -1843,7 +1850,19 @@ html,body{
   background:var(--my-bg);color:var(--my-text-secondary);
 }
 
-/* ============ 今日引导（浅提示 + 按钮） ============ */
+/* ============ 时间轴内联引导 ============ */
+.tl-rail-guide{
+  margin-top:16px;
+  padding:0 0 4px;
+}
+.tl-rail-guide-text{
+  margin:0;
+  font-size:13px;
+  line-height:1.55;
+  color:var(--my-text-tertiary);
+}
+
+/* ============ 今日引导（旧卡片，保留兼容） ============ */
 .tl-guide-card{
   margin-bottom:0;
   padding:14px 16px 16px;
@@ -3286,11 +3305,9 @@ const TIMELINE_BLOCKS = [
         kind:'sister-card', id:'e-518-1b', time:'16:00', railDot:'ai',
       },
       {
-        kind:'guide', id:'g-518-post', time:'16:05',
+        kind:'guide', id:'g-518-post',
         hiddenUntilSisterDone:true,
-        tone:'soft',
-        text:'经期刚开始，肚子和腰有点不舒服很正常。今晚想怎么照顾自己？',
-        chips:['热敷一下','早点休息','还行，不用特别做什么'],
+        text:'经期刚开始，肚子和腰有点不舒服很正常。今晚有什么想记下来的吗？',
       },
     ],
   },
@@ -4458,12 +4475,12 @@ function CycleDayHeader({day}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
         <span className={'tl-rail-dot'+dotCls}/>
       </div>
@@ -4516,18 +4533,10 @@ function ModulePlaceholder({mod, cycleDay}){
   );
 }
 
-function TodayGuideCard({item, onChip, isNew}){
-  const soft = item.tone === 'soft';
+function TodayGuideCard({item, isNew}){
   return (
-    <div className={'tl-guide-card'+(soft?' is-soft':'')+(isNew?' fade-in':'')}>
-      <p className="tl-guide-text">{item.text}</p>
-      {item.chips && item.chips.length > 0 && (
-        <div className="tl-guide-chips">
-          {item.chips.map((c,i)=>(
-            <button key={i} className="tl-guide-chip" onClick={()=>onChip?.(c)}>{c}</button>
-          ))}
-        </div>
-      )}
+    <div className={'tl-rail-guide'+(isNew?' fade-in':'')}>
+      <p className="tl-rail-guide-text">{item.text}</p>
     </div>
   );
 }
@@ -4761,24 +4770,27 @@ function getNodeCaption(item){
 
 function TimelineItemWrap({item, children}){
   const cap = getNodeCaption(item);
+  const showCaption = item.kind !== 'guide';
   return (
     <div className="tl-node-stack">
-      <TlNodeCaption
-        time={item.time}
-        label={cap?.label}
-        labelKind={cap?.kind}
-      />
+      {showCaption && (
+        <TlNodeCaption
+          time={item.time}
+          label={cap?.label}
+          labelKind={cap?.kind}
+        />
+      )}
       {children}
     </div>
   );
 }
 
-function TimelineItem({item, isNew, onGuideChip, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
   const cycleDay = item.cycleDay;
 
   let body = null;
   if(item.kind === 'guide'){
-    body = <TodayGuideCard item={item} onChip={onGuideChip} isNew={isNew}/>;
+    body = <TodayGuideCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card'){
@@ -4807,6 +4819,7 @@ function TimelineItem({item, isNew, onGuideChip, phaseKind, isFeedLast, sisterPl
       phaseKind={phaseKind}
       railDot={item.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
       isFeedLast={isFeedLast}
+      nodeKind={item.kind}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
@@ -4889,7 +4902,7 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
+function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
   const items = (day.items || day.entries || []).filter(it=>{
     if(!it.hiddenUntilSisterDone) return true;
     return sisterCycleDone;
@@ -4907,7 +4920,6 @@ function TimelineDateSection({day, onGuideChip, sisterPlayAnimation, sisterCycle
           isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
           phaseKind={day.phaseKind}
           isFeedLast={it.id === lastItemId}
-          onGuideChip={onGuideChip}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
         />
@@ -4931,7 +4943,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, onGuideChip, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone);
 
   return (
@@ -4943,7 +4955,6 @@ function TimelineStream({blocks, endRef, onGuideChip, sisterPlayAnimation, siste
               <TimelineDateSection
                 key={block.id}
                 day={block}
-                onGuideChip={onGuideChip}
                 sisterPlayAnimation={sisterPlayAnimation}
                 sisterCycleDone={sisterCycleDone}
                 onSisterCycleComplete={onSisterCycleComplete}
@@ -5097,7 +5108,7 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
                 '--delay': (0.02 + i * 0.045)+'s',
                 '--close-delay': ((items.length - 1 - i) * 0.028)+'s',
               }}
-              onClick={()=>{ onPick(item); onToggle(false); }}
+              onClick={()=> onPick(item)}
               aria-label={item.label}
             >
               <span className="dock-fan-node-ico dock-fan-node-ico--stack">
@@ -5141,7 +5152,7 @@ function DockPublisher({
       setQuickOpen(true);
       return;
     }
-    if(!quickOpen) return;
+    if(!quickOpen || quickClosing) return;
     setQuickClosing(true);
     setTimeout(()=>{
       setQuickOpen(false);
@@ -6181,7 +6192,6 @@ function App(){
           <TimelineStream
             blocks={timeline}
             endRef={timelineEndRef}
-            onGuideChip={(c)=>submitText(c)}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
             onSisterCycleComplete={handleSisterCycleComplete}

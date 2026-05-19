@@ -305,11 +305,9 @@ const TIMELINE_BLOCKS = [
         kind:'sister-card', id:'e-518-1b', time:'16:00', railDot:'ai',
       },
       {
-        kind:'guide', id:'g-518-post', time:'16:05',
+        kind:'guide', id:'g-518-post',
         hiddenUntilSisterDone:true,
-        tone:'soft',
-        text:'经期刚开始，肚子和腰有点不舒服很正常。今晚想怎么照顾自己？',
-        chips:['热敷一下','早点休息','还行，不用特别做什么'],
+        text:'经期刚开始，肚子和腰有点不舒服很正常。今晚有什么想记下来的吗？',
       },
     ],
   },

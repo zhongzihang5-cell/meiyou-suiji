@@ -297,7 +297,6 @@ function App(){
           <TimelineStream
             blocks={timeline}
             endRef={timelineEndRef}
-            onGuideChip={(c)=>submitText(c)}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
             onSisterCycleComplete={handleSisterCycleComplete}
