@@ -1915,29 +1915,33 @@ html,body{
 .tl-weekly-bubble.is-wellness .tl-weekly-overview{
   color:var(--my-text-primary);
 }
-.tl-weekly-preview{
+.tl-weekly-stack-inline{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
   margin-top:10px;
 }
-.tl-weekly-preview .tl-weekly-panel{
-  margin-bottom:0;
-}
-.tl-weekly-panel.is-preview{
+.tl-weekly-panel.is-stat-only{
   padding:10px 11px 8px;
   background:rgba(0,0,0,0.02);
+  border-radius:10px;
 }
-.tl-weekly-panel-head.is-compact{
-  margin-bottom:6px;
-}
-.tl-weekly-panel-head.is-compact .tl-weekly-panel-icon{
-  width:22px;
-  height:22px;
-  font-size:13px;
-}
-.tl-weekly-panel-delta.inline{
-  margin-left:auto;
-  font-size:11px;
+.tl-weekly-panel-stat{
+  margin:2px 0 6px;
+  font-size:20px;
   font-weight:500;
+  line-height:1.2;
+  font-variant-numeric:tabular-nums;
+  color:var(--my-text-primary);
+}
+.tl-weekly-panel.tone-weight .tl-weekly-panel-stat{
   color:var(--my-brand-red);
+}
+.tl-weekly-panel.tone-sleep .tl-weekly-panel-stat{
+  color:#4f7cae;
+}
+.tl-weekly-panel.is-stat-only .tl-weekly-panel-summary{
+  margin-top:0;
 }
 .tl-weekly-toggle{
   width:100%;
@@ -3187,7 +3191,7 @@ const TIMELINE_BLOCKS = [
       {
         kind:'weekly', id:'w-515', time:'18:00',
         range:'5/9 – 5/15',
-        overview:'本周心情整体平稳，经前一日略有低落。',
+        overview:'本周整体平稳，体重缓降，睡眠经前略有减少。',
         panels:[
           {
             id:'mood', type:'mood', icon:'💜', title:'心情趋势',
@@ -3208,6 +3212,7 @@ const TIMELINE_BLOCKS = [
           },
           {
             id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
+            sleepDelta:'↓ 0.5 h',
             sleepTrend:[
               {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
               {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.8},{d:'日', v:6.5},
@@ -3248,6 +3253,7 @@ const TIMELINE_BLOCKS = [
           },
           {
             id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
+            sleepDelta:'↓ 1.0 h',
             sleepTrend:[
               {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
               {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.5},
@@ -4617,27 +4623,41 @@ function WeeklySleepChart({data}){
   );
 }
 
-function WeeklyPanel({panel, preview}){
+function panelStat(panel){
+  if(panel.type === 'weight') return panel.weightDelta || null;
+  if(panel.type === 'sleep') return panel.sleepDelta || null;
+  return null;
+}
+
+function WeeklyPanel({panel, variant}){
+  const statOnly = variant === 'wellness-stat';
+  const showChart = variant === 'weekly-mood' || variant === 'weekly-trend';
+  const stat = panelStat(panel);
   let chart = null;
-  if(panel.type === 'mood'){
-    chart = <WeeklyMoodChart data={panel.moodTrend || []}/>;
-  } else if(panel.type === 'weight'){
-    chart = <WeeklyWeightChart data={panel.weightTrend || []} delta={preview ? null : panel.weightDelta}/>;
-  } else if(panel.type === 'sleep'){
-    chart = <WeeklySleepChart data={panel.sleepTrend || []}/>;
+
+  if(showChart){
+    if(panel.type === 'mood'){
+      chart = <WeeklyMoodChart data={panel.moodTrend || []}/>;
+    } else if(panel.type === 'weight'){
+      chart = <WeeklyWeightChart data={panel.weightTrend || []} delta={panel.weightDelta}/>;
+    } else if(panel.type === 'sleep'){
+      chart = <WeeklySleepChart data={panel.sleepTrend || []}/>;
+    }
   }
 
   return (
-    <article className={'tl-weekly-panel tone-'+panel.type+(preview?' is-preview':'')}>
-      <div className={'tl-weekly-panel-head'+(preview?' is-compact':'')}>
+    <article className={'tl-weekly-panel tone-'+panel.type+(showChart ? ' has-chart' : ' is-stat-only')}>
+      <div className="tl-weekly-panel-head">
         <span className="tl-weekly-panel-icon">{panel.icon || '📊'}</span>
         <span className="tl-weekly-panel-title">{panel.title}</span>
-        {preview && panel.weightDelta && (
-          <span className="tl-weekly-panel-delta inline">{panel.weightDelta}</span>
-        )}
       </div>
-      <div className="tl-weekly-panel-chart">{chart}</div>
-      {!preview && panel.summary && (
+      {statOnly && stat && (
+        <div className="tl-weekly-panel-stat">{stat}</div>
+      )}
+      {showChart && chart && (
+        <div className="tl-weekly-panel-chart">{chart}</div>
+      )}
+      {panel.summary && (
         <p className="tl-weekly-panel-summary">{panel.summary}</p>
       )}
     </article>
@@ -4646,22 +4666,42 @@ function WeeklyPanel({panel, preview}){
 
 function WeeklyTrendCard({item}){
   const panels = item.panels?.length ? item.panels : buildWeeklyPanels(item);
+  const overview = item.overview || item.analysis || '';
+  const isWellness = item.kind === 'wellness';
   const [open, setOpen] = React.useState(false);
-  const [preview, ...rest] = panels;
-  const overview = item.overview || item.analysis || preview?.summary || '';
-  const canExpand = rest.length > 0;
+
+  if(isWellness){
+    return (
+      <div className="tl-weekly-bubble is-wellness">
+        <div className="tl-weekly-surface">
+          {overview && <p className="tl-weekly-overview">{overview}</p>}
+          {panels.length > 0 && (
+            <div className="tl-weekly-stack-inline">
+              {panels.map(p=>(
+                <WeeklyPanel key={p.id || p.type} panel={p} variant="wellness-stat"/>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const moodPanel = panels.find(p => p.type === 'mood');
+  const trendPanels = panels.filter(p => p.type !== 'mood');
+  const hasExpand = trendPanels.length > 0;
 
   return (
-    <div className={'tl-weekly-bubble'+(open ? ' is-open' : '')+(item.kind === 'wellness' ? ' is-wellness' : '')}>
+    <div className={'tl-weekly-bubble'+(open ? ' is-open' : '')}>
       <div className="tl-weekly-surface">
-        <p className="tl-weekly-overview">{overview}</p>
-        {preview && (
-          <div className="tl-weekly-preview">
-            <WeeklyPanel panel={preview} preview/>
+        {overview && <p className="tl-weekly-overview">{overview}</p>}
+        {moodPanel && (
+          <div className="tl-weekly-stack-inline">
+            <WeeklyPanel panel={moodPanel} variant="weekly-mood"/>
           </div>
         )}
       </div>
-      {canExpand && (
+      {hasExpand && (
         <>
           <button
             type="button"
@@ -4677,8 +4717,8 @@ function WeeklyTrendCard({item}){
             </span>
           </button>
           <div className="tl-weekly-detail">
-            {rest.map(p=>(
-              <WeeklyPanel key={p.id || p.type} panel={p}/>
+            {trendPanels.map(p=>(
+              <WeeklyPanel key={p.id || p.type} panel={p} variant="weekly-trend"/>
             ))}
           </div>
         </>

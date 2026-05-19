@@ -212,7 +212,7 @@ const TIMELINE_BLOCKS = [
       {
         kind:'weekly', id:'w-515', time:'18:00',
         range:'5/9 – 5/15',
-        overview:'本周心情整体平稳，经前一日略有低落。',
+        overview:'本周整体平稳，体重缓降，睡眠经前略有减少。',
         panels:[
           {
             id:'mood', type:'mood', icon:'💜', title:'心情趋势',
@@ -233,6 +233,7 @@ const TIMELINE_BLOCKS = [
           },
           {
             id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
+            sleepDelta:'↓ 0.5 h',
             sleepTrend:[
               {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
               {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.8},{d:'日', v:6.5},
@@ -273,6 +274,7 @@ const TIMELINE_BLOCKS = [
           },
           {
             id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
+            sleepDelta:'↓ 1.0 h',
             sleepTrend:[
               {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
               {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.5},

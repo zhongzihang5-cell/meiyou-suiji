@@ -196,27 +196,41 @@ function WeeklySleepChart({data}){
   );
 }
 
-function WeeklyPanel({panel, preview}){
+function panelStat(panel){
+  if(panel.type === 'weight') return panel.weightDelta || null;
+  if(panel.type === 'sleep') return panel.sleepDelta || null;
+  return null;
+}
+
+function WeeklyPanel({panel, variant}){
+  const statOnly = variant === 'wellness-stat';
+  const showChart = variant === 'weekly-mood' || variant === 'weekly-trend';
+  const stat = panelStat(panel);
   let chart = null;
-  if(panel.type === 'mood'){
-    chart = <WeeklyMoodChart data={panel.moodTrend || []}/>;
-  } else if(panel.type === 'weight'){
-    chart = <WeeklyWeightChart data={panel.weightTrend || []} delta={preview ? null : panel.weightDelta}/>;
-  } else if(panel.type === 'sleep'){
-    chart = <WeeklySleepChart data={panel.sleepTrend || []}/>;
+
+  if(showChart){
+    if(panel.type === 'mood'){
+      chart = <WeeklyMoodChart data={panel.moodTrend || []}/>;
+    } else if(panel.type === 'weight'){
+      chart = <WeeklyWeightChart data={panel.weightTrend || []} delta={panel.weightDelta}/>;
+    } else if(panel.type === 'sleep'){
+      chart = <WeeklySleepChart data={panel.sleepTrend || []}/>;
+    }
   }
 
   return (
-    <article className={'tl-weekly-panel tone-'+panel.type+(preview?' is-preview':'')}>
-      <div className={'tl-weekly-panel-head'+(preview?' is-compact':'')}>
+    <article className={'tl-weekly-panel tone-'+panel.type+(showChart ? ' has-chart' : ' is-stat-only')}>
+      <div className="tl-weekly-panel-head">
         <span className="tl-weekly-panel-icon">{panel.icon || '📊'}</span>
         <span className="tl-weekly-panel-title">{panel.title}</span>
-        {preview && panel.weightDelta && (
-          <span className="tl-weekly-panel-delta inline">{panel.weightDelta}</span>
-        )}
       </div>
-      <div className="tl-weekly-panel-chart">{chart}</div>
-      {!preview && panel.summary && (
+      {statOnly && stat && (
+        <div className="tl-weekly-panel-stat">{stat}</div>
+      )}
+      {showChart && chart && (
+        <div className="tl-weekly-panel-chart">{chart}</div>
+      )}
+      {panel.summary && (
         <p className="tl-weekly-panel-summary">{panel.summary}</p>
       )}
     </article>
@@ -225,22 +239,42 @@ function WeeklyPanel({panel, preview}){
 
 function WeeklyTrendCard({item}){
   const panels = item.panels?.length ? item.panels : buildWeeklyPanels(item);
+  const overview = item.overview || item.analysis || '';
+  const isWellness = item.kind === 'wellness';
   const [open, setOpen] = React.useState(false);
-  const [preview, ...rest] = panels;
-  const overview = item.overview || item.analysis || preview?.summary || '';
-  const canExpand = rest.length > 0;
+
+  if(isWellness){
+    return (
+      <div className="tl-weekly-bubble is-wellness">
+        <div className="tl-weekly-surface">
+          {overview && <p className="tl-weekly-overview">{overview}</p>}
+          {panels.length > 0 && (
+            <div className="tl-weekly-stack-inline">
+              {panels.map(p=>(
+                <WeeklyPanel key={p.id || p.type} panel={p} variant="wellness-stat"/>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const moodPanel = panels.find(p => p.type === 'mood');
+  const trendPanels = panels.filter(p => p.type !== 'mood');
+  const hasExpand = trendPanels.length > 0;
 
   return (
-    <div className={'tl-weekly-bubble'+(open ? ' is-open' : '')+(item.kind === 'wellness' ? ' is-wellness' : '')}>
+    <div className={'tl-weekly-bubble'+(open ? ' is-open' : '')}>
       <div className="tl-weekly-surface">
-        <p className="tl-weekly-overview">{overview}</p>
-        {preview && (
-          <div className="tl-weekly-preview">
-            <WeeklyPanel panel={preview} preview/>
+        {overview && <p className="tl-weekly-overview">{overview}</p>}
+        {moodPanel && (
+          <div className="tl-weekly-stack-inline">
+            <WeeklyPanel panel={moodPanel} variant="weekly-mood"/>
           </div>
         )}
       </div>
-      {canExpand && (
+      {hasExpand && (
         <>
           <button
             type="button"
@@ -256,8 +290,8 @@ function WeeklyTrendCard({item}){
             </span>
           </button>
           <div className="tl-weekly-detail">
-            {rest.map(p=>(
-              <WeeklyPanel key={p.id || p.type} panel={p}/>
+            {trendPanels.map(p=>(
+              <WeeklyPanel key={p.id || p.type} panel={p} variant="weekly-trend"/>
             ))}
           </div>
         </>

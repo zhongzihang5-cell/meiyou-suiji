@@ -673,29 +673,33 @@
 .tl-weekly-bubble.is-wellness .tl-weekly-overview{
   color:var(--my-text-primary);
 }
-.tl-weekly-preview{
+.tl-weekly-stack-inline{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
   margin-top:10px;
 }
-.tl-weekly-preview .tl-weekly-panel{
-  margin-bottom:0;
-}
-.tl-weekly-panel.is-preview{
+.tl-weekly-panel.is-stat-only{
   padding:10px 11px 8px;
   background:rgba(0,0,0,0.02);
+  border-radius:10px;
 }
-.tl-weekly-panel-head.is-compact{
-  margin-bottom:6px;
-}
-.tl-weekly-panel-head.is-compact .tl-weekly-panel-icon{
-  width:22px;
-  height:22px;
-  font-size:13px;
-}
-.tl-weekly-panel-delta.inline{
-  margin-left:auto;
-  font-size:11px;
+.tl-weekly-panel-stat{
+  margin:2px 0 6px;
+  font-size:20px;
   font-weight:500;
+  line-height:1.2;
+  font-variant-numeric:tabular-nums;
+  color:var(--my-text-primary);
+}
+.tl-weekly-panel.tone-weight .tl-weekly-panel-stat{
   color:var(--my-brand-red);
+}
+.tl-weekly-panel.tone-sleep .tl-weekly-panel-stat{
+  color:#4f7cae;
+}
+.tl-weekly-panel.is-stat-only .tl-weekly-panel-summary{
+  margin-top:0;
 }
 .tl-weekly-toggle{
   width:100%;
