@@ -15,7 +15,7 @@ function StatusBar(){
   );
 }
 
-function TopNav({title='随记'}){
+function TopNav({title='点滴'}){
   return (
     <div className="nav">
       <div className="nav-title">{title}</div>
@@ -216,7 +216,7 @@ function TabBar({active='note'}){
       </svg>
     )},
     {id:'rec', label:'记录', custom:<span className="tile">19</span>},
-    {id:'note', label:'随记', custom:(
+    {id:'note', label:'点滴', custom:(
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path d="M14 4l5 5-9 9H5v-5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
         <path d="M13 5l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
@@ -326,8 +326,84 @@ function PhotoSheet({onCancel, onPick}){
   );
 }
 
+// ComposeScreen & ImmersiveVoice → compose-portal.jsx
+
 Object.assign(window, {
   StatusBar, TopNav, Mascot, HealthCard, GuideCard,
   AIInsight, Entry, DaySection, PhaseMarker, GapMarker, CycleReport,
-  TabBar, Toast, VoiceSheet, PhotoSheet
+  TabBar, Toast, VoiceSheet, PhotoSheet,
+  DailyCard, TimelineFeed,
+});
+function DailyCard({card}){
+  const phaseCls = card.phaseKind || 'period';
+  const accentColors = {
+    period:'var(--my-brand-red)', foll:'var(--phase-foll)',
+    lut:'var(--phase-lut)', preg:'var(--my-purple)', baby:'var(--my-success)',
+  };
+  return (
+    <div className={'day-card'+(card.isToday?' today':'')}>
+      <div className="day-card-accent" style={{background:accentColors[phaseCls]||accentColors.period}}/>
+      <div className="day-card-head">
+        <div>
+          <div className="dc-date">
+            <span className="dc-day">{card.date}</span>
+            <span className="dc-month">{card.month}</span>
+          </div>
+          <div className="dc-weekday">{card.weekday}{card.isToday?' · 今天':''}</div>
+        </div>
+        <div className="dc-meta">
+          <span className="dc-weather">{card.weather}</span>
+          <span className={'dc-phase '+phaseCls}>{card.phase}</span>
+        </div>
+      </div>
+      <div className="day-card-body">
+        <div className="dc-summary">{card.summary}</div>
+        {card.tags && card.tags.length > 0 && (
+          <div className="dc-tags">
+            {card.tags.map((t,i)=>(
+              <span key={i} className="dc-tag auto">{t}</span>
+            ))}
+          </div>
+        )}
+      </div>
+      {(card.insight || card.entryCount) && (
+        <div className="dc-foot">
+          {card.insight ? (
+            <span className="dc-insight">
+              {card.hasPhoto && <span className="dc-photo-dot"/>}
+              {card.insight}
+            </span>
+          ) : <span/>}
+          <span className="dc-count">{card.entryCount} 条记录</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TimelineFeed({cards, onCompose}){
+  const I = window.Icon;
+  return (
+    <div className="feed">
+      <div className="feed-header">
+        <div>
+          <div className="feed-title">点滴</div>
+          <div className="feed-sub">我和我身体的空间</div>
+        </div>
+        <button className="feed-compose-btn" onClick={onCompose} aria-label="写点滴">
+          <I name="pen" size={18} stroke={1.8}/>
+        </button>
+      </div>
+      <div className="day-cards">
+        {cards.map(c=><DailyCard key={c.id} card={c}/>)}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  StatusBar, TopNav, Mascot, HealthCard, GuideCard,
+  AIInsight, Entry, DaySection, PhaseMarker, GapMarker, CycleReport,
+  TabBar, Toast, VoiceSheet, PhotoSheet,
+  DailyCard, TimelineFeed,
 });
