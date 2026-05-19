@@ -732,11 +732,13 @@
   overflow:hidden;
   transition:max-height .38s ease, opacity .28s ease, padding .28s ease;
   padding:0 15px;
+  border-top:0.5px solid transparent;
 }
 .tl-weekly-bubble.is-open .tl-weekly-detail{
   max-height:1200px;
   opacity:1;
-  padding:0 15px 14px;
+  padding:12px 15px 0;
+  border-top-color:rgba(0,0,0,0.05);
 }
 .tl-weekly-detail .tl-weekly-panel{
   width:100%;

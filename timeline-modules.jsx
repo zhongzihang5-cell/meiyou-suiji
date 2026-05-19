@@ -276,6 +276,11 @@ function WeeklyTrendCard({item}){
       </div>
       {hasExpand && (
         <>
+          <div className="tl-weekly-detail">
+            {trendPanels.map(p=>(
+              <WeeklyPanel key={p.id || p.type} panel={p} variant="weekly-trend"/>
+            ))}
+          </div>
           <button
             type="button"
             className="tl-weekly-toggle"
@@ -289,11 +294,6 @@ function WeeklyTrendCard({item}){
               </svg>
             </span>
           </button>
-          <div className="tl-weekly-detail">
-            {trendPanels.map(p=>(
-              <WeeklyPanel key={p.id || p.type} panel={p} variant="weekly-trend"/>
-            ))}
-          </div>
         </>
       )}
     </div>

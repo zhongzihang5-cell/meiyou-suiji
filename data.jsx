@@ -165,7 +165,7 @@ const SCENE_CONTEXT = {
 const TIMELINE_BLOCKS = [
   { type:'gap', id:'gap-top', label:'上个周期 · 4/22 – 5/13' },
   {
-    type:'day', id:'d-5-14', date:'5/14', weekday:'周三',
+    type:'day', id:'d-5-14', date:'5/14', weekday:'周四',
     phaseTag:'卵泡期第 8 天', phaseKind:'foll', cycleDay:22, cycleLen:28,
     items:[
       {
@@ -191,7 +191,7 @@ const TIMELINE_BLOCKS = [
     ],
   },
   {
-    type:'day', id:'d-5-15', date:'5/15', weekday:'周四',
+    type:'day', id:'d-5-15', date:'5/15', weekday:'周五',
     phaseTag:'黄体期第 8 天', phaseKind:'lut', cycleDay:27, cycleLen:28,
     items:[
       {
@@ -209,43 +209,10 @@ const TIMELINE_BLOCKS = [
           total:'总卡路里 766 kcal',
         },
       },
-      {
-        kind:'weekly', id:'w-515', time:'18:00',
-        range:'5/9 – 5/15',
-        overview:'本周整体平稳，体重缓降，睡眠经前略有减少。',
-        panels:[
-          {
-            id:'mood', type:'mood', icon:'💜', title:'心情趋势',
-            moodTrend:[
-              {d:'一', v:3},{d:'二', v:4},{d:'三', v:3},
-              {d:'四', v:2},{d:'五', v:3},{d:'六', v:3},{d:'日', v:3},
-            ],
-            summary:'本周心情整体平稳，经前一日（周四）略有低落，与经前激素变化一致。',
-          },
-          {
-            id:'weight', type:'weight', icon:'⚖️', title:'体重变化',
-            weightDelta:'↓ 0.4 kg',
-            weightTrend:[
-              {d:'一', v:52.9},{d:'二', v:52.8},{d:'三', v:52.7},
-              {d:'四', v:52.6},{d:'五', v:52.5},{d:'六', v:52.4},{d:'日', v:52.4},
-            ],
-            summary:'体重较上周缓降 0.4kg，处于经前正常波动范围，无需过度关注。',
-          },
-          {
-            id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
-            sleepDelta:'↓ 0.5 h',
-            sleepTrend:[
-              {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
-              {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.8},{d:'日', v:6.5},
-            ],
-            summary:'本周平均睡眠约 6.7 小时，经前一晚偏短，建议睡前减少屏幕时间。',
-          },
-        ],
-      },
     ],
   },
   {
-    type:'day', id:'d-5-17', date:'5/17', weekday:'周六',
+    type:'day', id:'d-5-17', date:'5/17', weekday:'周日',
     phaseTag:'黄体期第 9 天', phaseKind:'lut', cycleDay:28, cycleLen:28,
     items:[
       {
@@ -283,10 +250,43 @@ const TIMELINE_BLOCKS = [
           },
         ],
       },
+      {
+        kind:'weekly', id:'w-517', time:'18:00',
+        range:'5/11 – 5/17',
+        overview:'本周整体平稳，体重缓降，睡眠经前略有减少。',
+        panels:[
+          {
+            id:'mood', type:'mood', icon:'💜', title:'心情趋势',
+            moodTrend:[
+              {d:'一', v:3},{d:'二', v:4},{d:'三', v:3},
+              {d:'四', v:2},{d:'五', v:3},{d:'六', v:3},{d:'日', v:3},
+            ],
+            summary:'本周心情整体平稳，经前一日（周六）略有低落，与经前激素变化一致。',
+          },
+          {
+            id:'weight', type:'weight', icon:'⚖️', title:'体重变化',
+            weightDelta:'↓ 0.4 kg',
+            weightTrend:[
+              {d:'一', v:52.9},{d:'二', v:52.8},{d:'三', v:52.7},
+              {d:'四', v:52.6},{d:'五', v:52.5},{d:'六', v:52.4},{d:'日', v:52.4},
+            ],
+            summary:'体重较上周缓降 0.4kg，处于经前正常波动范围，无需过度关注。',
+          },
+          {
+            id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
+            sleepDelta:'↓ 0.5 h',
+            sleepTrend:[
+              {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
+              {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.8},{d:'日', v:6.5},
+            ],
+            summary:'本周平均睡眠约 6.7 小时，经前一晚偏短，建议睡前减少屏幕时间。',
+          },
+        ],
+      },
     ],
   },
   {
-    type:'day', id:'d-5-18', date:'5/18', weekday:'周日', isToday:true,
+    type:'day', id:'d-5-18', date:'5/18', weekday:'周一', isToday:true,
     phaseTag:'经期第 1 天', phaseKind:'period', cycleDay:1, periodLen:5,
     items:[
       {
