@@ -357,15 +357,15 @@ function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, 
         onCycleComplete={onSisterCycleComplete}
       />
     );
-  } else {
+  } else if(item.module) {
     body = (
       <div className="tl-rec-group">
         <RecordCard entry={item} isNew={isNew}/>
-        {item.module && (
-          <ModulePlaceholder mod={item.module} cycleDay={cycleDay || item.module.cycleDay}/>
-        )}
+        <ModulePlaceholder mod={item.module} cycleDay={cycleDay || item.module.cycleDay}/>
       </div>
     );
+  } else {
+    body = <RecordCard entry={item} isNew={isNew}/>;
   }
 
   return (

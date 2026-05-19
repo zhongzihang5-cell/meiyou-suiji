@@ -27,6 +27,7 @@ function buildTimelineEntry(text, hits, opts={}){
   }));
   const entry = {
     id:'e-'+Date.now(),
+    kind:'rec',
     time: window.formatNowTime(),
     body: text,
     isNew: true,
@@ -48,11 +49,7 @@ function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const ctx = window.SCENE_CONTEXT[t.scene] || window.SCENE_CONTEXT.period;
 
-  const [syncItems, setSyncItems] = useState([]);
-  const [nudge, setNudge] = useState('');
-  const [suggestChips, setSuggestChips] = useState([]);
   const [draft, setDraft] = useState('');
-  const [livePreview, setLivePreview] = useState(null);
   const [timeline, setTimeline] = useState(window.TIMELINE_BLOCKS);
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
@@ -60,6 +57,7 @@ function App(){
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(false);
   const [sisterPlayAnimation, setSisterPlayAnimation] = useState(0);
   const [sisterCycleDone, setSisterCycleDone] = useState(true);
+  const [hideTodayGuide, setHideTodayGuide] = useState(false);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
 
@@ -94,31 +92,16 @@ function App(){
   }, []);
 
   useEffect(()=>{
-    if(sisterPlayAnimation > 0) setSisterCycleDone(false);
+    if(sisterPlayAnimation > 0){
+      setSisterCycleDone(false);
+      setHideTodayGuide(false);
+    }
   }, [sisterPlayAnimation]);
 
   useEffect(()=>{
-    setSyncItems([]);
-    setNudge('');
-    setSuggestChips([]);
     setDraft('');
-    setLivePreview(null);
+    setHideTodayGuide(false);
   }, [t.scene]);
-
-  useEffect(()=>{
-    if(!draft.trim()){ setLivePreview(null); return; }
-    const tm = setTimeout(()=>{
-      const hits = window.extractKeywords(draft);
-      if(!hits.length){ setLivePreview(null); return; }
-      const dayId = window.resolveEntryDayId(draft, timeline);
-      const dayHint = window.resolveDayHint(draft, timeline, dayId);
-      setLivePreview({
-        labels: hits.map(h=>window.buildSyncDisplayLabel(h, draft)),
-        dayHint,
-      });
-    }, 300);
-    return ()=>clearTimeout(tm);
-  }, [draft, timeline]);
 
   const scrollTimelineToEnd = (behavior='smooth')=>{
     requestAnimationFrame(()=>{
@@ -145,27 +128,7 @@ function App(){
     }, 2400);
   };
 
-  const buildSyncItems = (text, hits)=>{
-    const dayHint = window.resolveDayHint(text, timeline, window.resolveEntryDayId(text, timeline));
-    return hits.map(h=>({
-      label: window.buildSyncDisplayLabel(h, text),
-      dayHint,
-    }));
-  };
-
-  const showFollowUp = (hits)=>{
-    const follow = window.pickFollowUp(hits, ctx);
-    setTimeout(()=>{
-      setNudge(follow.text);
-      setSuggestChips(follow.chips);
-    }, 380);
-  };
-
-  const clearFeedback = ()=>{
-    setSyncItems([]);
-    setNudge('');
-    setSuggestChips([]);
-  };
+  const markUserRecorded = ()=> setHideTodayGuide(true);
 
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
@@ -176,38 +139,17 @@ function App(){
     const text = (textOverride || draft).trim();
     if(!text) return;
 
-    clearFeedback();
     const hits = window.extractKeywords(text);
-    const syncBuilt = buildSyncItems(text, hits);
-
     setDraft('');
-    setLivePreview(null);
-
-    if(syncBuilt.length){
-      setTimeout(()=>setSyncItems(syncBuilt), 60);
-      showFollowUp(hits);
-      pushToast({ text:'已记录', tags: syncBuilt.map(s=>s.label).slice(0,2) });
-    } else {
-      pushToast({ text:'已保存' });
-    }
-
+    markUserRecorded();
     pushToTimeline(buildTimelineEntry(text, hits, opts), text);
   };
 
   const submitVoice = (transcript, durSec)=>{
     const text = transcript.trim();
-    clearFeedback();
+    if(!text) return;
     const hits = window.extractKeywords(text);
-    const syncBuilt = buildSyncItems(text, hits);
-
-    if(syncBuilt.length){
-      setTimeout(()=>setSyncItems(syncBuilt), 60);
-      showFollowUp(hits);
-      pushToast({ text:'已记录', tags: syncBuilt.map(s=>s.label).slice(0,2) });
-    } else {
-      pushToast({ text:'语音已转写' });
-    }
-
+    markUserRecorded();
     pushToTimeline(buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     }), text);
@@ -219,7 +161,7 @@ function App(){
 
   const submitPhoto = ()=>{
     setShowPhoto(false);
-    clearFeedback();
+    markUserRecorded();
     pushToTimeline({
       id:'e-'+Date.now(),
       time: window.formatNowTime(),
@@ -228,7 +170,6 @@ function App(){
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
     }, '');
-    pushToast({ text:'照片已加入' });
   };
 
   const sceneForHealth = {
@@ -299,6 +240,7 @@ function App(){
             endRef={timelineEndRef}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
+            hideTodayGuide={hideTodayGuide}
             onSisterCycleComplete={handleSisterCycleComplete}
           />
         </div>
@@ -307,14 +249,9 @@ function App(){
           draft={draft}
           onDraft={setDraft}
           onSend={()=>submitText()}
-          onChip={(c)=>submitText(c)}
           onQuickMark={submitQuickMark}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
-          syncItems={syncItems}
-          nudge={nudge}
-          suggestChips={suggestChips}
-          livePreview={livePreview}
         />
       </div>
 

@@ -63,6 +63,7 @@ function FloatNotice({show, onOpen, onClose}){
         aria-label="关闭"
         onClick={(e)=>{ e.stopPropagation(); onClose(); }}
       >×</button>
+      <div className="fn-avatar" aria-hidden="true"/>
       <p className="fn-message">结合近期记录，已为你生成周期状态分析</p>
     </div>
   );

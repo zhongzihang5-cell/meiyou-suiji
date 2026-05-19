@@ -59,6 +59,16 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
         <path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/>
       </svg>
     );
+    case 'wand': return (
+      <svg {...common} strokeWidth={Math.max(stroke, 2.2)}>
+        <path d="M4 20L13 11"/>
+        <path
+          d="M14.2 2.8l1.6 3.7 3.7 1.6-3.7 1.6-1.6 3.7-1.6-3.7-3.7-1.6 3.7-1.6z"
+          fill="currentColor"
+          stroke="none"
+        />
+      </svg>
+    );
     case 'plus': return (
       <svg {...common} strokeWidth="2">
         <path d="M12 5v14M5 12h14"/>

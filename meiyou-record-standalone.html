@@ -2799,8 +2799,8 @@ html,body{
   background:#fff;
   border:0.5px solid #ffe1ea;
   border-radius:14px;
-  padding:12px 34px 12px 14px;
-  display:flex;align-items:center;
+  padding:12px 34px 12px 12px;
+  display:flex;align-items:center;gap:10px;
   box-shadow:0 4px 16px rgba(255,93,138,.18);
   opacity:0;
   pointer-events:none;
@@ -2820,6 +2820,19 @@ html,body{
   color:rgba(0,0,0,0.3);
   font-size:18px;line-height:1;
   cursor:pointer;
+}
+.float-notice .fn-avatar{
+  width:36px;
+  height:36px;
+  flex-shrink:0;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M4 20L13 11' stroke='%23ff4d88' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M14.2 2.8l1.6 3.7 3.7 1.6-3.7 1.6-1.6 3.7-1.6-3.7-3.7-1.6 3.7-1.6z' fill='%23ff4d88'/%3E%3C/svg%3E") center/20px no-repeat,
+    linear-gradient(145deg, rgba(79,124,174,0.16) 0%, rgba(255,77,136,0.10) 100%);
+  box-shadow:inset 0 0 0 0.5px rgba(255,77,136,0.16);
 }
 .float-notice .fn-message{
   flex:1;
@@ -2912,6 +2925,16 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
     case 'sparkle': return (
       <svg {...common} fill="currentColor" stroke="none">
         <path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/>
+      </svg>
+    );
+    case 'wand': return (
+      <svg {...common} strokeWidth={Math.max(stroke, 2.2)}>
+        <path d="M4 20L13 11"/>
+        <path
+          d="M14.2 2.8l1.6 3.7 3.7 1.6-3.7 1.6-1.6 3.7-1.6-3.7-3.7-1.6 3.7-1.6z"
+          fill="currentColor"
+          stroke="none"
+        />
       </svg>
     );
     case 'plus': return (
@@ -3860,6 +3883,7 @@ function FloatNotice({show, onOpen, onClose}){
         aria-label="关闭"
         onClick={(e)=>{ e.stopPropagation(); onClose(); }}
       >×</button>
+      <div className="fn-avatar" aria-hidden="true"/>
       <p className="fn-message">结合近期记录，已为你生成周期状态分析</p>
     </div>
   );
@@ -4797,15 +4821,15 @@ function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, 
         onCycleComplete={onSisterCycleComplete}
       />
     );
-  } else {
+  } else if(item.module) {
     body = (
       <div className="tl-rec-group">
         <RecordCard entry={item} isNew={isNew}/>
-        {item.module && (
-          <ModulePlaceholder mod={item.module} cycleDay={cycleDay || item.module.cycleDay}/>
-        )}
+        <ModulePlaceholder mod={item.module} cycleDay={cycleDay || item.module.cycleDay}/>
       </div>
     );
+  } else {
+    body = <RecordCard entry={item} isNew={isNew}/>;
   }
 
   return (
@@ -4883,24 +4907,26 @@ function WeeklyCard({item}){
   );
 }
 
-function resolveTimelineLastItemId(blocks, sisterCycleDone){
+function filterDayItems(items, sisterCycleDone, hideTodayGuide){
+  return (items || []).filter(it=>{
+    if(it.kind === 'guide' && hideTodayGuide) return false;
+    if(!it.hiddenUntilSisterDone) return true;
+    return sisterCycleDone;
+  });
+}
+
+function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   const ids = [];
   blocks.forEach(block=>{
     if(block.type !== 'day') return;
-    const items = (block.items || block.entries || []).filter(it=>{
-      if(!it.hiddenUntilSisterDone) return true;
-      return sisterCycleDone;
-    });
+    const items = filterDayItems(block.items || block.entries, sisterCycleDone, hideTodayGuide);
     items.forEach(it=>ids.push(it.id));
   });
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
-  const items = (day.items || day.entries || []).filter(it=>{
-    if(!it.hiddenUntilSisterDone) return true;
-    return sisterCycleDone;
-  });
+function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId}){
+  const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
     <>
@@ -4937,8 +4963,8 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
-  const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone);
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete}){
+  const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
 
   return (
     <div className="tl-feed">
@@ -4951,6 +4977,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, o
                 day={block}
                 sisterPlayAnimation={sisterPlayAnimation}
                 sisterCycleDone={sisterCycleDone}
+                hideTodayGuide={hideTodayGuide}
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
               />
@@ -5137,7 +5164,6 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onVoiceDone,
-  syncItems, nudge, suggestChips, onChip, livePreview,
   onPhoto,
 }){
   const I = window.Icon;
@@ -5190,13 +5216,10 @@ function DockPublisher({
     toggleQuick(false);
   };
 
-  const handleQuick = ()=>{
+  const handleQuick = (item)=>{
+    if(item) onQuickMark?.(item);
     toggleQuick(false);
   };
-
-  const showFeedback = syncItems.length > 0
-    || Boolean(nudge)
-    || (suggestChips && suggestChips.length > 0);
 
   return (
     <>
@@ -5216,36 +5239,6 @@ function DockPublisher({
       </div>
 
       <div className="dock-wrap">
-        {showFeedback && (
-          <div className="dock-feedback fade-in">
-            {syncItems.length > 0 ? (
-              <div className="dock-sync-lite">
-                <span className="dock-sync-mark"><I name="check" size={10} stroke={2.6}/> 已记录</span>
-                {syncItems.map((s,i)=>(
-                  <span key={i} className="dock-sync-tag">{s.label}</span>
-                ))}
-                {syncItems[0]?.dayHint ? <span className="dock-sync-date">{syncItems[0].dayHint}</span> : null}
-              </div>
-            ) : null}
-            {nudge ? <p className="dock-nudge">{nudge}</p> : null}
-            {suggestChips && suggestChips.length > 0 && (
-              <div className="dock-suggest">
-                {suggestChips.map((c,i)=>(
-                  <button key={i} type="button" className="dock-suggest-chip" onClick={()=>onChip(c)}>{c}</button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {livePreview && livePreview.labels?.length > 0 && (
-          <div className="dock-live fade-in">
-            <span className="dock-live-dot"/>
-            识别到 · {livePreview.labels.join(' · ')}
-            {livePreview.dayHint && <span className="dock-live-date">{livePreview.dayHint}</span>}
-          </div>
-        )}
-
         <div className="dock-panel">
           <div className="dock-bar">
             <div className="dock-input-row">
@@ -5930,6 +5923,7 @@ function buildTimelineEntry(text, hits, opts={}){
   }));
   const entry = {
     id:'e-'+Date.now(),
+    kind:'rec',
     time: window.formatNowTime(),
     body: text,
     isNew: true,
@@ -5951,11 +5945,7 @@ function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const ctx = window.SCENE_CONTEXT[t.scene] || window.SCENE_CONTEXT.period;
 
-  const [syncItems, setSyncItems] = useState([]);
-  const [nudge, setNudge] = useState('');
-  const [suggestChips, setSuggestChips] = useState([]);
   const [draft, setDraft] = useState('');
-  const [livePreview, setLivePreview] = useState(null);
   const [timeline, setTimeline] = useState(window.TIMELINE_BLOCKS);
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
@@ -5963,6 +5953,7 @@ function App(){
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(false);
   const [sisterPlayAnimation, setSisterPlayAnimation] = useState(0);
   const [sisterCycleDone, setSisterCycleDone] = useState(true);
+  const [hideTodayGuide, setHideTodayGuide] = useState(false);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
 
@@ -5997,31 +5988,16 @@ function App(){
   }, []);
 
   useEffect(()=>{
-    if(sisterPlayAnimation > 0) setSisterCycleDone(false);
+    if(sisterPlayAnimation > 0){
+      setSisterCycleDone(false);
+      setHideTodayGuide(false);
+    }
   }, [sisterPlayAnimation]);
 
   useEffect(()=>{
-    setSyncItems([]);
-    setNudge('');
-    setSuggestChips([]);
     setDraft('');
-    setLivePreview(null);
+    setHideTodayGuide(false);
   }, [t.scene]);
-
-  useEffect(()=>{
-    if(!draft.trim()){ setLivePreview(null); return; }
-    const tm = setTimeout(()=>{
-      const hits = window.extractKeywords(draft);
-      if(!hits.length){ setLivePreview(null); return; }
-      const dayId = window.resolveEntryDayId(draft, timeline);
-      const dayHint = window.resolveDayHint(draft, timeline, dayId);
-      setLivePreview({
-        labels: hits.map(h=>window.buildSyncDisplayLabel(h, draft)),
-        dayHint,
-      });
-    }, 300);
-    return ()=>clearTimeout(tm);
-  }, [draft, timeline]);
 
   const scrollTimelineToEnd = (behavior='smooth')=>{
     requestAnimationFrame(()=>{
@@ -6048,27 +6024,7 @@ function App(){
     }, 2400);
   };
 
-  const buildSyncItems = (text, hits)=>{
-    const dayHint = window.resolveDayHint(text, timeline, window.resolveEntryDayId(text, timeline));
-    return hits.map(h=>({
-      label: window.buildSyncDisplayLabel(h, text),
-      dayHint,
-    }));
-  };
-
-  const showFollowUp = (hits)=>{
-    const follow = window.pickFollowUp(hits, ctx);
-    setTimeout(()=>{
-      setNudge(follow.text);
-      setSuggestChips(follow.chips);
-    }, 380);
-  };
-
-  const clearFeedback = ()=>{
-    setSyncItems([]);
-    setNudge('');
-    setSuggestChips([]);
-  };
+  const markUserRecorded = ()=> setHideTodayGuide(true);
 
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
@@ -6079,38 +6035,17 @@ function App(){
     const text = (textOverride || draft).trim();
     if(!text) return;
 
-    clearFeedback();
     const hits = window.extractKeywords(text);
-    const syncBuilt = buildSyncItems(text, hits);
-
     setDraft('');
-    setLivePreview(null);
-
-    if(syncBuilt.length){
-      setTimeout(()=>setSyncItems(syncBuilt), 60);
-      showFollowUp(hits);
-      pushToast({ text:'已记录', tags: syncBuilt.map(s=>s.label).slice(0,2) });
-    } else {
-      pushToast({ text:'已保存' });
-    }
-
+    markUserRecorded();
     pushToTimeline(buildTimelineEntry(text, hits, opts), text);
   };
 
   const submitVoice = (transcript, durSec)=>{
     const text = transcript.trim();
-    clearFeedback();
+    if(!text) return;
     const hits = window.extractKeywords(text);
-    const syncBuilt = buildSyncItems(text, hits);
-
-    if(syncBuilt.length){
-      setTimeout(()=>setSyncItems(syncBuilt), 60);
-      showFollowUp(hits);
-      pushToast({ text:'已记录', tags: syncBuilt.map(s=>s.label).slice(0,2) });
-    } else {
-      pushToast({ text:'语音已转写' });
-    }
-
+    markUserRecorded();
     pushToTimeline(buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     }), text);
@@ -6122,7 +6057,7 @@ function App(){
 
   const submitPhoto = ()=>{
     setShowPhoto(false);
-    clearFeedback();
+    markUserRecorded();
     pushToTimeline({
       id:'e-'+Date.now(),
       time: window.formatNowTime(),
@@ -6131,7 +6066,6 @@ function App(){
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
     }, '');
-    pushToast({ text:'照片已加入' });
   };
 
   const sceneForHealth = {
@@ -6202,6 +6136,7 @@ function App(){
             endRef={timelineEndRef}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
+            hideTodayGuide={hideTodayGuide}
             onSisterCycleComplete={handleSisterCycleComplete}
           />
         </div>
@@ -6210,14 +6145,9 @@ function App(){
           draft={draft}
           onDraft={setDraft}
           onSend={()=>submitText()}
-          onChip={(c)=>submitText(c)}
           onQuickMark={submitQuickMark}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
-          syncItems={syncItems}
-          nudge={nudge}
-          suggestChips={suggestChips}
-          livePreview={livePreview}
         />
       </div>
 

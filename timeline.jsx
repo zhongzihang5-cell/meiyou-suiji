@@ -52,24 +52,26 @@ function WeeklyCard({item}){
   );
 }
 
-function resolveTimelineLastItemId(blocks, sisterCycleDone){
+function filterDayItems(items, sisterCycleDone, hideTodayGuide){
+  return (items || []).filter(it=>{
+    if(it.kind === 'guide' && hideTodayGuide) return false;
+    if(!it.hiddenUntilSisterDone) return true;
+    return sisterCycleDone;
+  });
+}
+
+function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   const ids = [];
   blocks.forEach(block=>{
     if(block.type !== 'day') return;
-    const items = (block.items || block.entries || []).filter(it=>{
-      if(!it.hiddenUntilSisterDone) return true;
-      return sisterCycleDone;
-    });
+    const items = filterDayItems(block.items || block.entries, sisterCycleDone, hideTodayGuide);
     items.forEach(it=>ids.push(it.id));
   });
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete, lastItemId}){
-  const items = (day.items || day.entries || []).filter(it=>{
-    if(!it.hiddenUntilSisterDone) return true;
-    return sisterCycleDone;
-  });
+function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId}){
+  const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
     <>
@@ -106,8 +108,8 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, onSisterCycleComplete}){
-  const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone);
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete}){
+  const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
 
   return (
     <div className="tl-feed">
@@ -120,6 +122,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, o
                 day={block}
                 sisterPlayAnimation={sisterPlayAnimation}
                 sisterCycleDone={sisterCycleDone}
+                hideTodayGuide={hideTodayGuide}
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
               />

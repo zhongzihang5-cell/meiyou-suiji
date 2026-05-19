@@ -88,7 +88,6 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onVoiceDone,
-  syncItems, nudge, suggestChips, onChip, livePreview,
   onPhoto,
 }){
   const I = window.Icon;
@@ -141,13 +140,10 @@ function DockPublisher({
     toggleQuick(false);
   };
 
-  const handleQuick = ()=>{
+  const handleQuick = (item)=>{
+    if(item) onQuickMark?.(item);
     toggleQuick(false);
   };
-
-  const showFeedback = syncItems.length > 0
-    || Boolean(nudge)
-    || (suggestChips && suggestChips.length > 0);
 
   return (
     <>
@@ -167,36 +163,6 @@ function DockPublisher({
       </div>
 
       <div className="dock-wrap">
-        {showFeedback && (
-          <div className="dock-feedback fade-in">
-            {syncItems.length > 0 ? (
-              <div className="dock-sync-lite">
-                <span className="dock-sync-mark"><I name="check" size={10} stroke={2.6}/> 已记录</span>
-                {syncItems.map((s,i)=>(
-                  <span key={i} className="dock-sync-tag">{s.label}</span>
-                ))}
-                {syncItems[0]?.dayHint ? <span className="dock-sync-date">{syncItems[0].dayHint}</span> : null}
-              </div>
-            ) : null}
-            {nudge ? <p className="dock-nudge">{nudge}</p> : null}
-            {suggestChips && suggestChips.length > 0 && (
-              <div className="dock-suggest">
-                {suggestChips.map((c,i)=>(
-                  <button key={i} type="button" className="dock-suggest-chip" onClick={()=>onChip(c)}>{c}</button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {livePreview && livePreview.labels?.length > 0 && (
-          <div className="dock-live fade-in">
-            <span className="dock-live-dot"/>
-            识别到 · {livePreview.labels.join(' · ')}
-            {livePreview.dayHint && <span className="dock-live-date">{livePreview.dayHint}</span>}
-          </div>
-        )}
-
         <div className="dock-panel">
           <div className="dock-bar">
             <div className="dock-input-row">
