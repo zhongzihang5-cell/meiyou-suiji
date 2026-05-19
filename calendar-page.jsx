@@ -55,7 +55,7 @@ function FloatNotice({show, onOpen, onClose}){
       role="button"
       tabIndex={show ? 0 : -1}
       aria-hidden={!show}
-      aria-label="美柚姐姐，本次周期分析已生成"
+      aria-label="结合近期记录，已为你生成周期状态分析"
     >
       <button
         type="button"
@@ -63,11 +63,7 @@ function FloatNotice({show, onOpen, onClose}){
         aria-label="关闭"
         onClick={(e)=>{ e.stopPropagation(); onClose(); }}
       >×</button>
-      <div className="fn-avatar" aria-hidden="true">👩</div>
-      <div className="fn-text">
-        <div className="fn-title">美柚姐姐</div>
-        <div className="fn-subtitle">本次周期分析已生成</div>
-      </div>
+      <p className="fn-message">结合近期记录，已为你生成周期状态分析</p>
     </div>
   );
 }
