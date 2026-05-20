@@ -35,9 +35,10 @@
   padding-bottom:420px;
 }
 .suiji-stream{
-  padding:0 16px 200px;
+  padding:0 16px calc(200px + var(--my-safe-bottom));
   padding-top:52px;
   max-height:calc(100vh - 44px);
+  max-height:calc(100dvh - 44px);
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
@@ -46,7 +47,7 @@
 /* ============ Dock 容器 ============ */
 .dock-wrap{
   position:fixed;
-  bottom:58px;left:50%;transform:translateX(-50%);
+  bottom:var(--my-tabbar-h);left:50%;transform:translateX(-50%);
   width:100%;max-width:390px;
   z-index:90;
   pointer-events:none;
@@ -60,7 +61,7 @@
   transition:box-shadow 0.32s ease, transform 0.32s cubic-bezier(0.34,1.2,0.64,1);
 }
 .dock-wrap.is-mood-expanded{
-  bottom:58px;
+  bottom:var(--my-tabbar-h);
 }
 .dock-panel.is-mood-expanded{
   box-shadow:0 -8px 36px rgba(255,77,136,0.14);
@@ -533,7 +534,7 @@
   transform:translateX(-50%);
   width:100%;
   max-width:390px;
-  bottom:180px;
+  bottom:var(--my-dock-float-b);
   height:0;
   z-index:91;
   pointer-events:none;
