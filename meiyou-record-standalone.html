@@ -6,7 +6,7 @@
 <title>美柚 · 记录 · 场景原型</title>
 <!--
   美柚记录 Tab 场景原型 — 单文件版
-  生成日期: 2026-05-19
+  生成日期: 2026-05-20
   使用方式: 双击打开，或浏览器拖入此文件即可预览（需联网加载 React/Babel CDN）
 
   编辑指南:
@@ -679,6 +679,66 @@ html,body{
 .photo-opt-title{font-size:14px;color:var(--my-text-primary);font-weight:500}
 .photo-opt-desc{font-size:11px;color:var(--my-text-tertiary);text-align:center}
 
+/* ============ DEMO SCENE DOCK（手机外 · 右下角） ============ */
+.demo-scene-dock{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:9999;
+  width:220px;
+  padding:10px 12px 12px;
+  border-radius:12px;
+  background:rgba(24,24,28,0.92);
+  border:0.5px solid rgba(255,255,255,0.10);
+  box-shadow:0 8px 32px rgba(0,0,0,0.45);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+  font-family:'PingFang SC',-apple-system,sans-serif;
+}
+.demo-scene-dock-label{
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  color:rgba(255,255,255,0.45);
+  margin-bottom:8px;
+}
+.demo-scene-dock-options{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.demo-scene-dock-btn{
+  appearance:none;
+  border:0;
+  background:rgba(255,255,255,0.06);
+  border-radius:8px;
+  padding:8px 10px;
+  font-size:12px;
+  line-height:1.29;
+  color:rgba(255,255,255,0.72);
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:400;
+  text-align:left;
+  transition:background .15s, color .15s;
+}
+.demo-scene-dock-btn:hover{
+  background:rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.88);
+}
+.demo-scene-dock-btn.active{
+  background:rgba(255,77,136,0.22);
+  color:#ff8cb3;
+  font-weight:500;
+  box-shadow:inset 0 0 0 0.5px rgba(255,77,136,0.35);
+}
+.demo-scene-dock-hint{
+  margin:8px 0 0;
+  font-size:11px;
+  line-height:1.35;
+  color:rgba(255,255,255,0.38);
+}
+
 /* ============ TAB BAR ============ */
 .tabbar{
   position:fixed;bottom:0;
@@ -850,7 +910,11 @@ html,body{
 }
 .suiji-shell--scene .suiji-stream{position:relative;z-index:1}
 .suiji-shell--scene .dock-wrap{z-index:90}
+.suiji-shell--scene .dock-wrap.is-mood-expanded{z-index:100}
 .suiji-shell--scene .quick-float-wrap{z-index:91}
+.suiji-shell.is-mood-expanded .suiji-stream{
+  padding-bottom:420px;
+}
 .suiji-stream{
   padding:0 16px 200px;
   padding-top:52px;
@@ -874,6 +938,15 @@ html,body{
   border-top:0.5px solid var(--my-line);
   box-shadow:0 -4px 24px rgba(0,0,0,0.06);
   border-radius:16px 16px 0 0;
+  transition:box-shadow 0.32s ease, transform 0.32s cubic-bezier(0.34,1.2,0.64,1);
+}
+.dock-wrap.is-mood-expanded{
+  bottom:58px;
+}
+.dock-panel.is-mood-expanded{
+  box-shadow:0 -8px 36px rgba(255,77,136,0.14);
+  transform:translateY(0);
+  overflow:hidden;
 }
 
 /* 反馈条 */
@@ -939,6 +1012,401 @@ html,body{
 }
 @keyframes livePulse{0%,100%{opacity:0.5}50%{opacity:1}}
 
+/* ============ 输入框展开 · 心情选择（内嵌） ============ */
+.dock-mood-sheet{
+  display:flex;
+  flex-direction:column;
+  min-height:300px;
+  max-height:min(52vh, 360px);
+  animation:dockMoodIn 0.36s cubic-bezier(0.34,1.18,0.64,1) both;
+}
+@keyframes dockMoodIn{
+  from{opacity:0.6;transform:translateY(12px) scale(0.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.dock-mood-top{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  align-items:center;
+  padding:14px 8px 10px;
+  flex-shrink:0;
+}
+.dock-mood-lead-cell{
+  grid-column:1;
+  min-width:0;
+  padding:0 2px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.dock-mood-lead{
+  margin:0;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.55);
+  line-height:1.29;
+  letter-spacing:0.02em;
+  white-space:nowrap;
+  text-align:left;
+  /* 与下方居中「超开心」左缘对齐：右移 (lead宽 - label宽) / 2 */
+  transform:translateX(calc((14px * 8 - 11px * 3) / 2));
+}
+.dock-mood-close{
+  grid-column:5;
+  justify-self:end;
+  width:32px;
+  height:32px;
+  appearance:none;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:rgba(0,0,0,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font:inherit;
+  transition:background 0.15s, color 0.15s, transform 0.15s;
+}
+.dock-mood-close:active{
+  background:rgba(0,0,0,0.04);
+  color:rgba(0,0,0,0.55);
+  transform:scale(0.96);
+}
+.dock-mood-grid{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:2px 0;
+  padding:0 8px 4px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.dock-mood-cell{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+  padding:6px 2px 8px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  transition:background 0.15s, transform 0.15s;
+}
+.dock-mood-cell:active{transform:scale(0.96)}
+.dock-mood-face-wrap{
+  position:relative;
+  width:40px;
+  height:40px;
+  flex-shrink:0;
+}
+.dock-mood-face{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--mood-bg, #FFE875);
+  overflow:hidden;
+}
+.dock-mood-check{
+  position:absolute;
+  right:-1px;
+  bottom:-1px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#00cc99;
+  border:1.5px solid #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  pointer-events:none;
+}
+.dock-mood-sheet .mood-face-svg{
+  width:40px;
+  height:40px;
+  display:block;
+}
+.dock-mood-lbl{
+  font-size:11px;
+  line-height:1.2;
+  color:rgba(0,0,0,0.6);
+  text-align:center;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.dock-mood-foot{
+  flex-shrink:0;
+  padding:8px 16px 12px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+  background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.96) 24%);
+}
+.dock-mood-submit{
+  width:100%;
+  height:40px;
+  appearance:none;
+  border:0;
+  border-radius:80px;
+  background:#ff4d88;
+  color:#fff;
+  font:inherit;
+  font-size:15px;
+  font-weight:500;
+  cursor:pointer;
+  transition:opacity 0.15s, transform 0.15s;
+}
+.dock-mood-submit:disabled{
+  opacity:0.35;
+  cursor:default;
+}
+.dock-mood-submit:not(:disabled):active{
+  transform:scale(0.98);
+  opacity:0.92;
+}
+
+/* ============ 通用底部展开 sheet ============ */
+.dock-sheet{
+  display:flex;
+  flex-direction:column;
+  min-height:300px;
+  max-height:min(58vh, 420px);
+  animation:dockMoodIn 0.36s cubic-bezier(0.34,1.18,0.64,1) both;
+}
+.dock-sheet-hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px 8px;
+  flex-shrink:0;
+}
+.dock-sheet-title{
+  margin:0;
+  font-size:17px;
+  font-weight:500;
+  color:rgba(0,0,0,0.85);
+  line-height:1.19;
+}
+.dock-sheet-close{
+  width:32px;
+  height:32px;
+  appearance:none;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:rgba(0,0,0,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font:inherit;
+}
+.dock-sheet-close:active{background:rgba(0,0,0,0.04)}
+.dock-sheet-foot{
+  flex-shrink:0;
+  padding:8px 16px 12px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+  background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.96) 24%);
+}
+.dock-sheet-submit{
+  width:100%;
+  height:40px;
+  appearance:none;
+  border:0;
+  border-radius:80px;
+  background:#ff4d88;
+  color:#fff;
+  font:inherit;
+  font-size:15px;
+  font-weight:500;
+  cursor:pointer;
+  transition:opacity 0.15s, transform 0.15s;
+}
+.dock-sheet-submit:disabled{opacity:0.35;cursor:default}
+.dock-sheet-submit:not(:disabled):active{transform:scale(0.98);opacity:0.92}
+
+/* ============ 症状选择 ============ */
+.dock-symptom-sheet{
+  max-height:min(62vh, 440px);
+}
+.dock-symptom-scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:0 12px 4px;
+}
+.dock-symptom-group{
+  margin-bottom:12px;
+}
+.dock-symptom-group-title{
+  margin:0 0 8px 4px;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.75);
+  line-height:1.29;
+}
+.dock-symptom-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:4px 0;
+}
+.dock-symptom-cell{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+  padding:6px 2px 8px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.dock-symptom-cell:active{transform:scale(0.96)}
+.dock-symptom-ico-wrap{
+  position:relative;
+  width:44px;
+  height:44px;
+}
+.dock-symptom-ico{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--sym-bg, #ffe8f0);
+  font-size:22px;
+  line-height:1;
+}
+.dock-picker-check{
+  position:absolute;
+  right:-1px;
+  bottom:-1px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#00cc99;
+  border:1.5px solid #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  pointer-events:none;
+}
+.dock-symptom-lbl{
+  font-size:11px;
+  line-height:1.2;
+  color:rgba(0,0,0,0.6);
+  text-align:center;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ============ 体重输入 ============ */
+.dock-weight-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px 8px;
+  flex-shrink:0;
+}
+.dock-sheet-lead{
+  margin:0;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.55);
+  line-height:1.47;
+  letter-spacing:0.02em;
+  white-space:nowrap;
+}
+.dock-weight-sheet{
+  min-height:360px;
+  max-height:min(65vh, 460px);
+}
+.dock-weight-display-wrap{
+  position:relative;
+  margin:4px 16px 12px;
+  padding:20px 16px 18px;
+  background:#f7f7f9;
+  border-radius:12px;
+  text-align:center;
+}
+.dock-weight-unit-toggle{
+  position:absolute;
+  top:10px;
+  right:10px;
+  appearance:none;
+  border:0;
+  background:#fff;
+  border-radius:80px;
+  padding:4px 10px;
+  font:inherit;
+  font-size:11px;
+  color:rgba(0,0,0,0.5);
+  cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+.dock-weight-display{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:6px;
+  padding-top:8px;
+}
+.dock-weight-num{
+  font-size:40px;
+  font-weight:500;
+  color:rgba(0,0,0,0.88);
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.dock-weight-unit{
+  font-size:15px;
+  color:rgba(0,0,0,0.35);
+  line-height:1.29;
+}
+.dock-weight-keypad{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:8px;
+  padding:0 16px 8px;
+  flex-shrink:0;
+}
+.dock-weight-key{
+  height:44px;
+  appearance:none;
+  border:0;
+  border-radius:8px;
+  background:#f7f7f9;
+  font:inherit;
+  font-size:20px;
+  font-weight:500;
+  color:rgba(0,0,0,0.82);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.12s, transform 0.12s;
+}
+.dock-weight-key:active{background:#ececef;transform:scale(0.97)}
+.dock-weight-key.is-fn{
+  font-size:16px;
+  color:rgba(0,0,0,0.45);
+}
+
 /* ============ 右下悬浮快捷发布 ============ */
 .quick-float-wrap{
   position:fixed;
@@ -956,6 +1424,15 @@ html,body{
   right:12px;
   bottom:0;
   pointer-events:auto;
+  transition:opacity 0.28s ease, transform 0.32s cubic-bezier(0.34,1.2,0.64,1);
+}
+.quick-float-wrap.is-covered{
+  pointer-events:none;
+}
+.quick-float-wrap.is-covered .dock-fan-corner{
+  opacity:0;
+  transform:scale(0.88) translateY(8px);
+  pointer-events:none;
 }
 
 /* ============ 底部栏：仅输入 + 相机 ============ */
@@ -1170,24 +1647,196 @@ html,body{
   border:0.5px solid transparent;
   padding:0 12px;
   display:flex;align-items:center;
+  position:relative;
   transition:border-color 0.15s, background 0.15s;
 }
-.dock-text-field:focus-within{
+.dock-text-field:focus-within,
+.dock-text-field.is-focused{
   background:var(--my-surface);
   border-color:rgba(255,77,136,0.25);
+}
+.dock-float-ph{
+  position:absolute;
+  left:12px;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  display:inline-flex;
+  align-items:baseline;
+  pointer-events:none;
+  font-size:15px;
+  line-height:1.45;
+  color:rgba(0,0,0,0.3);
+  white-space:nowrap;
+  overflow:hidden;
+  transition:transform 200ms ease-out;
+}
+.dock-float-ph.is-focused{
+  transform:translateY(calc(-50% - 2px));
+}
+.dock-float-ph.is-leaving{
+  animation:dockPhLineLeave 360ms ease-in forwards;
+}
+.dock-float-ph-char{
+  display:inline-block;
+}
+.dock-float-ph-char.is-enter{
+  opacity:0;
+  transform:translateY(7px);
+  animation:dockPhCharIn 440ms cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay:calc(var(--i) * 72ms);
+}
+.dock-float-ph-char.is-idle{
+  opacity:0.45;
+  transform:translateY(0);
+}
+.dock-float-ph.is-focused .dock-float-ph-char{
+  opacity:0.5;
+  transform:translateY(0);
+  animation:none;
+}
+@keyframes dockPhCharIn{
+  to{
+    opacity:0.45;
+    transform:translateY(0);
+  }
+}
+@keyframes dockPhLineLeave{
+  from{
+    opacity:1;
+    transform:translateY(-50%);
+  }
+  to{
+    opacity:0;
+    transform:translateY(calc(-50% - 8px));
+  }
 }
 .dock-text-field textarea{
   width:100%;border:none;outline:none;background:transparent;
   font:inherit;font-size:15px;line-height:1.45;
   color:var(--my-text-primary);resize:none;
   padding:8px 0;max-height:72px;
+  position:relative;z-index:1;
 }
-.dock-text-field textarea::placeholder{color:var(--my-text-tertiary)}
+.dock-text-field textarea::placeholder{color:transparent}
 
+.dock-voice-wrap{
+  flex:1;
+  position:relative;
+  min-height:40px;
+  border-radius:10px;
+  overflow:hidden;
+  background:linear-gradient(180deg, #f5f5f7 0%, #ececef 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 0 0 0.5px rgba(0,0,0,0.04);
+}
+.dock-voice-wrap.is-recording{
+  background:linear-gradient(180deg, #efeff2 0%, #e8e8ec 100%);
+}
+.dock-voice-stage{
+  position:absolute;
+  inset:0;
+  border-radius:10px;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:0;
+}
+.dock-voice-shimmer{
+  position:absolute;
+  top:-8%;bottom:-8%;
+  width:62%;
+  left:-68%;
+  transform:skewX(-20deg);
+  background:linear-gradient(
+    108deg,
+    transparent 0%,
+    rgba(255,255,255,0.04) 18%,
+    rgba(255,255,255,0.22) 36%,
+    rgba(255,255,255,0.62) 48%,
+    rgba(255,255,255,0.78) 50%,
+    rgba(255,255,255,0.62) 52%,
+    rgba(255,255,255,0.22) 64%,
+    rgba(255,255,255,0.04) 82%,
+    transparent 100%
+  );
+  filter:blur(0.4px);
+  animation:dockVoiceShimmer 5s ease-in-out infinite;
+}
+.dock-voice-wrap.is-recording .dock-voice-shimmer{
+  width:58%;
+  background:linear-gradient(
+    108deg,
+    transparent 0%,
+    rgba(255,255,255,0.06) 18%,
+    rgba(255,255,255,0.28) 36%,
+    rgba(255,255,255,0.68) 48%,
+    rgba(255,255,255,0.85) 50%,
+    rgba(255,255,255,0.68) 52%,
+    rgba(255,255,255,0.28) 64%,
+    rgba(255,255,255,0.06) 82%,
+    transparent 100%
+  );
+  animation:dockVoiceShimmerRec 5s ease-in-out infinite;
+}
+@keyframes dockVoiceShimmer{
+  0%,64%,100%{
+    left:-68%;
+    opacity:0;
+  }
+  68%{
+    left:-38%;
+    opacity:0.45;
+  }
+  76%{
+    left:8%;
+    opacity:0.72;
+  }
+  84%{
+    left:52%;
+    opacity:0.78;
+  }
+  92%{
+    left:108%;
+    opacity:0.35;
+  }
+  96%{
+    opacity:0;
+  }
+}
+@keyframes dockVoiceShimmerRec{
+  0%,62%,100%{
+    left:-66%;
+    opacity:0;
+  }
+  67%{
+    left:-34%;
+    opacity:0.5;
+  }
+  75%{
+    left:10%;
+    opacity:0.8;
+  }
+  83%{
+    left:54%;
+    opacity:0.85;
+  }
+  91%{
+    left:110%;
+    opacity:0.4;
+  }
+  95%{
+    opacity:0;
+  }
+}
 .dock-voice-btn{
-  flex:1;height:40px;
-  border:none;border-radius:8px;
-  background:var(--my-bg);
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:40px;
+  border:none;
+  border-radius:10px;
+  background:transparent;
   font:inherit;font-size:15px;font-weight:500;
   color:var(--my-text-primary);
   cursor:pointer;
@@ -1196,10 +1845,16 @@ html,body{
   -webkit-user-select:none;
   touch-action:none;
 }
+.dock-voice-label{
+  position:relative;
+  z-index:1;
+}
 .dock-voice-btn:active,
 .dock-voice-btn.recording{
-  background:rgba(255,77,136,0.12);
   color:var(--my-brand-red);
+}
+.dock-voice-btn.recording .dock-voice-label{
+  font-weight:500;
 }
 .dock-voice-waves{
   display:flex;align-items:center;gap:2px;height:16px;
@@ -2162,6 +2817,167 @@ html,body{
   height:48px;width:100%;pointer-events:none;
 }
 
+/* === 模板5 · 分段式统一卡片（Ins 简约） === */
+.tl-t5-card{
+  border-radius:14px;
+  border:none;
+  padding:16px 18px;
+  background:#ffffff;
+  box-shadow:0 1px 10px rgba(0,0,0,0.04);
+}
+.tl-t5-main{
+  margin:0;
+}
+.tl-t5-body{
+  margin:0;
+  font-size:14px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.82);
+  letter-spacing:0.01em;
+}
+.tl-typewriter-cursor{
+  display:inline-block;
+  width:1px;
+  height:0.95em;
+  margin-left:1px;
+  vertical-align:-0.08em;
+  background:rgba(255,77,136,0.55);
+  animation:tlTypeCursor 0.85s step-end infinite;
+}
+@keyframes tlTypeCursor{
+  0%,100%{opacity:1}
+  50%{opacity:0}
+}
+.tl-tags-reveal{
+  animation:tlTagsReveal 0.28s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes tlTagsReveal{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.tl-combo-ai.is-pending{
+  min-height:0;
+  padding:0;
+  opacity:0;
+  pointer-events:none;
+}
+.tl-t5-main .tl-voice-block{
+  margin:0;
+}
+.tl-t5-main .rec-img{
+  margin-top:12px;
+}
+.tl-t5-tags{
+  margin-top:12px;
+}
+.tl-t5-main .tl-tags-t5,
+.tl-t5-main .tl-tags:not(.tl-tags-rows){
+  gap:6px;
+  margin:0;
+}
+.tl-t5-main .tl-tag.is-t5{
+  background:rgba(0,0,0,0.035);
+  border:none;
+  color:rgba(0,0,0,0.5);
+  font-size:11px;
+  padding:3px 9px;
+  border-radius:6px;
+  line-height:1.29;
+  letter-spacing:0.02em;
+}
+.tl-t5-divider{
+  height:0.5px;
+  background:rgba(0,0,0,0.06);
+  margin:14px 0;
+}
+.tl-t5-insight{
+  margin:0;
+}
+.tl-t5-ai-note{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:0;
+  border:none;
+  background:transparent;
+  font-size:13px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.52);
+  letter-spacing:0.01em;
+}
+.tl-t5-ai-note .tl-combo-ai-icon{
+  flex-shrink:0;
+  font-size:13px;
+  line-height:1.55;
+  margin-top:1px;
+  opacity:0.72;
+}
+.tl-t5-ai-note .tl-combo-ai-text{
+  margin:0;
+  color:rgba(0,0,0,0.52);
+}
+.tl-t5-ai-note .tl-combo-ai-list{
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.tl-t5-ai-note .tl-combo-ai-list li{
+  font-size:13px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.52);
+  padding:1px 0;
+}
+.tl-t5-ai-note .tl-combo-ai-list li::before{
+  content:'·';
+  margin-right:5px;
+  color:rgba(0,0,0,0.28);
+}
+.tl-t5-ai-note .tl-combo-ai-total{
+  margin-top:8px;
+  padding-top:8px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+  font-size:13px;
+  font-weight:500;
+  color:rgba(0,0,0,0.58);
+}
+.tl-t5-insight .tl-t5-analysis-body{
+  font-size:13px;
+  color:rgba(0,0,0,0.55);
+  line-height:1.55;
+  letter-spacing:0.01em;
+}
+.tl-t5-insight .tl-t5-analysis-lead,
+.tl-t5-insight .tl-t5-analysis-text{
+  margin:0 0 10px;
+  font-size:13px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.55);
+}
+.tl-t5-insight .tl-t5-analysis-body b,
+.tl-t5-insight .tl-t5-analysis-body strong{
+  font-weight:500;
+  color:rgba(0,0,0,0.68);
+}
+.tl-t5-insight .tl-t5-analysis-body .chart-block{
+  margin:0 0 10px;
+}
+.tl-t5-insight .tl-t5-chart-divider{
+  height:0.5px;
+  margin:10px 0;
+  background:rgba(0,0,0,0.05);
+}
+.tl-t5-insight .cycle-card{
+  margin:0 0 10px;
+  background:rgba(0,0,0,0.02);
+  border-color:rgba(0,0,0,0.05);
+  border-radius:10px;
+}
+.tl-t5-insight .signal-card{
+  margin:0 0 10px;
+  background:rgba(0,0,0,0.02);
+  border-radius:10px;
+}
+
 /* === 语音记录 & 美柚姐姐分析卡片 === */
 .tl-card{
   background:#ffffff;
@@ -2249,6 +3065,100 @@ html,body{
   border-radius:14px 14px 0 0;
   border-bottom:none;
 }
+.tl-combo-body.has-voice-row{
+  padding:11px 12px 10px;
+}
+.tl-voice-card{
+  padding:11px 12px 10px;
+}
+.tl-voice-block{
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.tl-voice-block.has-voice-pill .tl-voice-text{
+  line-height:1.62;
+}
+.tl-voice-text{
+  margin:0;
+  font-size:14px;
+  line-height:inherit;
+  color:rgba(0,0,0,0.8);
+}
+.tl-voice-text .tl-voice-pill{
+  margin-left:6px;
+  vertical-align:-2px;
+}
+.tl-voice-block + .tl-extract-label,
+.tl-voice-card .tl-extract-label{
+  margin-top:10px;
+}
+.tl-voice-pill{
+  display:inline-flex;
+  vertical-align:middle;
+  align-items:center;
+  gap:4px;
+  padding:2px 7px 2px 2px;
+  margin:0;
+  min-height:24px;
+  border-radius:80px;
+  background:rgba(255,77,136,0.12);
+  border:none;
+  color:#ff4d88;
+  cursor:pointer;
+  font:inherit;
+  line-height:1.2;
+  white-space:nowrap;
+  transition:background .15s, transform .15s;
+}
+.tl-voice-pill:hover{background:rgba(255,77,136,0.16)}
+.tl-voice-pill:active{transform:scale(0.97)}
+.tl-voice-pill.is-playing{background:rgba(255,77,136,0.18)}
+.tl-voice-pill-ico{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#ff4d88;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.tl-voice-pill-ico svg{
+  width:8px;
+  height:8px;
+  margin-left:1px;
+}
+.tl-voice-pill.is-playing .tl-voice-pill-ico svg{
+  margin-left:0;
+  width:7px;
+  height:7px;
+}
+.tl-voice-pill .tl-voice-wave.is-mini{
+  flex:none;
+  width:18px;
+  height:10px;
+  gap:1.5px;
+  align-items:center;
+}
+.tl-voice-pill .tl-voice-wave.is-mini span{
+  width:1.5px;
+  border-radius:1px;
+  background:#ff4d88;
+  opacity:0.42;
+}
+.tl-voice-pill .tl-voice-wave.is-mini.is-playing span{
+  opacity:0.75;
+}
+.tl-voice-pill-dur{
+  font-size:11px;
+  line-height:1;
+  font-weight:500;
+  color:#ff4d88;
+  font-variant-numeric:tabular-nums;
+  padding-right:0;
+}
 .tl-voice-bar{
   width:100%;
   display:flex;
@@ -2300,11 +3210,6 @@ html,body{
   font-variant-numeric:tabular-nums;
   flex-shrink:0;
 }
-.tl-voice-text{
-  font-size:14px;
-  line-height:1.65;
-  color:#4a4a4a;
-}
 .tl-extract-label{
   display:flex;
   align-items:center;
@@ -2314,6 +3219,7 @@ html,body{
   font-weight:500;
   color:rgba(255,120,160,0.82);
 }
+
 .tl-extract-label::before{
   content:'';
   width:5px;height:5px;
@@ -2605,9 +3511,16 @@ html,body{
 
 /* ============ 日历 Tab（经期记录页） ============ */
 .cal-page{
+  position:absolute;
+  top:44px;
+  left:0;
+  right:0;
+  bottom:0;
   background:#fff;
-  min-height:calc(100vh - 44px);
-  padding-bottom:72px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:80px;
 }
 
 .cal-top-nav{
@@ -2723,7 +3636,7 @@ html,body{
   background:#f7f7f9;
   border-radius:14px 14px 0 0;
   margin:0 6px;
-  padding:6px 0 0;
+  padding:6px 0 16px;
 }
 .cal-row{
   display:flex;align-items:center;
@@ -2814,12 +3727,22 @@ html,body{
   pointer-events:auto;
 }
 .float-notice .fn-close{
-  position:absolute;top:6px;right:8px;
-  width:22px;height:22px;
+  position:absolute;top:8px;right:10px;
+  width:auto;height:auto;
   display:flex;align-items:center;justify-content:center;
-  color:rgba(0,0,0,0.3);
-  font-size:18px;line-height:1;
+  color:rgba(0,0,0,0.35);
+  font-size:16px;line-height:1;
   cursor:pointer;
+  border:none;
+  background:transparent;
+  padding:0;
+  appearance:none;
+  -webkit-appearance:none;
+  box-shadow:none;
+  outline:none;
+}
+.float-notice .fn-close:focus-visible{
+  outline:none;
 }
 .float-notice .fn-avatar{
   width:36px;
@@ -2846,6 +3769,500 @@ html,body{
 
 .app-view-hidden{display:none !important}
 
+
+/* ============ 记录 Tab · 新用户空值页 ============ */
+.suiji-shell--empty{
+  background:linear-gradient(180deg, #FFFFFF 0%, #F2F2F5 100%);
+  min-height:calc(100vh - 44px);
+  position:relative;
+  overflow:hidden;
+}
+.suiji-shell--empty::before{display:none}
+
+.record-empty-root{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  min-height:calc(100vh - 44px - 58px);
+  padding-bottom:8px;
+  font-family:"PingFang SC", -apple-system, "Helvetica Neue", sans-serif;
+  color:#323232;
+}
+.record-empty-blob{
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+.record-empty-blob--tr{
+  top:-120px;right:-80px;width:320px;height:320px;
+  opacity:0.55;
+}
+.record-empty-blob--bl{
+  bottom:200px;left:-100px;width:280px;height:280px;
+  opacity:0.35;
+}
+.record-empty-head{
+  display:flex;
+  align-items:center;
+  padding:12px 22px 8px;
+  position:relative;
+  z-index:2;
+}
+.record-empty-title{
+  font-size:22px;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+  padding:14px 22px 0;
+  position:relative;
+  z-index:2;
+}
+.record-empty-hero-title{
+  margin:0;
+  font-size:32px;
+  font-weight:600;
+  line-height:1.18;
+  letter-spacing:-0.02em;
+}
+.record-empty-accent{color:#ff4d88}
+.record-empty-hero-sub{
+  margin:10px 0 0;
+  font-size:14.5px;
+  line-height:1.55;
+  color:#8E8E93;
+  letter-spacing:0.01em;
+}
+.record-empty-demo{
+  flex:1;
+  padding:20px 22px 0;
+  min-height:0;
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+}
+.record-empty-card{
+  background:#fff;
+  border-radius:24px;
+  padding:16px 16px 18px;
+  box-shadow:0 1px 2px rgba(40,20,10,0.04), 0 12px 32px rgba(80,40,20,0.06);
+  border:0.5px solid rgba(0,0,0,0.04);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.record-empty-card-hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.record-empty-card-label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:11.5px;
+  color:#8E8E93;
+  letter-spacing:0.08em;
+}
+.record-empty-card-dot{
+  width:6px;height:6px;border-radius:3px;background:#ff4d88;
+}
+.record-empty-card-pct{
+  font-size:10.5px;
+  color:#8E8E93;
+  font-variant-numeric:tabular-nums;
+}
+.record-empty-bubble-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+}
+.record-empty-bubble{
+  border-radius:18px 18px 4px 18px;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  max-width:85%;
+}
+.record-empty-wave{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  height:18px;
+}
+.record-empty-wave span{
+  width:2px;
+  border-radius:1px;
+  background:rgba(255,255,255,0.92);
+}
+.record-empty-bubble-dur{
+  font-size:11px;
+  color:rgba(255,255,255,0.9);
+  font-variant-numeric:tabular-nums;
+  min-width:22px;
+}
+.record-empty-transcript{
+  font-size:13px;
+  color:#323232;
+  background:rgba(0,0,0,0.03);
+  padding:6px 10px;
+  border-radius:10px;
+  max-width:90%;
+  line-height:1.45;
+}
+.record-empty-cursor{
+  display:inline-block;
+  width:6px;height:13px;
+  background:#ff4d88;
+  margin-left:2px;
+  vertical-align:middle;
+}
+.record-empty-tags{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  padding-top:2px;
+}
+.record-empty-tag{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  border-radius:14px;
+  padding:6px 10px 6px 8px;
+  border:0.5px solid;
+}
+.record-empty-tag-cat{
+  font-size:10.5px;
+  opacity:0.7;
+  letter-spacing:0.05em;
+}
+.record-empty-tag-val{
+  font-size:12.5px;
+  color:#323232;
+  font-weight:500;
+}
+.record-empty-chart{
+  background:rgba(0,0,0,0.025);
+  border-radius:14px;
+  padding:12px 12px 10px;
+}
+.record-empty-chart-hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.record-empty-chart-title{
+  font-size:11px;
+  font-weight:500;
+  color:#323232;
+}
+.record-empty-chart-badge{
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:6px;
+}
+.record-empty-chart-bars{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  height:48px;
+  gap:6px;
+}
+.record-empty-chart-col{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  justify-content:flex-end;
+  height:100%;
+}
+.record-empty-chart-bar{
+  width:100%;
+  border-radius:4px;
+}
+.record-empty-chart-day{
+  font-size:9px;
+  color:#8E8E93;
+}
+.record-empty-voice-wrap{
+  padding:0 22px 28px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+  z-index:2;
+}
+.record-empty-voice-hint{
+  margin:14px 0 0;
+  font-size:13px;
+  color:#8E8E93;
+  letter-spacing:0.04em;
+}
+.record-empty-mic{
+  position:relative;
+  width:96px;height:96px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.record-empty-mic-ring{
+  position:absolute;
+  border-radius:50%;
+}
+.record-empty-mic-ring--glow{
+  inset:0;
+  filter:blur(8px);
+}
+.record-empty-mic-ring--stroke{
+  inset:-8px;
+  border:1.5px solid;
+}
+.record-empty-mic-core{
+  width:84px;height:84px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  transition:transform 0.08s ease;
+}
+
+
+/* ============ 记录搜索页 ============ */
+.search-page{
+  position:fixed;
+  top:44px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  bottom:0;
+  z-index:120;
+  background:var(--my-bg);
+  display:flex;
+  flex-direction:column;
+  animation:searchPageIn 0.28s ease-out;
+}
+@keyframes searchPageIn{
+  from{opacity:0;transform:translateX(-50%) translateY(8px)}
+  to{opacity:1;transform:translateX(-50%) translateY(0)}
+}
+
+.search-nav{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 12px 10px 8px;
+  flex-shrink:0;
+}
+.search-back{
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;
+  color:var(--my-text-primary);
+  cursor:pointer;
+  border-radius:8px;
+}
+.search-nav-title{
+  flex:1;
+  font-size:17px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.2;
+}
+.search-reset{
+  border:none;background:transparent;
+  font-size:14px;
+  color:var(--my-link);
+  padding:6px 8px;
+  cursor:pointer;
+}
+
+.search-field-wrap{
+  margin:0 16px 12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  height:40px;
+  padding:0 12px;
+  background:var(--my-surface);
+  border-radius:8px;
+  box-shadow:0 1px 4px rgba(50,50,50,0.04);
+  border:0.5px solid rgba(0,0,0,0.04);
+  flex-shrink:0;
+}
+.search-field-ico{
+  color:var(--my-text-tertiary);
+  display:flex;
+  flex-shrink:0;
+}
+.search-field{
+  flex:1;
+  border:none;
+  background:transparent;
+  font-size:15px;
+  color:var(--my-text-primary);
+  outline:none;
+  min-width:0;
+}
+.search-field::placeholder{color:var(--my-text-quat)}
+.search-field-clear{
+  width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:rgba(0,0,0,0.05);
+  border-radius:50%;
+  color:var(--my-text-tertiary);
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+.search-scroll{
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:0 16px calc(env(safe-area-inset-bottom, 12px) + 20px);
+}
+
+.search-tags-section{
+  margin-bottom:16px;
+}
+.search-tags{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:8px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  padding-bottom:2px;
+}
+.search-tags::-webkit-scrollbar{display:none}
+.search-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  height:28px;
+  padding:0 12px;
+  border-radius:80px;
+  border:1px solid rgba(0,0,0,0.08);
+  background:var(--my-surface);
+  font-size:13px;
+  color:var(--my-text-secondary);
+  cursor:pointer;
+  flex-shrink:0;
+  transition:background 0.18s ease,border-color 0.18s ease,color 0.18s ease;
+}
+.search-tag-emoji{font-size:13px;line-height:1}
+.search-tag.is-active{
+  border-color:rgba(255,77,136,0.45);
+  background:var(--my-brand-soft);
+  color:var(--my-brand-red);
+}
+
+.search-results-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.search-results-title{
+  font-size:14px;
+  font-weight:500;
+  color:var(--my-text-primary);
+}
+.search-results-count{
+  font-size:12px;
+  color:var(--my-text-tertiary);
+}
+
+.search-result-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.search-result-card{
+  background:var(--my-surface);
+  border-radius:12px;
+  padding:14px 14px 12px;
+  box-shadow:0 2px 10px rgba(50,50,50,0.05);
+  border:0.5px solid rgba(0,0,0,0.03);
+}
+.search-result-meta-row{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:8px;
+}
+.search-result-date{
+  font-size:12px;
+  font-weight:500;
+  color:var(--my-text-secondary);
+}
+.search-result-time{
+  font-size:11px;
+  color:var(--my-text-tertiary);
+}
+.search-result-voice{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  font-size:11px;
+  color:var(--my-text-tertiary);
+  margin-left:auto;
+}
+.search-result-body{
+  font-size:14px;
+  line-height:1.47;
+  color:var(--my-text-primary);
+  margin:0 0 10px;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.search-hl{
+  background:rgba(255,77,136,0.14);
+  color:var(--my-brand-red);
+  border-radius:2px;
+  padding:0 1px;
+}
+.search-result-card .tl-tags{
+  margin:0;
+}
+.search-result-card .tl-tag.is-t5{
+  font-size:11px;
+  height:20px;
+  padding:0 8px;
+}
+
+.search-empty{
+  text-align:center;
+  padding:28px 16px 12px;
+}
+.search-empty--idle{
+  padding:20px 16px 8px;
+}
+.search-empty-title{
+  font-size:15px;
+  font-weight:500;
+  color:var(--my-text-secondary);
+  margin:0 0 6px;
+}
+.search-empty-desc{
+  font-size:13px;
+  color:var(--my-text-tertiary);
+  margin:0;
+  line-height:1.45;
+}
+
 </style>
 </head>
 <body>
@@ -2854,8 +4271,7 @@ html,body{
 
 <script>
 const TWEAK_DEFAULTS = {
-  "scene": "period",
-  "entry": "direct"
+  "demoScene": "period-calendar"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 </script>
@@ -2920,6 +4336,11 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
     case 'arrow': return (
       <svg {...common}>
         <path d="M9 6l6 6-6 6"/>
+      </svg>
+    );
+    case 'arrow-left': return (
+      <svg {...common}>
+        <path d="M15 6l-6 6 6 6"/>
       </svg>
     );
     case 'sparkle': return (
@@ -3141,6 +4562,81 @@ function pickFollowUp(hits, ctx){
   return { text: ctx.followUp, chips: ctx.chips.slice(0, 3) };
 }
 
+const WEEKDAY_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
+
+function formatTodayDateLabel(d = new Date()){
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function buildTodayDayBlock(ctx){
+  const scene = ctx || SCENE_CONTEXT.period;
+  const cycle = scene.cycle || {};
+  const d = new Date();
+  const phaseTag = cycle.label && cycle.sub
+    ? `${cycle.label}${cycle.sub}`
+    : (cycle.label || '');
+  return {
+    type:'day',
+    id:'d-today',
+    date: formatTodayDateLabel(d),
+    weekday: WEEKDAY_ZH[d.getDay()],
+    isToday: true,
+    phaseTag,
+    phaseKind: cycle.kind || 'period',
+    cycleDay: parseInt(String(cycle.dayNum || '').replace(/\D/g, ''), 10) || 1,
+    items: [],
+  };
+}
+
+function buildT5TagsFromText(text, hits){
+  const tags = [];
+  const seen = new Set();
+
+  const push = (label, cat, key)=>{
+    const k = key || `${cat}:${label}`;
+    if(seen.has(k)) return;
+    seen.add(k);
+    tags.push({ label, cat });
+  };
+
+  hits.forEach(h=>{
+    if(seen.has(h.kind)) return;
+    seen.add(h.kind);
+    if(h.kind === 'period'){
+      push(buildSyncDisplayLabel(h, text), 'period', 'period');
+    } else if(h.kind === 'pain'){
+      push('痛经', 'symptom', 'pain');
+    } else if(h.kind === 'flow'){
+      push('经量 偏多', 'flow', 'flow');
+    } else if(h.kind === 'flow-low'){
+      push('经量 偏少', 'flow', 'flow-low');
+    } else if(h.kind === 'sleep'){
+      push(/没睡|失眠|醒|偏少/.test(text) ? '睡眠偏少' : '睡眠', 'sleep', 'sleep');
+    } else if(h.kind === 'mood'){
+      push(/低落|烦|焦虑|难过|哭/.test(text) ? '心情 低落' : '心情 平静', 'mood', 'mood');
+    } else if(h.kind === 'med'){
+      push('用药', 'symptom', 'med');
+    } else if(h.kind === 'weight'){
+      push('体重', 'weight', 'weight');
+    } else if(h.kind === 'food'){
+      push('饮食', 'diet', 'food');
+    }
+  });
+
+  if(/腹胀|肚子胀/.test(text)) push('腹胀', 'symptom', 'bloat');
+  if(/腰酸|腰痛/.test(text)) push('腰酸', 'symptom', 'back');
+  if(/累|疲惫|乏力|没力气/.test(text) && !seen.has('sleep')) push('疲惫', 'symptom', 'tired');
+  if(/跑步|跑了|三公里|公里/.test(text)) push('跑步', 'fitness', 'run');
+  if(/三明治|午饭|午餐|晚餐|早餐|吃了/.test(text) && !seen.has('food')) push('饮食', 'diet', 'food-extra');
+  if(/愉快|开心|高兴/.test(text) && !seen.has('mood')) push('心情 愉快', 'mood', 'mood-extra');
+
+  return tags;
+}
+
+function getTimelineEmpty(ctx){
+  return [buildTodayDayBlock(ctx || SCENE_CONTEXT.period)];
+}
+
 // ---------- Scene context ----------
 const SCENE_CONTEXT = {
   period: {
@@ -3308,7 +4804,7 @@ const TIMELINE_BLOCKS = [
     items:[
       {
         kind:'voice-card', id:'e-518-1a', time:'16:00',
-        voice:{ duration:'12"' },
+        voice:{ duration:'0:12' },
         voiceText:'今天月经来了，量不算多，肚子有点闷闷的胀，腰也有点酸，心情还行就是有点懒得动。',
         tags:[
           { label:'月经来了', cat:'period' },
@@ -3329,6 +4825,14 @@ const TIMELINE_BLOCKS = [
     ],
   },
 ];
+
+// 场景二：新用户空值 — 运行时生成「今天」分日（与场景一时间轴头一致）
+const TIMELINE_EMPTY = getTimelineEmpty();
+
+// 旧场景二数据（含历史时间轴，保留供参考）
+const TIMELINE_RECORD_DIRECT = TIMELINE_BLOCKS.filter(
+  (b) => b.type !== 'day' || b.id !== 'd-5-18',
+);
 
 // Legacy daily cards (kept for reference)
 const DAILY_CARDS = [
@@ -3388,9 +4892,15 @@ window.extractContentTypes = extractContentTypes;
 window.CONTENT_TYPES = CONTENT_TYPES;
 window.chooseAnalysis = chooseAnalysis;
 window.buildSyncDisplayLabel = buildSyncDisplayLabel;
+window.buildT5TagsFromText = buildT5TagsFromText;
+window.buildTodayDayBlock = buildTodayDayBlock;
+window.getTimelineEmpty = getTimelineEmpty;
+window.formatTodayDateLabel = formatTodayDateLabel;
 window.pickFollowUp = pickFollowUp;
 window.SCENE_CONTEXT = SCENE_CONTEXT;
 window.TIMELINE_BLOCKS = TIMELINE_BLOCKS;
+window.TIMELINE_EMPTY = TIMELINE_EMPTY;
+window.TIMELINE_RECORD_DIRECT = TIMELINE_RECORD_DIRECT;
 window.DAILY_CARDS = DAILY_CARDS;
 
 </script>
@@ -3908,7 +5418,7 @@ function CalDayCell({cell, periodLit}){
   );
 }
 
-function CalendarPage({onAnalysisReady, onPeriodReset}){
+function CalendarPage({onAnalysisReady, onPeriodReset, periodFlowEnabled = true}){
   const [periodYes, setPeriodYes] = useState(false);
   const [litDays, setLitDays] = useState([]);
   const timersRef = useRef([]);
@@ -3940,7 +5450,7 @@ function CalendarPage({onAnalysisReady, onPeriodReset}){
       timersRef.current.push(t);
     });
     const t2 = setTimeout(()=>{
-      onAnalysisReady();
+      if(periodFlowEnabled) onAnalysisReady?.();
     }, PERIOD_DAYS.length * 280 + 200);
     timersRef.current.push(t2);
   };
@@ -4096,6 +5606,7 @@ Object.assign(window, { CalendarPage, FloatNotice });
 // ============ 统一语音条 & 5/18 分析卡片 ============
 
 const VOICE_WAVE_HEIGHTS = [6,11,16,9,13,7,17,12,8,15,10,18,9,14,7,12,16,8,13,6,11,15,9,7];
+const MINI_WAVE_HEIGHTS = [4,7,9,6,8,5];
 
 const CC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAfACEDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUHCAMG/8QAKhAAAgEDAwIDCQAAAAAAAAAAAQIDAAQRBQYhEjEHExQWJTJxgYKhsfH/xAAXAQEBAQEAAAAAAAAAAAAAAAACBQED/8QAHBEAAQUBAQEAAAAAAAAAAAAAAgABAwURBBJh/9oADAMBAAIRAxEAPwDZLEAZP7pdc6vYQTxwSTxiSQ9IGaNyytDod5IrYKwuQftNRGzknvr5LeMl5ZGzk9uaYjqsVlY3YJET4zK2prWnNcrbi5j8xk6wM96YRsrqCpyCM96hOu2t1o18IrnJJxyOx/lVHwyuXudrwNJIXIyAT86RDjJWFSPNCM0Zazr1FFFFclFSjeCO+278Rgl/TyYA7/Caz5oOtPpOqpdeWSUOCpPNaYYBhgjOR9KTy7a0KaVpJNJsXZjkkwAk02LFcqLaPijOOQPTEoVufdDa3cxOYuhIxwM9zmq94Q9fsdbs64LEn8mmw2tt7j3NY8HPEC03t4o4YwkcYjUDAUAACsck7O4h6oBgiDyzfdXSijFFFQF//9k=';
 
@@ -4104,6 +5615,89 @@ const SC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BS
 function TlCardTime({time}){
   if(!time) return null;
   return <div className="tl-card-time">{time}</div>;
+}
+
+const TYPEWRITER_MS = 68;
+
+function segmentsFullText(segments){
+  return (segments || []).map(s => s.text).join('');
+}
+
+function renderTypedSegments(segments, len){
+  let left = len;
+  const out = [];
+  (segments || []).forEach((seg, i) => {
+    if(left <= 0) return;
+    const take = Math.min(left, seg.text.length);
+    if(take <= 0) return;
+    const chunk = seg.text.slice(0, take);
+    left -= take;
+    if(seg.bold) out.push(<b key={i}>{chunk}</b>);
+    else out.push(<React.Fragment key={i}>{chunk}</React.Fragment>);
+  });
+  return out;
+}
+
+function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onComplete, className}){
+  const full = segments ? segmentsFullText(segments) : (text || '');
+  const [len, setLen] = React.useState(active ? 0 : full.length);
+  const doneRef = React.useRef(!active);
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  React.useEffect(()=>{
+    if(!active){
+      setLen(full.length);
+      if(!doneRef.current){
+        doneRef.current = true;
+        onCompleteRef.current?.();
+      }
+      return;
+    }
+    doneRef.current = false;
+    setLen(0);
+    if(!full.length){
+      doneRef.current = true;
+      onCompleteRef.current?.();
+      return;
+    }
+    let i = 0;
+    let timer = null;
+    const tick = ()=>{
+      i += 1;
+      setLen(i);
+      if(i >= full.length){
+        doneRef.current = true;
+        onCompleteRef.current?.();
+        return;
+      }
+      timer = setTimeout(tick, charMs);
+    };
+    timer = setTimeout(tick, charMs);
+    return ()=>{ if(timer) clearTimeout(timer); };
+  }, [text, segments, active, charMs, full]);
+
+  const showCursor = active && len < full.length;
+  const content = segments ? renderTypedSegments(segments, len) : full.slice(0, len);
+
+  return (
+    <span className={className}>
+      {content}
+      {showCursor && <span className="tl-typewriter-cursor" aria-hidden="true"/>}
+    </span>
+  );
+}
+
+function TypewriterBody({text, active, onComplete, className}){
+  if(!text) return null;
+  if(!active){
+    return <div className={className}>{text}</div>;
+  }
+  return (
+    <div className={className}>
+      <TypewriterText text={text} active onComplete={onComplete}/>
+    </div>
+  );
 }
 
 // ============ 记录标签体系 ============
@@ -4185,31 +5779,35 @@ function RecordedTags({tags, layout}){
   const visible = (tags || []).filter(t => resolveTag(t).cat !== 'care');
   if(visible.length === 0) return null;
   const isRows = layout === 'rows';
+  const isT5 = layout === 't5';
   return (
-    <>
-      <div className="tl-extract-label">已记录</div>
-      <div className={'tl-tags'+(isRows ? ' tl-tags-rows' : '')}>
-        {visible.map((t, i) => {
-          const r = resolveTag(t);
-          return (
-            <span key={i} className={'tl-tag tone-'+r.tone+(isRows ? ' is-row':'')}>
-              <span className="tl-tag-ico" aria-hidden="true">{r.emoji}</span>
-              {r.label}
-            </span>
-          );
-        })}
-      </div>
-    </>
+    <div className={'tl-tags'+(isRows ? ' tl-tags-rows' : '')+(isT5 ? ' tl-tags-t5' : '')}>
+      {visible.map((t, i) => {
+        const r = resolveTag(t);
+        return (
+          <span key={i} className={'tl-tag tone-'+r.tone+(isRows ? ' is-row':'')+(isT5 ? ' is-t5':'')}>
+            {isT5 ? (
+              tagLabel(t)
+            ) : (
+              <>
+                <span className="tl-tag-ico" aria-hidden="true">{r.emoji}</span>
+                {r.label}
+              </>
+            )}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
-function AiNoteSection({aiNote}){
+function AiNoteSection({aiNote, embedded, typewriter, onTypeComplete}){
   if(!aiNote) return null;
   const tone = aiNote.tone || 'green';
   const icon = aiNote.icon || '💡';
 
   return (
-    <div className={'tl-combo-ai '+tone+'-bg'}>
+    <div className={'tl-combo-ai'+(embedded?' tl-t5-ai-note':' '+tone+'-bg')}>
       <span className="tl-combo-ai-icon" aria-hidden="true">{icon}</span>
       <div className="tl-combo-ai-body">
         {aiNote.items?.length ? (
@@ -4223,6 +5821,10 @@ function AiNoteSection({aiNote}){
               <div className="tl-combo-ai-total">{aiNote.total}</div>
             )}
           </>
+        ) : typewriter ? (
+          <p className="tl-combo-ai-text">
+            <TypewriterText text={aiNote.text} active onComplete={onTypeComplete}/>
+          </p>
         ) : (
           <p className="tl-combo-ai-text">{aiNote.text}</p>
         )}
@@ -4249,48 +5851,126 @@ function RecordPhoto({photo}){
   );
 }
 
-function VoiceWave({playing}){
+function VoiceWave({playing, mini}){
+  const heights = mini ? MINI_WAVE_HEIGHTS : VOICE_WAVE_HEIGHTS;
   return (
-    <div className={'tl-voice-wave'+(playing?' is-playing':'')} aria-hidden="true">
-      {VOICE_WAVE_HEIGHTS.map((h, i) => (
+    <div className={'tl-voice-wave'+(mini?' is-mini':'')+(playing?' is-playing':'')} aria-hidden="true">
+      {heights.map((h, i) => (
         <span key={i} style={{height: h + 'px', '--i': i}}/>
       ))}
     </div>
   );
 }
 
-function TlVoiceBar({voice}){
+function TlVoicePlayBtn({voice}){
   const [playing, setPlaying] = React.useState(false);
-  const duration = voice?.duration || '0:00';
+  const raw = voice?.duration || '0:00';
+  const duration = /^\d+["″]?$/.test(raw)
+    ? '0:'+String(parseInt(raw, 10)).padStart(2, '0')
+    : raw;
   return (
-    <div className="tl-voice-bar">
-      <button
-        type="button"
-        className="tl-voice-play"
-        onClick={()=>setPlaying(p=>!p)}
-        aria-label={playing?'暂停':'播放语音'}
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <VoiceWave playing={playing}/>
-      <div className="tl-voice-dur">{duration}</div>
+    <button
+      type="button"
+      className={'tl-voice-pill'+(playing?' is-playing':'')}
+      onClick={()=>setPlaying(p=>!p)}
+      aria-label={playing?'暂停':'播放语音'}
+    >
+      <span className="tl-voice-pill-ico" aria-hidden="true">
+        {playing ? (
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="7" y="6" width="3.5" height="12" rx="0.8"/>
+            <rect x="13.5" y="6" width="3.5" height="12" rx="0.8"/>
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        )}
+      </span>
+      <VoiceWave playing={playing} mini/>
+      <span className="tl-voice-pill-dur">{duration}</span>
+    </button>
+  );
+}
+
+function TlVoiceBar({voice}){
+  return <TlVoicePlayBtn voice={voice}/>;
+}
+
+function TlVoiceInline({voice, text}){
+  if(!voice && !text) return null;
+  return (
+    <div className={'tl-voice-block'+(voice?' has-voice-pill':'')}>
+      <p className="tl-voice-text">
+        {text}
+        {voice && <TlVoicePlayBtn voice={voice}/>}
+      </p>
     </div>
   );
 }
 
-function VoiceRecordCard({item}){
-  const voiceText = item.voiceText || '';
+function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, analysisProps}){
+  const tags = entry.tags || [];
+  const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
+  const hasAiNote = !!entry.aiNote;
+  const hasAnalysis = !!analysisProps;
+  const hasVoice = !!entry.voice;
+  const text = entry.voiceText || entry.body || '';
+  const tagLayout = entry.tagLayout || 't5';
+  const aiNoteTypewriter = !!(typewriterAiNote && hasAiNote);
+  const analysisAnimateText = hasAnalysis && (
+    !!animateAnalysis || (analysisProps.playAnimation > 0)
+  );
 
   return (
-    <div className="tl-card">
-      {item.voice && <TlVoiceBar voice={item.voice}/>}
-      <div className="tl-voice-text">{voiceText}</div>
-      <RecordedTags tags={item.tags}/>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')}>
+      <section className="tl-t5-main">
+        {hasVoice ? (
+          <TlVoiceInline voice={entry.voice} text={text}/>
+        ) : text ? (
+          <div className="tl-t5-body">{text}</div>
+        ) : null}
+        <RecordPhoto photo={entry.photo}/>
+        {hasTags && (
+          <div className="tl-t5-tags">
+            <RecordedTags tags={tags} layout={tagLayout}/>
+          </div>
+        )}
+      </section>
+
+      {hasAiNote && (
+        <>
+          <div className="tl-t5-divider" role="separator"/>
+          <section className="tl-t5-insight">
+            <AiNoteSection
+              aiNote={entry.aiNote}
+              embedded
+              typewriter={aiNoteTypewriter}
+            />
+          </section>
+        </>
+      )}
+
+      {hasAnalysis && (
+        <>
+          <div className="tl-t5-divider" role="separator"/>
+          <section className="tl-t5-insight" id="sister-analysis-anchor">
+            <SisterAnalysisContent
+              {...analysisProps}
+              animateText={analysisAnimateText}
+            />
+          </section>
+        </>
+      )}
     </div>
   );
 }
 
-function SisterCycleChart({animated}){
+function VoiceRecordCard(props){
+  return <SegmentedRecordCard {...props}/>;
+}
+
+const CYCLE_CHART_ANIM_MS = 4280; // zoom-pop @3580ms + 0.7s animation
+
+function SisterCycleChart({animated, onComplete}){
   const bars = [
     {date:'上上次', status:'准时', width:'96.8%', label:'30天'},
     {date:'上次', status:'准时', width:'100%', label:'31天'},
@@ -4301,9 +5981,14 @@ function SisterCycleChart({animated}){
   const [seenBars, setSeenBars] = React.useState(done ? [0, 1, 2] : []);
   const [grownBars, setGrownBars] = React.useState(done ? [0, 1, 2] : []);
   const [zoomPop, setZoomPop] = React.useState(done);
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   React.useEffect(()=>{
-    if(!animated) return;
+    if(!animated){
+      onCompleteRef.current?.();
+      return;
+    }
     setHeadSeen(false);
     setSeenBars([]);
     setGrownBars([]);
@@ -4314,6 +5999,7 @@ function SisterCycleChart({animated}){
       setTimeout(()=>{ setSeenBars([0, 1]); setGrownBars([0, 1]); }, 1400),
       setTimeout(()=>{ setSeenBars([0, 1, 2]); setGrownBars([0, 1, 2]); }, 2480),
       setTimeout(()=>setZoomPop(true), 3580),
+      setTimeout(()=>onCompleteRef.current?.(), CYCLE_CHART_ANIM_MS),
     ];
     return ()=>timers.forEach(clearTimeout);
   }, [animated]);
@@ -4421,41 +6107,685 @@ function SisterSignalCard({animated}){
   );
 }
 
-function SisterAnalysisCard({playAnimation, onCycleComplete}){
+const SISTER_LEAD = '以下是本次月经情况的分析。先看一下你最近3个周期的情况：';
+
+const SISTER_PARA1 = [
+  { text:'你最近三次周期分别是' },
+  { text:'30天、31天、29天', bold:true },
+  { text:'，整体波动幅度很小，属于' },
+  { text:'非常规律', bold:true },
+  { text:'的状态。' },
+];
+
+const SISTER_CLOSING = [
+  { text:'这次周期天数落在' },
+  { text:'21–35天的理想范围', bold:true },
+  { text:'内。很棒哦，继续保持现在的健康生活节奏就可以。' },
+];
+
+function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const [animated, setAnimated] = React.useState(false);
-  const [showSignal, setShowSignal] = React.useState(!playAnimation);
-  const [showClosing, setShowClosing] = React.useState(!playAnimation);
+  const [leadDone, setLeadDone] = React.useState(!animateText);
+  const [chartDone, setChartDone] = React.useState(!animateText);
+  const [para1Done, setPara1Done] = React.useState(!animateText);
+  const [showSignal, setShowSignal] = React.useState(!playAnimation && !animateText);
+  const [showClosing, setShowClosing] = React.useState(!playAnimation && !animateText);
+  const [closingDone, setClosingDone] = React.useState(!animateText);
+  const prevPlayRef = React.useRef(playAnimation);
+  const onCycleCompleteRef = React.useRef(onCycleComplete);
+  onCycleCompleteRef.current = onCycleComplete;
 
   React.useEffect(()=>{
-    if(!playAnimation){
-      onCycleComplete?.();
+    if(!animateText){
+      setLeadDone(true);
+      setChartDone(true);
+      setPara1Done(true);
+      setClosingDone(true);
+      onCycleCompleteRef.current?.();
       return;
     }
+    if(playAnimation > prevPlayRef.current){
+      setLeadDone(false);
+      setChartDone(false);
+      setPara1Done(false);
+      setClosingDone(false);
+      setShowSignal(false);
+      setShowClosing(false);
+      setAnimated(false);
+    }
+    prevPlayRef.current = playAnimation;
+  }, [animateText, playAnimation]);
+
+  React.useEffect(()=>{
+    if(!playAnimation) return;
+    if(animateText && !leadDone) return;
     setAnimated(true);
     setShowSignal(false);
     setShowClosing(false);
-    const t1 = setTimeout(()=>setShowSignal(true), 3600);
-    const t2 = setTimeout(()=>setShowClosing(true), 5800);
-    const t3 = setTimeout(()=>onCycleComplete?.(), 5800);
-    return ()=>{ clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [playAnimation, onCycleComplete]);
+  }, [playAnimation, animateText, leadDone]);
+
+  React.useEffect(()=>{
+    if(!animateText || !para1Done) return;
+    const delay = playAnimation ? 480 : 320;
+    const t = setTimeout(()=>setShowSignal(true), delay);
+    return ()=>clearTimeout(t);
+  }, [animateText, para1Done, playAnimation]);
+
+  React.useEffect(()=>{
+    if(!animateText || !showSignal) return;
+    const delay = playAnimation ? 2400 : 880;
+    const t = setTimeout(()=>setShowClosing(true), delay);
+    return ()=>clearTimeout(t);
+  }, [animateText, showSignal, playAnimation]);
+
+  React.useEffect(()=>{
+    if(!animateText || !showClosing || !closingDone) return;
+    onCycleCompleteRef.current?.();
+  }, [animateText, showClosing, closingDone]);
+
+  const showChart = !animateText || leadDone;
+  const showPara1 = !animateText || (leadDone && chartDone);
 
   return (
-    <div className="sister-bubble" id="sister-analysis-anchor">
-      <p>以下是本次月经情况的分析。先看一下你最近3个周期的情况：</p>
-      <SisterCycleChart animated={animated}/>
-      <p>你最近三次周期分别是<b>30天、31天、29天</b>，整体波动幅度很小，属于<b>非常规律</b>的状态。</p>
-      {showSignal && <SisterSignalCard animated={animated}/>}
-      {showClosing && (
-        <p>这次周期天数落在<b>21–35天的理想范围</b>内。很棒哦，继续保持现在的健康生活节奏就可以。</p>
+    <div className="tl-t5-analysis-body">
+      <p className="tl-t5-analysis-lead">
+        {animateText && !leadDone ? (
+          <TypewriterText text={SISTER_LEAD} active onComplete={()=>setLeadDone(true)}/>
+        ) : SISTER_LEAD}
+      </p>
+      {showChart && (
+        <SisterCycleChart
+          animated={animated}
+          onComplete={()=>setChartDone(true)}
+        />
+      )}
+      {showPara1 && (
+        <p className="tl-t5-analysis-text">
+          {animateText && !para1Done ? (
+            <TypewriterText
+              segments={SISTER_PARA1}
+              active
+              onComplete={()=>setPara1Done(true)}
+            />
+          ) : (
+            renderTypedSegments(SISTER_PARA1, segmentsFullText(SISTER_PARA1).length)
+          )}
+        </p>
+      )}
+      {showSignal && (!animateText || para1Done) && (
+        <>
+          <div className="tl-t5-chart-divider" role="separator"/>
+          <SisterSignalCard animated={animated}/>
+        </>
+      )}
+      {showClosing && (!animateText || para1Done) && (
+        <p className="tl-t5-analysis-text">
+          {animateText && !closingDone ? (
+            <TypewriterText
+              segments={SISTER_CLOSING}
+              active
+              onComplete={()=>setClosingDone(true)}
+            />
+          ) : (
+            renderTypedSegments(SISTER_CLOSING, segmentsFullText(SISTER_CLOSING).length)
+          )}
+        </p>
       )}
     </div>
   );
 }
 
+function SisterAnalysisCard({playAnimation, onCycleComplete}){
+  return (
+    <div className="sister-bubble" id="sister-analysis-anchor">
+      <SisterAnalysisContent
+        playAnimation={playAnimation}
+        onCycleComplete={onCycleComplete}
+      />
+    </div>
+  );
+}
+
 Object.assign(window, {
-  TlCardTime, TlVoiceBar, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
-  VoiceRecordCard, SisterAnalysisCard,
+  TlCardTime, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
+  SegmentedRecordCard, VoiceRecordCard, SisterAnalysisCard, SisterAnalysisContent,
+});
+
+</script>
+
+<!-- mood-picker.jsx -->
+<script type="text/babel">
+// ============ 心情快捷选择 — 输入框上方引导 ============
+
+const MOOD_OPTIONS = [
+  { id:'super-happy', label:'超开心', face:'super-happy', bg:'#FFE875' },
+  { id:'happy', label:'挺开心', face:'happy', bg:'#FFE875' },
+  { id:'normal', label:'一般', face:'normal', bg:'#B8E8FF' },
+  { id:'unhappy', label:'不开心', face:'unhappy', bg:'#FFC8DC' },
+  { id:'very-sad', label:'好伤心', face:'very-sad', bg:'#FFC8DC' },
+  { id:'excited', label:'兴奋', face:'excited', bg:'#FFE875' },
+  { id:'surprised', label:'惊喜', face:'surprised', bg:'#FFE875' },
+  { id:'satisfied', label:'满足', face:'satisfied', bg:'#FFE875' },
+  { id:'heart-flutter', label:'心动', face:'heart-flutter', bg:'#FFE875' },
+  { id:'confident', label:'自信', face:'confident', bg:'#FFE875' },
+  { id:'relaxed', label:'放松', face:'relaxed', bg:'#FFE875' },
+  { id:'calm', label:'平静', face:'calm', bg:'#B8E8FF' },
+  { id:'irritable', label:'烦躁', face:'irritable', bg:'#FFC8DC' },
+  { id:'temper', label:'易怒', face:'temper', bg:'#FFC8DC' },
+  { id:'angry', label:'生气', face:'angry', bg:'#FF9898' },
+  { id:'anxious', label:'焦虑', face:'anxious', bg:'#C8E8A8' },
+  { id:'overthink', label:'内耗', face:'overthink', bg:'#FFC8DC' },
+  { id:'stressed', label:'压力', face:'stressed', bg:'#FFE875' },
+  { id:'scared', label:'害怕', face:'scared', bg:'#FFC8DC' },
+  { id:'indifferent', label:'冷漠', face:'indifferent', bg:'#B8E8FF' },
+];
+
+function MoodFace({face, bg}){
+  const common = { className:'mood-face-svg', viewBox:'0 0 48 48', role:'img', 'aria-hidden':true };
+  const skin = bg || '#FFE875';
+  const eye = '#5A4030';
+  const mouth = '#E06B88';
+
+  switch(face){
+    case 'super-happy':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M12 22c0-3 3-5 6-5s6 2 6 5M24 22c0-3 3-5 6-5s6 2 6 5" stroke={eye} strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+          <path d="M14 30c4 6 16 6 20 0" stroke={mouth} strokeWidth="2.4" fill="none" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'happy':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="22" r="2.2" fill={eye}/><circle cx="31" cy="22" r="2.2" fill={eye}/>
+          <path d="M16 30c3 4 13 4 16 0" stroke={mouth} strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'normal':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="22" r="2.2" fill={eye}/><circle cx="31" cy="22" r="2.2" fill={eye}/>
+          <path d="M18 31h12" stroke={mouth} strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'unhappy':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="22" r="2" fill={eye}/><circle cx="31" cy="22" r="2" fill={eye}/>
+          <path d="M17 32c3-3 11-3 14 0" stroke={mouth} strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'very-sad':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="22" r="2" fill={eye}/><circle cx="31" cy="22" r="2" fill={eye}/>
+          <path d="M16 33c4-4 12-4 16 0" stroke={mouth} strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+          <path d="M14 18v5M34 18v5" stroke="#6BB8FF" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'excited':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M15 21l2 2 4-4M29 21l2 2 4-4" stroke={eye} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+          <path d="M14 30c4 5 16 5 20 0" stroke={mouth} strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+          <path d="M30 10l2 4 4 1-4 1-2 4-2-4-4-1 4-1z" fill="#FF8CB0"/>
+        </svg>
+      );
+    case 'surprised':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="21" r="2.5" fill={eye}/><circle cx="31" cy="21" r="2.5" fill={eye}/>
+          <ellipse cx="24" cy="31" rx="4" ry="5" fill={mouth}/>
+          <path d="M10 14l3 3M38 14l-3 3" stroke="#FFD700" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'satisfied':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M15 22c0-2 2-3 4-3s4 1 4 3M25 22c0-2 2-3 4-3s4 1 4 3" stroke={eye} strokeWidth="1.8" fill="none"/>
+          <path d="M17 30c2 3 12 3 14 0" stroke={mouth} strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <circle cx="36" cy="16" r="3" fill="#FFB8D0"/>
+        </svg>
+      );
+    case 'heart-flutter':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="22" r="2" fill={eye}/><circle cx="31" cy="22" r="2" fill={eye}/>
+          <path d="M16 30c3 3 13 3 16 0" stroke={mouth} strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M10 12l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5zM38 10l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#FF8CB0"/>
+        </svg>
+      );
+    case 'confident':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <rect x="12" y="20" width="24" height="8" rx="4" fill="#3A3A3A"/>
+          <path d="M17 32c2 2 12 2 14 0" stroke={mouth} strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'relaxed':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M15 22c0-2 2-3 4-3s4 1 4 3M25 22c0-2 2-3 4-3s4 1 4 3" stroke={eye} strokeWidth="1.8" fill="none"/>
+          <path d="M17 30c2 3 12 3 14 0" stroke={mouth} strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <rect x="32" y="28" width="8" height="10" rx="2" fill="#fff" stroke="#ddd" strokeWidth="0.8"/>
+        </svg>
+      );
+    case 'calm':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="22" r="2" fill={eye}/><circle cx="31" cy="22" r="2" fill={eye}/>
+          <path d="M18 31h12" stroke={mouth} strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="36" cy="30" r="5" fill="#FF8CB0" opacity="0.7"/>
+        </svg>
+      );
+    case 'irritable':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M14 20l4 2M34 20l-4 2" stroke={eye} strokeWidth="2" strokeLinecap="round"/>
+          <path d="M17 32c3-2 11-2 14 0" stroke={mouth} strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'temper':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M14 20l4 2M34 20l-4 2" stroke={eye} strokeWidth="2" strokeLinecap="round"/>
+          <path d="M16 33c4-3 12-3 16 0" stroke={mouth} strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+          <path d="M18 12l2-3M24 10v-3M30 12l-2-3" stroke="#FF8888" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'angry':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M13 19l5 3M35 19l-5 3" stroke={eye} strokeWidth="2.2" strokeLinecap="round"/>
+          <path d="M15 33c5-4 13-4 18 0" stroke="#D04040" strokeWidth="2.4" fill="none" strokeLinecap="round"/>
+          <rect x="34" y="10" width="6" height="6" rx="1" fill="#555"/>
+        </svg>
+      );
+    case 'anxious':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <ellipse cx="17" cy="22" rx="2.5" ry="3" fill={eye}/><ellipse cx="31" cy="22" rx="2.5" ry="3" fill={eye}/>
+          <path d="M18 32c2-2 10-2 12 0" stroke={mouth} strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'overthink':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <ellipse cx="17" cy="21" rx="3" ry="4" fill={eye}/><ellipse cx="31" cy="21" rx="3" ry="4" fill={eye}/>
+          <path d="M17 33c3-3 11-3 14 0" stroke={mouth} strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'stressed':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="22" r="2" fill={eye}/><circle cx="31" cy="22" r="2" fill={eye}/>
+          <path d="M16 32c4-2 12-2 16 0" stroke={mouth} strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M12 16h4M32 16h4" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'scared':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <circle cx="17" cy="21" r="3" fill={eye}/><circle cx="31" cy="21" r="3" fill={eye}/>
+          <ellipse cx="24" cy="32" rx="3" ry="4" fill={mouth}/>
+          <path d="M10 28c2-4 4-4 6 0M32 28c2-4 4-4 6 0" stroke="#6BB8FF" strokeWidth="1.5" fill="none"/>
+        </svg>
+      );
+    case 'indifferent':
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+          <path d="M15 22h6M27 22h6" stroke={eye} strokeWidth="2" strokeLinecap="round"/>
+          <path d="M18 31h12" stroke={mouth} strokeWidth="2" strokeLinecap="round"/>
+          <rect x="34" y="18" width="6" height="10" rx="1" fill="#8CC8FF"/>
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common}>
+          <circle cx="24" cy="24" r="22" fill={skin}/>
+        </svg>
+      );
+  }
+}
+
+function DockMoodPicker({onConfirm, onCancel}){
+  const [selectedIds, setSelectedIds] = React.useState([]);
+  const selected = MOOD_OPTIONS.filter(m=>selectedIds.includes(m.id));
+  const I = window.Icon;
+
+  const toggleMood = (id)=>{
+    setSelectedIds(prev=>(
+      prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]
+    ));
+  };
+
+  return (
+    <div className="dock-mood-sheet">
+      <div className="dock-mood-top">
+        <div className="dock-mood-lead-cell">
+          <p className="dock-mood-lead">今天心情怎么样？</p>
+        </div>
+        <button type="button" className="dock-mood-close" onClick={onCancel} aria-label="关闭">
+          <I name="close" size={18} stroke={2}/>
+        </button>
+      </div>
+      <div className="dock-mood-grid">
+        {MOOD_OPTIONS.map((m)=>{
+          const isSelected = selectedIds.includes(m.id);
+          return (
+          <button
+            key={m.id}
+            type="button"
+            className={'dock-mood-cell'+(isSelected?' is-selected':'')}
+            onClick={()=>toggleMood(m.id)}
+            aria-pressed={isSelected}
+          >
+            <span className="dock-mood-face-wrap">
+              <span className="dock-mood-face" style={{'--mood-bg': m.bg}}>
+                <MoodFace face={m.face} bg={m.bg}/>
+              </span>
+              {isSelected && (
+                <span className="dock-mood-check" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" width="8" height="8">
+                    <path d="M2.5 6.2 4.8 8.5 9.5 3.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              )}
+            </span>
+            <span className="dock-mood-lbl">{m.label}</span>
+          </button>
+          );
+        })}
+      </div>
+      <div className="dock-mood-foot">
+        <button
+          type="button"
+          className="dock-mood-submit"
+          disabled={selected.length === 0}
+          onClick={()=>selected.length > 0 && onConfirm?.(selected)}
+        >
+          发布
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function createMoodRecordEntry(moods){
+  const list = Array.isArray(moods) ? moods : [moods];
+  return {
+    id:'e-'+Date.now(),
+    kind:'rec',
+    time: window.formatNowTime(),
+    body:'',
+    tags:list.map(m=>({ label:'心情 '+m.label, cat:'mood', emoji:'💛' })),
+    tagLayout:'rows',
+    skipExtractLabel: true,
+    isNew: true,
+  };
+}
+
+Object.assign(window, {
+  MOOD_OPTIONS,
+  MoodFace,
+  DockMoodPicker,
+  createMoodRecordEntry,
+});
+
+</script>
+
+<!-- quick-pickers.jsx -->
+<script type="text/babel">
+// ============ 快捷发布 · 症状 / 体重（底部展开） ============
+
+const SYMPTOM_SECTIONS = [
+  {
+    title:'身体症状',
+    items:[
+      { id:'none', label:'没症状', emoji:'👍', bg:'#ffe8f0' },
+      { id:'breast', label:'乳胀', emoji:'💗', bg:'#ffe8f0' },
+      { id:'discharge', label:'白带', emoji:'💧', bg:'#ffe8f0' },
+      { id:'headache', label:'头痛', emoji:'🤕', bg:'#ffe8f0' },
+      { id:'fever', label:'身体发热', emoji:'🌡️', bg:'#ffe8f0' },
+      { id:'weak', label:'浑身无力', emoji:'😮‍💨', bg:'#ffe8f0' },
+      { id:'cold', label:'身体冷', emoji:'🥶', bg:'#ffe8f0' },
+      { id:'tired', label:'疲惫', emoji:'😩', bg:'#ffe8f0' },
+      { id:'urine', label:'尿频', emoji:'🚽', bg:'#ffe8f0' },
+      { id:'constipation', label:'便秘', emoji:'😣', bg:'#ffe8f0' },
+      { id:'back', label:'腰酸', emoji:'🦴', bg:'#ffe8f0' },
+      { id:'dizzy', label:'眩晕', emoji:'😵', bg:'#ffe8f0' },
+    ],
+  },
+  {
+    title:'阴道分泌物',
+    items:[
+      { id:'dry', label:'干燥', emoji:'🏜️', bg:'#ffe8f0' },
+      { id:'sticky', label:'粘稠', emoji:'🍯', bg:'#ffe8f0' },
+      { id:'creamy', label:'乳液状', emoji:'🥛', bg:'#ffe8f0' },
+      { id:'eggwhite', label:'蛋清状', emoji:'🥚', bg:'#ffe8f0' },
+    ],
+  },
+];
+
+const SYMPTOM_OPTIONS = SYMPTOM_SECTIONS.flatMap(s=>s.items);
+
+const WEIGHT_KEYS = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
+
+function DockSheetFoot({disabled, onSubmit, label}){
+  return (
+    <div className="dock-sheet-foot">
+      <button
+        type="button"
+        className="dock-sheet-submit"
+        disabled={disabled}
+        onClick={onSubmit}
+      >
+        {label || '发布'}
+      </button>
+    </div>
+  );
+}
+
+function DockSheetClose({onCancel}){
+  const I = window.Icon;
+  return (
+    <button type="button" className="dock-sheet-close" onClick={onCancel} aria-label="关闭">
+      <I name="close" size={18} stroke={2}/>
+    </button>
+  );
+}
+
+function SymptomCheck(){
+  return (
+    <span className="dock-picker-check" aria-hidden="true">
+      <svg viewBox="0 0 12 12" width="8" height="8">
+        <path d="M2.5 6.2 4.8 8.5 9.5 3.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </span>
+  );
+}
+
+function DockSymptomPicker({onConfirm, onCancel}){
+  const [selectedIds, setSelectedIds] = React.useState([]);
+  const selected = SYMPTOM_OPTIONS.filter(s=>selectedIds.includes(s.id));
+
+  const toggle = (id)=>{
+    setSelectedIds(prev=>(
+      prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]
+    ));
+  };
+
+  return (
+    <div className="dock-sheet dock-symptom-sheet">
+      <div className="dock-sheet-hd">
+        <h2 className="dock-sheet-title">症状</h2>
+        <DockSheetClose onCancel={onCancel}/>
+      </div>
+      <div className="dock-symptom-scroll">
+        {SYMPTOM_SECTIONS.map((section)=>(
+          <div key={section.title} className="dock-symptom-group">
+            <h3 className="dock-symptom-group-title">{section.title}</h3>
+            <div className="dock-symptom-grid">
+              {section.items.map((item)=>{
+                const isSelected = selectedIds.includes(item.id);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={'dock-symptom-cell'+(isSelected?' is-selected':'')}
+                    onClick={()=>toggle(item.id)}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="dock-symptom-ico-wrap">
+                      <span className="dock-symptom-ico" style={{'--sym-bg': item.bg}}>
+                        {item.emoji}
+                      </span>
+                      {isSelected && <SymptomCheck/>}
+                    </span>
+                    <span className="dock-symptom-lbl">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <DockSheetFoot
+        disabled={selected.length === 0}
+        onSubmit={()=>selected.length > 0 && onConfirm?.(selected)}
+      />
+    </div>
+  );
+}
+
+function DockWeightPicker({onConfirm, onCancel}){
+  const [value, setValue] = React.useState('');
+  const [unit, setUnit] = React.useState('kg');
+
+  const pressKey = (key)=>{
+    if(key === '⌫'){
+      setValue(v=>v.slice(0, -1));
+      return;
+    }
+    if(key === '.'){
+      if(value.includes('.')) return;
+      setValue(v=>(v || '0') + '.');
+      return;
+    }
+    setValue(v=>{
+      if(v === '0') return key;
+      if(v.includes('.') && v.split('.')[1]?.length >= 1) return v;
+      if(!v.includes('.') && v.replace('.','').length >= 3) return v;
+      return v + key;
+    });
+  };
+
+  const num = parseFloat(value);
+  const canSubmit = Number.isFinite(num) && num > 0;
+  const display = value || '0';
+  const unitLabel = unit === 'kg' ? '公斤' : '斤';
+
+  return (
+    <div className="dock-sheet dock-weight-sheet">
+      <div className="dock-weight-top">
+        <p className="dock-sheet-lead">今天体重多少？</p>
+        <DockSheetClose onCancel={onCancel}/>
+      </div>
+      <div className="dock-weight-display-wrap">
+        <button
+          type="button"
+          className="dock-weight-unit-toggle"
+          onClick={()=>setUnit(u=>(u === 'kg' ? 'jin' : 'kg'))}
+        >
+          切换为{unit === 'kg' ? '斤' : '公斤'}
+        </button>
+        <div className="dock-weight-display">
+          <span className="dock-weight-num">{display}</span>
+          <span className="dock-weight-unit">{unitLabel}</span>
+        </div>
+      </div>
+      <div className="dock-weight-keypad">
+        {WEIGHT_KEYS.map((key)=>(
+          <button
+            key={key}
+            type="button"
+            className={'dock-weight-key'+(key === '⌫' ? ' is-fn' : '')}
+            onClick={()=>pressKey(key)}
+            aria-label={key === '⌫' ? '删除' : key}
+          >
+            {key === '⌫' ? (
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M18 8H8a2 2 0 0 0-1.7 1l-3.3 5a1 1 0 0 0 0 1l3.3 5A2 2 0 0 0 8 20h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/>
+                <path d="m14 11-2 2 2 2M12 13h0"/>
+              </svg>
+            ) : key}
+          </button>
+        ))}
+      </div>
+      <DockSheetFoot
+        disabled={!canSubmit}
+        onSubmit={()=>canSubmit && onConfirm?.({ value: num, unit })}
+      />
+    </div>
+  );
+}
+
+function createSymptomRecordEntry(symptoms){
+  const list = Array.isArray(symptoms) ? symptoms : [symptoms];
+  return {
+    id:'e-'+Date.now(),
+    kind:'rec',
+    time: window.formatNowTime(),
+    body:'',
+    tags:list.map(s=>({ label:s.label, cat:'symptom', emoji:s.emoji || '🤒' })),
+    tagLayout:'t5',
+    isNew: true,
+  };
+}
+
+function createWeightRecordEntry({value, unit}){
+  const unitLabel = unit === 'jin' ? '斤' : 'kg';
+  const text = unit === 'jin'
+    ? `${value}斤`
+    : `${value}kg`;
+  return {
+    id:'e-'+Date.now(),
+    kind:'rec',
+    time: window.formatNowTime(),
+    body:'',
+    tags:[{ label:'体重 '+text, cat:'weight', emoji:'⚖️' }],
+    tagLayout:'t5',
+    isNew: true,
+  };
+}
+
+Object.assign(window, {
+  SYMPTOM_SECTIONS,
+  SYMPTOM_OPTIONS,
+  DockSymptomPicker,
+  DockWeightPicker,
+  createSymptomRecordEntry,
+  createWeightRecordEntry,
 });
 
 </script>
@@ -4551,10 +6881,41 @@ function ModulePlaceholder({mod, cycleDay}){
   );
 }
 
-function TodayGuideCard({item, isNew}){
+const GUIDE_REVEAL_DELAY_MS = 1800;
+const GUIDE_TYPEWRITER_MS = 84;
+
+function TodayGuideCard({item, isNew, animate}){
+  const [ready, setReady] = React.useState(!animate);
+
+  React.useEffect(()=>{
+    if(!animate){
+      setReady(true);
+      return;
+    }
+    setReady(false);
+    const t = setTimeout(()=>setReady(true), GUIDE_REVEAL_DELAY_MS);
+    return ()=>clearTimeout(t);
+  }, [animate, item.text]);
+
+  React.useEffect(()=>{
+    if(!ready || !animate) return;
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        const end = document.querySelector('.tl-feed-end');
+        end?.scrollIntoView({ behavior:'smooth', block:'end' });
+      }, 80);
+    });
+  }, [ready, animate]);
+
+  if(!ready) return null;
+
   return (
     <div className={'tl-rail-guide'+(isNew?' fade-in':'')}>
-      <p className="tl-rail-guide-text">{item.text}</p>
+      <p className="tl-rail-guide-text">
+        {animate ? (
+          <TypewriterText text={item.text} active charMs={GUIDE_TYPEWRITER_MS}/>
+        ) : item.text}
+      </p>
     </div>
   );
 }
@@ -4769,12 +7130,15 @@ function TlNodeCaption({time, label, labelKind}){
   );
 }
 
-function getNodeCaption(item){
+function getNodeCaption(item, sisterItem){
   if(item.cardLabel || item.cardLabelKind){
     return {
       label: item.cardLabel,
       kind: item.cardLabelKind,
     };
+  }
+  if(sisterItem){
+    return { label:'本次周期分析', kind:'ai' };
   }
   if(item.kind === 'sister-card'){
     return { label:'本次周期分析', kind:'ai' };
@@ -4786,8 +7150,8 @@ function getNodeCaption(item){
   return null;
 }
 
-function TimelineItemWrap({item, children}){
-  const cap = getNodeCaption(item);
+function TimelineItemWrap({item, sisterItem, children}){
+  const cap = getNodeCaption(item, sisterItem);
   const showCaption = item.kind !== 'guide';
   return (
     <div className="tl-node-stack">
@@ -4803,16 +7167,29 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
   const cycleDay = item.cycleDay;
+  const guideAnimate = item.kind === 'guide' && (
+    isNew || item.hiddenUntilSisterDone
+  );
 
   let body = null;
   if(item.kind === 'guide'){
-    body = <TodayGuideCard item={item} isNew={isNew}/>;
+    body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card'){
-    body = <VoiceRecordCard item={item}/>;
+    body = (
+      <VoiceRecordCard
+        entry={item}
+        isNew={isNew}
+        animateAnalysis={isFeedLast}
+        analysisProps={sisterItem ? {
+          playAnimation: sisterPlayAnimation,
+          onCycleComplete: onSisterCycleComplete,
+        } : null}
+      />
+    );
   } else if(item.kind === 'sister-card'){
     body = (
       <SisterAnalysisCard
@@ -4824,22 +7201,28 @@ function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, 
   } else if(item.module) {
     body = (
       <div className="tl-rec-group">
-        <RecordCard entry={item} isNew={isNew}/>
+        <RecordCard entry={item} isNew={isNew} typewriterAiNote={!!(isNew && item.aiNote)}/>
         <ModulePlaceholder mod={item.module} cycleDay={cycleDay || item.module.cycleDay}/>
       </div>
     );
   } else {
-    body = <RecordCard entry={item} isNew={isNew}/>;
+    body = (
+      <RecordCard
+        entry={item}
+        isNew={isNew}
+        typewriterAiNote={!!(isNew && item.aiNote)}
+      />
+    );
   }
 
   return (
     <TimelineRailNode
       phaseKind={phaseKind}
-      railDot={item.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
+      railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
       isFeedLast={isFeedLast}
-      nodeKind={item.kind}
+      nodeKind={sisterItem ? 'voice-card' : item.kind}
     >
-      <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
+      <TimelineItemWrap item={item} sisterItem={sisterItem}>{body}</TimelineItemWrap>
     </TimelineRailNode>
   );
 }
@@ -4859,23 +7242,14 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew}){
-  const tags = entry.tags || [];
-
+function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
   return (
-    <div className={'tl-combo-card'+(isNew?' fade-in':'')+(entry.aiNote?' has-ai':'')}>
-      <div className="tl-combo-body">
-        {entry.voice && <VoiceBar voice={entry.voice}/>}
-        {entry.body && (
-          <div className={'rec-body'+(entry.voice?' rec-body-voice':'')+(entry.photo?' rec-body-photo':'')}>{entry.body}</div>
-        )}
-        <RecordPhoto photo={entry.photo}/>
-        {tags.length > 0 && (
-          <RecordedTags tags={tags} layout={entry.tagLayout}/>
-        )}
-      </div>
-      <AiNoteSection aiNote={entry.aiNote}/>
-    </div>
+    <SegmentedRecordCard
+      entry={entry}
+      isNew={isNew}
+      typewriterAiNote={typewriterAiNote}
+      animateAnalysis={animateAnalysis}
+    />
   );
 }
 
@@ -4933,17 +7307,24 @@ function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, hideTod
       <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
         <CycleDayHeader day={day}/>
       </div>
-      {items.map(it=>(
+      {items.map((it, idx)=>{
+        if(it.kind === 'sister-card' && items[idx - 1]?.kind === 'voice-card') return null;
+        const sisterItem = it.kind === 'voice-card' && items[idx + 1]?.kind === 'sister-card'
+          ? items[idx + 1]
+          : null;
+        return (
         <TimelineItem
           key={it.id}
           item={it}
+          sisterItem={sisterItem}
           isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
           phaseKind={day.phaseKind}
-          isFeedLast={it.id === lastItemId}
+          isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
         />
-      ))}
+        );
+      })}
     </>
   );
 }
@@ -5062,13 +7443,621 @@ function appendTodayEntry(blocks, entry){
   return appendTimelineEntry(blocks, entry);
 }
 
+function isTimelineEmpty(blocks){
+  return !(blocks || []).some(b=>{
+    if(b.type !== 'day') return true;
+    return (b.items || b.entries || []).length > 0;
+  });
+}
+
 Object.assign(window, {
   VoiceBar, RecordCard, CycleSumCard, WeeklyCard,
   TimelineDateSection, TimelineStream, CycleStartMarker,
   formatNowTime, formatVoiceDur,
   appendTodayEntry, appendTimelineEntry,
   resolveEntryDayId, resolveDayHint, resolveTimelineLastItemId,
+  isTimelineEmpty,
 });
+
+</script>
+
+<!-- record-empty.jsx -->
+<script type="text/babel">
+// ============ 记录 Tab · 新用户空值页（_Tab__standalone.html） ============
+
+const { useState, useEffect, useRef } = React;
+
+const EMPTY_LOOP_SEC = 4.6;
+const EMPTY_DEMO_ACTIVE_SEC = 3.6;
+
+function useLoopTime(duration = EMPTY_LOOP_SEC, speed = 1) {
+  const [t, setT] = useState(0);
+  const startRef = useRef(performance.now());
+  const speedRef = useRef(speed);
+  useEffect(() => { speedRef.current = speed; }, [speed]);
+
+  useEffect(() => {
+    let raf;
+    const tick = () => {
+      const now = performance.now();
+      const elapsed = ((now - startRef.current) / 1000) * speedRef.current;
+      setT(elapsed % duration);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [duration]);
+  return t;
+}
+
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const range = (t, a, b) => clamp01((t - a) / (b - a));
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+const EMPTY_PALETTE = {
+  bg1: '#FFFFFF',
+  bg2: '#F2F2F5',
+  primary: '#FF4D88',
+  primarySoft: '#FFE0EC',
+  accent: '#FF7AA8',
+  ring: 'rgba(255,77,136,0.18)',
+};
+
+const EMPTY_DEMO_TRANSCRIPT = '今天有点累，肚子胀，午饭吃了三明治';
+
+function RecordEmptyTagIcon({ name, color }) {
+  if(name === 'mood'){
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.6"/>
+        <circle cx="9" cy="10" r="1" fill={color}/>
+        <circle cx="15" cy="10" r="1" fill={color}/>
+        <path d="M9 15c1-0.5 5-0.5 6 0" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  if(name === 'sym'){
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 3v18M3 12h18" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 8h16l-2 11a2 2 0 01-2 2H8a2 2 0 01-2-2L4 8z" stroke={color} strokeWidth="1.6"/>
+      <path d="M8 8V5a4 4 0 018 0v3" stroke={color} strokeWidth="1.6"/>
+    </svg>
+  );
+}
+
+function RecordEmptyScreen({ onVoiceDone }) {
+  const P = EMPTY_PALETTE;
+  const t = useLoopTime(EMPTY_LOOP_SEC, 1);
+  const [pressed, setPressed] = useState(false);
+  const [recSec, setRecSec] = useState(0);
+  const recTimer = useRef(null);
+
+  useEffect(() => {
+    if(pressed){
+      recTimer.current = setInterval(()=>setRecSec(s=>s+1), 1000);
+    } else {
+      clearInterval(recTimer.current);
+      setRecSec(0);
+    }
+    return ()=>clearInterval(recTimer.current);
+  }, [pressed]);
+
+  const handleRelease = ()=>{
+    if(!pressed) return;
+    setPressed(false);
+    onVoiceDone?.(EMPTY_DEMO_TRANSCRIPT, Math.max(recSec, 3));
+  };
+
+  return (
+    <div className="record-empty-root">
+      <div
+        className="record-empty-blob record-empty-blob--tr"
+        style={{ background: `radial-gradient(circle, ${P.primarySoft} 0%, transparent 70%)` }}
+        aria-hidden="true"
+      />
+      <div
+        className="record-empty-blob record-empty-blob--bl"
+        style={{ background: `radial-gradient(circle, ${P.primarySoft} 0%, transparent 70%)` }}
+        aria-hidden="true"
+      />
+
+      <div className="record-empty-head">
+        <div className="record-empty-title">记录</div>
+      </div>
+
+      <div className="record-empty-hero">
+        <h1 className="record-empty-hero-title">
+          在美柚，<span className="record-empty-accent">记一切</span>
+        </h1>
+        <p className="record-empty-hero-sub">说一句话，情绪 · 症状 · 饮食 自动整理</p>
+      </div>
+
+      <div className="record-empty-demo">
+        <RecordEmptyDemoCard t={t} P={P}/>
+      </div>
+
+      <div className="record-empty-voice-wrap">
+        <RecordEmptyVoiceButton
+          P={P}
+          pressed={pressed}
+          onPress={()=>setPressed(true)}
+          onRelease={handleRelease}
+        />
+        <p className="record-empty-voice-hint">
+          {pressed ? '松开发送' : '按住说话  或  点击长录'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function RecordEmptyDemoCard({ t, P }) {
+  const pCard = easeOut(range(t, 0.0, 0.4));
+  const pVoice = easeOut(range(t, 0.5, 1.0));
+  const pText = range(t, 1.1, 2.0);
+  const pTags = [range(t, 2.0, 2.25), range(t, 2.2, 2.45), range(t, 2.4, 2.65)];
+  const pChart = easeOut(range(t, 2.7, 3.3));
+  const shown = EMPTY_DEMO_TRANSCRIPT.slice(0, Math.floor(pText * EMPTY_DEMO_TRANSCRIPT.length));
+  const pct = Math.floor((Math.min(t, EMPTY_DEMO_ACTIVE_SEC) / EMPTY_DEMO_ACTIVE_SEC) * 100);
+
+  return (
+    <div
+      className="record-empty-card"
+      style={{
+        opacity: pCard,
+        transform: `translateY(${(1 - pCard) * 8}px)`,
+      }}
+    >
+      <div className="record-empty-card-hd">
+        <div className="record-empty-card-label">
+          <span
+            className="record-empty-card-dot"
+            style={{ opacity: 0.6 + 0.4 * Math.sin(t * 6) }}
+          />
+          示例 · 一次记录会发生什么
+        </div>
+        <span className="record-empty-card-pct">{pct}%</span>
+      </div>
+
+      <RecordEmptyVoiceBubble pIn={pVoice} pText={pText} text={shown} P={P} t={t}/>
+      <RecordEmptyTagsRow progress={pTags} P={P}/>
+      <RecordEmptyMiniChart progress={pChart} P={P}/>
+    </div>
+  );
+}
+
+function RecordEmptyVoiceBubble({ pIn, pText, text, P, t }) {
+  const bars = 22;
+  return (
+    <div
+      className="record-empty-bubble-wrap"
+      style={{
+        opacity: pIn,
+        transform: `translateY(${(1 - pIn) * 6}px)`,
+      }}
+    >
+      <div
+        className="record-empty-bubble"
+        style={{
+          background: `linear-gradient(135deg, ${P.primary} 0%, ${P.accent} 100%)`,
+          boxShadow: `0 4px 12px ${P.ring}`,
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="9" y="3" width="6" height="12" rx="3" fill="white"/>
+          <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+        <div className="record-empty-wave">
+          {Array.from({ length: bars }).map((_, i) => {
+            const phase = i * 0.45;
+            const a = Math.sin(t * 8 + phase) * 0.45 + Math.sin(t * 14 + phase * 1.7) * 0.3;
+            const env = pText < 1 ? 1 : 0.35;
+            const h = 3 + (Math.abs(a) * 12 + 2) * env;
+            return <span key={i} style={{ height: h + 'px' }}/>;
+          })}
+        </div>
+        <span className="record-empty-bubble-dur">0:0{Math.floor(t * 2) % 10}</span>
+      </div>
+      {pText > 0 && (
+        <div className="record-empty-transcript">
+          {text}
+          {pText < 1 && (
+            <span
+              className="record-empty-cursor"
+              style={{ opacity: 0.5 + 0.5 * Math.sin(t * 20) }}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecordEmptyTagsRow({ progress, P }) {
+  const items = [
+    { cat: '情绪', val: '疲惫', icon: 'mood' },
+    { cat: '症状', val: '腹胀', icon: 'sym' },
+    { cat: '饮食', val: '三明治', icon: 'food' },
+  ];
+  return (
+    <div className="record-empty-tags">
+      {items.map((it, i) => {
+        const p = easeOut(progress[i]);
+        return (
+          <div
+            key={i}
+            className="record-empty-tag"
+            style={{
+              opacity: p,
+              transform: `translateY(${(1 - p) * 10}px) scale(${0.92 + p * 0.08})`,
+              background: P.primarySoft,
+              borderColor: P.primary + '22',
+            }}
+          >
+            <RecordEmptyTagIcon name={it.icon} color={P.primary}/>
+            <span className="record-empty-tag-cat" style={{ color: P.primary }}>{it.cat}</span>
+            <span className="record-empty-tag-val">{it.val}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RecordEmptyMiniChart({ progress, P }) {
+  const data = [0.35, 0.55, 0.4, 0.7, 0.5, 0.8, 0.65];
+  const labels = ['一', '二', '三', '四', '五', '六', '日'];
+  return (
+    <div
+      className="record-empty-chart"
+      style={{
+        opacity: progress,
+        transform: `translateY(${(1 - progress) * 6}px)`,
+      }}
+    >
+      <div className="record-empty-chart-hd">
+        <span className="record-empty-chart-title">本周情绪走势</span>
+        <span className="record-empty-chart-badge" style={{ color: P.primary, background: P.primarySoft }}>
+          自动生成
+        </span>
+      </div>
+      <div className="record-empty-chart-bars">
+        {data.map((v, i) => {
+          const delay = i * 0.07;
+          const localP = easeOut(clamp01((progress - delay) / (1 - delay)));
+          const h = v * 44 * localP;
+          const isLast = i === data.length - 1;
+          return (
+            <div key={i} className="record-empty-chart-col">
+              <div
+                className="record-empty-chart-bar"
+                style={{
+                  height: h + 'px',
+                  background: isLast
+                    ? `linear-gradient(180deg, ${P.primary} 0%, ${P.accent} 100%)`
+                    : `${P.primary}55`,
+                }}
+              />
+              <span className="record-empty-chart-day">{labels[i]}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
+  const t = useLoopTime(2.4, 1);
+  const pulse = (Math.sin(t * Math.PI * 2 / 2.4) + 1) / 2;
+  const scale = pressed ? 0.94 : 1 + pulse * 0.012;
+  const ringScale = 1 + pulse * 0.18;
+  const ringOpacity = 0.4 - pulse * 0.35;
+
+  return (
+    <div
+      className="record-empty-mic"
+      onMouseDown={onPress}
+      onMouseUp={onRelease}
+      onMouseLeave={pressed ? onRelease : undefined}
+      onTouchStart={(e)=>{ e.preventDefault(); onPress(); }}
+      onTouchEnd={(e)=>{ e.preventDefault(); onRelease(); }}
+      role="button"
+      aria-label="按住说话"
+    >
+      <div
+        className="record-empty-mic-ring record-empty-mic-ring--glow"
+        style={{
+          background: P.primary,
+          opacity: ringOpacity,
+          transform: `scale(${ringScale})`,
+        }}
+      />
+      <div
+        className="record-empty-mic-ring record-empty-mic-ring--stroke"
+        style={{
+          borderColor: P.primary,
+          opacity: 0.25 - pulse * 0.25,
+          transform: `scale(${1 + pulse * 0.25})`,
+        }}
+      />
+      <div
+        className="record-empty-mic-core"
+        style={{
+          background: `radial-gradient(circle at 30% 25%, ${P.accent} 0%, ${P.primary} 60%, ${P.primary} 100%)`,
+          boxShadow: pressed
+            ? `inset 0 4px 12px rgba(0,0,0,0.18), 0 2px 6px ${P.ring}`
+            : `0 8px 24px ${P.ring}, 0 2px 6px ${P.ring}, inset 0 1.5px 0 rgba(255,255,255,0.3)`,
+          transform: `scale(${scale})`,
+        }}
+      >
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="9" y="3" width="6" height="13" rx="3" fill="white"/>
+          <path d="M5 11a7 7 0 0014 0" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M12 18v3M8.5 21h7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { RecordEmptyScreen, EMPTY_DEMO_TRANSCRIPT });
+
+</script>
+
+<!-- search-page.jsx -->
+<script type="text/babel">
+// ============ 记录搜索页 ============
+
+const SEARCH_TAGS = [
+  { id: 'cat-period', label: '月经', cat: 'period', emoji: '🩸' },
+  { id: 'cat-symptom', label: '症状', cat: 'symptom', emoji: '🤕' },
+  { id: 'cat-mood', label: '心情', cat: 'mood', emoji: '💭' },
+  { id: 'cat-sleep', label: '睡眠', cat: 'sleep', emoji: '😴' },
+  { id: 'cat-diet', label: '饮食', cat: 'diet', emoji: '🥗' },
+  { id: 'cat-weight', label: '体重', cat: 'weight', emoji: '⚖️' },
+];
+
+const SEARCH_TAG_MAP = {};
+SEARCH_TAGS.forEach(t => { SEARCH_TAG_MAP[t.id] = t; });
+
+function flattenSearchableItems(blocks){
+  const out = [];
+  (blocks || []).forEach(block=>{
+    if(block.type !== 'day') return;
+    const dayMeta = {
+      date: block.date,
+      weekday: block.weekday || '',
+      phaseTag: block.phaseTag || '',
+    };
+    (block.items || []).forEach(item=>{
+      if(item.kind !== 'rec' && item.kind !== 'voice-card') return;
+      const text = (item.body || item.voiceText || '').trim();
+      if(!text && !item.photo) return;
+      out.push({
+        id: item.id,
+        dayMeta,
+        time: item.time,
+        text,
+        tags: item.tags || [],
+        voice: item.voice,
+        photo: item.photo,
+      });
+    });
+  });
+  return out;
+}
+
+function itemMatchesFilters(item, query, activeTags){
+  const q = query.trim().toLowerCase();
+  const hasTags = activeTags.length > 0;
+
+  let matchQuery = !q;
+  if(q){
+    const tagText = (item.tags || []).map(t=>t.label).join(' ');
+    const haystack = (item.text + ' ' + tagText).toLowerCase();
+    matchQuery = haystack.includes(q);
+  }
+
+  let matchTags = !hasTags;
+  if(hasTags){
+    matchTags = activeTags.some(filter=>{
+      const tagHit = (item.tags || []).some(tag=>{
+        const r = window.resolveTag(tag);
+        if(filter.cat && !filter.matchLabel) return r.cat === filter.cat;
+        if(filter.matchLabel){
+          if(r.label.includes(filter.matchLabel) || filter.matchLabel.includes(r.label)) return true;
+          if(filter.cat && r.cat === filter.cat) return true;
+        }
+        return false;
+      });
+      if(tagHit) return true;
+      if(filter.matchLabel && item.text.includes(filter.matchLabel)) return true;
+      if(filter.cat === 'period' && /月经|经期/.test(item.text)) return true;
+      if(filter.cat === 'symptom' && /腹胀|腰酸|疲惫|痛|不适/.test(item.text)) return true;
+      if(filter.cat === 'mood' && /心情|情绪|愉快|低落|平静/.test(item.text)) return true;
+      if(filter.cat === 'sleep' && /睡/.test(item.text)) return true;
+      if(filter.cat === 'weight' && /体重|kg|公斤|斤/.test(item.text)) return true;
+      if(filter.cat === 'diet' && /吃|餐|饮食|午饭|晚饭|早餐/.test(item.text)) return true;
+      if(filter.cat === 'fitness' && /跑|运动|健身/.test(item.text)) return true;
+      return false;
+    });
+  }
+
+  return matchQuery && matchTags;
+}
+
+function highlightQuery(text, query){
+  const q = query.trim();
+  if(!q || !text) return text;
+  const lower = text.toLowerCase();
+  const idx = lower.indexOf(q.toLowerCase());
+  if(idx < 0) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="search-hl">{text.slice(idx, idx + q.length)}</mark>
+      {text.slice(idx + q.length)}
+    </>
+  );
+}
+
+function SearchResultCard({item, query}){
+  const RecordedTags = window.RecordedTags;
+  const excerpt = item.text.length > 72 ? item.text.slice(0, 72) + '…' : item.text;
+  const dayLine = [item.dayMeta.date, item.dayMeta.weekday].filter(Boolean).join(' · ');
+
+  return (
+    <article className="search-result-card">
+      <div className="search-result-meta-row">
+        <span className="search-result-date">{dayLine}</span>
+        {item.time && <span className="search-result-time">{item.time}</span>}
+        {item.voice && (
+          <span className="search-result-voice">
+            <span aria-hidden="true">🎙</span>
+            {item.voice.duration || '语音'}
+          </span>
+        )}
+      </div>
+      {item.text && (
+        <p className="search-result-body">{highlightQuery(excerpt, query)}</p>
+      )}
+      {item.tags.length > 0 && (
+        <RecordedTags tags={item.tags} layout="t5"/>
+      )}
+    </article>
+  );
+}
+
+function SearchPage({timeline, onClose}){
+  const [query, setQuery] = React.useState('');
+  const [selectedIds, setSelectedIds] = React.useState([]);
+  const inputRef = React.useRef(null);
+
+  const allItems = React.useMemo(()=>flattenSearchableItems(timeline), [timeline]);
+  const activeTags = React.useMemo(
+    ()=>selectedIds.map(id=>SEARCH_TAG_MAP[id]).filter(Boolean),
+    [selectedIds]
+  );
+  const hasFilter = !!(query.trim() || selectedIds.length);
+
+  const results = React.useMemo(()=>{
+    if(!hasFilter) return [];
+    return allItems
+      .filter(item=>itemMatchesFilters(item, query, activeTags))
+      .slice()
+      .reverse();
+  }, [allItems, query, activeTags, hasFilter]);
+
+  React.useEffect(()=>{
+    const tm = setTimeout(()=>inputRef.current?.focus(), 120);
+    return ()=>clearTimeout(tm);
+  }, []);
+
+  const toggleTag = (id)=>{
+    setSelectedIds(prev=>prev.includes(id) ? prev.filter(x=>x !== id) : [...prev, id]);
+  };
+
+  const clearFilters = ()=>{
+    setQuery('');
+    setSelectedIds([]);
+    inputRef.current?.focus();
+  };
+
+  const I = window.Icon;
+
+  return (
+    <div className="search-page" role="dialog" aria-modal="true" aria-label="搜索">
+      <div className="search-nav">
+        <button type="button" className="search-back" aria-label="返回" onClick={onClose}>
+          <I name="arrow-left" size={22} stroke={2}/>
+        </button>
+        <h1 className="search-nav-title">搜索</h1>
+        {hasFilter && (
+          <button type="button" className="search-reset" onClick={clearFilters}>清除</button>
+        )}
+      </div>
+
+      <div className="search-field-wrap">
+        <span className="search-field-ico" aria-hidden="true">
+          <I name="search" size={18} stroke={1.8}/>
+        </span>
+        <input
+          ref={inputRef}
+          className="search-field"
+          type="search"
+          enterKeyHint="search"
+          placeholder="输入关键字检索"
+          value={query}
+          onChange={e=>setQuery(e.target.value)}
+        />
+        {query && (
+          <button type="button" className="search-field-clear" aria-label="清空" onClick={()=>setQuery('')}>
+            <I name="close" size={14} stroke={2}/>
+          </button>
+        )}
+      </div>
+
+      <div className="search-scroll">
+        <section className="search-tags-section" aria-label="标签筛选">
+          <div className="search-tags">
+            {SEARCH_TAGS.map(tag=>{
+              const active = selectedIds.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  className={'search-tag'+(active ? ' is-active' : '')}
+                  aria-pressed={active}
+                  onClick={()=>toggleTag(tag.id)}
+                >
+                  {tag.emoji && <span className="search-tag-emoji" aria-hidden="true">{tag.emoji}</span>}
+                  {tag.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="search-results" aria-live="polite">
+          {!hasFilter && (
+            <div className="search-empty search-empty--idle">
+              <p className="search-empty-desc">输入关键字，或点选标签筛选</p>
+            </div>
+          )}
+
+          {hasFilter && (
+            <div className="search-results-head">
+              <h2 className="search-results-title">搜索结果</h2>
+              <span className="search-results-count">{results.length} 条</span>
+            </div>
+          )}
+
+          {hasFilter && results.length === 0 && (
+            <div className="search-empty">
+              <p className="search-empty-title">没有找到相关记录</p>
+              <p className="search-empty-desc">换个关键字或标签试试</p>
+            </div>
+          )}
+
+          <div className="search-result-list">
+            {results.map(item=>(
+              <SearchResultCard key={item.id} item={item} query={query}/>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { SearchPage, flattenSearchableItems });
 
 </script>
 
@@ -5078,14 +8067,106 @@ Object.assign(window, {
 
 /** 右下角 + — 5 项快捷发布 */
 const QUICK_PUBLISH = [
-  { id:'period', emoji:'🩸', label:'月经', text:'今天月经来了' },
-  { id:'mood', emoji:'💛', label:'心情', text:'今天心情还行' },
-  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg' },
+  { id:'mood', emoji:'💛', label:'情绪', text:'今天情绪有点低落' },
   { id:'symptom', emoji:'🤒', label:'症状', text:'有点不舒服' },
-  { id:'diary', emoji:'📔', label:'日记', text:'想记录一下今天…' },
+  { id:'food', emoji:'🍽️', label:'饮食', text:'午餐吃了鸡胸肉和青菜' },
+  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg' },
+  { id:'sleep', emoji:'😴', label:'睡眠', text:'昨晚睡了 7 小时' },
 ];
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
+
+const DOCK_SELLING_POINTS = [
+  '记点什么…',
+  '记录今天的心情…',
+  '身体有什么变化…',
+  '刚才吃了什么…',
+  '睡眠怎么样…',
+];
+const DOCK_PH_CHAR_STAGGER = 72;
+const DOCK_PH_CHAR_ENTER = 440;
+const DOCK_PH_DWELL = 2600;
+const DOCK_PH_LEAVE = 360;
+
+function DockWavePlaceholder({show, focused}){
+  const [index, setIndex] = React.useState(0);
+  const [phase, setPhase] = React.useState('enter');
+  const timersRef = React.useRef([]);
+  const runIdRef = React.useRef(0);
+
+  const clearTimers = ()=>{
+    timersRef.current.forEach(t=>window.clearTimeout(t));
+    timersRef.current = [];
+  };
+
+  const pushTimer = (fn, ms)=>{
+    const id = window.setTimeout(fn, ms);
+    timersRef.current.push(id);
+    return id;
+  };
+
+  React.useEffect(()=>{
+    if(!show || focused){
+      clearTimers();
+      runIdRef.current += 1;
+      return;
+    }
+
+    const runId = ++runIdRef.current;
+    const startCycle = (pointIndex)=>{
+      if(runId !== runIdRef.current) return;
+      const text = DOCK_SELLING_POINTS[pointIndex];
+      const enterMs = Math.max(0, text.length - 1) * DOCK_PH_CHAR_STAGGER + DOCK_PH_CHAR_ENTER;
+
+      setIndex(pointIndex);
+      setPhase('enter');
+
+      pushTimer(()=>{
+        if(runId !== runIdRef.current) return;
+        setPhase('idle');
+        pushTimer(()=>{
+          if(runId !== runIdRef.current) return;
+          setPhase('leave');
+          pushTimer(()=>{
+            if(runId !== runIdRef.current) return;
+            startCycle((pointIndex + 1) % DOCK_SELLING_POINTS.length);
+          }, DOCK_PH_LEAVE);
+        }, DOCK_PH_DWELL);
+      }, enterMs);
+    };
+
+    startCycle(0);
+    return ()=>{
+      runIdRef.current += 1;
+      clearTimers();
+    };
+  }, [show, focused]);
+
+  if(!show) return null;
+
+  const text = DOCK_SELLING_POINTS[index];
+  const chars = Array.from(text);
+  const charPhase = phase === 'enter' ? 'enter' : 'idle';
+
+  return (
+    <span
+      className={'dock-float-ph'
+        +(focused ? ' is-focused' : '')
+        +(phase === 'leave' ? ' is-leaving' : '')}
+      aria-hidden="true"
+    >
+      {chars.map((ch, i)=>(
+        <span
+          key={index+'-'+i}
+          className={'dock-float-ph-char is-'+charPhase}
+          style={{'--i': i}}
+        >
+          {ch}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /** 左半圆：从 + 向左侧展开（90° 上 → 180° 左 → 270° 下），不往右伸 */
 function fanArcPos(index, total, radius){
@@ -5163,18 +8244,33 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
 }
 
 function DockPublisher({
-  draft, onDraft, onSend, onQuickMark, onVoiceDone,
-  onPhoto,
+  draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
+  onVoiceDone, onPhoto, onDockExpandedChange, activeTab,
 }){
   const I = window.Icon;
+  const DockMoodPicker = window.DockMoodPicker;
+  const DockSymptomPicker = window.DockSymptomPicker;
+  const DockWeightPicker = window.DockWeightPicker;
   const [inputMode, setInputMode] = React.useState('text');
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickClosing, setQuickClosing] = React.useState(false);
+  const [dockSheet, setDockSheet] = React.useState(null);
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
+  const [inputFocused, setInputFocused] = React.useState(false);
   const recTimer = React.useRef(null);
 
   const quickOpenedAt = React.useRef(0);
+  const prevTabRef = React.useRef(activeTab);
+
+  React.useEffect(()=>{
+    if(activeTab === 'note' && prevTabRef.current !== 'note'){
+      setQuickOpen(false);
+      setQuickClosing(false);
+      setDockSheet(null);
+    }
+    prevTabRef.current = activeTab;
+  }, [activeTab]);
 
   const toggleQuick = (next)=>{
     if(next === undefined) next = !quickOpen;
@@ -5193,6 +8289,7 @@ function DockPublisher({
       setQuickClosing(false);
     }, 340);
   };
+
 
   React.useEffect(()=>{
     if(recording){
@@ -5216,14 +8313,50 @@ function DockPublisher({
     toggleQuick(false);
   };
 
+  const closeDockSheet = ()=> setDockSheet(null);
+
   const handleQuick = (item)=>{
-    if(item) onQuickMark?.(item);
     toggleQuick(false);
+    if(item?.id === 'mood'){
+      setDockSheet('mood');
+      return;
+    }
+    if(item?.id === 'symptom'){
+      setDockSheet('symptom');
+      return;
+    }
+    if(item?.id === 'weight'){
+      setDockSheet('weight');
+      return;
+    }
+    setDockSheet(null);
+    if(item) onQuickMark?.(item);
   };
+
+  const handleMoodConfirm = (moods)=>{
+    setDockSheet(null);
+    onMoodConfirm?.(moods);
+  };
+
+  const handleSymptomConfirm = (symptoms)=>{
+    setDockSheet(null);
+    onSymptomConfirm?.(symptoms);
+  };
+
+  const handleWeightConfirm = (payload)=>{
+    setDockSheet(null);
+    onWeightConfirm?.(payload);
+  };
+
+  React.useEffect(()=>{
+    onDockExpandedChange?.(!!dockSheet);
+  }, [dockSheet, onDockExpandedChange]);
+
+  const isDockExpanded = !!dockSheet;
 
   return (
     <>
-      <div className="quick-float-wrap">
+      <div className={'quick-float-wrap'+(isDockExpanded?' is-covered':'')}>
         <QuickFan
           items={QUICK_PUBLISH}
           open={quickOpen}
@@ -5238,8 +8371,24 @@ function DockPublisher({
         />
       </div>
 
-      <div className="dock-wrap">
-        <div className="dock-panel">
+      <div className={'dock-wrap'+(isDockExpanded?' is-mood-expanded':'')}>
+        <div className={'dock-panel'+(isDockExpanded?' is-mood-expanded':'')}>
+          {dockSheet === 'mood' ? (
+            <DockMoodPicker
+              onConfirm={handleMoodConfirm}
+              onCancel={closeDockSheet}
+            />
+          ) : dockSheet === 'symptom' ? (
+            <DockSymptomPicker
+              onConfirm={handleSymptomConfirm}
+              onCancel={closeDockSheet}
+            />
+          ) : dockSheet === 'weight' ? (
+            <DockWeightPicker
+              onConfirm={handleWeightConfirm}
+              onCancel={closeDockSheet}
+            />
+          ) : (
           <div className="dock-bar">
             <div className="dock-input-row">
               <button
@@ -5254,16 +8403,23 @@ function DockPublisher({
               </button>
 
               {inputMode==='text' ? (
-                <div className="dock-text-field">
+                <div className={'dock-text-field'+(inputFocused?' is-focused':'')}>
+                  <DockWavePlaceholder
+                    show={!draft.trim()}
+                    focused={inputFocused}
+                  />
                   <textarea
                     rows="1"
-                    placeholder="说点什么…"
+                    placeholder=""
+                    aria-label={DOCK_SELLING_POINTS[0]}
                     value={draft}
                     onChange={(e)=>{
                       onDraft(e.target.value);
                       e.target.style.height='auto';
                       e.target.style.height = Math.min(e.target.scrollHeight, 72)+'px';
                     }}
+                    onFocus={()=>setInputFocused(true)}
+                    onBlur={()=>setInputFocused(false)}
                     onKeyDown={(e)=>{
                       if(e.key==='Enter' && !e.shiftKey && draft.trim()){
                         e.preventDefault();
@@ -5273,24 +8429,29 @@ function DockPublisher({
                   />
                 </div>
               ) : (
-                <button
-                  type="button"
-                  className={'dock-voice-btn'+(recording?' recording':'')}
-                  onPointerDown={(e)=>{ e.preventDefault(); startRec(); }}
-                  onPointerUp={stopRec}
-                  onPointerLeave={recording ? stopRec : undefined}
-                >
-                  {recording ? (
-                    <>
-                      <span className="dock-voice-waves" aria-hidden="true">
-                        {[4,8,12,8,6,10,7].map((h,j)=><span key={j} style={{height:h+'px'}}/>)}
-                      </span>
-                      <span>松开 结束{recSec > 0 ? ' '+recSec+'s' : ''}</span>
-                    </>
-                  ) : (
-                    <span>按住 说话</span>
-                  )}
-                </button>
+                <div className={'dock-voice-wrap'+(recording?' is-recording':'')}>
+                  <div className="dock-voice-stage" aria-hidden="true">
+                    <span className="dock-voice-shimmer"/>
+                  </div>
+                  <button
+                    type="button"
+                    className={'dock-voice-btn'+(recording?' recording':'')}
+                    onPointerDown={(e)=>{ e.preventDefault(); startRec(); }}
+                    onPointerUp={stopRec}
+                    onPointerLeave={recording ? stopRec : undefined}
+                  >
+                    {recording ? (
+                      <>
+                        <span className="dock-voice-waves" aria-hidden="true">
+                          {[4,8,12,8,6,10,7].map((h,j)=><span key={j} style={{height:h+'px'}}/>)}
+                        </span>
+                        <span>松开 结束{recSec > 0 ? ' '+recSec+'s' : ''}</span>
+                      </>
+                    ) : (
+                      <span className="dock-voice-label">按住 说话</span>
+                    )}
+                  </button>
+                </div>
               )}
 
               {inputMode==='text' && draft.trim() ? (
@@ -5309,6 +8470,7 @@ function DockPublisher({
               <I name="camera" size={22} stroke={1.6}/>
             </button>
           </div>
+          )}
         </div>
       </div>
     </>
@@ -5316,6 +8478,119 @@ function DockPublisher({
 }
 
 Object.assign(window, { DockPublisher, CloudPublisher: DockPublisher });
+</script>
+
+<!-- demo-scenes.jsx -->
+<script type="text/babel">
+// Demo 场景配置 — 控制默认 Tab、页面展示与交互流程
+//
+// 场景一 period-calendar：默认日历 Tab，通过「月经来了」触发浮动分析 → 跳转记录页周期分析
+// 场景二 record-empty：新用户未记录空值页（_Tab__standalone.html）
+
+const DEMO_SCENES = {
+  'period-calendar': {
+    id: 'period-calendar',
+    label: '场景一 · 日历记月经',
+    description: '默认日历页，记录月经来了后弹出分析通知，点击进入周期分析',
+    defaultTab: 'cal',
+    identity: 'period',
+    getTimeline: () => JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS)),
+    calendar: {
+      enabled: true,
+      periodFlow: true,
+    },
+    floatNotice: {
+      enabled: true,
+    },
+    record: {
+      showHealthCard: false,
+      sisterAnalysis: {
+        trigger: 'float-notice',
+        initialDone: false,
+      },
+      todayGuide: true,
+    },
+  },
+
+  'record-direct': {
+    id: 'record-direct',
+    label: '场景二 · 未记录空值',
+    description: '新用户进入记录 Tab，空时间轴 +「记一切」演示动效',
+    defaultTab: 'note',
+    identity: 'period',
+    getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
+    calendar: {
+      enabled: true,
+      periodFlow: false,
+    },
+    floatNotice: {
+      enabled: false,
+    },
+    record: {
+      showHealthCard: false,
+      emptyState: true,
+      sisterAnalysis: {
+        trigger: 'none',
+        initialDone: true,
+      },
+      todayGuide: false,
+    },
+  },
+};
+
+const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
+  value: s.id,
+  label: s.label,
+}));
+
+function getDemoScene(id){
+  return DEMO_SCENES[id] || DEMO_SCENES['period-calendar'];
+}
+
+function getSceneInitialState(id){
+  const scene = getDemoScene(id);
+  return {
+    activeTab: scene.defaultTab,
+    timeline: scene.getTimeline(),
+    showAnalysisNotice: false,
+    sisterPlayAnimation: 0,
+    sisterCycleDone: scene.record.sisterAnalysis.initialDone,
+    hideTodayGuide: false,
+    draft: '',
+  };
+}
+
+Object.assign(window, {
+  DEMO_SCENES,
+  DEMO_SCENE_OPTIONS,
+  getDemoScene,
+  getSceneInitialState,
+});
+
+function DemoSceneBar({ value, onChange, description }) {
+  const options = window.DEMO_SCENE_OPTIONS;
+  return (
+    <div className="demo-scene-dock" role="toolbar" aria-label="演示场景切换">
+      <div className="demo-scene-dock-label">演示场景</div>
+      <div className="demo-scene-dock-options">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            className={'demo-scene-dock-btn' + (value === opt.value ? ' active' : '')}
+            aria-pressed={value === opt.value}
+            onClick={() => onChange(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      {description && <p className="demo-scene-dock-hint">{description}</p>}
+    </div>
+  );
+}
+
+Object.assign(window, { DemoSceneBar });
 
 </script>
 
@@ -5896,11 +9171,6 @@ Object.assign(window, {
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
 
-const TAG_EMOJI = {
-  period:'🩸', pain:'😖', flow:'🩸', 'flow-low':'💧',
-  sleep:'😴', mood:'💛', med:'💊',
-};
-
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
   if(analysis.tone === 'warn') return true;
@@ -5911,24 +9181,21 @@ function shouldShowAnalysis(hits, analysis){
 function buildTimelineEntry(text, hits, opts={}){
   const analysis = hits.length ? window.chooseAnalysis(hits) : null;
   const toneMap = { warn:'yellow', brand:'brand', good:'green' };
-  const contentTypes = window.extractContentTypes(text);
-  const topicTags = hits.map(h=>({
-    emoji: TAG_EMOJI[h.kind] || '·',
-    label: h.label,
-  }));
-  const contentTags = contentTypes.map(c=>({
-    emoji: c.emoji,
-    label: c.label,
-    content: true,
-  }));
+  const tags = window.buildT5TagsFromText(text, hits);
   const entry = {
     id:'e-'+Date.now(),
-    kind:'rec',
+    kind: opts.voice ? 'voice-card' : 'rec',
     time: window.formatNowTime(),
-    body: text,
     isNew: true,
-    tags: [...contentTags, ...topicTags],
+    tags,
+    tagLayout: 't5',
   };
+  if(opts.voice){
+    entry.voice = opts.voice;
+    entry.voiceText = text;
+  } else {
+    entry.body = text;
+  }
   if(shouldShowAnalysis(hits, analysis)){
     entry.aiNote = {
       tone: toneMap[analysis.tone] || 'green',
@@ -5936,26 +9203,49 @@ function buildTimelineEntry(text, hits, opts={}){
       text: analysis.points?.map(p=>p.text).join(' ') || analysis.title,
     };
   }
-  if(opts.voice) entry.voice = opts.voice;
-  if(opts.quickTag) entry.tags = [{ emoji: opts.quickTag.emoji, label: opts.quickTag.label }, ...entry.tags];
+  if(opts.quickTag){
+    entry.tags = [{ label: opts.quickTag.label, cat:'symptom', emoji: opts.quickTag.emoji }, ...entry.tags];
+  }
   return entry;
 }
 
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
-  const ctx = window.SCENE_CONTEXT[t.scene] || window.SCENE_CONTEXT.period;
+  const scene = window.getDemoScene(t.demoScene);
+  const ctx = window.SCENE_CONTEXT[scene.identity] || window.SCENE_CONTEXT.period;
 
-  const [draft, setDraft] = useState('');
-  const [timeline, setTimeline] = useState(window.TIMELINE_BLOCKS);
+  const initial = window.getSceneInitialState(t.demoScene);
+  const [draft, setDraft] = useState(initial.draft);
+  const [timeline, setTimeline] = useState(initial.timeline);
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
-  const [activeTab, setActiveTab] = useState('cal');
-  const [showAnalysisNotice, setShowAnalysisNotice] = useState(false);
-  const [sisterPlayAnimation, setSisterPlayAnimation] = useState(0);
-  const [sisterCycleDone, setSisterCycleDone] = useState(true);
-  const [hideTodayGuide, setHideTodayGuide] = useState(false);
+  const [activeTab, setActiveTab] = useState(initial.activeTab);
+  const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
+  const [sisterPlayAnimation, setSisterPlayAnimation] = useState(initial.sisterPlayAnimation);
+  const [sisterCycleDone, setSisterCycleDone] = useState(initial.sisterCycleDone);
+  const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
+  const [dockExpanded, setDockExpanded] = useState(false);
+  const [showSearchPage, setShowSearchPage] = useState(false);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
+  const recordEnterModeRef = useRef('idle');
+
+  const resetSceneState = (demoSceneId)=>{
+    const next = window.getSceneInitialState(demoSceneId);
+    setDraft(next.draft);
+    setTimeline(next.timeline);
+    setShowAnalysisNotice(next.showAnalysisNotice);
+    setSisterPlayAnimation(next.sisterPlayAnimation);
+    setSisterCycleDone(next.sisterCycleDone);
+    setHideTodayGuide(next.hideTodayGuide);
+    setActiveTab(next.activeTab);
+    setShowPhoto(false);
+    setShowSearchPage(false);
+  };
+
+  useEffect(()=>{
+    resetSceneState(t.demoScene);
+  }, [t.demoScene]);
 
   const scrollToSisterAnalysis = ()=>{
     requestAnimationFrame(()=>{
@@ -5973,6 +9263,8 @@ function App(){
   };
 
   const openSisterAnalysis = ()=>{
+    if(scene.record.sisterAnalysis.trigger !== 'float-notice') return;
+    recordEnterModeRef.current = 'analysis';
     setShowAnalysisNotice(false);
     setSisterCycleDone(false);
     setSisterPlayAnimation(n=>n + 1);
@@ -5983,7 +9275,7 @@ function App(){
   const handleSisterCycleComplete = React.useCallback(()=>{
     setSisterCycleDone(true);
     requestAnimationFrame(()=>{
-      setTimeout(()=>scrollTimelineToEnd('smooth'), 120);
+      setTimeout(()=>scrollTimelineToLastItem('smooth'), 120);
     });
   }, []);
 
@@ -5994,26 +9286,62 @@ function App(){
     }
   }, [sisterPlayAnimation]);
 
-  useEffect(()=>{
-    setDraft('');
-    setHideTodayGuide(false);
-  }, [t.scene]);
-
-  const scrollTimelineToEnd = (behavior='smooth')=>{
+  const scrollTimelineToLastItem = (behavior='smooth')=>{
     requestAnimationFrame(()=>{
-      const el = streamRef.current;
-      if(!el) return;
-      if(behavior === 'auto') el.scrollTop = el.scrollHeight;
-      else el.scrollTo({ top: el.scrollHeight, behavior:'smooth' });
+      setTimeout(()=>{
+        const el = streamRef.current;
+        if(!el) return;
+        const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
+        if(anchor){
+          const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 28;
+          if(behavior === 'auto') el.scrollTop = Math.max(0, top);
+          else el.scrollTo({ top: Math.max(0, top), behavior });
+          return;
+        }
+        if(behavior === 'auto') el.scrollTop = el.scrollHeight;
+        else el.scrollTo({ top: el.scrollHeight, behavior });
+      }, 80);
     });
   };
 
+  const scrollTimelineToEnd = (behavior='smooth')=>{
+    scrollTimelineToLastItem(behavior);
+  };
+
+  const handleTabChange = (tab)=>{
+    if(tab === 'note' && activeTab !== 'note'){
+      recordEnterModeRef.current = 'manual';
+    }
+    if(tab !== 'note'){
+      recordEnterModeRef.current = 'idle';
+    }
+    setActiveTab(tab);
+  };
+
+  const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
+
   useEffect(()=>{
+    if(activeTab !== 'note') return;
+    if(showRecordEmpty) return;
+    if(recordEnterModeRef.current === 'analysis'){
+      recordEnterModeRef.current = 'idle';
+      return;
+    }
+    const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
+    recordEnterModeRef.current = 'idle';
+    return ()=>clearTimeout(tm);
+  }, [activeTab, showRecordEmpty]);
+
+  useEffect(()=>{
+    if(showRecordEmpty) return;
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, []);
+  }, [t.demoScene, showRecordEmpty]);
 
-  useEffect(()=>{ scrollTimelineToEnd('smooth'); }, [timeline]);
+  useEffect(()=>{
+    if(showRecordEmpty) return;
+    scrollTimelineToEnd('smooth');
+  }, [timeline, showRecordEmpty]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -6024,7 +9352,9 @@ function App(){
     }, 2400);
   };
 
-  const markUserRecorded = ()=> setHideTodayGuide(true);
+  const markUserRecorded = ()=>{
+    if(scene.record.todayGuide) setHideTodayGuide(true);
+  };
 
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
@@ -6055,6 +9385,30 @@ function App(){
     submitText(mark.text, { quickTag: { emoji: mark.emoji, label: mark.label } });
   };
 
+  const submitMoodRecord = (moods)=>{
+    markUserRecorded();
+    const entry = window.createMoodRecordEntry(moods);
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitSymptomRecord = (symptoms)=>{
+    markUserRecorded();
+    const entry = window.createSymptomRecordEntry(symptoms);
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitWeightRecord = (payload)=>{
+    markUserRecorded();
+    const entry = window.createWeightRecordEntry(payload);
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
@@ -6078,32 +9432,49 @@ function App(){
     dayLbl: '今日',
   };
 
-  const TP = window.TweaksPanel;
-  const TR = window.TweakRadio;
-  const TS = window.TweakSection;
+  const showCalendar = scene.calendar.enabled && activeTab === 'cal';
+  const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
+  const showRecordShell = activeTab === 'note';
+  const showTodayGuide = scene.record.todayGuide && !hideTodayGuide;
+
   const I = window.Icon;
+  const DemoSceneBar = window.DemoSceneBar;
+  const RecordEmptyScreen = window.RecordEmptyScreen;
+  const SearchPage = window.SearchPage;
+
+  const openSearchPage = ()=>setShowSearchPage(true);
+  const closeSearchPage = ()=>setShowSearchPage(false);
 
   return (
-    <div className="phone">
-      <StatusBar/>
+    <>
+      <div className="phone">
+        <StatusBar/>
 
-      {activeTab === 'cal' && (
+      {showCalendar && (
         <CalendarPage
+          key={scene.id}
+          periodFlowEnabled={scene.calendar.periodFlow}
           onAnalysisReady={()=>setShowAnalysisNotice(true)}
           onPeriodReset={()=>setShowAnalysisNotice(false)}
         />
       )}
 
-      <FloatNotice
-        show={showAnalysisNotice && activeTab === 'cal'}
-        onOpen={openSisterAnalysis}
-        onClose={()=>setShowAnalysisNotice(false)}
-      />
+      {scene.floatNotice.enabled && (
+        <FloatNotice
+          show={showFloatNotice}
+          onOpen={openSisterAnalysis}
+          onClose={()=>setShowAnalysisNotice(false)}
+        />
+      )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(activeTab !== 'note' ? ' app-view-hidden' : '')}
-        aria-hidden={activeTab !== 'note'}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
+        aria-hidden={!showRecordShell}
       >
+        {showRecordEmpty ? (
+          <RecordEmptyScreen onVoiceDone={submitVoice}/>
+        ) : (
+        <>
         <div className="suiji-stream" ref={streamRef}>
           <div className="stream-header">
             <div>
@@ -6111,21 +9482,28 @@ function App(){
               <p className="stream-sub">情绪 · 身体 · 体重</p>
             </div>
             <div className="stream-actions">
+              {scene.calendar.enabled && (
+                <button
+                  className="stream-action"
+                  aria-label="日历"
+                  type="button"
+                  onClick={()=>setActiveTab('cal')}
+                >
+                  <I name="calendar" size={20} stroke={1.7}/>
+                </button>
+              )}
               <button
                 className="stream-action"
-                aria-label="日历"
+                aria-label="搜索"
                 type="button"
-                onClick={()=>setActiveTab('cal')}
+                onClick={openSearchPage}
               >
-                <I name="calendar" size={20} stroke={1.7}/>
-              </button>
-              <button className="stream-action" aria-label="搜索" type="button">
                 <I name="search" size={20} stroke={1.7}/>
               </button>
             </div>
           </div>
 
-          {t.entry === 'analysis' && (
+          {scene.record.showHealthCard && (
             <div className="stream-health">
               <HealthCard scene={sceneForHealth}/>
             </div>
@@ -6136,7 +9514,7 @@ function App(){
             endRef={timelineEndRef}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
-            hideTodayGuide={hideTodayGuide}
+            hideTodayGuide={!showTodayGuide}
             onSisterCycleComplete={handleSisterCycleComplete}
           />
         </div>
@@ -6146,41 +9524,34 @@ function App(){
           onDraft={setDraft}
           onSend={()=>submitText()}
           onQuickMark={submitQuickMark}
+          onMoodConfirm={submitMoodRecord}
+          onSymptomConfirm={submitSymptomRecord}
+          onWeightConfirm={submitWeightRecord}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
+          onDockExpandedChange={setDockExpanded}
+          activeTab={activeTab}
         />
+        </>
+        )}
       </div>
+
+      {showSearchPage && (
+        <SearchPage timeline={timeline} onClose={closeSearchPage}/>
+      )}
 
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      <TabBar active={activeTab} onChange={setActiveTab}/>
+      {!showSearchPage && <TabBar active={activeTab} onChange={handleTabChange}/>}
+      </div>
 
-      <TP>
-        <TS label="场景">
-          <TR
-            label="用户身份"
-            value={t.scene}
-            options={[
-              {value:'period', label:'经期'},
-              {value:'follicular', label:'卵泡期'},
-              {value:'pregnancy', label:'孕期'},
-              {value:'parenting', label:'育儿'},
-            ]}
-            onChange={(v)=>setTweak('scene', v)}
-          />
-          <TR
-            label="分析引流"
-            value={t.entry || 'direct'}
-            options={[
-              {value:'direct', label:'无'},
-              {value:'analysis', label:'顶部红绿灯'},
-            ]}
-            onChange={(v)=>setTweak('entry', v)}
-          />
-        </TS>
-      </TP>
-    </div>
+      <DemoSceneBar
+        value={t.demoScene}
+        onChange={(v)=>setTweak('demoScene', v)}
+        description={scene.description}
+      />
+    </>
   );
 }
 

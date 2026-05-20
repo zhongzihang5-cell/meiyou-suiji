@@ -88,7 +88,7 @@ function CalDayCell({cell, periodLit}){
   );
 }
 
-function CalendarPage({onAnalysisReady, onPeriodReset}){
+function CalendarPage({onAnalysisReady, onPeriodReset, periodFlowEnabled = true}){
   const [periodYes, setPeriodYes] = useState(false);
   const [litDays, setLitDays] = useState([]);
   const timersRef = useRef([]);
@@ -120,7 +120,7 @@ function CalendarPage({onAnalysisReady, onPeriodReset}){
       timersRef.current.push(t);
     });
     const t2 = setTimeout(()=>{
-      onAnalysisReady();
+      if(periodFlowEnabled) onAnalysisReady?.();
     }, PERIOD_DAYS.length * 280 + 200);
     timersRef.current.push(t2);
   };

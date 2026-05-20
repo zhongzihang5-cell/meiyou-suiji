@@ -7,9 +7,11 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
-<link rel="stylesheet" href="cloud.css?v=20260519-78">
-<link rel="stylesheet" href="timeline.css?v=20260519-78">
-<link rel="stylesheet" href="calendar.css?v=20260519-78">
+<link rel="stylesheet" href="cloud.css?v=20260520-132">
+<link rel="stylesheet" href="timeline.css?v=20260520-132">
+<link rel="stylesheet" href="calendar.css?v=20260520-132">
+<link rel="stylesheet" href="record-empty.css?v=20260520-132">
+<link rel="stylesheet" href="search.css?v=20260520-132">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;letter-spacing:0}
@@ -675,6 +677,66 @@ html,body{
 .photo-opt-title{font-size:14px;color:var(--my-text-primary);font-weight:500}
 .photo-opt-desc{font-size:11px;color:var(--my-text-tertiary);text-align:center}
 
+/* ============ DEMO SCENE DOCK（手机外 · 右下角） ============ */
+.demo-scene-dock{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:9999;
+  width:220px;
+  padding:10px 12px 12px;
+  border-radius:12px;
+  background:rgba(24,24,28,0.92);
+  border:0.5px solid rgba(255,255,255,0.10);
+  box-shadow:0 8px 32px rgba(0,0,0,0.45);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+  font-family:'PingFang SC',-apple-system,sans-serif;
+}
+.demo-scene-dock-label{
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  color:rgba(255,255,255,0.45);
+  margin-bottom:8px;
+}
+.demo-scene-dock-options{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.demo-scene-dock-btn{
+  appearance:none;
+  border:0;
+  background:rgba(255,255,255,0.06);
+  border-radius:8px;
+  padding:8px 10px;
+  font-size:12px;
+  line-height:1.29;
+  color:rgba(255,255,255,0.72);
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:400;
+  text-align:left;
+  transition:background .15s, color .15s;
+}
+.demo-scene-dock-btn:hover{
+  background:rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.88);
+}
+.demo-scene-dock-btn.active{
+  background:rgba(255,77,136,0.22);
+  color:#ff8cb3;
+  font-weight:500;
+  box-shadow:inset 0 0 0 0.5px rgba(255,77,136,0.35);
+}
+.demo-scene-dock-hint{
+  margin:8px 0 0;
+  font-size:11px;
+  line-height:1.35;
+  color:rgba(255,255,255,0.38);
+}
+
 /* ============ TAB BAR ============ */
 .tabbar{
   position:fixed;bottom:0;
@@ -822,8 +884,7 @@ html,body{
 
 <script>
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "scene": "period",
-  "entry": "direct"
+  "demoScene": "period-calendar"
 }/*EDITMODE-END*/;
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 </script>
@@ -832,16 +893,21 @@ window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-<script type="text/babel" src="icons.jsx?v=20260519-78"></script>
-<script type="text/babel" src="data.jsx?v=20260519-78"></script>
-<script type="text/babel" src="components.jsx?v=20260519-78"></script>
-<script type="text/babel" src="calendar-page.jsx?v=20260519-78"></script>
-<script type="text/babel" src="timeline-sister-cards.jsx?v=20260519-78"></script>
-<script type="text/babel" src="timeline-modules.jsx?v=20260519-78"></script>
-<script type="text/babel" src="timeline.jsx?v=20260519-78"></script>
-<script type="text/babel" src="cloud-publisher.jsx?v=20260519-78"></script>
-<script type="text/babel" src="tweaks-panel.jsx?v=20260519-78"></script>
-<script type="text/babel" src="app.jsx?v=20260519-78"></script>
+<script type="text/babel" src="icons.jsx?v=20260520-132"></script>
+<script type="text/babel" src="data.jsx?v=20260520-132"></script>
+<script type="text/babel" src="components.jsx?v=20260520-132"></script>
+<script type="text/babel" src="calendar-page.jsx?v=20260520-132"></script>
+<script type="text/babel" src="timeline-sister-cards.jsx?v=20260520-132"></script>
+<script type="text/babel" src="mood-picker.jsx?v=20260520-132"></script>
+<script type="text/babel" src="quick-pickers.jsx?v=20260520-132"></script>
+<script type="text/babel" src="timeline-modules.jsx?v=20260520-132"></script>
+<script type="text/babel" src="timeline.jsx?v=20260520-132"></script>
+<script type="text/babel" src="record-empty.jsx?v=20260520-132"></script>
+<script type="text/babel" src="search-page.jsx?v=20260520-132"></script>
+<script type="text/babel" src="cloud-publisher.jsx?v=20260520-132"></script>
+<script type="text/babel" src="demo-scenes.jsx?v=20260520-132"></script>
+<script type="text/babel" src="tweaks-panel.jsx?v=20260520-132"></script>
+<script type="text/babel" src="app.jsx?v=20260520-132"></script>
 
 </body>
 </html>

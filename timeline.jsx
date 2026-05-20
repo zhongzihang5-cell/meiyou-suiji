@@ -4,23 +4,14 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew}){
-  const tags = entry.tags || [];
-
+function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
   return (
-    <div className={'tl-combo-card'+(isNew?' fade-in':'')+(entry.aiNote?' has-ai':'')}>
-      <div className="tl-combo-body">
-        {entry.voice && <VoiceBar voice={entry.voice}/>}
-        {entry.body && (
-          <div className={'rec-body'+(entry.voice?' rec-body-voice':'')+(entry.photo?' rec-body-photo':'')}>{entry.body}</div>
-        )}
-        <RecordPhoto photo={entry.photo}/>
-        {tags.length > 0 && (
-          <RecordedTags tags={tags} layout={entry.tagLayout}/>
-        )}
-      </div>
-      <AiNoteSection aiNote={entry.aiNote}/>
-    </div>
+    <SegmentedRecordCard
+      entry={entry}
+      isNew={isNew}
+      typewriterAiNote={typewriterAiNote}
+      animateAnalysis={animateAnalysis}
+    />
   );
 }
 
@@ -78,17 +69,24 @@ function TimelineDateSection({day, sisterPlayAnimation, sisterCycleDone, hideTod
       <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
         <CycleDayHeader day={day}/>
       </div>
-      {items.map(it=>(
+      {items.map((it, idx)=>{
+        if(it.kind === 'sister-card' && items[idx - 1]?.kind === 'voice-card') return null;
+        const sisterItem = it.kind === 'voice-card' && items[idx + 1]?.kind === 'sister-card'
+          ? items[idx + 1]
+          : null;
+        return (
         <TimelineItem
           key={it.id}
           item={it}
+          sisterItem={sisterItem}
           isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
           phaseKind={day.phaseKind}
-          isFeedLast={it.id === lastItemId}
+          isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
         />
-      ))}
+        );
+      })}
     </>
   );
 }
@@ -207,10 +205,18 @@ function appendTodayEntry(blocks, entry){
   return appendTimelineEntry(blocks, entry);
 }
 
+function isTimelineEmpty(blocks){
+  return !(blocks || []).some(b=>{
+    if(b.type !== 'day') return true;
+    return (b.items || b.entries || []).length > 0;
+  });
+}
+
 Object.assign(window, {
   VoiceBar, RecordCard, CycleSumCard, WeeklyCard,
   TimelineDateSection, TimelineStream, CycleStartMarker,
   formatNowTime, formatVoiceDur,
   appendTodayEntry, appendTimelineEntry,
   resolveEntryDayId, resolveDayHint, resolveTimelineLastItemId,
+  isTimelineEmpty,
 });

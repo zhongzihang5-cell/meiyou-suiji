@@ -87,10 +87,41 @@ function ModulePlaceholder({mod, cycleDay}){
   );
 }
 
-function TodayGuideCard({item, isNew}){
+const GUIDE_REVEAL_DELAY_MS = 1800;
+const GUIDE_TYPEWRITER_MS = 84;
+
+function TodayGuideCard({item, isNew, animate}){
+  const [ready, setReady] = React.useState(!animate);
+
+  React.useEffect(()=>{
+    if(!animate){
+      setReady(true);
+      return;
+    }
+    setReady(false);
+    const t = setTimeout(()=>setReady(true), GUIDE_REVEAL_DELAY_MS);
+    return ()=>clearTimeout(t);
+  }, [animate, item.text]);
+
+  React.useEffect(()=>{
+    if(!ready || !animate) return;
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        const end = document.querySelector('.tl-feed-end');
+        end?.scrollIntoView({ behavior:'smooth', block:'end' });
+      }, 80);
+    });
+  }, [ready, animate]);
+
+  if(!ready) return null;
+
   return (
     <div className={'tl-rail-guide'+(isNew?' fade-in':'')}>
-      <p className="tl-rail-guide-text">{item.text}</p>
+      <p className="tl-rail-guide-text">
+        {animate ? (
+          <TypewriterText text={item.text} active charMs={GUIDE_TYPEWRITER_MS}/>
+        ) : item.text}
+      </p>
     </div>
   );
 }
@@ -305,12 +336,15 @@ function TlNodeCaption({time, label, labelKind}){
   );
 }
 
-function getNodeCaption(item){
+function getNodeCaption(item, sisterItem){
   if(item.cardLabel || item.cardLabelKind){
     return {
       label: item.cardLabel,
       kind: item.cardLabelKind,
     };
+  }
+  if(sisterItem){
+    return { label:'本次周期分析', kind:'ai' };
   }
   if(item.kind === 'sister-card'){
     return { label:'本次周期分析', kind:'ai' };
@@ -322,8 +356,8 @@ function getNodeCaption(item){
   return null;
 }
 
-function TimelineItemWrap({item, children}){
-  const cap = getNodeCaption(item);
+function TimelineItemWrap({item, sisterItem, children}){
+  const cap = getNodeCaption(item, sisterItem);
   const showCaption = item.kind !== 'guide';
   return (
     <div className="tl-node-stack">
@@ -339,16 +373,29 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
   const cycleDay = item.cycleDay;
+  const guideAnimate = item.kind === 'guide' && (
+    isNew || item.hiddenUntilSisterDone
+  );
 
   let body = null;
   if(item.kind === 'guide'){
-    body = <TodayGuideCard item={item} isNew={isNew}/>;
+    body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card'){
-    body = <VoiceRecordCard item={item}/>;
+    body = (
+      <VoiceRecordCard
+        entry={item}
+        isNew={isNew}
+        animateAnalysis={isFeedLast}
+        analysisProps={sisterItem ? {
+          playAnimation: sisterPlayAnimation,
+          onCycleComplete: onSisterCycleComplete,
+        } : null}
+      />
+    );
   } else if(item.kind === 'sister-card'){
     body = (
       <SisterAnalysisCard
@@ -360,22 +407,28 @@ function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, 
   } else if(item.module) {
     body = (
       <div className="tl-rec-group">
-        <RecordCard entry={item} isNew={isNew}/>
+        <RecordCard entry={item} isNew={isNew} typewriterAiNote={!!(isNew && item.aiNote)}/>
         <ModulePlaceholder mod={item.module} cycleDay={cycleDay || item.module.cycleDay}/>
       </div>
     );
   } else {
-    body = <RecordCard entry={item} isNew={isNew}/>;
+    body = (
+      <RecordCard
+        entry={item}
+        isNew={isNew}
+        typewriterAiNote={!!(isNew && item.aiNote)}
+      />
+    );
   }
 
   return (
     <TimelineRailNode
       phaseKind={phaseKind}
-      railDot={item.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
+      railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
       isFeedLast={isFeedLast}
-      nodeKind={item.kind}
+      nodeKind={sisterItem ? 'voice-card' : item.kind}
     >
-      <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
+      <TimelineItemWrap item={item} sisterItem={sisterItem}>{body}</TimelineItemWrap>
     </TimelineRailNode>
   );
 }

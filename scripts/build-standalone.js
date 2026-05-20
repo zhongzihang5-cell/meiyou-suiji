@@ -15,7 +15,7 @@ const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const inlineStyleMatch = indexHtml.match(/<style>([\s\S]*?)<\/style>/);
 const inlineStyles = inlineStyleMatch ? inlineStyleMatch[1] : '';
 
-const cssFiles = ['cloud.css', 'timeline.css', 'calendar.css'];
+const cssFiles = ['cloud.css', 'timeline.css', 'calendar.css', 'record-empty.css', 'search.css'];
 const css = cssFiles
   .map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8'))
   .join('\n\n');
@@ -26,9 +26,14 @@ const scriptFiles = [
   'components.jsx',
   'calendar-page.jsx',
   'timeline-sister-cards.jsx',
+  'mood-picker.jsx',
+  'quick-pickers.jsx',
   'timeline-modules.jsx',
   'timeline.jsx',
+  'record-empty.jsx',
+  'search-page.jsx',
   'cloud-publisher.jsx',
+  'demo-scenes.jsx',
   'tweaks-panel.jsx',
   'app.jsx',
 ];
@@ -67,8 +72,7 @@ ${css}
 
 <script>
 const TWEAK_DEFAULTS = {
-  "scene": "period",
-  "entry": "direct"
+  "demoScene": "period-calendar"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 </script>

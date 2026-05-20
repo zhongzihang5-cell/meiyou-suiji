@@ -1,6 +1,7 @@
 // ============ 统一语音条 & 5/18 分析卡片 ============
 
 const VOICE_WAVE_HEIGHTS = [6,11,16,9,13,7,17,12,8,15,10,18,9,14,7,12,16,8,13,6,11,15,9,7];
+const MINI_WAVE_HEIGHTS = [4,7,9,6,8,5];
 
 const CC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAfACEDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUHCAMG/8QAKhAAAgEDAwIDCQAAAAAAAAAAAQIDAAQRBQYhEjEHExQWJTJxgYKhsfH/xAAXAQEBAQEAAAAAAAAAAAAAAAACBQED/8QAHBEAAQUBAQEAAAAAAAAAAAAAAgABAwURBBJh/9oADAMBAAIRAxEAPwDZLEAZP7pdc6vYQTxwSTxiSQ9IGaNyytDod5IrYKwuQftNRGzknvr5LeMl5ZGzk9uaYjqsVlY3YJET4zK2prWnNcrbi5j8xk6wM96YRsrqCpyCM96hOu2t1o18IrnJJxyOx/lVHwyuXudrwNJIXIyAT86RDjJWFSPNCM0Zazr1FFFFclFSjeCO+278Rgl/TyYA7/Caz5oOtPpOqpdeWSUOCpPNaYYBhgjOR9KTy7a0KaVpJNJsXZjkkwAk02LFcqLaPijOOQPTEoVufdDa3cxOYuhIxwM9zmq94Q9fsdbs64LEn8mmw2tt7j3NY8HPEC03t4o4YwkcYjUDAUAACsck7O4h6oBgiDyzfdXSijFFFQF//9k=';
 
@@ -9,6 +10,89 @@ const SC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BS
 function TlCardTime({time}){
   if(!time) return null;
   return <div className="tl-card-time">{time}</div>;
+}
+
+const TYPEWRITER_MS = 68;
+
+function segmentsFullText(segments){
+  return (segments || []).map(s => s.text).join('');
+}
+
+function renderTypedSegments(segments, len){
+  let left = len;
+  const out = [];
+  (segments || []).forEach((seg, i) => {
+    if(left <= 0) return;
+    const take = Math.min(left, seg.text.length);
+    if(take <= 0) return;
+    const chunk = seg.text.slice(0, take);
+    left -= take;
+    if(seg.bold) out.push(<b key={i}>{chunk}</b>);
+    else out.push(<React.Fragment key={i}>{chunk}</React.Fragment>);
+  });
+  return out;
+}
+
+function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onComplete, className}){
+  const full = segments ? segmentsFullText(segments) : (text || '');
+  const [len, setLen] = React.useState(active ? 0 : full.length);
+  const doneRef = React.useRef(!active);
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  React.useEffect(()=>{
+    if(!active){
+      setLen(full.length);
+      if(!doneRef.current){
+        doneRef.current = true;
+        onCompleteRef.current?.();
+      }
+      return;
+    }
+    doneRef.current = false;
+    setLen(0);
+    if(!full.length){
+      doneRef.current = true;
+      onCompleteRef.current?.();
+      return;
+    }
+    let i = 0;
+    let timer = null;
+    const tick = ()=>{
+      i += 1;
+      setLen(i);
+      if(i >= full.length){
+        doneRef.current = true;
+        onCompleteRef.current?.();
+        return;
+      }
+      timer = setTimeout(tick, charMs);
+    };
+    timer = setTimeout(tick, charMs);
+    return ()=>{ if(timer) clearTimeout(timer); };
+  }, [text, segments, active, charMs, full]);
+
+  const showCursor = active && len < full.length;
+  const content = segments ? renderTypedSegments(segments, len) : full.slice(0, len);
+
+  return (
+    <span className={className}>
+      {content}
+      {showCursor && <span className="tl-typewriter-cursor" aria-hidden="true"/>}
+    </span>
+  );
+}
+
+function TypewriterBody({text, active, onComplete, className}){
+  if(!text) return null;
+  if(!active){
+    return <div className={className}>{text}</div>;
+  }
+  return (
+    <div className={className}>
+      <TypewriterText text={text} active onComplete={onComplete}/>
+    </div>
+  );
 }
 
 // ============ 记录标签体系 ============
@@ -90,31 +174,35 @@ function RecordedTags({tags, layout}){
   const visible = (tags || []).filter(t => resolveTag(t).cat !== 'care');
   if(visible.length === 0) return null;
   const isRows = layout === 'rows';
+  const isT5 = layout === 't5';
   return (
-    <>
-      <div className="tl-extract-label">已记录</div>
-      <div className={'tl-tags'+(isRows ? ' tl-tags-rows' : '')}>
-        {visible.map((t, i) => {
-          const r = resolveTag(t);
-          return (
-            <span key={i} className={'tl-tag tone-'+r.tone+(isRows ? ' is-row':'')}>
-              <span className="tl-tag-ico" aria-hidden="true">{r.emoji}</span>
-              {r.label}
-            </span>
-          );
-        })}
-      </div>
-    </>
+    <div className={'tl-tags'+(isRows ? ' tl-tags-rows' : '')+(isT5 ? ' tl-tags-t5' : '')}>
+      {visible.map((t, i) => {
+        const r = resolveTag(t);
+        return (
+          <span key={i} className={'tl-tag tone-'+r.tone+(isRows ? ' is-row':'')+(isT5 ? ' is-t5':'')}>
+            {isT5 ? (
+              tagLabel(t)
+            ) : (
+              <>
+                <span className="tl-tag-ico" aria-hidden="true">{r.emoji}</span>
+                {r.label}
+              </>
+            )}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
-function AiNoteSection({aiNote}){
+function AiNoteSection({aiNote, embedded, typewriter, onTypeComplete}){
   if(!aiNote) return null;
   const tone = aiNote.tone || 'green';
   const icon = aiNote.icon || '💡';
 
   return (
-    <div className={'tl-combo-ai '+tone+'-bg'}>
+    <div className={'tl-combo-ai'+(embedded?' tl-t5-ai-note':' '+tone+'-bg')}>
       <span className="tl-combo-ai-icon" aria-hidden="true">{icon}</span>
       <div className="tl-combo-ai-body">
         {aiNote.items?.length ? (
@@ -128,6 +216,10 @@ function AiNoteSection({aiNote}){
               <div className="tl-combo-ai-total">{aiNote.total}</div>
             )}
           </>
+        ) : typewriter ? (
+          <p className="tl-combo-ai-text">
+            <TypewriterText text={aiNote.text} active onComplete={onTypeComplete}/>
+          </p>
         ) : (
           <p className="tl-combo-ai-text">{aiNote.text}</p>
         )}
@@ -154,48 +246,126 @@ function RecordPhoto({photo}){
   );
 }
 
-function VoiceWave({playing}){
+function VoiceWave({playing, mini}){
+  const heights = mini ? MINI_WAVE_HEIGHTS : VOICE_WAVE_HEIGHTS;
   return (
-    <div className={'tl-voice-wave'+(playing?' is-playing':'')} aria-hidden="true">
-      {VOICE_WAVE_HEIGHTS.map((h, i) => (
+    <div className={'tl-voice-wave'+(mini?' is-mini':'')+(playing?' is-playing':'')} aria-hidden="true">
+      {heights.map((h, i) => (
         <span key={i} style={{height: h + 'px', '--i': i}}/>
       ))}
     </div>
   );
 }
 
-function TlVoiceBar({voice}){
+function TlVoicePlayBtn({voice}){
   const [playing, setPlaying] = React.useState(false);
-  const duration = voice?.duration || '0:00';
+  const raw = voice?.duration || '0:00';
+  const duration = /^\d+["″]?$/.test(raw)
+    ? '0:'+String(parseInt(raw, 10)).padStart(2, '0')
+    : raw;
   return (
-    <div className="tl-voice-bar">
-      <button
-        type="button"
-        className="tl-voice-play"
-        onClick={()=>setPlaying(p=>!p)}
-        aria-label={playing?'暂停':'播放语音'}
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <VoiceWave playing={playing}/>
-      <div className="tl-voice-dur">{duration}</div>
+    <button
+      type="button"
+      className={'tl-voice-pill'+(playing?' is-playing':'')}
+      onClick={()=>setPlaying(p=>!p)}
+      aria-label={playing?'暂停':'播放语音'}
+    >
+      <span className="tl-voice-pill-ico" aria-hidden="true">
+        {playing ? (
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="7" y="6" width="3.5" height="12" rx="0.8"/>
+            <rect x="13.5" y="6" width="3.5" height="12" rx="0.8"/>
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        )}
+      </span>
+      <VoiceWave playing={playing} mini/>
+      <span className="tl-voice-pill-dur">{duration}</span>
+    </button>
+  );
+}
+
+function TlVoiceBar({voice}){
+  return <TlVoicePlayBtn voice={voice}/>;
+}
+
+function TlVoiceInline({voice, text}){
+  if(!voice && !text) return null;
+  return (
+    <div className={'tl-voice-block'+(voice?' has-voice-pill':'')}>
+      <p className="tl-voice-text">
+        {text}
+        {voice && <TlVoicePlayBtn voice={voice}/>}
+      </p>
     </div>
   );
 }
 
-function VoiceRecordCard({item}){
-  const voiceText = item.voiceText || '';
+function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, analysisProps}){
+  const tags = entry.tags || [];
+  const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
+  const hasAiNote = !!entry.aiNote;
+  const hasAnalysis = !!analysisProps;
+  const hasVoice = !!entry.voice;
+  const text = entry.voiceText || entry.body || '';
+  const tagLayout = entry.tagLayout || 't5';
+  const aiNoteTypewriter = !!(typewriterAiNote && hasAiNote);
+  const analysisAnimateText = hasAnalysis && (
+    !!animateAnalysis || (analysisProps.playAnimation > 0)
+  );
 
   return (
-    <div className="tl-card">
-      {item.voice && <TlVoiceBar voice={item.voice}/>}
-      <div className="tl-voice-text">{voiceText}</div>
-      <RecordedTags tags={item.tags}/>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')}>
+      <section className="tl-t5-main">
+        {hasVoice ? (
+          <TlVoiceInline voice={entry.voice} text={text}/>
+        ) : text ? (
+          <div className="tl-t5-body">{text}</div>
+        ) : null}
+        <RecordPhoto photo={entry.photo}/>
+        {hasTags && (
+          <div className="tl-t5-tags">
+            <RecordedTags tags={tags} layout={tagLayout}/>
+          </div>
+        )}
+      </section>
+
+      {hasAiNote && (
+        <>
+          <div className="tl-t5-divider" role="separator"/>
+          <section className="tl-t5-insight">
+            <AiNoteSection
+              aiNote={entry.aiNote}
+              embedded
+              typewriter={aiNoteTypewriter}
+            />
+          </section>
+        </>
+      )}
+
+      {hasAnalysis && (
+        <>
+          <div className="tl-t5-divider" role="separator"/>
+          <section className="tl-t5-insight" id="sister-analysis-anchor">
+            <SisterAnalysisContent
+              {...analysisProps}
+              animateText={analysisAnimateText}
+            />
+          </section>
+        </>
+      )}
     </div>
   );
 }
 
-function SisterCycleChart({animated}){
+function VoiceRecordCard(props){
+  return <SegmentedRecordCard {...props}/>;
+}
+
+const CYCLE_CHART_ANIM_MS = 4280; // zoom-pop @3580ms + 0.7s animation
+
+function SisterCycleChart({animated, onComplete}){
   const bars = [
     {date:'上上次', status:'准时', width:'96.8%', label:'30天'},
     {date:'上次', status:'准时', width:'100%', label:'31天'},
@@ -206,9 +376,14 @@ function SisterCycleChart({animated}){
   const [seenBars, setSeenBars] = React.useState(done ? [0, 1, 2] : []);
   const [grownBars, setGrownBars] = React.useState(done ? [0, 1, 2] : []);
   const [zoomPop, setZoomPop] = React.useState(done);
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   React.useEffect(()=>{
-    if(!animated) return;
+    if(!animated){
+      onCompleteRef.current?.();
+      return;
+    }
     setHeadSeen(false);
     setSeenBars([]);
     setGrownBars([]);
@@ -219,6 +394,7 @@ function SisterCycleChart({animated}){
       setTimeout(()=>{ setSeenBars([0, 1]); setGrownBars([0, 1]); }, 1400),
       setTimeout(()=>{ setSeenBars([0, 1, 2]); setGrownBars([0, 1, 2]); }, 2480),
       setTimeout(()=>setZoomPop(true), 3580),
+      setTimeout(()=>onCompleteRef.current?.(), CYCLE_CHART_ANIM_MS),
     ];
     return ()=>timers.forEach(clearTimeout);
   }, [animated]);
@@ -326,39 +502,146 @@ function SisterSignalCard({animated}){
   );
 }
 
-function SisterAnalysisCard({playAnimation, onCycleComplete}){
+const SISTER_LEAD = '以下是本次月经情况的分析。先看一下你最近3个周期的情况：';
+
+const SISTER_PARA1 = [
+  { text:'你最近三次周期分别是' },
+  { text:'30天、31天、29天', bold:true },
+  { text:'，整体波动幅度很小，属于' },
+  { text:'非常规律', bold:true },
+  { text:'的状态。' },
+];
+
+const SISTER_CLOSING = [
+  { text:'这次周期天数落在' },
+  { text:'21–35天的理想范围', bold:true },
+  { text:'内。很棒哦，继续保持现在的健康生活节奏就可以。' },
+];
+
+function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const [animated, setAnimated] = React.useState(false);
-  const [showSignal, setShowSignal] = React.useState(!playAnimation);
-  const [showClosing, setShowClosing] = React.useState(!playAnimation);
+  const [leadDone, setLeadDone] = React.useState(!animateText);
+  const [chartDone, setChartDone] = React.useState(!animateText);
+  const [para1Done, setPara1Done] = React.useState(!animateText);
+  const [showSignal, setShowSignal] = React.useState(!playAnimation && !animateText);
+  const [showClosing, setShowClosing] = React.useState(!playAnimation && !animateText);
+  const [closingDone, setClosingDone] = React.useState(!animateText);
+  const prevPlayRef = React.useRef(playAnimation);
+  const onCycleCompleteRef = React.useRef(onCycleComplete);
+  onCycleCompleteRef.current = onCycleComplete;
 
   React.useEffect(()=>{
-    if(!playAnimation){
-      onCycleComplete?.();
+    if(!animateText){
+      setLeadDone(true);
+      setChartDone(true);
+      setPara1Done(true);
+      setClosingDone(true);
+      onCycleCompleteRef.current?.();
       return;
     }
+    if(playAnimation > prevPlayRef.current){
+      setLeadDone(false);
+      setChartDone(false);
+      setPara1Done(false);
+      setClosingDone(false);
+      setShowSignal(false);
+      setShowClosing(false);
+      setAnimated(false);
+    }
+    prevPlayRef.current = playAnimation;
+  }, [animateText, playAnimation]);
+
+  React.useEffect(()=>{
+    if(!playAnimation) return;
+    if(animateText && !leadDone) return;
     setAnimated(true);
     setShowSignal(false);
     setShowClosing(false);
-    const t1 = setTimeout(()=>setShowSignal(true), 3600);
-    const t2 = setTimeout(()=>setShowClosing(true), 5800);
-    const t3 = setTimeout(()=>onCycleComplete?.(), 5800);
-    return ()=>{ clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [playAnimation, onCycleComplete]);
+  }, [playAnimation, animateText, leadDone]);
+
+  React.useEffect(()=>{
+    if(!animateText || !para1Done) return;
+    const delay = playAnimation ? 480 : 320;
+    const t = setTimeout(()=>setShowSignal(true), delay);
+    return ()=>clearTimeout(t);
+  }, [animateText, para1Done, playAnimation]);
+
+  React.useEffect(()=>{
+    if(!animateText || !showSignal) return;
+    const delay = playAnimation ? 2400 : 880;
+    const t = setTimeout(()=>setShowClosing(true), delay);
+    return ()=>clearTimeout(t);
+  }, [animateText, showSignal, playAnimation]);
+
+  React.useEffect(()=>{
+    if(!animateText || !showClosing || !closingDone) return;
+    onCycleCompleteRef.current?.();
+  }, [animateText, showClosing, closingDone]);
+
+  const showChart = !animateText || leadDone;
+  const showPara1 = !animateText || (leadDone && chartDone);
 
   return (
-    <div className="sister-bubble" id="sister-analysis-anchor">
-      <p>以下是本次月经情况的分析。先看一下你最近3个周期的情况：</p>
-      <SisterCycleChart animated={animated}/>
-      <p>你最近三次周期分别是<b>30天、31天、29天</b>，整体波动幅度很小，属于<b>非常规律</b>的状态。</p>
-      {showSignal && <SisterSignalCard animated={animated}/>}
-      {showClosing && (
-        <p>这次周期天数落在<b>21–35天的理想范围</b>内。很棒哦，继续保持现在的健康生活节奏就可以。</p>
+    <div className="tl-t5-analysis-body">
+      <p className="tl-t5-analysis-lead">
+        {animateText && !leadDone ? (
+          <TypewriterText text={SISTER_LEAD} active onComplete={()=>setLeadDone(true)}/>
+        ) : SISTER_LEAD}
+      </p>
+      {showChart && (
+        <SisterCycleChart
+          animated={animated}
+          onComplete={()=>setChartDone(true)}
+        />
+      )}
+      {showPara1 && (
+        <p className="tl-t5-analysis-text">
+          {animateText && !para1Done ? (
+            <TypewriterText
+              segments={SISTER_PARA1}
+              active
+              onComplete={()=>setPara1Done(true)}
+            />
+          ) : (
+            renderTypedSegments(SISTER_PARA1, segmentsFullText(SISTER_PARA1).length)
+          )}
+        </p>
+      )}
+      {showSignal && (!animateText || para1Done) && (
+        <>
+          <div className="tl-t5-chart-divider" role="separator"/>
+          <SisterSignalCard animated={animated}/>
+        </>
+      )}
+      {showClosing && (!animateText || para1Done) && (
+        <p className="tl-t5-analysis-text">
+          {animateText && !closingDone ? (
+            <TypewriterText
+              segments={SISTER_CLOSING}
+              active
+              onComplete={()=>setClosingDone(true)}
+            />
+          ) : (
+            renderTypedSegments(SISTER_CLOSING, segmentsFullText(SISTER_CLOSING).length)
+          )}
+        </p>
       )}
     </div>
   );
 }
 
+function SisterAnalysisCard({playAnimation, onCycleComplete}){
+  return (
+    <div className="sister-bubble" id="sister-analysis-anchor">
+      <SisterAnalysisContent
+        playAnimation={playAnimation}
+        onCycleComplete={onCycleComplete}
+      />
+    </div>
+  );
+}
+
 Object.assign(window, {
-  TlCardTime, TlVoiceBar, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
-  VoiceRecordCard, SisterAnalysisCard,
+  TlCardTime, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
+  SegmentedRecordCard, VoiceRecordCard, SisterAnalysisCard, SisterAnalysisContent,
 });

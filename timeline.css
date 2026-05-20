@@ -921,6 +921,167 @@
   height:48px;width:100%;pointer-events:none;
 }
 
+/* === 模板5 · 分段式统一卡片（Ins 简约） === */
+.tl-t5-card{
+  border-radius:14px;
+  border:none;
+  padding:16px 18px;
+  background:#ffffff;
+  box-shadow:0 1px 10px rgba(0,0,0,0.04);
+}
+.tl-t5-main{
+  margin:0;
+}
+.tl-t5-body{
+  margin:0;
+  font-size:14px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.82);
+  letter-spacing:0.01em;
+}
+.tl-typewriter-cursor{
+  display:inline-block;
+  width:1px;
+  height:0.95em;
+  margin-left:1px;
+  vertical-align:-0.08em;
+  background:rgba(255,77,136,0.55);
+  animation:tlTypeCursor 0.85s step-end infinite;
+}
+@keyframes tlTypeCursor{
+  0%,100%{opacity:1}
+  50%{opacity:0}
+}
+.tl-tags-reveal{
+  animation:tlTagsReveal 0.28s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes tlTagsReveal{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.tl-combo-ai.is-pending{
+  min-height:0;
+  padding:0;
+  opacity:0;
+  pointer-events:none;
+}
+.tl-t5-main .tl-voice-block{
+  margin:0;
+}
+.tl-t5-main .rec-img{
+  margin-top:12px;
+}
+.tl-t5-tags{
+  margin-top:12px;
+}
+.tl-t5-main .tl-tags-t5,
+.tl-t5-main .tl-tags:not(.tl-tags-rows){
+  gap:6px;
+  margin:0;
+}
+.tl-t5-main .tl-tag.is-t5{
+  background:rgba(0,0,0,0.035);
+  border:none;
+  color:rgba(0,0,0,0.5);
+  font-size:11px;
+  padding:3px 9px;
+  border-radius:6px;
+  line-height:1.29;
+  letter-spacing:0.02em;
+}
+.tl-t5-divider{
+  height:0.5px;
+  background:rgba(0,0,0,0.06);
+  margin:14px 0;
+}
+.tl-t5-insight{
+  margin:0;
+}
+.tl-t5-ai-note{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:0;
+  border:none;
+  background:transparent;
+  font-size:13px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.52);
+  letter-spacing:0.01em;
+}
+.tl-t5-ai-note .tl-combo-ai-icon{
+  flex-shrink:0;
+  font-size:13px;
+  line-height:1.55;
+  margin-top:1px;
+  opacity:0.72;
+}
+.tl-t5-ai-note .tl-combo-ai-text{
+  margin:0;
+  color:rgba(0,0,0,0.52);
+}
+.tl-t5-ai-note .tl-combo-ai-list{
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.tl-t5-ai-note .tl-combo-ai-list li{
+  font-size:13px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.52);
+  padding:1px 0;
+}
+.tl-t5-ai-note .tl-combo-ai-list li::before{
+  content:'·';
+  margin-right:5px;
+  color:rgba(0,0,0,0.28);
+}
+.tl-t5-ai-note .tl-combo-ai-total{
+  margin-top:8px;
+  padding-top:8px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+  font-size:13px;
+  font-weight:500;
+  color:rgba(0,0,0,0.58);
+}
+.tl-t5-insight .tl-t5-analysis-body{
+  font-size:13px;
+  color:rgba(0,0,0,0.55);
+  line-height:1.55;
+  letter-spacing:0.01em;
+}
+.tl-t5-insight .tl-t5-analysis-lead,
+.tl-t5-insight .tl-t5-analysis-text{
+  margin:0 0 10px;
+  font-size:13px;
+  line-height:1.55;
+  color:rgba(0,0,0,0.55);
+}
+.tl-t5-insight .tl-t5-analysis-body b,
+.tl-t5-insight .tl-t5-analysis-body strong{
+  font-weight:500;
+  color:rgba(0,0,0,0.68);
+}
+.tl-t5-insight .tl-t5-analysis-body .chart-block{
+  margin:0 0 10px;
+}
+.tl-t5-insight .tl-t5-chart-divider{
+  height:0.5px;
+  margin:10px 0;
+  background:rgba(0,0,0,0.05);
+}
+.tl-t5-insight .cycle-card{
+  margin:0 0 10px;
+  background:rgba(0,0,0,0.02);
+  border-color:rgba(0,0,0,0.05);
+  border-radius:10px;
+}
+.tl-t5-insight .signal-card{
+  margin:0 0 10px;
+  background:rgba(0,0,0,0.02);
+  border-radius:10px;
+}
+
 /* === 语音记录 & 美柚姐姐分析卡片 === */
 .tl-card{
   background:#ffffff;
@@ -1008,6 +1169,100 @@
   border-radius:14px 14px 0 0;
   border-bottom:none;
 }
+.tl-combo-body.has-voice-row{
+  padding:11px 12px 10px;
+}
+.tl-voice-card{
+  padding:11px 12px 10px;
+}
+.tl-voice-block{
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.tl-voice-block.has-voice-pill .tl-voice-text{
+  line-height:1.62;
+}
+.tl-voice-text{
+  margin:0;
+  font-size:14px;
+  line-height:inherit;
+  color:rgba(0,0,0,0.8);
+}
+.tl-voice-text .tl-voice-pill{
+  margin-left:6px;
+  vertical-align:-2px;
+}
+.tl-voice-block + .tl-extract-label,
+.tl-voice-card .tl-extract-label{
+  margin-top:10px;
+}
+.tl-voice-pill{
+  display:inline-flex;
+  vertical-align:middle;
+  align-items:center;
+  gap:4px;
+  padding:2px 7px 2px 2px;
+  margin:0;
+  min-height:24px;
+  border-radius:80px;
+  background:rgba(255,77,136,0.12);
+  border:none;
+  color:#ff4d88;
+  cursor:pointer;
+  font:inherit;
+  line-height:1.2;
+  white-space:nowrap;
+  transition:background .15s, transform .15s;
+}
+.tl-voice-pill:hover{background:rgba(255,77,136,0.16)}
+.tl-voice-pill:active{transform:scale(0.97)}
+.tl-voice-pill.is-playing{background:rgba(255,77,136,0.18)}
+.tl-voice-pill-ico{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#ff4d88;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.tl-voice-pill-ico svg{
+  width:8px;
+  height:8px;
+  margin-left:1px;
+}
+.tl-voice-pill.is-playing .tl-voice-pill-ico svg{
+  margin-left:0;
+  width:7px;
+  height:7px;
+}
+.tl-voice-pill .tl-voice-wave.is-mini{
+  flex:none;
+  width:18px;
+  height:10px;
+  gap:1.5px;
+  align-items:center;
+}
+.tl-voice-pill .tl-voice-wave.is-mini span{
+  width:1.5px;
+  border-radius:1px;
+  background:#ff4d88;
+  opacity:0.42;
+}
+.tl-voice-pill .tl-voice-wave.is-mini.is-playing span{
+  opacity:0.75;
+}
+.tl-voice-pill-dur{
+  font-size:11px;
+  line-height:1;
+  font-weight:500;
+  color:#ff4d88;
+  font-variant-numeric:tabular-nums;
+  padding-right:0;
+}
 .tl-voice-bar{
   width:100%;
   display:flex;
@@ -1059,11 +1314,6 @@
   font-variant-numeric:tabular-nums;
   flex-shrink:0;
 }
-.tl-voice-text{
-  font-size:14px;
-  line-height:1.65;
-  color:#4a4a4a;
-}
 .tl-extract-label{
   display:flex;
   align-items:center;
@@ -1073,6 +1323,7 @@
   font-weight:500;
   color:rgba(255,120,160,0.82);
 }
+
 .tl-extract-label::before{
   content:'';
   width:5px;height:5px;

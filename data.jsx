@@ -124,6 +124,81 @@ function pickFollowUp(hits, ctx){
   return { text: ctx.followUp, chips: ctx.chips.slice(0, 3) };
 }
 
+const WEEKDAY_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
+
+function formatTodayDateLabel(d = new Date()){
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function buildTodayDayBlock(ctx){
+  const scene = ctx || SCENE_CONTEXT.period;
+  const cycle = scene.cycle || {};
+  const d = new Date();
+  const phaseTag = cycle.label && cycle.sub
+    ? `${cycle.label}${cycle.sub}`
+    : (cycle.label || '');
+  return {
+    type:'day',
+    id:'d-today',
+    date: formatTodayDateLabel(d),
+    weekday: WEEKDAY_ZH[d.getDay()],
+    isToday: true,
+    phaseTag,
+    phaseKind: cycle.kind || 'period',
+    cycleDay: parseInt(String(cycle.dayNum || '').replace(/\D/g, ''), 10) || 1,
+    items: [],
+  };
+}
+
+function buildT5TagsFromText(text, hits){
+  const tags = [];
+  const seen = new Set();
+
+  const push = (label, cat, key)=>{
+    const k = key || `${cat}:${label}`;
+    if(seen.has(k)) return;
+    seen.add(k);
+    tags.push({ label, cat });
+  };
+
+  hits.forEach(h=>{
+    if(seen.has(h.kind)) return;
+    seen.add(h.kind);
+    if(h.kind === 'period'){
+      push(buildSyncDisplayLabel(h, text), 'period', 'period');
+    } else if(h.kind === 'pain'){
+      push('痛经', 'symptom', 'pain');
+    } else if(h.kind === 'flow'){
+      push('经量 偏多', 'flow', 'flow');
+    } else if(h.kind === 'flow-low'){
+      push('经量 偏少', 'flow', 'flow-low');
+    } else if(h.kind === 'sleep'){
+      push(/没睡|失眠|醒|偏少/.test(text) ? '睡眠偏少' : '睡眠', 'sleep', 'sleep');
+    } else if(h.kind === 'mood'){
+      push(/低落|烦|焦虑|难过|哭/.test(text) ? '心情 低落' : '心情 平静', 'mood', 'mood');
+    } else if(h.kind === 'med'){
+      push('用药', 'symptom', 'med');
+    } else if(h.kind === 'weight'){
+      push('体重', 'weight', 'weight');
+    } else if(h.kind === 'food'){
+      push('饮食', 'diet', 'food');
+    }
+  });
+
+  if(/腹胀|肚子胀/.test(text)) push('腹胀', 'symptom', 'bloat');
+  if(/腰酸|腰痛/.test(text)) push('腰酸', 'symptom', 'back');
+  if(/累|疲惫|乏力|没力气/.test(text) && !seen.has('sleep')) push('疲惫', 'symptom', 'tired');
+  if(/跑步|跑了|三公里|公里/.test(text)) push('跑步', 'fitness', 'run');
+  if(/三明治|午饭|午餐|晚餐|早餐|吃了/.test(text) && !seen.has('food')) push('饮食', 'diet', 'food-extra');
+  if(/愉快|开心|高兴/.test(text) && !seen.has('mood')) push('心情 愉快', 'mood', 'mood-extra');
+
+  return tags;
+}
+
+function getTimelineEmpty(ctx){
+  return [buildTodayDayBlock(ctx || SCENE_CONTEXT.period)];
+}
+
 // ---------- Scene context ----------
 const SCENE_CONTEXT = {
   period: {
@@ -291,7 +366,7 @@ const TIMELINE_BLOCKS = [
     items:[
       {
         kind:'voice-card', id:'e-518-1a', time:'16:00',
-        voice:{ duration:'12"' },
+        voice:{ duration:'0:12' },
         voiceText:'今天月经来了，量不算多，肚子有点闷闷的胀，腰也有点酸，心情还行就是有点懒得动。',
         tags:[
           { label:'月经来了', cat:'period' },
@@ -312,6 +387,14 @@ const TIMELINE_BLOCKS = [
     ],
   },
 ];
+
+// 场景二：新用户空值 — 运行时生成「今天」分日（与场景一时间轴头一致）
+const TIMELINE_EMPTY = getTimelineEmpty();
+
+// 旧场景二数据（含历史时间轴，保留供参考）
+const TIMELINE_RECORD_DIRECT = TIMELINE_BLOCKS.filter(
+  (b) => b.type !== 'day' || b.id !== 'd-5-18',
+);
 
 // Legacy daily cards (kept for reference)
 const DAILY_CARDS = [
@@ -371,7 +454,13 @@ window.extractContentTypes = extractContentTypes;
 window.CONTENT_TYPES = CONTENT_TYPES;
 window.chooseAnalysis = chooseAnalysis;
 window.buildSyncDisplayLabel = buildSyncDisplayLabel;
+window.buildT5TagsFromText = buildT5TagsFromText;
+window.buildTodayDayBlock = buildTodayDayBlock;
+window.getTimelineEmpty = getTimelineEmpty;
+window.formatTodayDateLabel = formatTodayDateLabel;
 window.pickFollowUp = pickFollowUp;
 window.SCENE_CONTEXT = SCENE_CONTEXT;
 window.TIMELINE_BLOCKS = TIMELINE_BLOCKS;
+window.TIMELINE_EMPTY = TIMELINE_EMPTY;
+window.TIMELINE_RECORD_DIRECT = TIMELINE_RECORD_DIRECT;
 window.DAILY_CARDS = DAILY_CARDS;

@@ -2,14 +2,106 @@
 
 /** 右下角 + — 5 项快捷发布 */
 const QUICK_PUBLISH = [
-  { id:'period', emoji:'🩸', label:'月经', text:'今天月经来了' },
-  { id:'mood', emoji:'💛', label:'心情', text:'今天心情还行' },
-  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg' },
+  { id:'mood', emoji:'💛', label:'情绪', text:'今天情绪有点低落' },
   { id:'symptom', emoji:'🤒', label:'症状', text:'有点不舒服' },
-  { id:'diary', emoji:'📔', label:'日记', text:'想记录一下今天…' },
+  { id:'food', emoji:'🍽️', label:'饮食', text:'午餐吃了鸡胸肉和青菜' },
+  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg' },
+  { id:'sleep', emoji:'😴', label:'睡眠', text:'昨晚睡了 7 小时' },
 ];
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
+
+const DOCK_SELLING_POINTS = [
+  '记点什么…',
+  '记录今天的心情…',
+  '身体有什么变化…',
+  '刚才吃了什么…',
+  '睡眠怎么样…',
+];
+const DOCK_PH_CHAR_STAGGER = 72;
+const DOCK_PH_CHAR_ENTER = 440;
+const DOCK_PH_DWELL = 2600;
+const DOCK_PH_LEAVE = 360;
+
+function DockWavePlaceholder({show, focused}){
+  const [index, setIndex] = React.useState(0);
+  const [phase, setPhase] = React.useState('enter');
+  const timersRef = React.useRef([]);
+  const runIdRef = React.useRef(0);
+
+  const clearTimers = ()=>{
+    timersRef.current.forEach(t=>window.clearTimeout(t));
+    timersRef.current = [];
+  };
+
+  const pushTimer = (fn, ms)=>{
+    const id = window.setTimeout(fn, ms);
+    timersRef.current.push(id);
+    return id;
+  };
+
+  React.useEffect(()=>{
+    if(!show || focused){
+      clearTimers();
+      runIdRef.current += 1;
+      return;
+    }
+
+    const runId = ++runIdRef.current;
+    const startCycle = (pointIndex)=>{
+      if(runId !== runIdRef.current) return;
+      const text = DOCK_SELLING_POINTS[pointIndex];
+      const enterMs = Math.max(0, text.length - 1) * DOCK_PH_CHAR_STAGGER + DOCK_PH_CHAR_ENTER;
+
+      setIndex(pointIndex);
+      setPhase('enter');
+
+      pushTimer(()=>{
+        if(runId !== runIdRef.current) return;
+        setPhase('idle');
+        pushTimer(()=>{
+          if(runId !== runIdRef.current) return;
+          setPhase('leave');
+          pushTimer(()=>{
+            if(runId !== runIdRef.current) return;
+            startCycle((pointIndex + 1) % DOCK_SELLING_POINTS.length);
+          }, DOCK_PH_LEAVE);
+        }, DOCK_PH_DWELL);
+      }, enterMs);
+    };
+
+    startCycle(0);
+    return ()=>{
+      runIdRef.current += 1;
+      clearTimers();
+    };
+  }, [show, focused]);
+
+  if(!show) return null;
+
+  const text = DOCK_SELLING_POINTS[index];
+  const chars = Array.from(text);
+  const charPhase = phase === 'enter' ? 'enter' : 'idle';
+
+  return (
+    <span
+      className={'dock-float-ph'
+        +(focused ? ' is-focused' : '')
+        +(phase === 'leave' ? ' is-leaving' : '')}
+      aria-hidden="true"
+    >
+      {chars.map((ch, i)=>(
+        <span
+          key={index+'-'+i}
+          className={'dock-float-ph-char is-'+charPhase}
+          style={{'--i': i}}
+        >
+          {ch}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /** 左半圆：从 + 向左侧展开（90° 上 → 180° 左 → 270° 下），不往右伸 */
 function fanArcPos(index, total, radius){
@@ -87,18 +179,33 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
 }
 
 function DockPublisher({
-  draft, onDraft, onSend, onQuickMark, onVoiceDone,
-  onPhoto,
+  draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
+  onVoiceDone, onPhoto, onDockExpandedChange, activeTab,
 }){
   const I = window.Icon;
+  const DockMoodPicker = window.DockMoodPicker;
+  const DockSymptomPicker = window.DockSymptomPicker;
+  const DockWeightPicker = window.DockWeightPicker;
   const [inputMode, setInputMode] = React.useState('text');
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickClosing, setQuickClosing] = React.useState(false);
+  const [dockSheet, setDockSheet] = React.useState(null);
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
+  const [inputFocused, setInputFocused] = React.useState(false);
   const recTimer = React.useRef(null);
 
   const quickOpenedAt = React.useRef(0);
+  const prevTabRef = React.useRef(activeTab);
+
+  React.useEffect(()=>{
+    if(activeTab === 'note' && prevTabRef.current !== 'note'){
+      setQuickOpen(false);
+      setQuickClosing(false);
+      setDockSheet(null);
+    }
+    prevTabRef.current = activeTab;
+  }, [activeTab]);
 
   const toggleQuick = (next)=>{
     if(next === undefined) next = !quickOpen;
@@ -117,6 +224,7 @@ function DockPublisher({
       setQuickClosing(false);
     }, 340);
   };
+
 
   React.useEffect(()=>{
     if(recording){
@@ -140,14 +248,50 @@ function DockPublisher({
     toggleQuick(false);
   };
 
+  const closeDockSheet = ()=> setDockSheet(null);
+
   const handleQuick = (item)=>{
-    if(item) onQuickMark?.(item);
     toggleQuick(false);
+    if(item?.id === 'mood'){
+      setDockSheet('mood');
+      return;
+    }
+    if(item?.id === 'symptom'){
+      setDockSheet('symptom');
+      return;
+    }
+    if(item?.id === 'weight'){
+      setDockSheet('weight');
+      return;
+    }
+    setDockSheet(null);
+    if(item) onQuickMark?.(item);
   };
+
+  const handleMoodConfirm = (moods)=>{
+    setDockSheet(null);
+    onMoodConfirm?.(moods);
+  };
+
+  const handleSymptomConfirm = (symptoms)=>{
+    setDockSheet(null);
+    onSymptomConfirm?.(symptoms);
+  };
+
+  const handleWeightConfirm = (payload)=>{
+    setDockSheet(null);
+    onWeightConfirm?.(payload);
+  };
+
+  React.useEffect(()=>{
+    onDockExpandedChange?.(!!dockSheet);
+  }, [dockSheet, onDockExpandedChange]);
+
+  const isDockExpanded = !!dockSheet;
 
   return (
     <>
-      <div className="quick-float-wrap">
+      <div className={'quick-float-wrap'+(isDockExpanded?' is-covered':'')}>
         <QuickFan
           items={QUICK_PUBLISH}
           open={quickOpen}
@@ -162,8 +306,24 @@ function DockPublisher({
         />
       </div>
 
-      <div className="dock-wrap">
-        <div className="dock-panel">
+      <div className={'dock-wrap'+(isDockExpanded?' is-mood-expanded':'')}>
+        <div className={'dock-panel'+(isDockExpanded?' is-mood-expanded':'')}>
+          {dockSheet === 'mood' ? (
+            <DockMoodPicker
+              onConfirm={handleMoodConfirm}
+              onCancel={closeDockSheet}
+            />
+          ) : dockSheet === 'symptom' ? (
+            <DockSymptomPicker
+              onConfirm={handleSymptomConfirm}
+              onCancel={closeDockSheet}
+            />
+          ) : dockSheet === 'weight' ? (
+            <DockWeightPicker
+              onConfirm={handleWeightConfirm}
+              onCancel={closeDockSheet}
+            />
+          ) : (
           <div className="dock-bar">
             <div className="dock-input-row">
               <button
@@ -178,16 +338,23 @@ function DockPublisher({
               </button>
 
               {inputMode==='text' ? (
-                <div className="dock-text-field">
+                <div className={'dock-text-field'+(inputFocused?' is-focused':'')}>
+                  <DockWavePlaceholder
+                    show={!draft.trim()}
+                    focused={inputFocused}
+                  />
                   <textarea
                     rows="1"
-                    placeholder="说点什么…"
+                    placeholder=""
+                    aria-label={DOCK_SELLING_POINTS[0]}
                     value={draft}
                     onChange={(e)=>{
                       onDraft(e.target.value);
                       e.target.style.height='auto';
                       e.target.style.height = Math.min(e.target.scrollHeight, 72)+'px';
                     }}
+                    onFocus={()=>setInputFocused(true)}
+                    onBlur={()=>setInputFocused(false)}
                     onKeyDown={(e)=>{
                       if(e.key==='Enter' && !e.shiftKey && draft.trim()){
                         e.preventDefault();
@@ -197,24 +364,29 @@ function DockPublisher({
                   />
                 </div>
               ) : (
-                <button
-                  type="button"
-                  className={'dock-voice-btn'+(recording?' recording':'')}
-                  onPointerDown={(e)=>{ e.preventDefault(); startRec(); }}
-                  onPointerUp={stopRec}
-                  onPointerLeave={recording ? stopRec : undefined}
-                >
-                  {recording ? (
-                    <>
-                      <span className="dock-voice-waves" aria-hidden="true">
-                        {[4,8,12,8,6,10,7].map((h,j)=><span key={j} style={{height:h+'px'}}/>)}
-                      </span>
-                      <span>松开 结束{recSec > 0 ? ' '+recSec+'s' : ''}</span>
-                    </>
-                  ) : (
-                    <span>按住 说话</span>
-                  )}
-                </button>
+                <div className={'dock-voice-wrap'+(recording?' is-recording':'')}>
+                  <div className="dock-voice-stage" aria-hidden="true">
+                    <span className="dock-voice-shimmer"/>
+                  </div>
+                  <button
+                    type="button"
+                    className={'dock-voice-btn'+(recording?' recording':'')}
+                    onPointerDown={(e)=>{ e.preventDefault(); startRec(); }}
+                    onPointerUp={stopRec}
+                    onPointerLeave={recording ? stopRec : undefined}
+                  >
+                    {recording ? (
+                      <>
+                        <span className="dock-voice-waves" aria-hidden="true">
+                          {[4,8,12,8,6,10,7].map((h,j)=><span key={j} style={{height:h+'px'}}/>)}
+                        </span>
+                        <span>松开 结束{recSec > 0 ? ' '+recSec+'s' : ''}</span>
+                      </>
+                    ) : (
+                      <span className="dock-voice-label">按住 说话</span>
+                    )}
+                  </button>
+                </div>
               )}
 
               {inputMode==='text' && draft.trim() ? (
@@ -233,6 +405,7 @@ function DockPublisher({
               <I name="camera" size={22} stroke={1.6}/>
             </button>
           </div>
+          )}
         </div>
       </div>
     </>

@@ -29,7 +29,11 @@
 }
 .suiji-shell--scene .suiji-stream{position:relative;z-index:1}
 .suiji-shell--scene .dock-wrap{z-index:90}
+.suiji-shell--scene .dock-wrap.is-mood-expanded{z-index:100}
 .suiji-shell--scene .quick-float-wrap{z-index:91}
+.suiji-shell.is-mood-expanded .suiji-stream{
+  padding-bottom:420px;
+}
 .suiji-stream{
   padding:0 16px 200px;
   padding-top:52px;
@@ -53,6 +57,15 @@
   border-top:0.5px solid var(--my-line);
   box-shadow:0 -4px 24px rgba(0,0,0,0.06);
   border-radius:16px 16px 0 0;
+  transition:box-shadow 0.32s ease, transform 0.32s cubic-bezier(0.34,1.2,0.64,1);
+}
+.dock-wrap.is-mood-expanded{
+  bottom:58px;
+}
+.dock-panel.is-mood-expanded{
+  box-shadow:0 -8px 36px rgba(255,77,136,0.14);
+  transform:translateY(0);
+  overflow:hidden;
 }
 
 /* 反馈条 */
@@ -118,6 +131,401 @@
 }
 @keyframes livePulse{0%,100%{opacity:0.5}50%{opacity:1}}
 
+/* ============ 输入框展开 · 心情选择（内嵌） ============ */
+.dock-mood-sheet{
+  display:flex;
+  flex-direction:column;
+  min-height:300px;
+  max-height:min(52vh, 360px);
+  animation:dockMoodIn 0.36s cubic-bezier(0.34,1.18,0.64,1) both;
+}
+@keyframes dockMoodIn{
+  from{opacity:0.6;transform:translateY(12px) scale(0.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.dock-mood-top{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  align-items:center;
+  padding:14px 8px 10px;
+  flex-shrink:0;
+}
+.dock-mood-lead-cell{
+  grid-column:1;
+  min-width:0;
+  padding:0 2px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.dock-mood-lead{
+  margin:0;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.55);
+  line-height:1.29;
+  letter-spacing:0.02em;
+  white-space:nowrap;
+  text-align:left;
+  /* 与下方居中「超开心」左缘对齐：右移 (lead宽 - label宽) / 2 */
+  transform:translateX(calc((14px * 8 - 11px * 3) / 2));
+}
+.dock-mood-close{
+  grid-column:5;
+  justify-self:end;
+  width:32px;
+  height:32px;
+  appearance:none;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:rgba(0,0,0,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font:inherit;
+  transition:background 0.15s, color 0.15s, transform 0.15s;
+}
+.dock-mood-close:active{
+  background:rgba(0,0,0,0.04);
+  color:rgba(0,0,0,0.55);
+  transform:scale(0.96);
+}
+.dock-mood-grid{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:2px 0;
+  padding:0 8px 4px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.dock-mood-cell{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+  padding:6px 2px 8px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  transition:background 0.15s, transform 0.15s;
+}
+.dock-mood-cell:active{transform:scale(0.96)}
+.dock-mood-face-wrap{
+  position:relative;
+  width:40px;
+  height:40px;
+  flex-shrink:0;
+}
+.dock-mood-face{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--mood-bg, #FFE875);
+  overflow:hidden;
+}
+.dock-mood-check{
+  position:absolute;
+  right:-1px;
+  bottom:-1px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#00cc99;
+  border:1.5px solid #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  pointer-events:none;
+}
+.dock-mood-sheet .mood-face-svg{
+  width:40px;
+  height:40px;
+  display:block;
+}
+.dock-mood-lbl{
+  font-size:11px;
+  line-height:1.2;
+  color:rgba(0,0,0,0.6);
+  text-align:center;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.dock-mood-foot{
+  flex-shrink:0;
+  padding:8px 16px 12px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+  background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.96) 24%);
+}
+.dock-mood-submit{
+  width:100%;
+  height:40px;
+  appearance:none;
+  border:0;
+  border-radius:80px;
+  background:#ff4d88;
+  color:#fff;
+  font:inherit;
+  font-size:15px;
+  font-weight:500;
+  cursor:pointer;
+  transition:opacity 0.15s, transform 0.15s;
+}
+.dock-mood-submit:disabled{
+  opacity:0.35;
+  cursor:default;
+}
+.dock-mood-submit:not(:disabled):active{
+  transform:scale(0.98);
+  opacity:0.92;
+}
+
+/* ============ 通用底部展开 sheet ============ */
+.dock-sheet{
+  display:flex;
+  flex-direction:column;
+  min-height:300px;
+  max-height:min(58vh, 420px);
+  animation:dockMoodIn 0.36s cubic-bezier(0.34,1.18,0.64,1) both;
+}
+.dock-sheet-hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px 8px;
+  flex-shrink:0;
+}
+.dock-sheet-title{
+  margin:0;
+  font-size:17px;
+  font-weight:500;
+  color:rgba(0,0,0,0.85);
+  line-height:1.19;
+}
+.dock-sheet-close{
+  width:32px;
+  height:32px;
+  appearance:none;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:rgba(0,0,0,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font:inherit;
+}
+.dock-sheet-close:active{background:rgba(0,0,0,0.04)}
+.dock-sheet-foot{
+  flex-shrink:0;
+  padding:8px 16px 12px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+  background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.96) 24%);
+}
+.dock-sheet-submit{
+  width:100%;
+  height:40px;
+  appearance:none;
+  border:0;
+  border-radius:80px;
+  background:#ff4d88;
+  color:#fff;
+  font:inherit;
+  font-size:15px;
+  font-weight:500;
+  cursor:pointer;
+  transition:opacity 0.15s, transform 0.15s;
+}
+.dock-sheet-submit:disabled{opacity:0.35;cursor:default}
+.dock-sheet-submit:not(:disabled):active{transform:scale(0.98);opacity:0.92}
+
+/* ============ 症状选择 ============ */
+.dock-symptom-sheet{
+  max-height:min(62vh, 440px);
+}
+.dock-symptom-scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:0 12px 4px;
+}
+.dock-symptom-group{
+  margin-bottom:12px;
+}
+.dock-symptom-group-title{
+  margin:0 0 8px 4px;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.75);
+  line-height:1.29;
+}
+.dock-symptom-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:4px 0;
+}
+.dock-symptom-cell{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+  padding:6px 2px 8px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.dock-symptom-cell:active{transform:scale(0.96)}
+.dock-symptom-ico-wrap{
+  position:relative;
+  width:44px;
+  height:44px;
+}
+.dock-symptom-ico{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--sym-bg, #ffe8f0);
+  font-size:22px;
+  line-height:1;
+}
+.dock-picker-check{
+  position:absolute;
+  right:-1px;
+  bottom:-1px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#00cc99;
+  border:1.5px solid #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  pointer-events:none;
+}
+.dock-symptom-lbl{
+  font-size:11px;
+  line-height:1.2;
+  color:rgba(0,0,0,0.6);
+  text-align:center;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ============ 体重输入 ============ */
+.dock-weight-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px 8px;
+  flex-shrink:0;
+}
+.dock-sheet-lead{
+  margin:0;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.55);
+  line-height:1.47;
+  letter-spacing:0.02em;
+  white-space:nowrap;
+}
+.dock-weight-sheet{
+  min-height:360px;
+  max-height:min(65vh, 460px);
+}
+.dock-weight-display-wrap{
+  position:relative;
+  margin:4px 16px 12px;
+  padding:20px 16px 18px;
+  background:#f7f7f9;
+  border-radius:12px;
+  text-align:center;
+}
+.dock-weight-unit-toggle{
+  position:absolute;
+  top:10px;
+  right:10px;
+  appearance:none;
+  border:0;
+  background:#fff;
+  border-radius:80px;
+  padding:4px 10px;
+  font:inherit;
+  font-size:11px;
+  color:rgba(0,0,0,0.5);
+  cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+.dock-weight-display{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:6px;
+  padding-top:8px;
+}
+.dock-weight-num{
+  font-size:40px;
+  font-weight:500;
+  color:rgba(0,0,0,0.88);
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.dock-weight-unit{
+  font-size:15px;
+  color:rgba(0,0,0,0.35);
+  line-height:1.29;
+}
+.dock-weight-keypad{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:8px;
+  padding:0 16px 8px;
+  flex-shrink:0;
+}
+.dock-weight-key{
+  height:44px;
+  appearance:none;
+  border:0;
+  border-radius:8px;
+  background:#f7f7f9;
+  font:inherit;
+  font-size:20px;
+  font-weight:500;
+  color:rgba(0,0,0,0.82);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.12s, transform 0.12s;
+}
+.dock-weight-key:active{background:#ececef;transform:scale(0.97)}
+.dock-weight-key.is-fn{
+  font-size:16px;
+  color:rgba(0,0,0,0.45);
+}
+
 /* ============ 右下悬浮快捷发布 ============ */
 .quick-float-wrap{
   position:fixed;
@@ -135,6 +543,15 @@
   right:12px;
   bottom:0;
   pointer-events:auto;
+  transition:opacity 0.28s ease, transform 0.32s cubic-bezier(0.34,1.2,0.64,1);
+}
+.quick-float-wrap.is-covered{
+  pointer-events:none;
+}
+.quick-float-wrap.is-covered .dock-fan-corner{
+  opacity:0;
+  transform:scale(0.88) translateY(8px);
+  pointer-events:none;
 }
 
 /* ============ 底部栏：仅输入 + 相机 ============ */
@@ -349,24 +766,196 @@
   border:0.5px solid transparent;
   padding:0 12px;
   display:flex;align-items:center;
+  position:relative;
   transition:border-color 0.15s, background 0.15s;
 }
-.dock-text-field:focus-within{
+.dock-text-field:focus-within,
+.dock-text-field.is-focused{
   background:var(--my-surface);
   border-color:rgba(255,77,136,0.25);
+}
+.dock-float-ph{
+  position:absolute;
+  left:12px;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  display:inline-flex;
+  align-items:baseline;
+  pointer-events:none;
+  font-size:15px;
+  line-height:1.45;
+  color:rgba(0,0,0,0.3);
+  white-space:nowrap;
+  overflow:hidden;
+  transition:transform 200ms ease-out;
+}
+.dock-float-ph.is-focused{
+  transform:translateY(calc(-50% - 2px));
+}
+.dock-float-ph.is-leaving{
+  animation:dockPhLineLeave 360ms ease-in forwards;
+}
+.dock-float-ph-char{
+  display:inline-block;
+}
+.dock-float-ph-char.is-enter{
+  opacity:0;
+  transform:translateY(7px);
+  animation:dockPhCharIn 440ms cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay:calc(var(--i) * 72ms);
+}
+.dock-float-ph-char.is-idle{
+  opacity:0.45;
+  transform:translateY(0);
+}
+.dock-float-ph.is-focused .dock-float-ph-char{
+  opacity:0.5;
+  transform:translateY(0);
+  animation:none;
+}
+@keyframes dockPhCharIn{
+  to{
+    opacity:0.45;
+    transform:translateY(0);
+  }
+}
+@keyframes dockPhLineLeave{
+  from{
+    opacity:1;
+    transform:translateY(-50%);
+  }
+  to{
+    opacity:0;
+    transform:translateY(calc(-50% - 8px));
+  }
 }
 .dock-text-field textarea{
   width:100%;border:none;outline:none;background:transparent;
   font:inherit;font-size:15px;line-height:1.45;
   color:var(--my-text-primary);resize:none;
   padding:8px 0;max-height:72px;
+  position:relative;z-index:1;
 }
-.dock-text-field textarea::placeholder{color:var(--my-text-tertiary)}
+.dock-text-field textarea::placeholder{color:transparent}
 
+.dock-voice-wrap{
+  flex:1;
+  position:relative;
+  min-height:40px;
+  border-radius:10px;
+  overflow:hidden;
+  background:linear-gradient(180deg, #f5f5f7 0%, #ececef 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 0 0 0.5px rgba(0,0,0,0.04);
+}
+.dock-voice-wrap.is-recording{
+  background:linear-gradient(180deg, #efeff2 0%, #e8e8ec 100%);
+}
+.dock-voice-stage{
+  position:absolute;
+  inset:0;
+  border-radius:10px;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:0;
+}
+.dock-voice-shimmer{
+  position:absolute;
+  top:-8%;bottom:-8%;
+  width:62%;
+  left:-68%;
+  transform:skewX(-20deg);
+  background:linear-gradient(
+    108deg,
+    transparent 0%,
+    rgba(255,255,255,0.04) 18%,
+    rgba(255,255,255,0.22) 36%,
+    rgba(255,255,255,0.62) 48%,
+    rgba(255,255,255,0.78) 50%,
+    rgba(255,255,255,0.62) 52%,
+    rgba(255,255,255,0.22) 64%,
+    rgba(255,255,255,0.04) 82%,
+    transparent 100%
+  );
+  filter:blur(0.4px);
+  animation:dockVoiceShimmer 5s ease-in-out infinite;
+}
+.dock-voice-wrap.is-recording .dock-voice-shimmer{
+  width:58%;
+  background:linear-gradient(
+    108deg,
+    transparent 0%,
+    rgba(255,255,255,0.06) 18%,
+    rgba(255,255,255,0.28) 36%,
+    rgba(255,255,255,0.68) 48%,
+    rgba(255,255,255,0.85) 50%,
+    rgba(255,255,255,0.68) 52%,
+    rgba(255,255,255,0.28) 64%,
+    rgba(255,255,255,0.06) 82%,
+    transparent 100%
+  );
+  animation:dockVoiceShimmerRec 5s ease-in-out infinite;
+}
+@keyframes dockVoiceShimmer{
+  0%,64%,100%{
+    left:-68%;
+    opacity:0;
+  }
+  68%{
+    left:-38%;
+    opacity:0.45;
+  }
+  76%{
+    left:8%;
+    opacity:0.72;
+  }
+  84%{
+    left:52%;
+    opacity:0.78;
+  }
+  92%{
+    left:108%;
+    opacity:0.35;
+  }
+  96%{
+    opacity:0;
+  }
+}
+@keyframes dockVoiceShimmerRec{
+  0%,62%,100%{
+    left:-66%;
+    opacity:0;
+  }
+  67%{
+    left:-34%;
+    opacity:0.5;
+  }
+  75%{
+    left:10%;
+    opacity:0.8;
+  }
+  83%{
+    left:54%;
+    opacity:0.85;
+  }
+  91%{
+    left:110%;
+    opacity:0.4;
+  }
+  95%{
+    opacity:0;
+  }
+}
 .dock-voice-btn{
-  flex:1;height:40px;
-  border:none;border-radius:8px;
-  background:var(--my-bg);
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:40px;
+  border:none;
+  border-radius:10px;
+  background:transparent;
   font:inherit;font-size:15px;font-weight:500;
   color:var(--my-text-primary);
   cursor:pointer;
@@ -375,10 +964,16 @@
   -webkit-user-select:none;
   touch-action:none;
 }
+.dock-voice-label{
+  position:relative;
+  z-index:1;
+}
 .dock-voice-btn:active,
 .dock-voice-btn.recording{
-  background:rgba(255,77,136,0.12);
   color:var(--my-brand-red);
+}
+.dock-voice-btn.recording .dock-voice-label{
+  font-weight:500;
 }
 .dock-voice-waves{
   display:flex;align-items:center;gap:2px;height:16px;

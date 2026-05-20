@@ -1,10 +1,5 @@
 const { useState, useEffect, useRef } = React;
 
-const TAG_EMOJI = {
-  period:'🩸', pain:'😖', flow:'🩸', 'flow-low':'💧',
-  sleep:'😴', mood:'💛', med:'💊',
-};
-
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
   if(analysis.tone === 'warn') return true;
@@ -15,24 +10,21 @@ function shouldShowAnalysis(hits, analysis){
 function buildTimelineEntry(text, hits, opts={}){
   const analysis = hits.length ? window.chooseAnalysis(hits) : null;
   const toneMap = { warn:'yellow', brand:'brand', good:'green' };
-  const contentTypes = window.extractContentTypes(text);
-  const topicTags = hits.map(h=>({
-    emoji: TAG_EMOJI[h.kind] || '·',
-    label: h.label,
-  }));
-  const contentTags = contentTypes.map(c=>({
-    emoji: c.emoji,
-    label: c.label,
-    content: true,
-  }));
+  const tags = window.buildT5TagsFromText(text, hits);
   const entry = {
     id:'e-'+Date.now(),
-    kind:'rec',
+    kind: opts.voice ? 'voice-card' : 'rec',
     time: window.formatNowTime(),
-    body: text,
     isNew: true,
-    tags: [...contentTags, ...topicTags],
+    tags,
+    tagLayout: 't5',
   };
+  if(opts.voice){
+    entry.voice = opts.voice;
+    entry.voiceText = text;
+  } else {
+    entry.body = text;
+  }
   if(shouldShowAnalysis(hits, analysis)){
     entry.aiNote = {
       tone: toneMap[analysis.tone] || 'green',
@@ -40,26 +32,49 @@ function buildTimelineEntry(text, hits, opts={}){
       text: analysis.points?.map(p=>p.text).join(' ') || analysis.title,
     };
   }
-  if(opts.voice) entry.voice = opts.voice;
-  if(opts.quickTag) entry.tags = [{ emoji: opts.quickTag.emoji, label: opts.quickTag.label }, ...entry.tags];
+  if(opts.quickTag){
+    entry.tags = [{ label: opts.quickTag.label, cat:'symptom', emoji: opts.quickTag.emoji }, ...entry.tags];
+  }
   return entry;
 }
 
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
-  const ctx = window.SCENE_CONTEXT[t.scene] || window.SCENE_CONTEXT.period;
+  const scene = window.getDemoScene(t.demoScene);
+  const ctx = window.SCENE_CONTEXT[scene.identity] || window.SCENE_CONTEXT.period;
 
-  const [draft, setDraft] = useState('');
-  const [timeline, setTimeline] = useState(window.TIMELINE_BLOCKS);
+  const initial = window.getSceneInitialState(t.demoScene);
+  const [draft, setDraft] = useState(initial.draft);
+  const [timeline, setTimeline] = useState(initial.timeline);
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
-  const [activeTab, setActiveTab] = useState('cal');
-  const [showAnalysisNotice, setShowAnalysisNotice] = useState(false);
-  const [sisterPlayAnimation, setSisterPlayAnimation] = useState(0);
-  const [sisterCycleDone, setSisterCycleDone] = useState(true);
-  const [hideTodayGuide, setHideTodayGuide] = useState(false);
+  const [activeTab, setActiveTab] = useState(initial.activeTab);
+  const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
+  const [sisterPlayAnimation, setSisterPlayAnimation] = useState(initial.sisterPlayAnimation);
+  const [sisterCycleDone, setSisterCycleDone] = useState(initial.sisterCycleDone);
+  const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
+  const [dockExpanded, setDockExpanded] = useState(false);
+  const [showSearchPage, setShowSearchPage] = useState(false);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
+  const recordEnterModeRef = useRef('idle');
+
+  const resetSceneState = (demoSceneId)=>{
+    const next = window.getSceneInitialState(demoSceneId);
+    setDraft(next.draft);
+    setTimeline(next.timeline);
+    setShowAnalysisNotice(next.showAnalysisNotice);
+    setSisterPlayAnimation(next.sisterPlayAnimation);
+    setSisterCycleDone(next.sisterCycleDone);
+    setHideTodayGuide(next.hideTodayGuide);
+    setActiveTab(next.activeTab);
+    setShowPhoto(false);
+    setShowSearchPage(false);
+  };
+
+  useEffect(()=>{
+    resetSceneState(t.demoScene);
+  }, [t.demoScene]);
 
   const scrollToSisterAnalysis = ()=>{
     requestAnimationFrame(()=>{
@@ -77,6 +92,8 @@ function App(){
   };
 
   const openSisterAnalysis = ()=>{
+    if(scene.record.sisterAnalysis.trigger !== 'float-notice') return;
+    recordEnterModeRef.current = 'analysis';
     setShowAnalysisNotice(false);
     setSisterCycleDone(false);
     setSisterPlayAnimation(n=>n + 1);
@@ -87,7 +104,7 @@ function App(){
   const handleSisterCycleComplete = React.useCallback(()=>{
     setSisterCycleDone(true);
     requestAnimationFrame(()=>{
-      setTimeout(()=>scrollTimelineToEnd('smooth'), 120);
+      setTimeout(()=>scrollTimelineToLastItem('smooth'), 120);
     });
   }, []);
 
@@ -98,26 +115,62 @@ function App(){
     }
   }, [sisterPlayAnimation]);
 
-  useEffect(()=>{
-    setDraft('');
-    setHideTodayGuide(false);
-  }, [t.scene]);
-
-  const scrollTimelineToEnd = (behavior='smooth')=>{
+  const scrollTimelineToLastItem = (behavior='smooth')=>{
     requestAnimationFrame(()=>{
-      const el = streamRef.current;
-      if(!el) return;
-      if(behavior === 'auto') el.scrollTop = el.scrollHeight;
-      else el.scrollTo({ top: el.scrollHeight, behavior:'smooth' });
+      setTimeout(()=>{
+        const el = streamRef.current;
+        if(!el) return;
+        const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
+        if(anchor){
+          const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 28;
+          if(behavior === 'auto') el.scrollTop = Math.max(0, top);
+          else el.scrollTo({ top: Math.max(0, top), behavior });
+          return;
+        }
+        if(behavior === 'auto') el.scrollTop = el.scrollHeight;
+        else el.scrollTo({ top: el.scrollHeight, behavior });
+      }, 80);
     });
   };
 
+  const scrollTimelineToEnd = (behavior='smooth')=>{
+    scrollTimelineToLastItem(behavior);
+  };
+
+  const handleTabChange = (tab)=>{
+    if(tab === 'note' && activeTab !== 'note'){
+      recordEnterModeRef.current = 'manual';
+    }
+    if(tab !== 'note'){
+      recordEnterModeRef.current = 'idle';
+    }
+    setActiveTab(tab);
+  };
+
+  const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
+
   useEffect(()=>{
+    if(activeTab !== 'note') return;
+    if(showRecordEmpty) return;
+    if(recordEnterModeRef.current === 'analysis'){
+      recordEnterModeRef.current = 'idle';
+      return;
+    }
+    const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
+    recordEnterModeRef.current = 'idle';
+    return ()=>clearTimeout(tm);
+  }, [activeTab, showRecordEmpty]);
+
+  useEffect(()=>{
+    if(showRecordEmpty) return;
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, []);
+  }, [t.demoScene, showRecordEmpty]);
 
-  useEffect(()=>{ scrollTimelineToEnd('smooth'); }, [timeline]);
+  useEffect(()=>{
+    if(showRecordEmpty) return;
+    scrollTimelineToEnd('smooth');
+  }, [timeline, showRecordEmpty]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -128,7 +181,9 @@ function App(){
     }, 2400);
   };
 
-  const markUserRecorded = ()=> setHideTodayGuide(true);
+  const markUserRecorded = ()=>{
+    if(scene.record.todayGuide) setHideTodayGuide(true);
+  };
 
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
@@ -159,6 +214,30 @@ function App(){
     submitText(mark.text, { quickTag: { emoji: mark.emoji, label: mark.label } });
   };
 
+  const submitMoodRecord = (moods)=>{
+    markUserRecorded();
+    const entry = window.createMoodRecordEntry(moods);
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitSymptomRecord = (symptoms)=>{
+    markUserRecorded();
+    const entry = window.createSymptomRecordEntry(symptoms);
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitWeightRecord = (payload)=>{
+    markUserRecorded();
+    const entry = window.createWeightRecordEntry(payload);
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
@@ -182,32 +261,49 @@ function App(){
     dayLbl: '今日',
   };
 
-  const TP = window.TweaksPanel;
-  const TR = window.TweakRadio;
-  const TS = window.TweakSection;
+  const showCalendar = scene.calendar.enabled && activeTab === 'cal';
+  const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
+  const showRecordShell = activeTab === 'note';
+  const showTodayGuide = scene.record.todayGuide && !hideTodayGuide;
+
   const I = window.Icon;
+  const DemoSceneBar = window.DemoSceneBar;
+  const RecordEmptyScreen = window.RecordEmptyScreen;
+  const SearchPage = window.SearchPage;
+
+  const openSearchPage = ()=>setShowSearchPage(true);
+  const closeSearchPage = ()=>setShowSearchPage(false);
 
   return (
-    <div className="phone">
-      <StatusBar/>
+    <>
+      <div className="phone">
+        <StatusBar/>
 
-      {activeTab === 'cal' && (
+      {showCalendar && (
         <CalendarPage
+          key={scene.id}
+          periodFlowEnabled={scene.calendar.periodFlow}
           onAnalysisReady={()=>setShowAnalysisNotice(true)}
           onPeriodReset={()=>setShowAnalysisNotice(false)}
         />
       )}
 
-      <FloatNotice
-        show={showAnalysisNotice && activeTab === 'cal'}
-        onOpen={openSisterAnalysis}
-        onClose={()=>setShowAnalysisNotice(false)}
-      />
+      {scene.floatNotice.enabled && (
+        <FloatNotice
+          show={showFloatNotice}
+          onOpen={openSisterAnalysis}
+          onClose={()=>setShowAnalysisNotice(false)}
+        />
+      )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(activeTab !== 'note' ? ' app-view-hidden' : '')}
-        aria-hidden={activeTab !== 'note'}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
+        aria-hidden={!showRecordShell}
       >
+        {showRecordEmpty ? (
+          <RecordEmptyScreen onVoiceDone={submitVoice}/>
+        ) : (
+        <>
         <div className="suiji-stream" ref={streamRef}>
           <div className="stream-header">
             <div>
@@ -215,21 +311,28 @@ function App(){
               <p className="stream-sub">情绪 · 身体 · 体重</p>
             </div>
             <div className="stream-actions">
+              {scene.calendar.enabled && (
+                <button
+                  className="stream-action"
+                  aria-label="日历"
+                  type="button"
+                  onClick={()=>setActiveTab('cal')}
+                >
+                  <I name="calendar" size={20} stroke={1.7}/>
+                </button>
+              )}
               <button
                 className="stream-action"
-                aria-label="日历"
+                aria-label="搜索"
                 type="button"
-                onClick={()=>setActiveTab('cal')}
+                onClick={openSearchPage}
               >
-                <I name="calendar" size={20} stroke={1.7}/>
-              </button>
-              <button className="stream-action" aria-label="搜索" type="button">
                 <I name="search" size={20} stroke={1.7}/>
               </button>
             </div>
           </div>
 
-          {t.entry === 'analysis' && (
+          {scene.record.showHealthCard && (
             <div className="stream-health">
               <HealthCard scene={sceneForHealth}/>
             </div>
@@ -240,7 +343,7 @@ function App(){
             endRef={timelineEndRef}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
-            hideTodayGuide={hideTodayGuide}
+            hideTodayGuide={!showTodayGuide}
             onSisterCycleComplete={handleSisterCycleComplete}
           />
         </div>
@@ -250,41 +353,34 @@ function App(){
           onDraft={setDraft}
           onSend={()=>submitText()}
           onQuickMark={submitQuickMark}
+          onMoodConfirm={submitMoodRecord}
+          onSymptomConfirm={submitSymptomRecord}
+          onWeightConfirm={submitWeightRecord}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
+          onDockExpandedChange={setDockExpanded}
+          activeTab={activeTab}
         />
+        </>
+        )}
       </div>
+
+      {showSearchPage && (
+        <SearchPage timeline={timeline} onClose={closeSearchPage}/>
+      )}
 
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      <TabBar active={activeTab} onChange={setActiveTab}/>
+      {!showSearchPage && <TabBar active={activeTab} onChange={handleTabChange}/>}
+      </div>
 
-      <TP>
-        <TS label="场景">
-          <TR
-            label="用户身份"
-            value={t.scene}
-            options={[
-              {value:'period', label:'经期'},
-              {value:'follicular', label:'卵泡期'},
-              {value:'pregnancy', label:'孕期'},
-              {value:'parenting', label:'育儿'},
-            ]}
-            onChange={(v)=>setTweak('scene', v)}
-          />
-          <TR
-            label="分析引流"
-            value={t.entry || 'direct'}
-            options={[
-              {value:'direct', label:'无'},
-              {value:'analysis', label:'顶部红绿灯'},
-            ]}
-            onChange={(v)=>setTweak('entry', v)}
-          />
-        </TS>
-      </TP>
-    </div>
+      <DemoSceneBar
+        value={t.demoScene}
+        onChange={(v)=>setTweak('demoScene', v)}
+        description={scene.description}
+      />
+    </>
   );
 }
 

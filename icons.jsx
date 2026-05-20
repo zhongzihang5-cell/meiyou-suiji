@@ -54,6 +54,11 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
         <path d="M9 6l6 6-6 6"/>
       </svg>
     );
+    case 'arrow-left': return (
+      <svg {...common}>
+        <path d="M15 6l-6 6 6 6"/>
+      </svg>
+    );
     case 'sparkle': return (
       <svg {...common} fill="currentColor" stroke="none">
         <path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/>

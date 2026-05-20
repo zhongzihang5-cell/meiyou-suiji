@@ -1,8 +1,15 @@
 /* ============ 日历 Tab（经期记录页） ============ */
 .cal-page{
+  position:absolute;
+  top:44px;
+  left:0;
+  right:0;
+  bottom:0;
   background:#fff;
-  min-height:calc(100vh - 44px);
-  padding-bottom:72px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:80px;
 }
 
 .cal-top-nav{
@@ -118,7 +125,7 @@
   background:#f7f7f9;
   border-radius:14px 14px 0 0;
   margin:0 6px;
-  padding:6px 0 0;
+  padding:6px 0 16px;
 }
 .cal-row{
   display:flex;align-items:center;
@@ -209,12 +216,22 @@
   pointer-events:auto;
 }
 .float-notice .fn-close{
-  position:absolute;top:6px;right:8px;
-  width:22px;height:22px;
+  position:absolute;top:8px;right:10px;
+  width:auto;height:auto;
   display:flex;align-items:center;justify-content:center;
-  color:rgba(0,0,0,0.3);
-  font-size:18px;line-height:1;
+  color:rgba(0,0,0,0.35);
+  font-size:16px;line-height:1;
   cursor:pointer;
+  border:none;
+  background:transparent;
+  padding:0;
+  appearance:none;
+  -webkit-appearance:none;
+  box-shadow:none;
+  outline:none;
+}
+.float-notice .fn-close:focus-visible{
+  outline:none;
 }
 .float-notice .fn-avatar{
   width:36px;
