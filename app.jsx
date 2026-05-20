@@ -375,11 +375,13 @@ function App(){
       {!showSearchPage && <TabBar active={activeTab} onChange={handleTabChange}/>}
       </div>
 
-      <DemoSceneBar
-        value={t.demoScene}
-        onChange={(v)=>setTweak('demoScene', v)}
-        description={scene.description}
-      />
+      {!window.__STANDALONE_LOCKED_SCENE && (
+        <DemoSceneBar
+          value={t.demoScene}
+          onChange={(v)=>setTweak('demoScene', v)}
+          description={scene.description}
+        />
+      )}
     </>
   );
 }
