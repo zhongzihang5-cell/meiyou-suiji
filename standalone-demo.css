@@ -46,16 +46,6 @@ body.standalone-demo .phone .search-page{
   transform:none;
 }
 
-/* scrim 须全屏遮罩；若随 dock-fan(48×48) 变 absolute 会缩成按钮后的黑块 */
-body.standalone-demo .phone .dock-fan-scrim{
-  position:fixed;
-  inset:0;
-  left:50%;
-  transform:translateX(-50%);
-  width:100%;
-  max-width:390px;
-}
-
 body.standalone-demo .phone .tabbar{
   bottom:0;
 }

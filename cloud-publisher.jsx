@@ -2,11 +2,11 @@
 
 /** 右下角 + — 5 项快捷发布 */
 const QUICK_PUBLISH = [
-  { id:'mood', emoji:'💛', label:'情绪', text:'今天情绪有点低落' },
-  { id:'symptom', emoji:'🤒', label:'症状', text:'有点不舒服' },
-  { id:'food', emoji:'🍽️', label:'饮食', text:'午餐吃了鸡胸肉和青菜' },
-  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg' },
-  { id:'sleep', emoji:'😴', label:'睡眠', text:'昨晚睡了 7 小时' },
+  { id:'mood', emoji:'💛', label:'情绪', text:'今天情绪有点低落', bg:'#fff8e6' },
+  { id:'symptom', emoji:'🤒', label:'症状', text:'有点不舒服', bg:'#fff4ee' },
+  { id:'food', emoji:'🍽️', label:'饮食', text:'午餐吃了鸡胸肉和青菜', bg:'#eefaf3' },
+  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg', bg:'#eef4fc' },
+  { id:'sleep', emoji:'😴', label:'睡眠', text:'昨晚睡了 7 小时', bg:'#f0f4ff' },
 ];
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
@@ -131,14 +131,6 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
 
   return (
     <div className={'dock-fan dock-fan-corner'+(open?' open':'')+(closing?' closing':'')}>
-      {open && (
-        <button
-          type="button"
-          className="dock-fan-scrim"
-          onClick={()=>onToggle(false)}
-          aria-label="关闭"
-        />
-      )}
       <div className={'dock-fan-stage'+(open?' open':'')+(closing?' closing':'')}>
         {items.map((item,i)=>{
           const {x,y} = fanArcPos(i, items.length, r);
@@ -157,7 +149,10 @@ function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
               onClick={()=> onPick(item)}
               aria-label={item.label}
             >
-              <span className="dock-fan-node-ico dock-fan-node-ico--stack">
+              <span
+                className="dock-fan-node-ico dock-fan-node-ico--stack"
+                style={item.bg ? { background: item.bg } : undefined}
+              >
                 <span className="dock-fan-node-em" aria-hidden="true">{item.emoji}</span>
                 <span className="dock-fan-node-lbl">{item.label}</span>
               </span>

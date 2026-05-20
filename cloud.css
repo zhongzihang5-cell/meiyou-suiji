@@ -575,21 +575,11 @@
 .dock-fan-left{width:48px}
 .dock-fan-corner{width:48px}
 
-.dock-fan-scrim{
-  position:fixed;
-  inset:0;
-  border:none;
-  background:rgba(0,0,0,0.38);
-  z-index:98;
-  pointer-events:auto;
-  animation:scrimIn 0.22s ease both;
-}
-@keyframes scrimIn{from{opacity:0}to{opacity:1}}
-
 .dock-fan-stage{
   position:relative;
   width:48px;
   height:48px;
+  z-index:2;
 }
 .dock-fan-left .dock-fan-node{
   left:50%;
@@ -671,6 +661,7 @@
   display:flex;align-items:center;justify-content:center;
   font-size:22px;line-height:1;
   transition:transform 0.15s ease;
+  border:0.5px solid rgba(255,255,255,0.85);
 }
 .dock-fan-node:active .dock-fan-node-ico{transform:scale(0.9)}
 
