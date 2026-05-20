@@ -43,6 +43,7 @@ const scriptFiles = [
   'components.jsx',
   'calendar-page.jsx',
   'timeline-sister-cards.jsx',
+  'timeline-v3v2-cards.jsx',
   'mood-picker.jsx',
   'quick-pickers.jsx',
   'timeline-modules.jsx',

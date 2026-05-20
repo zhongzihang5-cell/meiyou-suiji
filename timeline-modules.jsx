@@ -5,26 +5,108 @@ function parseDayParts(dateStr){
   return { month: m || '', day: d || '' };
 }
 
-function CycleDayHeader({day}){
+function extractKcalFromText(text){
+  if(!text) return 0;
+  const m = String(text).match(/(\d+(?:\.\d+)?)\s*kcal/i);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+function extractWeightFromItem(item){
+  const text = [item.body, item.voiceText].filter(Boolean).join(' ');
+  const scaleMatch = text.match(/称[^0-9]*(\d+\.?\d*)/);
+  if(scaleMatch) return parseFloat(scaleMatch[1]);
+
+  if(item.kind === 'wellness' && item.panels){
+    const panel = item.panels.find(p => p.type === 'weight');
+    const trend = panel?.weightTrend;
+    if(trend?.length) return trend[trend.length - 1].v;
+  }
+  return null;
+}
+
+function summarizeDayItems(items, day){
+  if(day?.summaryStats?.length) return { stats: day.summaryStats };
+
+  let count = 0;
+  let kcal = 0;
+  let weight = null;
+
+  (items || []).forEach((it, idx)=>{
+    if(it.kind === 'sister-card' && (items[idx - 1]?.kind === 'voice-card' || items[idx - 1]?.kind === 'sync-card')) return;
+    if(it.kind === 'guide') return;
+
+    if(it.kind === 'record-group'){
+      if(it.primary) count += 1;
+      if(it.ai) count += 1;
+      if(it.primary?.totalKcal) kcal += it.primary.totalKcal;
+      (it.primary?.tags || []).forEach(tag=>{
+        const m = String(tag.val || '').match(/(\d+(?:\.\d+)?)\s*kcal/i);
+        if(m) kcal += parseFloat(m[1]);
+        const wm = String(tag.val || '').match(/(\d+\.?\d*)\s*kg/i);
+        if(wm) weight = parseFloat(wm[1]);
+      });
+      const w = extractWeightFromItem(it.primary || it);
+      if(w != null) weight = w;
+      return;
+    }
+
+    count += 1;
+    kcal += extractKcalFromText(it.aiNote?.total);
+
+    const w = extractWeightFromItem(it);
+    if(w != null) weight = w;
+  });
+
+  const stats = [];
+  if(count > 0) stats.push({ v: String(count), l: '条' });
+  if(kcal > 0) stats.push({ v: String(Math.round(kcal)), l: 'kcal' });
+  if(weight != null) stats.push({ v: weight.toFixed(1), l: 'kg' });
+
+  return { count, kcal, weight, stats };
+}
+
+function resolveDayTitleLabel(day, allDays){
+  if(day.isToday) return '今天';
+  const days = allDays || [];
+  const todayIdx = days.findIndex(d => d.isToday);
+  const idx = days.findIndex(d => d.id === day.id);
+  if(todayIdx >= 0 && idx === todayIdx - 1) return '昨天';
+  if(todayIdx >= 0 && idx === todayIdx - 2) return '前天';
   const { month, day: dayNum } = parseDayParts(day.date);
-  const phaseCls = day.phaseKind || '';
+  return `${month}/${dayNum}`;
+}
+
+function formatDayMeta(day, titleLabel){
+  const relative = titleLabel === '今天' || titleLabel === '昨天' || titleLabel === '前天';
+  if(relative){
+    const { month, day: dayNum } = parseDayParts(day.date);
+    const datePart = `${month}月${dayNum}日`;
+    return day.weekday ? `${datePart} · ${day.weekday}` : datePart;
+  }
+  return day.weekday || '';
+}
+
+function CycleDayHeader({day, items, dayBlocks}){
+  const title = resolveDayTitleLabel(day, dayBlocks);
+  const meta = formatDayMeta(day, title);
+  const { stats } = summarizeDayItems(items, day);
 
   return (
-    <div className="tl-day-banner">
-      <div className="tl-day-banner-top">
-        <div className="tl-day-banner-left">
-          <span className="tl-day-big">{dayNum}</span>
-          <div className="tl-day-meta">
-            <span className="tl-day-month">{month}月</span>
-            <span className="tl-day-week">
-              {day.weekday}{day.isToday ? ' · 今天' : ''}
-            </span>
-          </div>
-        </div>
-        {day.phaseTag && (
-          <span className={'tl-cycle-chip '+phaseCls}>{day.phaseTag}</span>
-        )}
+    <div className={'tl-day-summary'+(day.isToday ? ' is-today' : '')}>
+      <div className="tl-day-summary-top">
+        <span className="tl-day-summary-title">{title}</span>
+        {meta && <span className="tl-day-summary-meta">{meta}</span>}
       </div>
+      {stats.length > 0 && (
+        <div className="tl-day-summary-stats">
+          {stats.map((s, i)=>(
+            <span key={i} className="tl-day-summary-stat">
+              <span className="tl-day-summary-stat-v">{s.v}</span>
+              <span className="tl-day-summary-stat-l">{s.l}</span>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -266,10 +348,13 @@ function WeeklyTrendCard({item}){
   const isWellness = item.kind === 'wellness';
   const [open, setOpen] = React.useState(false);
 
+  const recKind = window.inferRecordKind?.(item) || { kind:'ai', label:'AI 分析' };
+
   if(isWellness){
     return (
       <div className="tl-weekly-bubble is-wellness">
         <div className="tl-weekly-surface">
+          <TlRecCardHead time={item.time} kind={recKind.kind} label={recKind.label}/>
           {overview && <p className="tl-weekly-overview">{overview}</p>}
           {panels.length > 0 && (
             <div className="tl-weekly-stack-inline">
@@ -290,6 +375,7 @@ function WeeklyTrendCard({item}){
   return (
     <div className={'tl-weekly-bubble'+(open ? ' is-open' : '')}>
       <div className="tl-weekly-surface">
+        <TlRecCardHead time={item.time} kind={recKind.kind} label={recKind.label}/>
         {overview && <p className="tl-weekly-overview">{overview}</p>}
         {moodPanel && (
           <div className="tl-weekly-stack-inline">
@@ -356,18 +442,9 @@ function getNodeCaption(item, sisterItem){
   return null;
 }
 
-function TimelineItemWrap({item, sisterItem, children}){
-  const cap = getNodeCaption(item, sisterItem);
-  const showCaption = item.kind !== 'guide';
+function TimelineItemWrap({item, children}){
   return (
     <div className="tl-node-stack">
-      {showCaption && (
-        <TlNodeCaption
-          time={item.time}
-          label={cap?.label}
-          labelKind={cap?.kind}
-        />
-      )}
       {children}
     </div>
   );
@@ -380,11 +457,13 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   );
 
   let body = null;
-  if(item.kind === 'guide'){
+  if(item.kind === 'record-group'){
+    body = <V3RecordGroupCard group={item} isNew={isNew}/>;
+  } else if(item.kind === 'guide'){
     body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
-  } else if(item.kind === 'voice-card'){
+  } else if(item.kind === 'voice-card' || item.kind === 'sync-card'){
     body = (
       <VoiceRecordCard
         entry={item}
@@ -424,16 +503,17 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   return (
     <TimelineRailNode
       phaseKind={phaseKind}
-      railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : undefined)}
+      railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : (item.ai && !item.primary ? 'ai' : undefined))}
       isFeedLast={isFeedLast}
-      nodeKind={sisterItem ? 'voice-card' : item.kind}
+      nodeKind={item.kind === 'record-group' ? (item.ai && !item.primary ? 'sister-card' : 'voice-card') : (sisterItem ? (item.kind === 'sync-card' ? 'sync-card' : 'voice-card') : item.kind)}
     >
-      <TimelineItemWrap item={item} sisterItem={sisterItem}>{body}</TimelineItemWrap>
+      <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
   );
 }
 
 Object.assign(window, {
-  CycleDayHeader, TimelineRailNode, TlNodeCaption,
+  CycleDayHeader, TimelineRailNode, TlNodeCaption, summarizeDayItems,
+  resolveDayTitleLabel, formatDayMeta,
   ModulePlaceholder, TodayGuideCard, WeeklyTrendCard, TimelineItem,
 });

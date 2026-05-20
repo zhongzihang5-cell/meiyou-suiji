@@ -235,128 +235,109 @@ const SCENE_CONTEXT = {
   },
 };
 
-// ---------- 场景时间轴 — 分日叙事 Demo ----------
-// 经前记录在上，5/18 经期第 1 天为最底部最新记录（语音 + 周期分析 + 晚间记录）
+// ---------- 场景时间轴 — V3v2 日章节 Demo（1:1 record-tab-v3plus） ----------
 const TIMELINE_BLOCKS = [
-  { type:'gap', id:'gap-top', label:'上个周期 · 4/22 – 5/13' },
+  { type:'gap', id:'gap-top' },
   {
     type:'day', id:'d-5-14', date:'5/14', weekday:'周四',
-    phaseTag:'卵泡期第 8 天', phaseKind:'foll', cycleDay:22, cycleLen:28,
+    summaryStats:[{ v:'3', l:'条' }, { v:'52.3', l:'kg' }],
     items:[
       {
-        kind:'rec', id:'e-514-1', time:'07:45',
-        body:'今天状态不错，去跑了三公里，出汗之后心情也好了很多。',
-        tags:[
-          { label:'跑步', cat:'fitness' },
-          { label:'心情 愉快', cat:'mood' },
-        ],
-      },
-      {
-        kind:'rec', id:'e-514-2', time:'21:20',
-        body:'晚上听了会儿播客，整个人慢下来不少，打算十一点前睡。',
-        tags:[
-          { label:'心情 放松', cat:'mood' },
-        ],
-        aiNote:{
-          tone:'green',
-          icon:'💡',
-          text:'卵泡期睡眠相对稳定时，第二天精力往往更好；你今晚准备早睡，是个不错的习惯。',
-        },
-      },
-    ],
-  },
-  {
-    type:'day', id:'d-5-15', date:'5/15', weekday:'周五',
-    phaseTag:'黄体期第 8 天', phaseKind:'lut', cycleDay:27, cycleLen:28,
-    items:[
-      {
-        kind:'rec', id:'e-515-2', time:'12:00',
-        photo:{ src:'assets/meal-519.png', alt:'午餐记录' },
-        tags:[{ label:'饮食', cat:'diet' }],
-        aiNote:{
-          tone:'green',
-          items:[
-            '香煎鸡胸肉 100g',
-            '炒土豆丝 1 盘',
-            '炒青菜 1 盘',
-            '杂粮饭 1 碗',
+        kind:'record-group', id:'e-514-1-g',
+        primary:{
+          id:'e-514-1', time:'07:45', kind:'text',
+          text:'今天状态不错，去跑了三公里，出汗之后心情也好了很多。',
+          tags:[
+            { cat:'运动', val:'跑步', icon:'run' },
+            { cat:'心情', val:'愉快', icon:'mood' },
           ],
-          total:'总卡路里 766 kcal',
         },
+      },
+      {
+        kind:'record-group', id:'t5-g-514',
+        primary:{
+          id:'t5', time:'09:30', kind:'text',
+          text:'体重 52.3kg，比昨天 ↓ 0.2kg',
+          tags:[{ cat:'体重', val:'52.3 kg', icon:'scale' }],
+        },
+        ai:{
+          id:'t6', time:'09:31', kind:'chart', chartType:'weightTrend',
+          title:'近 30 日体重趋势', note:'7 日均值 ↓ 0.4 kg',
+        },
+        aiDefaultOpen:false,
       },
     ],
   },
   {
-    type:'day', id:'d-5-17', date:'5/17', weekday:'周日',
-    phaseTag:'黄体期第 9 天', phaseKind:'lut', cycleDay:28, cycleLen:28,
+    type:'day', id:'d-5-19', date:'5/19', weekday:'周一',
+    summaryStats:[{ v:'3', l:'条' }, { v:'320', l:'kcal' }],
     items:[
       {
-        kind:'rec', id:'e-517-w', time:'08:00',
-        voice:{ duration:'0:35' },
-        body:'早上称了一下 52.4，比昨天轻了一点。昨晚睡得不太好，大概六个半钟头吧。',
-        tags:[
-          { label:'体重', cat:'weight' },
-          { label:'睡眠', cat:'sleep' },
-        ],
+        kind:'record-group', id:'y1-g',
+        primary:{
+          id:'y1', time:'21:10', kind:'voice',
+          duration:'0:08',
+          text:'晚饭吃了沙拉，喝了两杯水',
+          tags:[
+            { cat:'饮食', val:'沙拉', icon:'food' },
+            { cat:'热量', val:'320 kcal', icon:'flame' },
+          ],
+        },
       },
       {
-        kind:'wellness', id:'t-517', time:'08:00',
-        cardLabel:'体重 · 睡眠分析',
-        cardLabelKind:'ai',
-        overview:'体重略降、睡眠偏少，经前均属正常波动。',
-        panels:[
-          {
-            id:'weight', type:'weight', icon:'⚖️', title:'体重变化',
-            weightDelta:'↓ 0.1 kg',
-            weightTrend:[
-              {d:'一', v:52.9},{d:'二', v:52.8},{d:'三', v:52.7},
-              {d:'四', v:52.6},{d:'五', v:52.5},{d:'六', v:52.4},
-            ],
-            summary:'较昨日略降 0.1kg，处于经前正常波动范围。',
-          },
-          {
-            id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
-            sleepDelta:'↓ 1.0 h',
-            sleepTrend:[
-              {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
-              {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.5},
-            ],
-            summary:'昨晚约 6.5 小时，较前几日偏短。',
-          },
-        ],
+        kind:'record-group', id:'e-519-podcast-g',
+        primary:{
+          id:'e-519-podcast', time:'21:20', kind:'text',
+          text:'晚上听了会儿播客，整个人慢下来不少，打算十一点前睡。',
+          tags:[
+            { cat:'心情', val:'放松', icon:'mood' },
+          ],
+        },
+        ai:{
+          id:'e-519-podcast-ai', time:'21:21', kind:'chart',
+          title:'卵泡期睡眠',
+          note:'卵泡期睡眠相对稳定时，第二天精力往往更好；你今晚准备早睡，是个不错的习惯。',
+        },
+        aiDefaultOpen:false,
+      },
+    ],
+  },
+  {
+    type:'day', id:'d-5-20', date:'5/20', weekday:'周二',
+    summaryStats:[{ v:'4', l:'条' }, { v:'1126', l:'kcal' }],
+    items:[
+      {
+        kind:'record-group', id:'t3-g',
+        primary:{
+          id:'t3', time:'12:05', kind:'image', label:'午餐',
+          useRealImage:true,
+          photo:{ src:'assets/meal-519.png', alt:'午餐记录' },
+          text:'香煎鸡胸肉 100g；炒土豆丝 1 盘；炒青菜 1 盘；杂粮饭 1 碗',
+          totalKcal:766,
+        },
+        ai:{
+          id:'t4', time:'12:06', kind:'chart', chartType:'caloriePanel',
+          title:'午餐卡路里', note:'日目标 1800 · 已摄入 1126',
+        },
+        aiDefaultOpen:true,
       },
       {
-        kind:'weekly', id:'w-517', time:'18:00',
-        range:'5/11 – 5/17',
-        overview:'本周整体平稳，体重缓降，睡眠经前略有减少。',
-        panels:[
-          {
-            id:'mood', type:'mood', icon:'💜', title:'心情趋势',
-            moodTrend:[
-              {d:'一', v:3},{d:'二', v:4},{d:'三', v:3},
-              {d:'四', v:2},{d:'五', v:3},{d:'六', v:3},{d:'日', v:3},
-            ],
-            summary:'本周心情整体平稳，经前一日（周六）略有低落，与经前激素变化一致。',
-          },
-          {
-            id:'weight', type:'weight', icon:'⚖️', title:'体重变化',
-            weightDelta:'↓ 0.4 kg',
-            weightTrend:[
-              {d:'一', v:52.9},{d:'二', v:52.8},{d:'三', v:52.7},
-              {d:'四', v:52.6},{d:'五', v:52.5},{d:'六', v:52.4},{d:'日', v:52.4},
-            ],
-            summary:'体重较上周缓降 0.4kg，处于经前正常波动范围，无需过度关注。',
-          },
-          {
-            id:'sleep', type:'sleep', icon:'😴', title:'睡眠时长',
-            sleepDelta:'↓ 0.5 h',
-            sleepTrend:[
-              {d:'一', v:7.5},{d:'二', v:7.0},{d:'三', v:6.8},
-              {d:'四', v:6.2},{d:'五', v:6.5},{d:'六', v:6.8},{d:'日', v:6.5},
-            ],
-            summary:'本周平均睡眠约 6.7 小时，经前一晚偏短，建议睡前减少屏幕时间。',
-          },
-        ],
+        kind:'record-group', id:'t1-g',
+        primary:{
+          id:'t1', time:'14:23', kind:'voice',
+          duration:'0:18',
+          text:'今天有点累，肚子胀，午饭吃了三明治和拿铁',
+          tags:[
+            { cat:'情绪', val:'疲惫', icon:'mood' },
+            { cat:'症状', val:'腹胀', icon:'sym' },
+            { cat:'饮食', val:'三明治·拿铁', icon:'food' },
+          ],
+        },
+        ai:{
+          id:'t2', time:'14:24', kind:'chart', chartType:'moodWeek',
+          title:'本周情绪走势', note:'今日 ▽ 低于上周均值',
+        },
+        aiDefaultOpen:false,
       },
     ],
   },
@@ -365,15 +346,13 @@ const TIMELINE_BLOCKS = [
     phaseTag:'经期第 1 天', phaseKind:'period', cycleDay:1, periodLen:5,
     items:[
       {
-        kind:'voice-card', id:'e-518-1a', time:'16:00',
-        voice:{ duration:'0:12' },
-        voiceText:'今天月经来了，量不算多，肚子有点闷闷的胀，腰也有点酸，心情还行就是有点懒得动。',
+        kind:'sync-card', id:'e-518-1a', time:'16:00',
+        cardLabel:'自动同步',
+        cardLabelKind:'sync',
+        body:'今天月经来了。',
+        tagLayout:'v3',
         tags:[
-          { label:'月经来了', cat:'period' },
-          { label:'经量 偏少', cat:'flow' },
-          { label:'腹胀', cat:'symptom' },
-          { label:'腰酸', cat:'symptom' },
-          { label:'心情 平静', cat:'mood' },
+          { cat:'月经', val:'', icon:'period' },
         ],
       },
       {

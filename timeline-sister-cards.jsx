@@ -1,15 +1,79 @@
 // ============ 统一语音条 & 5/18 分析卡片 ============
 
 const VOICE_WAVE_HEIGHTS = [6,11,16,9,13,7,17,12,8,15,10,18,9,14,7,12,16,8,13,6,11,15,9,7];
-const MINI_WAVE_HEIGHTS = [4,7,9,6,8,5];
+const MINI_WAVE_HEIGHTS = [4, 8, 11, 7, 5];
 
 const CC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAfACEDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUHCAMG/8QAKhAAAgEDAwIDCQAAAAAAAAAAAQIDAAQRBQYhEjEHExQWJTJxgYKhsfH/xAAXAQEBAQEAAAAAAAAAAAAAAAACBQED/8QAHBEAAQUBAQEAAAAAAAAAAAAAAgABAwURBBJh/9oADAMBAAIRAxEAPwDZLEAZP7pdc6vYQTxwSTxiSQ9IGaNyytDod5IrYKwuQftNRGzknvr5LeMl5ZGzk9uaYjqsVlY3YJET4zK2prWnNcrbi5j8xk6wM96YRsrqCpyCM96hOu2t1o18IrnJJxyOx/lVHwyuXudrwNJIXIyAT86RDjJWFSPNCM0Zazr1FFFFclFSjeCO+278Rgl/TyYA7/Caz5oOtPpOqpdeWSUOCpPNaYYBhgjOR9KTy7a0KaVpJNJsXZjkkwAk02LFcqLaPijOOQPTEoVufdDa3cxOYuhIxwM9zmq94Q9fsdbs64LEn8mmw2tt7j3NY8HPEC03t4o4YwkcYjUDAUAACsck7O4h6oBgiDyzfdXSijFFFQF//9k=';
 
 const SC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAjACIDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAMHAQUIBv/EACkQAAEEAQMCBgIDAAAAAAAAAAEAAgMEEQUGEiExBxMUMmFxIkFRodH/xAAYAQEBAQEBAAAAAAAAAAAAAAAAAgUDBv/EAB8RAAICAwACAwAAAAAAAAAAAAACAREDBAUSkSFBcf/aAAwDAQACEQMRAD8A7JPRRSWYIpmQySsbI/2tJ6n6UGvXDQ0i1cAyYYnPA+gqYGp6nq+pjjLJLYcfxw7t/gVqtmpzuW24rPdLBdzbVd1gwNmYZQMlmeuFMCqihrSwSiVu4GMtAgZAeW5/gv7KzdvzWptKhkt8fOIw4tOQfkfBRko57mjGvESrXHo2PVFhFBnmn3pDNY2tqMUDS6R1d/ED9nCpLbFqRtPVnQkiwyAFo/fHkOf9LoRwBGD2WjG09CbqR1FlFjLByC5pIyD3BCtWo2+Z1E1ML4nW7qfRT9PWq8m3LNF8wZMJRKzI93wPlWl4WTWJ9qQyWORBcfLJ7lueiil8ONsSXvVekeMnkYxIeGfpesqV4q0DIIGNZGwYa0DAASWs79Xp62zi8MKz8zc39fhJ0RMlFB50yiIgGEREAwiIgP/Z';
 
-function TlCardTime({time}){
-  if(!time) return null;
-  return <div className="tl-card-time">{time}</div>;
+function TlRecKindIcon({kind}){
+  const I = window.Icon;
+  const p = { size:12, stroke:1.8 };
+  if(kind === 'voice') return <I name="mic" {...p}/>;
+  if(kind === 'sync'){
+    return (
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 12a8 8 0 0113.5-5.9M20 4v4h-4"/>
+        <path d="M20 12a8 8 0 01-13.5 5.9M4 20v-4h4"/>
+      </svg>
+    );
+  }
+  if(kind === 'diet' || kind === 'photo') return <I name="camera" {...p}/>;
+  if(kind === 'ai'){
+    return (
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 19V5M4 19h16M8 17V9M12 17V7M16 17v-4"/>
+      </svg>
+    );
+  }
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h10"/>
+    </svg>
+  );
+}
+
+function inferRecordKind(entry){
+  if(!entry) return { kind:'text', label:'文字' };
+  if(entry.cardLabel){
+    return { kind: entry.cardLabelKind || 'ai', label: entry.cardLabel };
+  }
+  if(entry.kind === 'sync-card'){
+    return { kind:'sync', label:'自动同步' };
+  }
+  if(entry.voice || entry.kind === 'voice-card'){
+    return { kind:'voice', label:'语音' };
+  }
+  if(entry.photo){
+    return { kind:'diet', label:'饮食' };
+  }
+  if(entry.kind === 'wellness'){
+    return { kind:'ai', label:'AI 分析' };
+  }
+  if(entry.kind === 'weekly'){
+    const range = entry.range ? ' · '+entry.range : '';
+    return { kind:'ai', label:'周报'+range };
+  }
+  if(entry.kind === 'sister-card'){
+    return { kind:'ai', label:'本次周期分析' };
+  }
+  return { kind:'text', label:'文字' };
+}
+
+function TlRecCardHead({time, kind, label}){
+  if(!time && !label) return null;
+  return (
+    <div className="tl-rec-card-hd">
+      {time && <span className="tl-rec-card-time">{time}</span>}
+      {label && (
+        <span className="tl-rec-card-kind">
+          <TlRecKindIcon kind={kind}/>
+          {label}
+        </span>
+      )}
+    </div>
+  );
 }
 
 const TYPEWRITER_MS = 68;
@@ -171,6 +235,18 @@ function tagLabel(t){
 }
 
 function RecordedTags({tags, layout}){
+  const isV3 = layout === 'v3' || ((tags || []).length > 0 && (tags || []).every(t => t.cat && t.icon && t.val !== undefined));
+  if(isV3){
+    const visible = (tags || []).filter(t => t.cat !== 'care');
+    if(visible.length === 0) return null;
+    const TLTag = window.TLTag;
+    if(!TLTag) return null;
+    return (
+      <div className="tl-tags tl-tags-v3">
+        {visible.map((t, i)=><TLTag key={i} tag={t}/>)}
+      </div>
+    );
+  }
   const visible = (tags || []).filter(t => resolveTag(t).cat !== 'care');
   if(visible.length === 0) return null;
   const isRows = layout === 'rows';
@@ -294,10 +370,8 @@ function TlVoiceInline({voice, text}){
   if(!voice && !text) return null;
   return (
     <div className={'tl-voice-block'+(voice?' has-voice-pill':'')}>
-      <p className="tl-voice-text">
-        {text}
-        {voice && <TlVoicePlayBtn voice={voice}/>}
-      </p>
+      {text && <p className="tl-voice-text">{text}</p>}
+      {voice && <TlVoicePlayBtn voice={voice}/>}
     </div>
   );
 }
@@ -315,8 +389,11 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, a
     !!animateAnalysis || (analysisProps.playAnimation > 0)
   );
 
+  const recKind = inferRecordKind(entry);
+
   return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')}>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')}>
+      <TlRecCardHead time={entry.time} kind={recKind.kind} label={recKind.label}/>
       <section className="tl-t5-main">
         {hasVoice ? (
           <TlVoiceInline voice={entry.voice} text={text}/>
@@ -345,15 +422,10 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, a
       )}
 
       {hasAnalysis && (
-        <>
-          <div className="tl-t5-divider" role="separator"/>
-          <section className="tl-t5-insight" id="sister-analysis-anchor">
-            <SisterAnalysisContent
-              {...analysisProps}
-              animateText={analysisAnimateText}
-            />
-          </section>
-        </>
+        <SisterAnalysisCollapsible
+          {...analysisProps}
+          animateText={analysisAnimateText}
+        />
       )}
     </div>
   );
@@ -365,13 +437,13 @@ function VoiceRecordCard(props){
 
 const CYCLE_CHART_ANIM_MS = 4280; // zoom-pop @3580ms + 0.7s animation
 
-function SisterCycleChart({animated, onComplete}){
+function SisterCycleChart({animated, onComplete, staticView = false}){
   const bars = [
     {date:'上上次', status:'准时', width:'96.8%', label:'30天'},
     {date:'上次', status:'准时', width:'100%', label:'31天'},
     {date:'本次', status:'推迟2天', width:'93.5%', label:'29天', zoom:true},
   ];
-  const done = !animated;
+  const done = staticView || !animated;
   const [headSeen, setHeadSeen] = React.useState(done);
   const [seenBars, setSeenBars] = React.useState(done ? [0, 1, 2] : []);
   const [grownBars, setGrownBars] = React.useState(done ? [0, 1, 2] : []);
@@ -380,10 +452,11 @@ function SisterCycleChart({animated, onComplete}){
   onCompleteRef.current = onComplete;
 
   React.useEffect(()=>{
-    if(!animated){
+    if(staticView){
       onCompleteRef.current?.();
       return;
     }
+    if(!animated) return;
     setHeadSeen(false);
     setSeenBars([]);
     setGrownBars([]);
@@ -397,7 +470,7 @@ function SisterCycleChart({animated, onComplete}){
       setTimeout(()=>onCompleteRef.current?.(), CYCLE_CHART_ANIM_MS),
     ];
     return ()=>timers.forEach(clearTimeout);
-  }, [animated]);
+  }, [animated, staticView]);
 
   return (
     <div className="chart-block" style={{background:'transparent', border:'none', padding:0}}>
@@ -518,13 +591,90 @@ const SISTER_CLOSING = [
   { text:'内。很棒哦，继续保持现在的健康生活节奏就可以。' },
 ];
 
+function TlAiChartIcon({size = 10, color = '#FF4D88'}){
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 20V6M4 20h16M8 16v-4M12 16V8M16 16v-6" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText}){
+  const [open, setOpen] = React.useState(true);
+  const [canCollapse, setCanCollapse] = React.useState(!animateText);
+  const [hasSeenAnimation, setHasSeenAnimation] = React.useState(!animateText);
+  const contentAnimateText = animateText && !hasSeenAnimation;
+  const keepContentMounted = hasSeenAnimation;
+
+  React.useEffect(()=>{
+    if(!animateText){
+      setCanCollapse(true);
+      setHasSeenAnimation(true);
+      return;
+    }
+    setOpen(true);
+    setCanCollapse(false);
+    setHasSeenAnimation(false);
+  }, [animateText, playAnimation]);
+
+  const handleComplete = React.useCallback(()=>{
+    setCanCollapse(true);
+    setHasSeenAnimation(true);
+    onCycleComplete?.();
+  }, [onCycleComplete]);
+
+  const handleToggle = ()=>{
+    if(!canCollapse) return;
+    setOpen(v=>{
+      if(v) setHasSeenAnimation(true);
+      return !v;
+    });
+  };
+
+  return (
+    <>
+      <div className="tl-t5-divider-dashed" role="separator"/>
+      <section className="tl-t5-insight tl-sister-ai-wrap" id="sister-analysis-anchor">
+        <button
+          type="button"
+          className={'tl-ai-toggle'+(canCollapse ? '' : ' is-locked')}
+          onClick={handleToggle}
+          aria-expanded={open}
+        >
+          <span className="tl-ai-badge"><TlAiChartIcon size={10}/></span>
+          <span className="tl-ai-label">AI</span>
+          <span className="tl-ai-title">本次月经分析</span>
+          <span className={'tl-ai-chevron'+(open ? ' is-open' : '')} aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M6 9l6 6 6-6" stroke="#8E8E93" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        {(open || keepContentMounted) && (
+          <div
+            className={'tl-sister-ai-panel'+(!open ? ' is-collapsed' : '')}
+            aria-hidden={!open}
+          >
+            <SisterAnalysisContent
+              key={playAnimation}
+              playAnimation={contentAnimateText ? playAnimation : 0}
+              onCycleComplete={handleComplete}
+              animateText={contentAnimateText}
+            />
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
 function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const [animated, setAnimated] = React.useState(false);
   const [leadDone, setLeadDone] = React.useState(!animateText);
   const [chartDone, setChartDone] = React.useState(!animateText);
   const [para1Done, setPara1Done] = React.useState(!animateText);
-  const [showSignal, setShowSignal] = React.useState(!playAnimation && !animateText);
-  const [showClosing, setShowClosing] = React.useState(!playAnimation && !animateText);
+  const [showSignal, setShowSignal] = React.useState(!animateText);
+  const [showClosing, setShowClosing] = React.useState(!animateText);
   const [closingDone, setClosingDone] = React.useState(!animateText);
   const prevPlayRef = React.useRef(playAnimation);
   const onCycleCompleteRef = React.useRef(onCycleComplete);
@@ -532,11 +682,13 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
 
   React.useEffect(()=>{
     if(!animateText){
+      setAnimated(false);
       setLeadDone(true);
       setChartDone(true);
       setPara1Done(true);
       setClosingDone(true);
-      onCycleCompleteRef.current?.();
+      setShowSignal(true);
+      setShowClosing(true);
       return;
     }
     if(playAnimation > prevPlayRef.current){
@@ -551,13 +703,15 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
     prevPlayRef.current = playAnimation;
   }, [animateText, playAnimation]);
 
-  React.useEffect(()=>{
-    if(!playAnimation) return;
-    if(animateText && !leadDone) return;
-    setAnimated(true);
-    setShowSignal(false);
-    setShowClosing(false);
-  }, [playAnimation, animateText, leadDone]);
+  const handleLeadComplete = React.useCallback(()=>{
+    setLeadDone(true);
+    if(animateText){
+      setChartDone(false);
+      setAnimated(true);
+      setShowSignal(false);
+      setShowClosing(false);
+    }
+  }, [animateText]);
 
   React.useEffect(()=>{
     if(!animateText || !para1Done) return;
@@ -578,19 +732,20 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
     onCycleCompleteRef.current?.();
   }, [animateText, showClosing, closingDone]);
 
-  const showChart = !animateText || leadDone;
+  const showChart = !animateText || (leadDone && animated);
   const showPara1 = !animateText || (leadDone && chartDone);
 
   return (
     <div className="tl-t5-analysis-body">
       <p className="tl-t5-analysis-lead">
         {animateText && !leadDone ? (
-          <TypewriterText text={SISTER_LEAD} active onComplete={()=>setLeadDone(true)}/>
+          <TypewriterText text={SISTER_LEAD} active onComplete={handleLeadComplete}/>
         ) : SISTER_LEAD}
       </p>
       {showChart && (
         <SisterCycleChart
           animated={animated}
+          staticView={!animateText}
           onComplete={()=>setChartDone(true)}
         />
       )}
@@ -630,18 +785,19 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   );
 }
 
-function SisterAnalysisCard({playAnimation, onCycleComplete}){
+function SisterAnalysisCard({playAnimation, onCycleComplete, animateText}){
   return (
-    <div className="sister-bubble" id="sister-analysis-anchor">
-      <SisterAnalysisContent
+    <div className="sister-bubble">
+      <SisterAnalysisCollapsible
         playAnimation={playAnimation}
         onCycleComplete={onCycleComplete}
+        animateText={!!animateText}
       />
     </div>
   );
 }
 
 Object.assign(window, {
-  TlCardTime, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
-  SegmentedRecordCard, VoiceRecordCard, SisterAnalysisCard, SisterAnalysisContent,
+  TlRecCardHead, TlRecKindIcon, inferRecordKind, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
+  SegmentedRecordCard, VoiceRecordCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent,
 });
