@@ -37,14 +37,23 @@ body.standalone-demo .phone .dock-wrap,
 body.standalone-demo .phone .quick-float-wrap,
 body.standalone-demo .phone .toast-stack,
 body.standalone-demo .phone .sheet-mask,
-body.standalone-demo .phone .search-page,
-body.standalone-demo .phone .dock-fan-scrim{
+body.standalone-demo .phone .search-page{
   position:absolute;
   left:0;
   right:0;
   width:100%;
   max-width:none;
   transform:none;
+}
+
+/* scrim 须全屏遮罩；若随 dock-fan(48×48) 变 absolute 会缩成按钮后的黑块 */
+body.standalone-demo .phone .dock-fan-scrim{
+  position:fixed;
+  inset:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
 }
 
 body.standalone-demo .phone .tabbar{
@@ -59,9 +68,8 @@ body.standalone-demo .phone .quick-float-wrap{
   bottom:var(--my-dock-float-b);
 }
 
-body.standalone-demo .phone .search-page{
-  top:44px;
-  bottom:0;
+body.standalone-demo .phone .record-empty-voice-wrap{
+  padding-bottom:calc(var(--my-tabbar-h, 58px) + 10px);
 }
 
 body.standalone-demo .phone .toast-stack{

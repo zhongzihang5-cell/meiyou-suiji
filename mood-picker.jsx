@@ -267,7 +267,7 @@ function DockMoodPicker({onConfirm, onCancel}){
           disabled={selected.length === 0}
           onClick={()=>selected.length > 0 && onConfirm?.(selected)}
         >
-          发布
+          发送
         </button>
       </div>
     </div>

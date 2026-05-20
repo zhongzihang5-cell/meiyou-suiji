@@ -21,6 +21,13 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const DOCS = path.join(ROOT, 'docs');
 
+const MEAL_PHOTO_DATA_URI = (() => {
+  const mealPath = path.join(ROOT, 'assets', 'meal-519.png');
+  if (!fs.existsSync(mealPath)) return null;
+  const b64 = fs.readFileSync(mealPath).toString('base64');
+  return `data:image/png;base64,${b64}`;
+})();
+
 const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const inlineStyleMatch = indexHtml.match(/<style>([\s\S]*?)<\/style>/);
 const inlineStyles = inlineStyleMatch ? inlineStyleMatch[1] : '';
@@ -49,7 +56,10 @@ const scriptFiles = [
 ];
 
 const scripts = scriptFiles.map((f) => {
-  const content = fs.readFileSync(path.join(ROOT, f), 'utf8');
+  let content = fs.readFileSync(path.join(ROOT, f), 'utf8');
+  if (f === 'data.jsx' && MEAL_PHOTO_DATA_URI) {
+    content = content.replace(/assets\/meal-519\.png/g, MEAL_PHOTO_DATA_URI);
+  }
   return `<!-- ${f} -->\n<script type="text/babel">\n${content}\n</script>`;
 });
 

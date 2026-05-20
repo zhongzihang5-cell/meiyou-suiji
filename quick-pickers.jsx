@@ -42,7 +42,7 @@ function DockSheetFoot({disabled, onSubmit, label}){
         disabled={disabled}
         onClick={onSubmit}
       >
-        {label || '发布'}
+        {label || '发送'}
       </button>
     </div>
   );

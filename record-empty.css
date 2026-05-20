@@ -220,7 +220,7 @@
   color:#8E8E93;
 }
 .record-empty-voice-wrap{
-  padding:0 22px calc(var(--my-tabbar-h, 58px) + 20px);
+  padding:20px 22px calc(var(--my-tabbar-h, 58px) + 14px);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -253,7 +253,7 @@
   filter:blur(8px);
 }
 .record-empty-mic-ring--stroke{
-  inset:-8px;
+  inset:-4px;
   border:1.5px solid;
 }
 .record-empty-mic-core{
