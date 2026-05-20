@@ -53,13 +53,7 @@ const scripts = scriptFiles.map((f) => {
   return `<!-- ${f} -->\n<script type="text/babel">\n${content}\n</script>`;
 });
 
-const MOBILE_STANDALONE_CSS = `
-/* —— 单场景 HTML · 手机全屏演示 —— */
-html,body{background:var(--my-bg);height:100%;overflow:hidden}
-#root{min-height:100%;height:100%;align-items:stretch}
-.phone{width:100%;max-width:none;min-height:100%;height:100%;box-shadow:none!important}
-.demo-scene-dock{display:none!important}
-`;
+const STANDALONE_DEMO_CSS = fs.readFileSync(path.join(ROOT, 'standalone-demo.css'), 'utf8');
 
 const BUILDS = [
   {
@@ -143,7 +137,8 @@ function buildLandingPage(builtAt) {
 }
 
 function buildHtml({ title, demoScene, locked, comment, builtAt }) {
-  const extraCss = locked ? MOBILE_STANDALONE_CSS : '';
+  const extraCss = locked ? STANDALONE_DEMO_CSS : '';
+  const bodyClass = locked ? ' class="standalone-demo"' : '';
   const lockedScript = locked
     ? 'window.__STANDALONE_LOCKED_SCENE = true;'
     : 'window.__STANDALONE_LOCKED_SCENE = false;';
@@ -174,7 +169,7 @@ ${css}
 ${extraCss}
 </style>
 </head>
-<body>
+<body${bodyClass}>
 
 <div id="root"></div>
 

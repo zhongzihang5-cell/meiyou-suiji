@@ -1,0 +1,95 @@
+/* GitHub Pages / 单场景 HTML — 还原 390px 手机框，Dock 与 Tab 对齐 */
+
+body.standalone-demo{
+  background:#0e0e10;
+  margin:0;
+}
+body.standalone-demo .demo-scene-dock{
+  display:none!important;
+}
+
+body.standalone-demo #root{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+body.standalone-demo .phone{
+  width:390px;
+  max-width:100vw;
+  min-height:100vh;
+  min-height:100dvh;
+  position:relative;
+  overflow:hidden;
+  box-shadow:none;
+}
+@media(min-width:431px){
+  body.standalone-demo .phone{
+    box-shadow:0 0 40px rgba(0,0,0,0.25);
+  }
+}
+
+/* fixed → absolute，收进 .phone，避免底部输入框与 Tab 错位 */
+body.standalone-demo .phone .tabbar,
+body.standalone-demo .phone .dock-wrap,
+body.standalone-demo .phone .quick-float-wrap,
+body.standalone-demo .phone .toast-stack,
+body.standalone-demo .phone .sheet-mask,
+body.standalone-demo .phone .search-page,
+body.standalone-demo .phone .dock-fan-scrim{
+  position:absolute;
+  left:0;
+  right:0;
+  width:100%;
+  max-width:none;
+  transform:none;
+}
+
+body.standalone-demo .phone .tabbar{
+  bottom:0;
+}
+
+body.standalone-demo .phone .dock-wrap{
+  bottom:58px;
+}
+
+body.standalone-demo .phone .quick-float-wrap{
+  bottom:180px;
+}
+
+body.standalone-demo .phone .search-page{
+  top:44px;
+  bottom:0;
+}
+
+body.standalone-demo .phone .toast-stack{
+  top:60px;
+}
+
+body.standalone-demo .phone .sheet-mask{
+  inset:0;
+}
+
+body.standalone-demo .phone .sheet{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  width:100%;
+  max-width:none;
+  transform:none;
+  animation:sheetUpStandalone 0.28s cubic-bezier(0.2,0,0,1);
+}
+@keyframes sheetUpStandalone{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+
+body.standalone-demo .phone .suiji-shell--scene::before{
+  position:absolute;
+  left:0;
+  transform:none;
+  width:100%;
+}
