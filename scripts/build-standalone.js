@@ -87,53 +87,96 @@ function buildLandingPage(builtAt) {
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>美柚 · 记录演示</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{
     font-family:"PingFang SC",-apple-system,sans-serif;
     background:#f2f2f5;color:#323232;
-    min-height:100vh;padding:32px 20px 48px;
+    min-height:100vh;min-height:100dvh;
+    padding:32px 20px calc(env(safe-area-inset-bottom, 20px) + 32px);
+    display:flex;flex-direction:column;align-items:center;
   }
+  .wrap{width:100%;max-width:420px}
   h1{font-size:22px;font-weight:500;margin-bottom:6px}
-  p{font-size:14px;color:#666;line-height:1.5;margin-bottom:28px}
-  .cards{display:flex;flex-direction:column;gap:12px;max-width:420px}
+  .hint{font-size:14px;color:#666;line-height:1.5;margin-bottom:8px}
+  .url{
+    font-size:12px;color:#8e8e93;line-height:1.45;margin-bottom:24px;
+    word-break:break-all;
+  }
+  .cards{display:flex;flex-direction:column;gap:12px}
   a.card{
     display:block;text-decoration:none;color:inherit;
     background:#fff;border-radius:12px;padding:18px 16px;
     box-shadow:0 2px 10px rgba(50,50,50,0.06);
     border:0.5px solid rgba(0,0,0,0.04);
+    -webkit-tap-highlight-color:transparent;
   }
-  a.card:active{opacity:0.92}
+  a.card:active{opacity:0.92;transform:scale(0.99)}
   .card-title{font-size:16px;font-weight:500;margin-bottom:4px}
   .card-desc{font-size:13px;color:#8e8e93;line-height:1.45}
-  .tag{
-    display:inline-block;margin-top:10px;font-size:11px;
-    color:#ff4d88;background:rgba(255,77,136,0.08);
-    padding:3px 8px;border-radius:4px;
+  .go{
+    display:inline-block;margin-top:12px;font-size:13px;font-weight:500;
+    color:#ff4d88;
   }
-  footer{margin-top:32px;font-size:11px;color:#c8c8cc}
+  footer{margin-top:28px;font-size:11px;color:#c8c8cc;line-height:1.5}
 </style>
 </head>
 <body>
-  <h1>美柚 · 记录演示</h1>
-  <p>选一个场景打开，建议手机 Safari 全屏演示；首次打开需联网加载 React。</p>
-  <div class="cards">
-    <a class="card" href="scene1.html">
-      <div class="card-title">场景一 · 日历记月经</div>
-      <div class="card-desc">默认日历页，记录「月经来了」后弹出分析，点击进入周期分析。</div>
-      <span class="tag">scene1.html</span>
-    </a>
-    <a class="card" href="scene2.html">
-      <div class="card-title">场景二 · 未记录空值</div>
-      <div class="card-desc">新用户进入记录 Tab，空值页 +「记一切」演示动效。</div>
-      <span class="tag">scene2.html</span>
-    </a>
+  <div class="wrap">
+    <h1>美柚 · 记录演示</h1>
+    <p class="hint">先在这里选场景，再进入演示。建议用 Safari 打开并添加到主屏幕，全屏效果更好。</p>
+    <p class="url">入口地址：zhongzihang5-cell.github.io/meiyou-suiji/</p>
+    <div class="cards">
+      <a class="card" href="./scene1.html">
+        <div class="card-title">场景一 · 日历记月经</div>
+        <div class="card-desc">默认日历页，记录「月经来了」后弹出分析，点击进入周期分析。</div>
+        <span class="go">进入场景一 →</span>
+      </a>
+      <a class="card" href="./scene2.html">
+        <div class="card-title">场景二 · 未记录空值</div>
+        <div class="card-desc">新用户进入记录 Tab，空值页 +「记一切」演示动效。</div>
+        <span class="go">进入场景二 →</span>
+      </a>
+    </div>
+    <footer>构建 ${builtAt}<br>微信内若无法加载，点右上角 ··· 用 Safari 打开</footer>
   </div>
-  <footer>构建 ${builtAt}</footer>
 </body>
 </html>`;
+}
+
+function buildRedirectPage(target, label) {
+  const safeTarget = target.replace(/"/g, '&quot;');
+  const safeLabel = label.replace(/</g, '&lt;');
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=${safeTarget}">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>跳转 · ${safeLabel}</title>
+<script>location.replace("${target.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}");</script>
+</head>
+<body style="font-family:PingFang SC,sans-serif;padding:24px;color:#666">
+<p>正在跳转到${safeLabel}…</p>
+<p><a href="${safeTarget}">若未自动跳转，请点这里</a></p>
+</body>
+</html>`;
+}
+
+function writeLegacyRedirects() {
+  const legacyDir = path.join(DOCS, 'docs');
+  fs.mkdirSync(legacyDir, { recursive: true });
+  const redirects = [
+    { file: 'index.html', target: '../', label: '演示入口' },
+    { file: 'scene1.html', target: '../scene1.html', label: '场景一' },
+    { file: 'scene2.html', target: '../scene2.html', label: '场景二' },
+  ];
+  redirects.forEach(({ file, target, label }) => {
+    fs.writeFileSync(path.join(legacyDir, file), buildRedirectPage(target, label), 'utf8');
+  });
 }
 
 function buildHtml({ title, demoScene, locked, comment, builtAt }) {
@@ -213,3 +256,6 @@ BUILDS.forEach((cfg) => {
 const landingPath = path.join(DOCS, 'index.html');
 fs.writeFileSync(landingPath, buildLandingPage(builtAt), 'utf8');
 console.log(`Wrote ${landingPath}`);
+
+writeLegacyRedirects();
+console.log(`Wrote legacy redirects under ${path.join(DOCS, 'docs')}`);
