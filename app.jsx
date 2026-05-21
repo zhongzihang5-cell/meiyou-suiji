@@ -342,8 +342,8 @@ function App(){
         <div className="suiji-stream" ref={streamRef}>
           <div className="stream-header">
             <div>
-              <h1 className="stream-title">记录</h1>
-              <p className="stream-sub">情绪 · 身体 · 体重</p>
+              <h1 className="stream-title">点滴</h1>
+              <p className="stream-sub">记录生活点滴</p>
             </div>
             <div className="stream-actions">
               {scene.calendar.enabled && (

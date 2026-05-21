@@ -4356,33 +4356,31 @@ html,body{
   bottom:200px;left:-100px;width:280px;height:280px;
   opacity:0.35;
 }
-.record-empty-head{
-  display:flex;
-  align-items:center;
-  padding:12px 22px 8px;
-  position:relative;
-  z-index:2;
-}
-.record-empty-title{
-  font-size:22px;
-  font-weight:600;
-  letter-spacing:-0.01em;
-}
 .record-empty-hero{
-  padding:14px 22px 0;
+  padding:24px 22px 0;
   position:relative;
   z-index:2;
 }
 .record-empty-hero-title{
   margin:0;
-  font-size:32px;
-  font-weight:600;
-  line-height:1.18;
-  letter-spacing:-0.02em;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
-.record-empty-accent{color:#ff4d88}
+.record-empty-hero-line{
+  display:block;
+  font-size:24px;
+  font-weight:500;
+  line-height:1.25;
+  letter-spacing:-0.01em;
+  color:rgba(0,0,0,0.8);
+}
+.record-empty-accent{
+  font-size:28px;
+  color:#ff4d88;
+}
 .record-empty-hero-sub{
-  margin:10px 0 0;
+  margin:14px 0 0;
   font-size:14.5px;
   line-height:1.55;
   color:#8E8E93;
@@ -5814,7 +5812,7 @@ function CycleReport({item}){
 }
 
 // ============ Tab bar ============
-// Order: 美柚 / 日历 / 记录(center) / 返现 / 我
+// Order: 美柚 / 记录 / 点滴(center) / 返现 / 我
 function TabBar({active='note', onChange}){
   const I = window.Icon;
   const tabs = [
@@ -5824,14 +5822,8 @@ function TabBar({active='note', onChange}){
         <path d="M12 3.5c1.5-1.5 3-1.5 3 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
       </svg>
     )},
-    {id:'cal', label:'日历', custom:<I name="calendar" size={22} stroke={1.6}/>},
-    {id:'note', label:'记录', custom:(
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M14 4l5 5-9 9H5v-5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
-        <path d="M13 5l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-        <circle cx="6" cy="19" r="1.2" fill="currentColor"/>
-      </svg>
-    )},
+    {id:'cal', label:'记录', custom:<I name="calendar" size={22} stroke={1.6}/>},
+    {id:'note', label:'点滴', custom:<I name="mic" size={22} stroke={1.6}/>},
     {id:'cash', label:'返现', custom:(
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6"/>
@@ -8958,13 +8950,10 @@ function RecordEmptyScreen({ onVoiceDone }) {
         aria-hidden="true"
       />
 
-      <div className="record-empty-head">
-        <div className="record-empty-title">记录</div>
-      </div>
-
       <div className="record-empty-hero">
         <h1 className="record-empty-hero-title">
-          在美柚，<span className="record-empty-accent">记一切</span>
+          <span className="record-empty-hero-line">在美柚，</span>
+          <span className="record-empty-hero-line record-empty-accent">记录生活点滴</span>
         </h1>
         <p className="record-empty-hero-sub">说一句话，情绪 · 症状 · 饮食 自动整理</p>
       </div>
@@ -9243,8 +9232,8 @@ function RecordBlankStream({
     <div className="suiji-stream record-blank-stream" ref={streamRef}>
       <div className="stream-header">
         <div>
-          <h1 className="stream-title">记录</h1>
-          <p className="stream-sub">情绪 · 身体 · 体重</p>
+          <h1 className="stream-title">点滴</h1>
+          <p className="stream-sub">记录生活点滴</p>
         </div>
         <div className="stream-actions">
           {scene.calendar.enabled && (
@@ -11009,8 +10998,8 @@ function App(){
         <div className="suiji-stream" ref={streamRef}>
           <div className="stream-header">
             <div>
-              <h1 className="stream-title">记录</h1>
-              <p className="stream-sub">情绪 · 身体 · 体重</p>
+              <h1 className="stream-title">点滴</h1>
+              <p className="stream-sub">记录生活点滴</p>
             </div>
             <div className="stream-actions">
               {scene.calendar.enabled && (

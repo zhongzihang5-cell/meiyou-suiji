@@ -34,33 +34,31 @@
   bottom:200px;left:-100px;width:280px;height:280px;
   opacity:0.35;
 }
-.record-empty-head{
-  display:flex;
-  align-items:center;
-  padding:12px 22px 8px;
-  position:relative;
-  z-index:2;
-}
-.record-empty-title{
-  font-size:22px;
-  font-weight:600;
-  letter-spacing:-0.01em;
-}
 .record-empty-hero{
-  padding:14px 22px 0;
+  padding:24px 22px 0;
   position:relative;
   z-index:2;
 }
 .record-empty-hero-title{
   margin:0;
-  font-size:32px;
-  font-weight:600;
-  line-height:1.18;
-  letter-spacing:-0.02em;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
-.record-empty-accent{color:#ff4d88}
+.record-empty-hero-line{
+  display:block;
+  font-size:24px;
+  font-weight:500;
+  line-height:1.25;
+  letter-spacing:-0.01em;
+  color:rgba(0,0,0,0.8);
+}
+.record-empty-accent{
+  font-size:28px;
+  color:#ff4d88;
+}
 .record-empty-hero-sub{
-  margin:10px 0 0;
+  margin:14px 0 0;
   font-size:14.5px;
   line-height:1.55;
   color:#8E8E93;

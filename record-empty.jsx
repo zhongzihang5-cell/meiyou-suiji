@@ -123,13 +123,10 @@ function RecordEmptyScreen({ onVoiceDone }) {
         aria-hidden="true"
       />
 
-      <div className="record-empty-head">
-        <div className="record-empty-title">记录</div>
-      </div>
-
       <div className="record-empty-hero">
         <h1 className="record-empty-hero-title">
-          在美柚，<span className="record-empty-accent">记一切</span>
+          <span className="record-empty-hero-line">在美柚，</span>
+          <span className="record-empty-hero-line record-empty-accent">记录生活点滴</span>
         </h1>
         <p className="record-empty-hero-sub">说一句话，情绪 · 症状 · 饮食 自动整理</p>
       </div>
