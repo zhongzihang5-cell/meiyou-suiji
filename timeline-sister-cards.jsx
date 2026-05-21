@@ -380,7 +380,7 @@ function TlVoiceInline({voice, text}){
   );
 }
 
-function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, analysisProps}){
+function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, typewriterBody, hideBodyUntilDrop, analysisProps}){
   const tags = entry.tags || [];
   const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
   const hasAiNote = !!entry.aiNote;
@@ -399,8 +399,16 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, a
       <section className="tl-t5-main">
         {hasVoice ? (
           <TlVoiceInline voice={entry.voice} text={text}/>
+        ) : hideBodyUntilDrop ? (
+          <div className="tl-t5-body tl-t5-body--pending" aria-hidden="true"/>
         ) : text ? (
-          <div className="tl-t5-body">{text}</div>
+          typewriterBody ? (
+            <div className="tl-t5-body">
+              <TypewriterText text={text} active charMs={48}/>
+            </div>
+          ) : (
+            <div className="tl-t5-body">{text}</div>
+          )
         ) : null}
         <RecordPhoto photo={entry.photo}/>
         {hasTags && (

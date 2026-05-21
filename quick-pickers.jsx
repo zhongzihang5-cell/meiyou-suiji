@@ -221,11 +221,161 @@ function createWeightRecordEntry({value, unit}){
   };
 }
 
+/* ============ 卡片扇 · 紧凑选择器（方案 I） ============ */
+
+const QUICK_SYMPTOM_TAGS = [
+  { id:'headache', label:'头痛', emoji:'🤕' },
+  { id:'bloat', label:'腹胀', emoji:'😣' },
+  { id:'cramp', label:'痛经', emoji:'😖' },
+  { id:'nausea', label:'恶心', emoji:'🤢' },
+  { id:'tired', label:'疲惫', emoji:'😩' },
+  { id:'back', label:'腰酸', emoji:'🦴' },
+  { id:'breast', label:'乳房胀', emoji:'💗' },
+  { id:'insomnia', label:'失眠', emoji:'😴' },
+];
+
+const QUICK_MOOD_LEVELS = [
+  { id:'very-sad', label:'好伤心', face:'very-sad', bg:'#FFC8DC' },
+  { id:'unhappy', label:'不开心', face:'unhappy', bg:'#FFC8DC' },
+  { id:'normal', label:'一般', face:'normal', bg:'#B8E8FF' },
+  { id:'happy', label:'挺开心', face:'happy', bg:'#FFE875' },
+  { id:'super-happy', label:'超开心', face:'super-happy', bg:'#FFE875' },
+];
+
+function QuickMoodFace({ level, color, size = 28 }) {
+  const sw = 1.6;
+  const mouths = {
+    1:'M9 16.2c1-1.6 5-1.6 6 0',
+    2:'M9.2 15.6c1-0.7 4.8-0.7 5.8 0',
+    3:'M9 15h6',
+    4:'M9.2 14.4c1 0.8 4.8 0.8 5.8 0',
+    5:'M9 14c1 1.6 5 1.6 6 0',
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth={sw}/>
+      <circle cx="9" cy="10.2" r="1.1" fill={color}/>
+      <circle cx="15" cy="10.2" r="1.1" fill={color}/>
+      <path d={mouths[level]} stroke={color} strokeWidth={sw} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+function QuickCardIcon({ kind, color = 'var(--my-text-primary)', size = 24 }) {
+  const sw = 1.7;
+  if(kind === 'mood'){
+    return <QuickMoodFace level={4} color={color} size={size}/>;
+  }
+  if(kind === 'symptom'){
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 21s-7-4.5-7-10a4.5 4.5 0 018-2.8A4.5 4.5 0 0119 11c0 5.5-7 10-7 10z" stroke={color} strokeWidth={sw} strokeLinejoin="round"/>
+        <path d="M9 11h6M12 8v6" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3.5" y="5.5" width="17" height="14" rx="2.5" stroke={color} strokeWidth={sw}/>
+      <path d="M9 9c0 1.7 1.3 3 3 3s3-1.3 3-3" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+      <circle cx="12" cy="6.5" r="0.8" fill={color}/>
+    </svg>
+  );
+}
+
+function QuickMoodPicker({ onSubmit }) {
+  const [level, setLevel] = React.useState(null);
+
+  React.useEffect(()=>{
+    if(level === null) return;
+    const mood = QUICK_MOOD_LEVELS[level - 1];
+    const t = window.setTimeout(()=>onSubmit?.([mood]), 320);
+    return ()=>window.clearTimeout(t);
+  }, [level, onSubmit]);
+
+  return (
+    <div className="quick-card-picker quick-card-picker--mood">
+      {[1, 2, 3, 4, 5].map(l=>(
+        <button
+          key={l}
+          type="button"
+          className={'quick-card-mood-btn'+(level === l ? ' is-selected' : '')}
+          onClick={()=>setLevel(l)}
+          aria-label={QUICK_MOOD_LEVELS[l - 1].label}
+        >
+          <QuickMoodFace level={l} color={level === l ? 'var(--my-brand-red)' : 'var(--my-text-primary)'} size={30}/>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function QuickSymptomPicker({ onSubmit }) {
+  const [sel, setSel] = React.useState([]);
+  const toggle = (id)=> setSel(s=> s.includes(id) ? s.filter(x=>x!==id) : [...s, id]);
+  const picked = QUICK_SYMPTOM_TAGS.filter(t=>sel.includes(t.id));
+
+  return (
+    <div className="quick-card-picker quick-card-picker--symptom">
+      <div className="quick-card-sym-tags">
+        {QUICK_SYMPTOM_TAGS.map(t=>{
+          const on = sel.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={'quick-card-sym-tag'+(on ? ' is-selected' : '')}
+              onClick={()=>toggle(t.id)}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        className="quick-card-submit"
+        disabled={picked.length === 0}
+        onClick={()=>picked.length > 0 && onSubmit?.(picked)}
+      >
+        {picked.length ? `记录 ${picked.length} 项` : '选择后记录'}
+      </button>
+    </div>
+  );
+}
+
+function QuickWeightPicker({ onSubmit, current = 52.3 }) {
+  const [w, setW] = React.useState(current);
+  const step = (d)=> setW(v=>Math.max(20, Math.min(150, +(v + d).toFixed(1))));
+
+  return (
+    <div className="quick-card-picker quick-card-picker--weight">
+      <div className="quick-card-weight-stepper">
+        <button type="button" className="quick-card-weight-btn" onClick={()=>step(-0.1)} aria-label="减少">−</button>
+        <div className="quick-card-weight-val">
+          <span className="quick-card-weight-num">{w.toFixed(1)}</span>
+          <span className="quick-card-weight-unit">kg</span>
+        </div>
+        <button type="button" className="quick-card-weight-btn" onClick={()=>step(0.1)} aria-label="增加">+</button>
+      </div>
+      <button type="button" className="quick-card-submit" onClick={()=>onSubmit?.({ value: w, unit: 'kg' })}>
+        记录
+      </button>
+    </div>
+  );
+}
+
 Object.assign(window, {
   SYMPTOM_SECTIONS,
   SYMPTOM_OPTIONS,
   DockSymptomPicker,
   DockWeightPicker,
+  QUICK_SYMPTOM_TAGS,
+  QUICK_MOOD_LEVELS,
+  QuickCardIcon,
+  QuickMoodPicker,
+  QuickSymptomPicker,
+  QuickWeightPicker,
   createSymptomRecordEntry,
   createWeightRecordEntry,
 });

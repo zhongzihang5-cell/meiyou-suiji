@@ -202,6 +202,20 @@
   position:relative;
   padding-top:2px;
   z-index:1;
+  overflow:visible;
+}
+.tl-rail-node.is-axis-drop .tl-rail-marker{
+  z-index:3;
+}
+.tl-rail-marker .record-blank-axis-land.is-timeline{
+  left:-17px;
+  top:-6px;
+}
+.tl-rail-marker .record-blank-axis-land.is-timeline .record-blank-axis-land-inner{
+  transform-origin:17px 42px;
+}
+.tl-t5-body--pending{
+  min-height:1.47em;
 }
 .tl-rail-dot{
   width:6px;
@@ -410,11 +424,11 @@
 }
 .rec-voice-play{
   width:28px;height:28px;border-radius:50%;flex-shrink:0;
-  background:var(--my-brand-red);color:#fff;
+  background:#4f7cae;color:#fff;
   display:flex;align-items:center;justify-content:center;
 }
 .rec-voice-bars{flex:1;display:flex;align-items:center;gap:2px;height:22px}
-.rec-voice-bars span{width:2px;border-radius:1px;background:var(--my-brand-red);opacity:0.45}
+.rec-voice-bars span{width:2px;border-radius:1px;background:#6b8fc4;opacity:0.78}
 .rec-voice-bars span:nth-child(odd){height:6px}
 .rec-voice-bars span:nth-child(3n){height:10px}
 .rec-voice-bars span:nth-child(4n){height:14px}
@@ -1413,23 +1427,23 @@
   min-height:22px;
   box-sizing:border-box;
   border-radius:80px;
-  background:rgba(255,77,136,0.1);
+  background:rgba(79,124,174,0.12);
   border:none;
-  color:#e8658a;
+  color:#4f7cae;
   cursor:pointer;
   font:inherit;
   line-height:1;
   white-space:nowrap;
   transition:background .15s, transform .15s;
 }
-.tl-voice-pill:hover{background:rgba(255,77,136,0.14)}
+.tl-voice-pill:hover{background:rgba(79,124,174,0.18)}
 .tl-voice-pill:active{transform:scale(0.97)}
-.tl-voice-pill.is-playing{background:rgba(255,77,136,0.16)}
+.tl-voice-pill.is-playing{background:rgba(79,124,174,0.22)}
 .tl-voice-pill-ico{
   width:18px;
   height:18px;
   border-radius:50%;
-  background:#ff6b9d;
+  background:#4f7cae;
   color:#fff;
   display:inline-flex;
   align-items:center;
@@ -1456,17 +1470,17 @@
 .tl-voice-pill .tl-voice-wave.is-mini span{
   width:2px;
   border-radius:1px;
-  background:#ff6b9d;
-  opacity:0.72;
+  background:#6b8fc4;
+  opacity:0.88;
 }
 .tl-voice-pill .tl-voice-wave.is-mini.is-playing span{
-  opacity:0.92;
+  opacity:1;
 }
 .tl-voice-pill-dur{
   font-size:11px;
   line-height:1;
   font-weight:500;
-  color:#e8658a;
+  color:#4f7cae;
   font-variant-numeric:tabular-nums;
   padding-right:0;
 }
@@ -1482,14 +1496,14 @@
   align-items:center;
   gap:10px;
   padding:9px 11px;
-  background:#fff5f8;
+  background:rgba(79,124,174,0.10);
   border-radius:10px;
   margin-bottom:11px;
 }
 .tl-voice-play{
   width:28px;height:28px;
   border-radius:50%;
-  background:var(--my-brand-red);
+  background:#4f7cae;
   color:#fff;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
@@ -1509,8 +1523,8 @@
 .tl-voice-wave span{
   width:2.5px;
   border-radius:2px;
-  background:#ff8db0;
-  opacity:.55;
+  background:#6b8fc4;
+  opacity:.82;
   transform-origin:center bottom;
 }
 .tl-voice-wave.is-playing span{
@@ -1523,7 +1537,7 @@
 }
 .tl-voice-dur{
   font-size:11px;
-  color:#b06b86;
+  color:#4f7cae;
   font-variant-numeric:tabular-nums;
   flex-shrink:0;
 }
@@ -1902,9 +1916,9 @@
   align-items:center;
   gap:4px;
   padding:3px 8px;
-  background:rgba(168, 152, 160, 0.11);
+  background:#fde2e9;
   border-radius:8px;
-  color:#9a8f97;
+  color:#ff4d88;
   font-weight:500;
   white-space:nowrap;
   font-size:11.5px;
@@ -1914,7 +1928,7 @@
   font-size:10.5px;
 }
 .v3-tag-cat{
-  opacity:0.72;
+  opacity:0.88;
   font-size:0.92em;
 }
 .v3-tag-val{
@@ -1931,12 +1945,12 @@
   border-radius:12px;
   padding:0;
   border:0;
-  background:#FF4D88;
+  background:#4f7cae;
   cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 1px 3px rgba(255,77,136,0.3);
+  box-shadow:0 1px 3px rgba(79,124,174,0.28);
 }
 .v3-voice-mini-wave{
   display:inline-flex;
@@ -1946,13 +1960,13 @@
 }
 .v3-voice-mini-wave span{
   width:1.5px;
-  background:#FF4D88;
-  opacity:0.45;
+  background:#6b8fc4;
+  opacity:0.78;
   border-radius:1px;
 }
 .v3-voice-mini-dur{
   font-size:11px;
-  color:#8E8E93;
+  color:#4f7cae;
   font-variant-numeric:tabular-nums;
 }
 .v3-card-photo{

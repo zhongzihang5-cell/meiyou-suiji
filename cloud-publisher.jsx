@@ -1,12 +1,10 @@
 // ============ 底部 Dock — 输入栏 + 右下悬浮快捷发布 ============
 
-/** 右下角 + — 5 项快捷发布 */
-const QUICK_PUBLISH = [
-  { id:'mood', emoji:'💛', label:'情绪', text:'今天情绪有点低落', bg:'#fff8e6' },
-  { id:'symptom', emoji:'🤒', label:'症状', text:'有点不舒服', bg:'#fff4ee' },
-  { id:'food', emoji:'🍽️', label:'饮食', text:'午餐吃了鸡胸肉和青菜', bg:'#eefaf3' },
-  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg', bg:'#eef4fc' },
-  { id:'sleep', emoji:'😴', label:'睡眠', text:'昨晚睡了 7 小时', bg:'#f0f4ff' },
+/** 方案 I · 卡片扇 — 仅 3 项 */
+const QUICK_CARDS = [
+  { id:'mood', label:'情绪', hint:'5 档表情', title:'记录情绪', x:-148, y:-32, angle:-12 },
+  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状', x:-74, y:-72, angle:0 },
+  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重', x:-4, y:-32, angle:12 },
 ];
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
@@ -103,79 +101,96 @@ function DockWavePlaceholder({show, focused}){
   );
 }
 
-/** 左半圆：从 + 向左侧展开（90° 上 → 180° 左 → 270° 下），不往右伸 */
-function fanArcPos(index, total, radius){
-  const startDeg = 90;
-  const endDeg = 270;
-  const t = total <= 1 ? 0.5 : index / (total - 1);
-  const deg = startDeg + (endDeg - startDeg) * t;
-  const rad = (deg * Math.PI) / 180;
-  return {
-    x: Math.round(radius * Math.cos(rad)),
-    y: Math.round(-radius * Math.sin(rad)),
-  };
-}
-
-function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
-  /* 180° 左半圆 / 5 项 / 50px 圆：R ≥ 50/(2·sin22.5°) ≈ 66 */
-  const r = items.length >= 5 ? 76 : 64;
-  const fabTapLock = React.useRef(false);
-
-  const handleFabTap = (e)=>{
-    e.preventDefault();
-    if(fabTapLock.current) return;
-    fabTapLock.current = true;
-    onToggle(!open);
-    window.setTimeout(()=>{ fabTapLock.current = false; }, 360);
-  };
+function QuickCardFan({
+  open, selected, onFabTap, onSelectCard, onClose,
+  onMoodSubmit, onSymptomSubmit, onWeightSubmit,
+}){
+  const I = window.Icon;
+  const QuickCardIcon = window.QuickCardIcon;
+  const QuickMoodPicker = window.QuickMoodPicker;
+  const QuickSymptomPicker = window.QuickSymptomPicker;
+  const QuickWeightPicker = window.QuickWeightPicker;
 
   return (
-    <div className={'dock-fan dock-fan-corner'+(open?' open':'')+(closing?' closing':'')}>
-      <div className={'dock-fan-stage'+(open?' open':'')+(closing?' closing':'')}>
-        {items.map((item,i)=>{
-          const {x,y} = fanArcPos(i, items.length, r);
-          return (
+    <div className={'quick-card-fan'+(open ? ' is-open' : '')+(selected ? ' has-selected' : '')}>
+      {QUICK_CARDS.map((card, i)=>{
+        const isSel = selected === card.id;
+        const isOther = selected && !isSel;
+        const fanDelay = (open && !selected) ? i * 65 : (QUICK_CARDS.length - 1 - i) * 30;
+        const tDelay = isSel ? 0 : fanDelay;
+
+        return (
+          <div
+            key={card.id}
+            className={'quick-card-fan-item'
+              +(isSel ? ' is-selected' : '')
+              +(isOther ? ' is-faded' : '')
+              +(open ? ' is-visible' : '')}
+            data-card={card.id}
+            style={{
+              '--card-x': card.x+'px',
+              '--card-y': card.y+'px',
+              '--card-angle': card.angle+'deg',
+              '--card-delay': tDelay+'ms',
+            }}
+          >
             <button
-              key={item.id}
               type="button"
-              className="dock-fan-node"
-              style={{
-                '--fx': x+'px',
-                '--fy': y+'px',
-                '--zi': i,
-                '--delay': (0.02 + i * 0.045)+'s',
-                '--close-delay': ((items.length - 1 - i) * 0.028)+'s',
+              className="quick-card-fan-face"
+              onClick={()=>{
+                if(open && !selected) onSelectCard(card.id);
               }}
-              onClick={()=> onPick(item)}
-              aria-label={item.label}
+              aria-label={card.label}
+              tabIndex={open && !selected ? 0 : -1}
             >
-              <span
-                className="dock-fan-node-ico dock-fan-node-ico--stack"
-                style={item.bg ? { background: item.bg } : undefined}
-              >
-                <span className="dock-fan-node-em" aria-hidden="true">{item.emoji}</span>
-                <span className="dock-fan-node-lbl">{item.label}</span>
+              <span className="quick-card-fan-ico">
+                <QuickCardIcon kind={card.id} color="var(--my-brand-red)" size={24}/>
+              </span>
+              <span className="quick-card-fan-meta">
+                <span className="quick-card-fan-lbl">{card.label}</span>
+                <span className="quick-card-fan-hint">{card.hint}</span>
               </span>
             </button>
-          );
-        })}
-        <button
-          type="button"
-          className={'dock-fab dock-fab-media'+(open?' open':'')}
-          onPointerUp={handleFabTap}
-          aria-expanded={open}
-          aria-label={open ? '收起' : '快捷发布'}
-        >
-          {renderFab(open)}
-        </button>
-      </div>
+
+            <div className="quick-card-fan-panel" aria-hidden={!isSel}>
+              <div className="quick-card-fan-panel-hd">
+                <span className="quick-card-fan-panel-title">{card.title}</span>
+                <button type="button" className="quick-card-fan-panel-close" onClick={onClose} aria-label="关闭">
+                  ×
+                </button>
+              </div>
+              <div className="quick-card-fan-panel-body">
+                {card.id === 'mood' ? (
+                  <QuickMoodPicker onSubmit={onMoodSubmit}/>
+                ) : card.id === 'symptom' ? (
+                  <QuickSymptomPicker onSubmit={onSymptomSubmit}/>
+                ) : (
+                  <QuickWeightPicker onSubmit={onWeightSubmit}/>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <button
+        type="button"
+        className={'quick-card-fab'+(open ? ' is-open' : '')+(selected ? ' is-covered' : '')}
+        onClick={onFabTap}
+        aria-expanded={open}
+        aria-label={open ? '收起快捷记录' : '快捷记录'}
+      >
+        {open
+          ? <I name="close" size={20} stroke={2.2}/>
+          : <I name="plus" size={24} stroke={2.2}/>}
+      </button>
     </div>
   );
 }
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
-  onVoiceDone, onPhoto, onDockExpandedChange, activeTab,
+  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showFirstDropBubble,
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -183,41 +198,31 @@ function DockPublisher({
   const DockWeightPicker = window.DockWeightPicker;
   const [inputMode, setInputMode] = React.useState('text');
   const [quickOpen, setQuickOpen] = React.useState(false);
-  const [quickClosing, setQuickClosing] = React.useState(false);
+  const [quickSelected, setQuickSelected] = React.useState(null);
   const [dockSheet, setDockSheet] = React.useState(null);
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
   const [inputFocused, setInputFocused] = React.useState(false);
   const recTimer = React.useRef(null);
-
-  const quickOpenedAt = React.useRef(0);
   const prevTabRef = React.useRef(activeTab);
 
   React.useEffect(()=>{
     if(activeTab === 'note' && prevTabRef.current !== 'note'){
       setQuickOpen(false);
-      setQuickClosing(false);
+      setQuickSelected(null);
       setDockSheet(null);
     }
     prevTabRef.current = activeTab;
   }, [activeTab]);
 
-  const toggleQuick = (next)=>{
-    if(next === undefined) next = !quickOpen;
-    if(next){
-      if(quickOpen || quickClosing) return;
-      quickOpenedAt.current = Date.now();
-      setQuickClosing(false);
-      setQuickOpen(true);
-      return;
-    }
-    if(!quickOpen || quickClosing) return;
-    if(Date.now() - quickOpenedAt.current < 380) return;
-    setQuickClosing(true);
-    setTimeout(()=>{
-      setQuickOpen(false);
-      setQuickClosing(false);
-    }, 340);
+  const closeQuick = ()=>{
+    setQuickSelected(null);
+    setQuickOpen(false);
+  };
+
+  const handleFabTap = ()=>{
+    if(quickOpen) closeQuick();
+    else setQuickOpen(true);
   };
 
 
@@ -240,27 +245,24 @@ function DockPublisher({
 
   const toggleMode = ()=>{
     setInputMode(m=>m==='text' ? 'voice' : 'text');
-    toggleQuick(false);
+    closeQuick();
   };
 
   const closeDockSheet = ()=> setDockSheet(null);
 
-  const handleQuick = (item)=>{
-    toggleQuick(false);
-    if(item?.id === 'mood'){
-      setDockSheet('mood');
-      return;
-    }
-    if(item?.id === 'symptom'){
-      setDockSheet('symptom');
-      return;
-    }
-    if(item?.id === 'weight'){
-      setDockSheet('weight');
-      return;
-    }
-    setDockSheet(null);
-    if(item) onQuickMark?.(item);
+  const handleQuickMoodSubmit = (moods)=>{
+    closeQuick();
+    onMoodConfirm?.(moods);
+  };
+
+  const handleQuickSymptomSubmit = (symptoms)=>{
+    closeQuick();
+    onSymptomConfirm?.(symptoms);
+  };
+
+  const handleQuickWeightSubmit = (payload)=>{
+    closeQuick();
+    onWeightConfirm?.(payload);
   };
 
   const handleMoodConfirm = (moods)=>{
@@ -279,25 +281,31 @@ function DockPublisher({
   };
 
   React.useEffect(()=>{
-    onDockExpandedChange?.(!!dockSheet);
-  }, [dockSheet, onDockExpandedChange]);
+    onDockExpandedChange?.(!!dockSheet || !!quickSelected);
+  }, [dockSheet, quickSelected, onDockExpandedChange]);
 
   const isDockExpanded = !!dockSheet;
+  const isQuickActive = quickOpen || !!quickSelected;
 
   return (
     <>
-      <div className={'quick-float-wrap'+(isDockExpanded?' is-covered':'')}>
-        <QuickFan
-          items={QUICK_PUBLISH}
+      <div className={'quick-float-wrap'+(isDockExpanded ? ' is-covered' : '')+(isQuickActive ? ' is-quick-active' : '')}>
+        {isQuickActive ? (
+          <div
+            className="quick-card-fan-scrim"
+            onClick={closeQuick}
+            aria-hidden="false"
+          />
+        ) : null}
+        <QuickCardFan
           open={quickOpen}
-          closing={quickClosing}
-          onToggle={toggleQuick}
-          onPick={handleQuick}
-          renderFab={(open)=>(
-            open
-              ? <I name="close" size={20} stroke={2.2}/>
-              : <I name="plus" size={24} stroke={2.2}/>
-          )}
+          selected={quickSelected}
+          onFabTap={handleFabTap}
+          onSelectCard={setQuickSelected}
+          onClose={closeQuick}
+          onMoodSubmit={handleQuickMoodSubmit}
+          onSymptomSubmit={handleQuickSymptomSubmit}
+          onWeightSubmit={handleQuickWeightSubmit}
         />
       </div>
 
@@ -334,6 +342,9 @@ function DockPublisher({
 
               {inputMode==='text' ? (
                 <div className={'dock-text-field'+(inputFocused?' is-focused':'')}>
+                  {showFirstDropBubble && !inputFocused ? (
+                    <div className="dock-first-drop-bubble" role="status">💧 落下你的第一滴</div>
+                  ) : null}
                   <DockWavePlaceholder
                     show={!draft.trim()}
                     focused={inputFocused}

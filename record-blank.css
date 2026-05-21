@@ -1,42 +1,744 @@
-/* 场景三 · 记录页空置 */
+/* ============ 场景三 · 记录页空置 — 对齐 meiyou-diandi-empty-state ============ */
+
 .record-blank-stream{
   position:relative;
 }
 
-.record-blank-placeholder{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:28px 24px 40px;
-  margin-top:-8px;
+.record-blank-stream.is-ceremony{
+  overflow:hidden;
 }
 
-.record-blank-icon{
-  width:72px;
-  height:72px;
-  border-radius:36px;
-  background:rgba(255,77,136,0.06);
+/* —— 空态：绝对定位时间轴 + 内容区 —— */
+.record-blank-empty{
+  position:relative;
+  padding-top:40px;
+  min-height:480px;
+}
+
+.record-blank-empty--exit{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  z-index:2;
+  animation:rbEmptyFadeOut 0.28s ease forwards;
+  pointer-events:none;
+}
+
+@keyframes rbEmptyFadeOut{
+  from{opacity:1}
+  to{opacity:0}
+}
+
+.record-blank-axis-line{
+  position:absolute;
+  left:16px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(0,0,0,0.06);
+  pointer-events:none;
+}
+
+/* 水滴 — left 22px ≈ 轴线上方 */
+.record-blank-droplet-hanger{
+  position:absolute;
+  left:6px;
+  top:80px;
+  opacity:0;
+  transform:translateY(-20px);
+  transition:opacity 0.8s cubic-bezier(0.34,1.56,0.64,1),
+             transform 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:2;
+}
+
+.record-blank-droplet-hanger.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* 水滴 */
+.record-blank-droplet{
+  display:block;
+  filter:drop-shadow(0 2px 4px rgba(255,77,136,0.12));
+}
+
+.record-blank-droplet-shape.is-floating{
+  animation:rbDropletFloat 2.5s ease-in-out infinite;
+  transform-origin:center center;
+  transform-box:fill-box;
+}
+
+@keyframes rbDropletFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-2px)}
+}
+
+/* 等待涟漪 — 内核脉冲 + 多层圆环 */
+.record-blank-ripple-field{
+  position:absolute;
+  left:17px;
+  top:112px;
+  width:0;
+  height:0;
+  opacity:0;
+  transition:opacity 1s ease;
+  pointer-events:none;
+  z-index:1;
+}
+
+.record-blank-ripple-field.is-visible{
+  opacity:1;
+}
+
+.record-blank-ripple-core{
+  position:absolute;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+}
+
+.record-blank-ripple-pulse{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:6px;
+  height:6px;
+  margin:-3px 0 0 -3px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.35);
+  animation:rbRipplePulse 2.4s calc(var(--rb-pulse-i, 0) * 0.55s) ease-out infinite;
+}
+
+@keyframes rbRipplePulse{
+  0%{
+    transform:scale(0.6);
+    opacity:0.45;
+  }
+  70%{
+    transform:scale(2.2);
+    opacity:0;
+  }
+  100%{
+    transform:scale(2.2);
+    opacity:0;
+  }
+}
+
+.record-blank-ripple-ring{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:calc(28px + var(--rb-ring-i, 0) * 18px);
+  height:calc(28px + var(--rb-ring-i, 0) * 18px);
+  margin:calc(-14px - var(--rb-ring-i, 0) * 9px) 0 0 calc(-14px - var(--rb-ring-i, 0) * 9px);
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,calc(0.24 - var(--rb-ring-i, 0) * 0.04));
+  box-shadow:0 0 0 0 rgba(255,143,180,0.08);
+  animation:rbRippleExpand 2.8s calc(var(--rb-ring-i, 0) * 0.55s) ease-out infinite;
+}
+
+@keyframes rbRippleExpand{
+  0%{
+    transform:scale(0.35);
+    opacity:0.55;
+    box-shadow:0 0 0 0 rgba(255,143,180,0.16);
+  }
+  55%{
+    opacity:0.22;
+    box-shadow:0 0 6px 1px rgba(255,143,180,0.08);
+  }
+  100%{
+    transform:scale(1.65);
+    opacity:0;
+    box-shadow:0 0 0 0 rgba(255,143,180,0);
+  }
+}
+
+/* 内容区 — marginLeft 48px（相对页面），stream padding 16 → 32px */
+.record-blank-content{
+  margin-left:32px;
+  margin-right:4px;
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.record-blank-content.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* 引导卡片 */
+.record-blank-guide-card{
+  background:#fff;
+  border-radius:12px;
+  padding:28px 24px 24px;
+  margin-top:60px;
+  position:relative;
+}
+
+.record-blank-guide-title{
+  font-size:21px;
+  font-weight:400;
+  color:rgba(0,0,0,0.75);
+  line-height:1.5;
+  margin:0 0 8px;
+}
+
+.record-blank-guide-sub{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.3);
+  line-height:1.6;
+  margin:0 0 20px;
+}
+
+.record-blank-guide-arrow-row{
   display:flex;
   align-items:center;
+  gap:8px;
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+
+.record-blank-guide-arrow-row.is-visible{
+  opacity:1;
+}
+
+.record-blank-guide-arrow-btn{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.08);
+  display:inline-flex;
+  align-items:center;
   justify-content:center;
+  flex-shrink:0;
+  animation:rbBounceDown 1.5s ease-in-out infinite;
+}
+
+@keyframes rbBounceDown{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(4px)}
+}
+
+.record-blank-guide-arrow-text{
+  font-size:13px;
+  font-weight:400;
+  color:#ff4d88;
+  opacity:0.7;
+  line-height:1.29;
+}
+
+/* 虚位占位卡片 */
+.record-blank-ghost-stack{
+  margin-top:20px;
+  opacity:0;
+  transition:opacity 0.8s ease;
+}
+
+.record-blank-ghost-stack.is-visible{
+  opacity:1;
+}
+
+.record-blank-ghost{
+  position:relative;
   margin-bottom:12px;
 }
 
-.record-blank-title{
-  font-size:15px;
-  font-weight:500;
-  color:rgba(0,0,0,0.78);
-  line-height:1.47;
-  margin:0 0 4px;
+.record-blank-ghost-dot{
+  position:absolute;
+  left:-26px;
+  top:18px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.1);
 }
 
-.record-blank-desc{
-  font-size:13px;
+.record-blank-ghost-body{
+  border-radius:10px;
+  background:rgba(255,255,255,0.38);
+}
+
+.record-blank-ghost-body.is-tall{height:48px}
+.record-blank-ghost-body.is-short{height:36px}
+
+.record-blank-guide-card.is-first-record{
+  padding:16px 18px 18px;
+  margin-top:60px;
+  animation:rbRecordCardIn 0.22s ease-out both;
+}
+
+@keyframes rbRecordCardIn{
+  from{opacity:0.92}
+  to{opacity:1}
+}
+
+.record-blank-guide-inner{
+  transition:opacity 280ms ease, transform 280ms ease;
+}
+
+.record-blank-record-inner{
+  margin-top:-4px;
+}
+
+.record-blank-record-time{
+  display:block;
+  font-size:12px;
+  font-weight:500;
+  color:rgba(0,0,0,0.35);
+  margin-bottom:8px;
+  font-variant-numeric:tabular-nums;
+}
+
+.record-blank-record-body{
+  font-size:17px;
   font-weight:400;
-  color:rgba(0,0,0,0.42);
+  color:rgba(0,0,0,0.8);
   line-height:1.47;
   margin:0;
-  max-width:240px;
+  min-height:1.47em;
+}
+
+.record-blank-record-body .tl-typewriter-cursor{
+  background:rgba(255,77,136,0.55);
+}
+
+/* —— 第一滴仪式 —— */
+.record-blank-ceremony{
+  position:relative;
+  min-height:360px;
+}
+
+.record-blank-ceremony-stage{
+  position:relative;
+  padding-top:40px;
+  min-height:360px;
+}
+
+.record-blank-date-in-stage{
+  margin:0 0 12px;
+  will-change:transform,opacity;
+}
+
+.record-blank-droplet-fall{
+  display:none;
+}
+
+.record-blank-axis-land{
+  position:absolute;
+  left:-7px;
+  top:76px;
+  width:48px;
+  height:48px;
+  z-index:4;
+  pointer-events:none;
+}
+
+.record-blank-axis-land-inner{
+  position:relative;
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  will-change:transform;
+  transform-origin:center bottom;
+}
+
+.record-blank-droplet.is-axis-fall{
+  display:block;
+  filter:drop-shadow(0 2px 5px rgba(255,77,136,0.18));
+  transform-origin:center bottom;
+}
+
+.record-blank-axis-splash-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.record-blank-axis-splash{
+  position:relative;
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.record-blank-axis-settle-dot{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:10px;
+  height:10px;
+  margin:-5px 0 0 -5px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.32);
+  border:1.5px solid rgba(255,77,136,0.48);
+  box-shadow:0 0 0 2px var(--my-bg);
+  pointer-events:none;
+  transform-origin:center center;
+}
+
+.record-blank-axis-splash-ring{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:34px;
+  height:34px;
+  margin:-17px 0 0 -17px;
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,0.22);
+  pointer-events:none;
+}
+
+.record-blank-axis-splash-ring.is-inner{
+  width:22px;
+  height:22px;
+  margin:-11px 0 0 -11px;
+  border-color:rgba(255,77,136,0.16);
+}
+
+.record-blank-axis-splash-svg{
+  position:relative;
+  z-index:1;
+  transform-origin:center center;
+  will-change:transform;
+}
+
+.record-blank-axis-land .record-blank-node-dot{
+  position:relative;
+  left:auto;
+  top:auto;
+  margin:0;
+}
+
+.record-blank-ceremony-row{
+  display:flex;
+  gap:6px;
+  position:relative;
+  margin-top:0;
+}
+
+.record-blank-ceremony-row .record-blank-content{
+  opacity:1;
+  transform:none;
+  flex:1;
+  min-width:0;
+}
+
+.record-blank-ceremony-row .record-blank-ghost-stack{
+  opacity:1;
+  transition:opacity 200ms ease;
+}
+
+.record-blank-date-card{
+  background:rgba(255,77,136,0.06);
+  border-radius:12px;
+  padding:12px 16px;
+  margin-bottom:16px;
+}
+
+.record-blank-date-card-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.record-blank-date-card-left{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+
+.record-blank-date-num{
+  font-size:21px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+}
+
+.record-blank-date-week{
+  font-size:14px;
+  font-weight:400;
+  color:#ff4d88;
+}
+
+.record-blank-date-count{
+  font-size:14px;
+  font-weight:500;
+  color:#ff4d88;
+}
+
+.record-blank-ceremony-node-row{
+  display:flex;
+  gap:6px;
+  position:relative;
+  padding-left:0;
+}
+
+.record-blank-ceremony-marker{
+  width:22px;
+  flex-shrink:0;
+  position:relative;
+  min-height:140px;
+}
+
+.record-blank-falling-node{
+  position:absolute;
+  left:50%;
+  top:0;
+  transform:translateX(-50%);
+  margin-left:-4px;
+  animation:rbDropFall 0.6s ease-in forwards;
+}
+
+@keyframes rbDropFall{
+  0%{transform:translateX(-50%) translateY(-30px);opacity:0}
+  60%{transform:translateX(-50%) translateY(2px);opacity:1}
+  80%{transform:translateX(-50%) translateY(-3px)}
+  100%{transform:translateX(-50%) translateY(0);opacity:1}
+}
+
+.record-blank-node-dot{
+  display:block;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#ff4d88;
+  box-shadow:0 0 0 3px rgba(255,77,136,0.15);
+  position:absolute;
+  left:50%;
+  top:76px;
+  margin-left:-6px;
+  z-index:2;
+}
+
+.record-blank-node-dot.is-landed{
+  animation:rbNodePop 0.32s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes rbNodePop{
+  from{transform:scale(0.4);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+.record-blank-land-ripple{
+  position:absolute;
+  top:72px;
+  left:50%;
+  margin-left:-10px;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:1.5px solid rgba(255,77,136,0.3);
+  animation:rbLandRipple 0.8s 0.5s ease-out forwards;
+  opacity:0;
+  pointer-events:none;
+}
+
+@keyframes rbLandRipple{
+  0%{transform:scale(0.5);opacity:0}
+  30%{opacity:0.6}
+  100%{transform:scale(2.5);opacity:0}
+}
+
+.record-blank-ceremony-card-slot{
+  flex:1;
+  min-width:0;
+}
+
+.record-blank-first-card{
+  will-change:transform,opacity;
+}
+
+/* 节点溅射涟漪（仪式内复用） */
+.record-blank-ripples{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:0;
+  height:0;
+  pointer-events:none;
+}
+
+.record-blank-ripple{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:10px;
+  height:10px;
+  margin:-5px 0 0 -5px;
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,0.2);
+  opacity:0;
+}
+
+/* 庆祝层 */
+.record-blank-celebrate{
+  text-align:center;
+  margin-top:48px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  pointer-events:none;
+  padding:0 20px;
+}
+
+.record-blank-celebrate-icon{
+  position:relative;
+  display:inline-block;
+  margin-bottom:12px;
+  width:60px;
+  height:60px;
+}
+
+.record-blank-splash-drops{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.record-blank-splash-drop{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:4px;
+  height:4px;
+  margin:-2px 0 0 -2px;
+  border-radius:50%;
+  background:#ff4d88;
+  opacity:0;
+  animation:rbSplashDrop 0.5s ease-out forwards;
+}
+
+@keyframes rbSplashDrop{
+  0%{
+    opacity:0.5;
+    transform:rotate(var(--rb-angle)) translateY(0);
+  }
+  100%{
+    opacity:0;
+    transform:rotate(var(--rb-angle)) translateY(-20px);
+  }
+}
+
+.record-blank-celeb-drop{
+  opacity:0;
+  animation:rbCelebDropIn 0.3s 1s ease-out forwards;
+}
+
+@keyframes rbCelebDropIn{
+  from{opacity:0}
+  to{opacity:0.9}
+}
+
+.record-blank-celeb-ring.is-outer{
+  transform-origin:30px 30px;
+  animation:rbCelebRingOuter 1s 1.2s ease-out forwards;
+}
+
+.record-blank-celeb-ring.is-inner{
+  transform-origin:30px 30px;
+  animation:rbCelebRingInner 0.8s 1.3s ease-out forwards;
+}
+
+@keyframes rbCelebRingOuter{
+  from{transform:scale(1);opacity:0.15}
+  to{transform:scale(3.1);opacity:0}
+}
+
+@keyframes rbCelebRingInner{
+  from{transform:scale(1);opacity:0.2}
+  to{transform:scale(4.5);opacity:0}
+}
+
+.record-blank-celebrate-title{
+  font-size:15px;
+  font-weight:500;
+  color:#ff4d88;
+  margin:0 0 4px;
+  text-align:center;
+}
+
+.record-blank-celebrate-sub{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.3);
+  margin:0;
+  text-align:center;
+  line-height:1.47;
+}
+
+.record-blank-post-hint{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.2);
+  text-align:center;
+  line-height:1.47;
+  margin:40px 0 12px;
+  padding:0 40px;
+}
+
+.record-blank-post-hint.is-static{
+  animation:rbFadeSlideIn 0.36s ease both;
+}
+
+@keyframes rbFadeSlideIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.record-blank-stream.is-post-ceremony .tl-day-section-head{
+  padding-top:0;
+}
+
+/* 输入框上方引导气泡 — 对齐输入框左侧 */
+.dock-text-field .dock-first-drop-bubble{
+  position:absolute;
+  left:12px;
+  bottom:calc(100% + 8px);
+  transform:none;
+  background:#ff4d88;
+  color:#fff;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.29;
+  padding:8px 14px;
+  border-radius:10px;
+  white-space:nowrap;
+  pointer-events:none;
+  box-shadow:0 2px 12px rgba(255,77,136,0.25);
+  animation:rbBubbleIn 0.4s ease 2s both;
+  z-index:2;
+}
+
+.dock-text-field .dock-first-drop-bubble::after{
+  content:'';
+  position:absolute;
+  left:24px;
+  bottom:-6px;
+  transform:none;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:6px solid #ff4d88;
+}
+
+@keyframes rbBubbleIn{
+  from{
+    opacity:0;
+    transform:translateY(6px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }

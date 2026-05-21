@@ -9,9 +9,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>美柚 · 场景三 · 记录页空置</title>
+<title>美柚 · 场景三 · 未记录时间轴空值</title>
 <!--
-  场景三：记录 Tab 无数据空置页（可改 record-blank.jsx）
+  场景三：未记录时间轴空值（可改 record-blank.jsx）
   生成日期: 2026-05-21
 
   手机演示：
@@ -1442,10 +1442,398 @@ html,body{
 .quick-float-wrap.is-covered{
   pointer-events:none;
 }
-.quick-float-wrap.is-covered .dock-fan-corner{
+.quick-float-wrap.is-covered .quick-card-fan{
   opacity:0;
   transform:scale(0.88) translateY(8px);
   pointer-events:none;
+}
+.quick-float-wrap.is-quick-active{
+  z-index:100;
+  top:0;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  height:auto;
+  pointer-events:none;
+}
+
+/* 快捷卡片扇打开时 — 禁用背景交互 */
+.phone:has(.quick-float-wrap.is-quick-active) .suiji-stream,
+.phone:has(.quick-float-wrap.is-quick-active) .statusbar,
+.phone:has(.quick-float-wrap.is-quick-active) .nav,
+.phone:has(.quick-float-wrap.is-quick-active) .dock-wrap,
+.phone:has(.quick-float-wrap.is-quick-active) .tabbar,
+.phone:has(.quick-float-wrap.is-quick-active) .calendar-page,
+.phone:has(.quick-float-wrap.is-quick-active) .record-empty-root,
+.phone:has(.quick-float-wrap.is-quick-active) .record-blank-root{
+  pointer-events:none;
+}
+
+/* ============ 方案 I · 卡片扇 ============ */
+.quick-card-fan-scrim{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:rgba(20,18,22,0.54);
+  backdrop-filter:blur(5px) saturate(90%);
+  -webkit-backdrop-filter:blur(5px) saturate(90%);
+  pointer-events:auto;
+  animation:quickScrimIn 240ms ease both;
+}
+@keyframes quickScrimIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+.quick-card-fan{
+  position:absolute;
+  right:12px;
+  bottom:0;
+  width:56px;
+  height:56px;
+  pointer-events:auto;
+  z-index:1;
+  overflow:visible;
+}
+.quick-card-fan.has-selected{
+  right:0;
+  left:0;
+  width:auto;
+  height:auto;
+  top:auto;
+}
+.quick-float-wrap.is-quick-active .quick-card-fan{
+  bottom:var(--my-dock-float-b);
+}
+
+.quick-card-fan-item{
+  position:absolute;
+  right:0;
+  bottom:56px;
+  width:100px;
+  height:124px;
+  border-radius:16px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow:0 12px 32px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.08);
+  transform:translate(0,0) rotate(0deg) scale(0.4);
+  opacity:0;
+  transform-origin:100% 100%;
+  pointer-events:none;
+  z-index:2;
+  transition:
+    transform 360ms cubic-bezier(0.32,0.94,0.38,1) var(--card-delay, 0ms),
+    opacity 240ms ease var(--card-delay, 0ms);
+}
+.quick-card-fan-item.is-visible{
+  pointer-events:auto;
+}
+.quick-card-fan-item.is-visible:not(.is-selected){
+  transform:translate(var(--card-x), var(--card-y)) rotate(var(--card-angle)) scale(1);
+  opacity:1;
+  transition:
+    transform 360ms cubic-bezier(0.32,0.94,0.38,1) var(--card-delay, 0ms),
+    opacity 240ms ease var(--card-delay, 0ms);
+}
+.quick-card-fan-item.is-faded{
+  opacity:0;
+  pointer-events:none;
+  transform:translate(var(--card-x), var(--card-y)) rotate(var(--card-angle)) scale(0.96);
+  transition:
+    transform 280ms cubic-bezier(0.32,0.94,0.38,1),
+    opacity 260ms ease;
+}
+.quick-card-fan-item.is-selected{
+  right:12px;
+  bottom:64px;
+  width:240px;
+  max-width:calc(100% - 24px);
+  height:124px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  transform:translate(0,0) rotate(0deg) scale(1);
+  opacity:1;
+  z-index:4;
+  transform-origin:100% 100%;
+  transition:
+    right 360ms cubic-bezier(0.32,0.94,0.38,1),
+    bottom 360ms cubic-bezier(0.32,0.94,0.38,1),
+    width 360ms cubic-bezier(0.32,0.94,0.38,1),
+    height 360ms cubic-bezier(0.32,0.94,0.38,1),
+    transform 360ms cubic-bezier(0.32,0.94,0.38,1),
+    opacity 200ms ease;
+}
+.quick-card-fan-item.is-selected[data-card="mood"]{
+  height:136px;
+}
+.quick-card-fan-item.is-selected[data-card="symptom"]{
+  height:232px;
+}
+.quick-card-fan-item.is-selected[data-card="weight"]{
+  height:172px;
+}
+
+.quick-card-fan-face{
+  position:absolute;
+  inset:0;
+  border:0;
+  background:transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  cursor:pointer;
+  padding:0;
+  transition:opacity 200ms ease, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
+}
+.quick-card-fan-item.is-selected .quick-card-fan-face{
+  opacity:0;
+  pointer-events:none;
+  transform:scale(0.92);
+  transition:opacity 180ms ease 60ms, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
+}
+.quick-card-fan-ico{
+  width:48px;
+  height:48px;
+  border-radius:24px;
+  background:var(--my-brand-soft);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.quick-card-fan-meta{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+.quick-card-fan-lbl{
+  font-size:13px;
+  font-weight:500;
+  color:var(--my-text-primary);
+}
+.quick-card-fan-hint{
+  font-size:10px;
+  color:var(--my-text-tertiary);
+}
+
+.quick-card-fan-panel{
+  position:absolute;
+  inset:0;
+  padding:12px 14px 14px;
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 280ms ease 180ms;
+}
+.quick-card-fan-item.is-selected .quick-card-fan-panel{
+  opacity:1;
+  pointer-events:auto;
+  transition:opacity 300ms ease 220ms;
+}
+.quick-card-fan-panel-hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+  flex-shrink:0;
+}
+.quick-card-fan-panel-title{
+  font-size:14px;
+  font-weight:500;
+  color:var(--my-text-primary);
+}
+.quick-card-fan-panel-close{
+  border:0;
+  background:transparent;
+  color:var(--my-text-tertiary);
+  font-size:22px;
+  line-height:1;
+  width:24px;
+  height:24px;
+  padding:0;
+  cursor:pointer;
+}
+.quick-card-fan-panel-body{
+  flex:0 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  overflow:visible;
+}
+.quick-card-fan-item.is-selected .quick-card-fan-panel-body{
+  overflow:visible;
+}
+
+.quick-card-fab{
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:56px;
+  height:56px;
+  border-radius:28px;
+  border:none;
+  background:radial-gradient(circle at 30% 25%, #ff7aa8 0%, var(--my-brand-red) 60%, var(--my-brand-red) 100%);
+  color:#fff;
+  box-shadow:0 8px 20px rgba(255,77,136,0.4), 0 2px 4px rgba(255,77,136,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:5;
+  touch-action:manipulation;
+  transform-origin:center center;
+  transition:transform 220ms ease;
+}
+.quick-card-fab.is-open{
+  transform:scale(0.92);
+}
+.quick-card-fab.is-covered{
+  z-index:3;
+}
+.quick-card-fab:active{
+  transform:scale(0.88);
+}
+.quick-card-fab.is-open:active{
+  transform:scale(0.84);
+}
+
+/* 卡片内紧凑选择器 */
+.quick-card-picker{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  box-sizing:border-box;
+}
+.quick-card-picker--mood{
+  flex-direction:row;
+  justify-content:space-between;
+  gap:2px;
+  width:100%;
+  padding:2px 0;
+}
+.quick-card-picker--symptom{
+  width:100%;
+  gap:8px;
+  align-items:stretch;
+}
+.quick-card-picker--weight{
+  width:100%;
+  padding:4px 0;
+}
+.quick-card-mood-btn{
+  border:0;
+  background:transparent;
+  border-radius:20px;
+  padding:4px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform 160ms ease, background 160ms ease;
+  flex:1;
+  min-width:0;
+}
+.quick-card-mood-btn.is-selected{
+  background:var(--my-brand-soft);
+  transform:scale(1.08);
+}
+.quick-card-sym-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:flex-start;
+  width:100%;
+}
+.quick-card-sym-tag{
+  border:1px solid rgba(0,0,0,0.10);
+  background:#fff;
+  color:var(--my-text-primary);
+  padding:5px 10px;
+  border-radius:14px;
+  font-size:12px;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:400;
+  white-space:nowrap;
+  flex-shrink:0;
+  transition:all 140ms ease;
+}
+.quick-card-sym-tag.is-selected{
+  border-color:var(--my-brand-red);
+  background:var(--my-brand-soft);
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.quick-card-weight-stepper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.quick-card-weight-btn{
+  width:32px;
+  height:32px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,0.10);
+  background:#fff;
+  font-size:16px;
+  line-height:1;
+  color:var(--my-text-primary);
+  cursor:pointer;
+  font-family:inherit;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.quick-card-weight-val{
+  display:flex;
+  align-items:baseline;
+  gap:3px;
+  min-width:0;
+  flex:1;
+  justify-content:center;
+}
+.quick-card-weight-num{
+  font-size:28px;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-0.02em;
+  line-height:1;
+}
+.quick-card-weight-unit{
+  font-size:13px;
+  color:var(--my-text-tertiary);
+}
+.quick-card-submit{
+  border:0;
+  background:var(--my-brand-red);
+  color:#fff;
+  padding:9px 24px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:500;
+  cursor:pointer;
+  font-family:inherit;
+  width:100%;
+  box-sizing:border-box;
+}
+.quick-card-submit:disabled{
+  background:#e5e2dc;
+  cursor:default;
 }
 
 /* ============ 底部栏：仅输入 + 相机 ============ */
@@ -1474,6 +1862,7 @@ html,body{
   visibility:hidden!important;
 }
 
+.dock-fan-stage{
   position:relative;
   width:48px;
   height:48px;
@@ -2107,6 +2496,20 @@ html,body{
   position:relative;
   padding-top:2px;
   z-index:1;
+  overflow:visible;
+}
+.tl-rail-node.is-axis-drop .tl-rail-marker{
+  z-index:3;
+}
+.tl-rail-marker .record-blank-axis-land.is-timeline{
+  left:-17px;
+  top:-6px;
+}
+.tl-rail-marker .record-blank-axis-land.is-timeline .record-blank-axis-land-inner{
+  transform-origin:17px 42px;
+}
+.tl-t5-body--pending{
+  min-height:1.47em;
 }
 .tl-rail-dot{
   width:6px;
@@ -2315,11 +2718,11 @@ html,body{
 }
 .rec-voice-play{
   width:28px;height:28px;border-radius:50%;flex-shrink:0;
-  background:var(--my-brand-red);color:#fff;
+  background:#4f7cae;color:#fff;
   display:flex;align-items:center;justify-content:center;
 }
 .rec-voice-bars{flex:1;display:flex;align-items:center;gap:2px;height:22px}
-.rec-voice-bars span{width:2px;border-radius:1px;background:var(--my-brand-red);opacity:0.45}
+.rec-voice-bars span{width:2px;border-radius:1px;background:#6b8fc4;opacity:0.78}
 .rec-voice-bars span:nth-child(odd){height:6px}
 .rec-voice-bars span:nth-child(3n){height:10px}
 .rec-voice-bars span:nth-child(4n){height:14px}
@@ -3318,23 +3721,23 @@ html,body{
   min-height:22px;
   box-sizing:border-box;
   border-radius:80px;
-  background:rgba(255,77,136,0.1);
+  background:rgba(79,124,174,0.12);
   border:none;
-  color:#e8658a;
+  color:#4f7cae;
   cursor:pointer;
   font:inherit;
   line-height:1;
   white-space:nowrap;
   transition:background .15s, transform .15s;
 }
-.tl-voice-pill:hover{background:rgba(255,77,136,0.14)}
+.tl-voice-pill:hover{background:rgba(79,124,174,0.18)}
 .tl-voice-pill:active{transform:scale(0.97)}
-.tl-voice-pill.is-playing{background:rgba(255,77,136,0.16)}
+.tl-voice-pill.is-playing{background:rgba(79,124,174,0.22)}
 .tl-voice-pill-ico{
   width:18px;
   height:18px;
   border-radius:50%;
-  background:#ff6b9d;
+  background:#4f7cae;
   color:#fff;
   display:inline-flex;
   align-items:center;
@@ -3361,17 +3764,17 @@ html,body{
 .tl-voice-pill .tl-voice-wave.is-mini span{
   width:2px;
   border-radius:1px;
-  background:#ff6b9d;
-  opacity:0.72;
+  background:#6b8fc4;
+  opacity:0.88;
 }
 .tl-voice-pill .tl-voice-wave.is-mini.is-playing span{
-  opacity:0.92;
+  opacity:1;
 }
 .tl-voice-pill-dur{
   font-size:11px;
   line-height:1;
   font-weight:500;
-  color:#e8658a;
+  color:#4f7cae;
   font-variant-numeric:tabular-nums;
   padding-right:0;
 }
@@ -3387,14 +3790,14 @@ html,body{
   align-items:center;
   gap:10px;
   padding:9px 11px;
-  background:#fff5f8;
+  background:rgba(79,124,174,0.10);
   border-radius:10px;
   margin-bottom:11px;
 }
 .tl-voice-play{
   width:28px;height:28px;
   border-radius:50%;
-  background:var(--my-brand-red);
+  background:#4f7cae;
   color:#fff;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
@@ -3414,8 +3817,8 @@ html,body{
 .tl-voice-wave span{
   width:2.5px;
   border-radius:2px;
-  background:#ff8db0;
-  opacity:.55;
+  background:#6b8fc4;
+  opacity:.82;
   transform-origin:center bottom;
 }
 .tl-voice-wave.is-playing span{
@@ -3428,7 +3831,7 @@ html,body{
 }
 .tl-voice-dur{
   font-size:11px;
-  color:#b06b86;
+  color:#4f7cae;
   font-variant-numeric:tabular-nums;
   flex-shrink:0;
 }
@@ -3807,9 +4210,9 @@ html,body{
   align-items:center;
   gap:4px;
   padding:3px 8px;
-  background:rgba(168, 152, 160, 0.11);
+  background:#fde2e9;
   border-radius:8px;
-  color:#9a8f97;
+  color:#ff4d88;
   font-weight:500;
   white-space:nowrap;
   font-size:11.5px;
@@ -3819,7 +4222,7 @@ html,body{
   font-size:10.5px;
 }
 .v3-tag-cat{
-  opacity:0.72;
+  opacity:0.88;
   font-size:0.92em;
 }
 .v3-tag-val{
@@ -3836,12 +4239,12 @@ html,body{
   border-radius:12px;
   padding:0;
   border:0;
-  background:#FF4D88;
+  background:#4f7cae;
   cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 1px 3px rgba(255,77,136,0.3);
+  box-shadow:0 1px 3px rgba(79,124,174,0.28);
 }
 .v3-voice-mini-wave{
   display:inline-flex;
@@ -3851,13 +4254,13 @@ html,body{
 }
 .v3-voice-mini-wave span{
   width:1.5px;
-  background:#FF4D88;
-  opacity:0.45;
+  background:#6b8fc4;
+  opacity:0.78;
   border-radius:1px;
 }
 .v3-voice-mini-dur{
   font-size:11px;
-  color:#8E8E93;
+  color:#4f7cae;
   font-variant-numeric:tabular-nums;
 }
 .v3-card-photo{
@@ -4600,47 +5003,749 @@ html,body{
 }
 
 
-/* 场景三 · 记录页空置 */
+/* ============ 场景三 · 记录页空置 — 对齐 meiyou-diandi-empty-state ============ */
+
 .record-blank-stream{
   position:relative;
 }
 
-.record-blank-placeholder{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:28px 24px 40px;
-  margin-top:-8px;
+.record-blank-stream.is-ceremony{
+  overflow:hidden;
 }
 
-.record-blank-icon{
-  width:72px;
-  height:72px;
-  border-radius:36px;
-  background:rgba(255,77,136,0.06);
+/* —— 空态：绝对定位时间轴 + 内容区 —— */
+.record-blank-empty{
+  position:relative;
+  padding-top:40px;
+  min-height:480px;
+}
+
+.record-blank-empty--exit{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  z-index:2;
+  animation:rbEmptyFadeOut 0.28s ease forwards;
+  pointer-events:none;
+}
+
+@keyframes rbEmptyFadeOut{
+  from{opacity:1}
+  to{opacity:0}
+}
+
+.record-blank-axis-line{
+  position:absolute;
+  left:16px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(0,0,0,0.06);
+  pointer-events:none;
+}
+
+/* 水滴 — left 22px ≈ 轴线上方 */
+.record-blank-droplet-hanger{
+  position:absolute;
+  left:6px;
+  top:80px;
+  opacity:0;
+  transform:translateY(-20px);
+  transition:opacity 0.8s cubic-bezier(0.34,1.56,0.64,1),
+             transform 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:2;
+}
+
+.record-blank-droplet-hanger.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* 水滴 */
+.record-blank-droplet{
+  display:block;
+  filter:drop-shadow(0 2px 4px rgba(255,77,136,0.12));
+}
+
+.record-blank-droplet-shape.is-floating{
+  animation:rbDropletFloat 2.5s ease-in-out infinite;
+  transform-origin:center center;
+  transform-box:fill-box;
+}
+
+@keyframes rbDropletFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-2px)}
+}
+
+/* 等待涟漪 — 内核脉冲 + 多层圆环 */
+.record-blank-ripple-field{
+  position:absolute;
+  left:17px;
+  top:112px;
+  width:0;
+  height:0;
+  opacity:0;
+  transition:opacity 1s ease;
+  pointer-events:none;
+  z-index:1;
+}
+
+.record-blank-ripple-field.is-visible{
+  opacity:1;
+}
+
+.record-blank-ripple-core{
+  position:absolute;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+}
+
+.record-blank-ripple-pulse{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:6px;
+  height:6px;
+  margin:-3px 0 0 -3px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.35);
+  animation:rbRipplePulse 2.4s calc(var(--rb-pulse-i, 0) * 0.55s) ease-out infinite;
+}
+
+@keyframes rbRipplePulse{
+  0%{
+    transform:scale(0.6);
+    opacity:0.45;
+  }
+  70%{
+    transform:scale(2.2);
+    opacity:0;
+  }
+  100%{
+    transform:scale(2.2);
+    opacity:0;
+  }
+}
+
+.record-blank-ripple-ring{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:calc(28px + var(--rb-ring-i, 0) * 18px);
+  height:calc(28px + var(--rb-ring-i, 0) * 18px);
+  margin:calc(-14px - var(--rb-ring-i, 0) * 9px) 0 0 calc(-14px - var(--rb-ring-i, 0) * 9px);
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,calc(0.24 - var(--rb-ring-i, 0) * 0.04));
+  box-shadow:0 0 0 0 rgba(255,143,180,0.08);
+  animation:rbRippleExpand 2.8s calc(var(--rb-ring-i, 0) * 0.55s) ease-out infinite;
+}
+
+@keyframes rbRippleExpand{
+  0%{
+    transform:scale(0.35);
+    opacity:0.55;
+    box-shadow:0 0 0 0 rgba(255,143,180,0.16);
+  }
+  55%{
+    opacity:0.22;
+    box-shadow:0 0 6px 1px rgba(255,143,180,0.08);
+  }
+  100%{
+    transform:scale(1.65);
+    opacity:0;
+    box-shadow:0 0 0 0 rgba(255,143,180,0);
+  }
+}
+
+/* 内容区 — marginLeft 48px（相对页面），stream padding 16 → 32px */
+.record-blank-content{
+  margin-left:32px;
+  margin-right:4px;
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.record-blank-content.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* 引导卡片 */
+.record-blank-guide-card{
+  background:#fff;
+  border-radius:12px;
+  padding:28px 24px 24px;
+  margin-top:60px;
+  position:relative;
+}
+
+.record-blank-guide-title{
+  font-size:21px;
+  font-weight:400;
+  color:rgba(0,0,0,0.75);
+  line-height:1.5;
+  margin:0 0 8px;
+}
+
+.record-blank-guide-sub{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.3);
+  line-height:1.6;
+  margin:0 0 20px;
+}
+
+.record-blank-guide-arrow-row{
   display:flex;
   align-items:center;
+  gap:8px;
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+
+.record-blank-guide-arrow-row.is-visible{
+  opacity:1;
+}
+
+.record-blank-guide-arrow-btn{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.08);
+  display:inline-flex;
+  align-items:center;
   justify-content:center;
+  flex-shrink:0;
+  animation:rbBounceDown 1.5s ease-in-out infinite;
+}
+
+@keyframes rbBounceDown{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(4px)}
+}
+
+.record-blank-guide-arrow-text{
+  font-size:13px;
+  font-weight:400;
+  color:#ff4d88;
+  opacity:0.7;
+  line-height:1.29;
+}
+
+/* 虚位占位卡片 */
+.record-blank-ghost-stack{
+  margin-top:20px;
+  opacity:0;
+  transition:opacity 0.8s ease;
+}
+
+.record-blank-ghost-stack.is-visible{
+  opacity:1;
+}
+
+.record-blank-ghost{
+  position:relative;
   margin-bottom:12px;
 }
 
-.record-blank-title{
-  font-size:15px;
-  font-weight:500;
-  color:rgba(0,0,0,0.78);
-  line-height:1.47;
-  margin:0 0 4px;
+.record-blank-ghost-dot{
+  position:absolute;
+  left:-26px;
+  top:18px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.1);
 }
 
-.record-blank-desc{
-  font-size:13px;
+.record-blank-ghost-body{
+  border-radius:10px;
+  background:rgba(255,255,255,0.38);
+}
+
+.record-blank-ghost-body.is-tall{height:48px}
+.record-blank-ghost-body.is-short{height:36px}
+
+.record-blank-guide-card.is-first-record{
+  padding:16px 18px 18px;
+  margin-top:60px;
+  animation:rbRecordCardIn 0.22s ease-out both;
+}
+
+@keyframes rbRecordCardIn{
+  from{opacity:0.92}
+  to{opacity:1}
+}
+
+.record-blank-guide-inner{
+  transition:opacity 280ms ease, transform 280ms ease;
+}
+
+.record-blank-record-inner{
+  margin-top:-4px;
+}
+
+.record-blank-record-time{
+  display:block;
+  font-size:12px;
+  font-weight:500;
+  color:rgba(0,0,0,0.35);
+  margin-bottom:8px;
+  font-variant-numeric:tabular-nums;
+}
+
+.record-blank-record-body{
+  font-size:17px;
   font-weight:400;
-  color:rgba(0,0,0,0.42);
+  color:rgba(0,0,0,0.8);
   line-height:1.47;
   margin:0;
-  max-width:240px;
+  min-height:1.47em;
+}
+
+.record-blank-record-body .tl-typewriter-cursor{
+  background:rgba(255,77,136,0.55);
+}
+
+/* —— 第一滴仪式 —— */
+.record-blank-ceremony{
+  position:relative;
+  min-height:360px;
+}
+
+.record-blank-ceremony-stage{
+  position:relative;
+  padding-top:40px;
+  min-height:360px;
+}
+
+.record-blank-date-in-stage{
+  margin:0 0 12px;
+  will-change:transform,opacity;
+}
+
+.record-blank-droplet-fall{
+  display:none;
+}
+
+.record-blank-axis-land{
+  position:absolute;
+  left:-7px;
+  top:76px;
+  width:48px;
+  height:48px;
+  z-index:4;
+  pointer-events:none;
+}
+
+.record-blank-axis-land-inner{
+  position:relative;
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  will-change:transform;
+  transform-origin:center bottom;
+}
+
+.record-blank-droplet.is-axis-fall{
+  display:block;
+  filter:drop-shadow(0 2px 5px rgba(255,77,136,0.18));
+  transform-origin:center bottom;
+}
+
+.record-blank-axis-splash-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.record-blank-axis-splash{
+  position:relative;
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.record-blank-axis-settle-dot{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:10px;
+  height:10px;
+  margin:-5px 0 0 -5px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.32);
+  border:1.5px solid rgba(255,77,136,0.48);
+  box-shadow:0 0 0 2px var(--my-bg);
+  pointer-events:none;
+  transform-origin:center center;
+}
+
+.record-blank-axis-splash-ring{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:34px;
+  height:34px;
+  margin:-17px 0 0 -17px;
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,0.22);
+  pointer-events:none;
+}
+
+.record-blank-axis-splash-ring.is-inner{
+  width:22px;
+  height:22px;
+  margin:-11px 0 0 -11px;
+  border-color:rgba(255,77,136,0.16);
+}
+
+.record-blank-axis-splash-svg{
+  position:relative;
+  z-index:1;
+  transform-origin:center center;
+  will-change:transform;
+}
+
+.record-blank-axis-land .record-blank-node-dot{
+  position:relative;
+  left:auto;
+  top:auto;
+  margin:0;
+}
+
+.record-blank-ceremony-row{
+  display:flex;
+  gap:6px;
+  position:relative;
+  margin-top:0;
+}
+
+.record-blank-ceremony-row .record-blank-content{
+  opacity:1;
+  transform:none;
+  flex:1;
+  min-width:0;
+}
+
+.record-blank-ceremony-row .record-blank-ghost-stack{
+  opacity:1;
+  transition:opacity 200ms ease;
+}
+
+.record-blank-date-card{
+  background:rgba(255,77,136,0.06);
+  border-radius:12px;
+  padding:12px 16px;
+  margin-bottom:16px;
+}
+
+.record-blank-date-card-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.record-blank-date-card-left{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+
+.record-blank-date-num{
+  font-size:21px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+}
+
+.record-blank-date-week{
+  font-size:14px;
+  font-weight:400;
+  color:#ff4d88;
+}
+
+.record-blank-date-count{
+  font-size:14px;
+  font-weight:500;
+  color:#ff4d88;
+}
+
+.record-blank-ceremony-node-row{
+  display:flex;
+  gap:6px;
+  position:relative;
+  padding-left:0;
+}
+
+.record-blank-ceremony-marker{
+  width:22px;
+  flex-shrink:0;
+  position:relative;
+  min-height:140px;
+}
+
+.record-blank-falling-node{
+  position:absolute;
+  left:50%;
+  top:0;
+  transform:translateX(-50%);
+  margin-left:-4px;
+  animation:rbDropFall 0.6s ease-in forwards;
+}
+
+@keyframes rbDropFall{
+  0%{transform:translateX(-50%) translateY(-30px);opacity:0}
+  60%{transform:translateX(-50%) translateY(2px);opacity:1}
+  80%{transform:translateX(-50%) translateY(-3px)}
+  100%{transform:translateX(-50%) translateY(0);opacity:1}
+}
+
+.record-blank-node-dot{
+  display:block;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#ff4d88;
+  box-shadow:0 0 0 3px rgba(255,77,136,0.15);
+  position:absolute;
+  left:50%;
+  top:76px;
+  margin-left:-6px;
+  z-index:2;
+}
+
+.record-blank-node-dot.is-landed{
+  animation:rbNodePop 0.32s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes rbNodePop{
+  from{transform:scale(0.4);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+.record-blank-land-ripple{
+  position:absolute;
+  top:72px;
+  left:50%;
+  margin-left:-10px;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:1.5px solid rgba(255,77,136,0.3);
+  animation:rbLandRipple 0.8s 0.5s ease-out forwards;
+  opacity:0;
+  pointer-events:none;
+}
+
+@keyframes rbLandRipple{
+  0%{transform:scale(0.5);opacity:0}
+  30%{opacity:0.6}
+  100%{transform:scale(2.5);opacity:0}
+}
+
+.record-blank-ceremony-card-slot{
+  flex:1;
+  min-width:0;
+}
+
+.record-blank-first-card{
+  will-change:transform,opacity;
+}
+
+/* 节点溅射涟漪（仪式内复用） */
+.record-blank-ripples{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:0;
+  height:0;
+  pointer-events:none;
+}
+
+.record-blank-ripple{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:10px;
+  height:10px;
+  margin:-5px 0 0 -5px;
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,0.2);
+  opacity:0;
+}
+
+/* 庆祝层 */
+.record-blank-celebrate{
+  text-align:center;
+  margin-top:48px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  pointer-events:none;
+  padding:0 20px;
+}
+
+.record-blank-celebrate-icon{
+  position:relative;
+  display:inline-block;
+  margin-bottom:12px;
+  width:60px;
+  height:60px;
+}
+
+.record-blank-splash-drops{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.record-blank-splash-drop{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:4px;
+  height:4px;
+  margin:-2px 0 0 -2px;
+  border-radius:50%;
+  background:#ff4d88;
+  opacity:0;
+  animation:rbSplashDrop 0.5s ease-out forwards;
+}
+
+@keyframes rbSplashDrop{
+  0%{
+    opacity:0.5;
+    transform:rotate(var(--rb-angle)) translateY(0);
+  }
+  100%{
+    opacity:0;
+    transform:rotate(var(--rb-angle)) translateY(-20px);
+  }
+}
+
+.record-blank-celeb-drop{
+  opacity:0;
+  animation:rbCelebDropIn 0.3s 1s ease-out forwards;
+}
+
+@keyframes rbCelebDropIn{
+  from{opacity:0}
+  to{opacity:0.9}
+}
+
+.record-blank-celeb-ring.is-outer{
+  transform-origin:30px 30px;
+  animation:rbCelebRingOuter 1s 1.2s ease-out forwards;
+}
+
+.record-blank-celeb-ring.is-inner{
+  transform-origin:30px 30px;
+  animation:rbCelebRingInner 0.8s 1.3s ease-out forwards;
+}
+
+@keyframes rbCelebRingOuter{
+  from{transform:scale(1);opacity:0.15}
+  to{transform:scale(3.1);opacity:0}
+}
+
+@keyframes rbCelebRingInner{
+  from{transform:scale(1);opacity:0.2}
+  to{transform:scale(4.5);opacity:0}
+}
+
+.record-blank-celebrate-title{
+  font-size:15px;
+  font-weight:500;
+  color:#ff4d88;
+  margin:0 0 4px;
+  text-align:center;
+}
+
+.record-blank-celebrate-sub{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.3);
+  margin:0;
+  text-align:center;
+  line-height:1.47;
+}
+
+.record-blank-post-hint{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.2);
+  text-align:center;
+  line-height:1.47;
+  margin:40px 0 12px;
+  padding:0 40px;
+}
+
+.record-blank-post-hint.is-static{
+  animation:rbFadeSlideIn 0.36s ease both;
+}
+
+@keyframes rbFadeSlideIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.record-blank-stream.is-post-ceremony .tl-day-section-head{
+  padding-top:0;
+}
+
+/* 输入框上方引导气泡 — 对齐输入框左侧 */
+.dock-text-field .dock-first-drop-bubble{
+  position:absolute;
+  left:12px;
+  bottom:calc(100% + 8px);
+  transform:none;
+  background:#ff4d88;
+  color:#fff;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.29;
+  padding:8px 14px;
+  border-radius:10px;
+  white-space:nowrap;
+  pointer-events:none;
+  box-shadow:0 2px 12px rgba(255,77,136,0.25);
+  animation:rbBubbleIn 0.4s ease 2s both;
+  z-index:2;
+}
+
+.dock-text-field .dock-first-drop-bubble::after{
+  content:'';
+  position:absolute;
+  left:24px;
+  bottom:-6px;
+  transform:none;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:6px solid #ff4d88;
+}
+
+@keyframes rbBubbleIn{
+  from{
+    opacity:0;
+    transform:translateY(6px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 
@@ -4929,6 +6034,27 @@ body.standalone-demo .phone .dock-wrap{
 
 body.standalone-demo .phone .quick-float-wrap{
   bottom:var(--my-dock-float-b);
+}
+body.standalone-demo .phone .quick-float-wrap.is-quick-active{
+  top:0;
+  bottom:0;
+  height:auto;
+}
+body.standalone-demo .phone .quick-card-fan{
+  bottom:0;
+}
+body.standalone-demo .phone .quick-float-wrap.is-quick-active .quick-card-fan{
+  bottom:var(--my-dock-float-b);
+}
+body.standalone-demo .phone .quick-card-fan-scrim{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  transform:none;
+  max-width:none;
+  width:100%;
 }
 
 body.standalone-demo .phone .record-empty-voice-wrap{
@@ -6676,7 +7802,7 @@ function TlVoiceInline({voice, text}){
   );
 }
 
-function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, analysisProps}){
+function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, typewriterBody, hideBodyUntilDrop, analysisProps}){
   const tags = entry.tags || [];
   const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
   const hasAiNote = !!entry.aiNote;
@@ -6695,8 +7821,16 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, a
       <section className="tl-t5-main">
         {hasVoice ? (
           <TlVoiceInline voice={entry.voice} text={text}/>
+        ) : hideBodyUntilDrop ? (
+          <div className="tl-t5-body tl-t5-body--pending" aria-hidden="true"/>
         ) : text ? (
-          <div className="tl-t5-body">{text}</div>
+          typewriterBody ? (
+            <div className="tl-t5-body">
+              <TypewriterText text={text} active charMs={48}/>
+            </div>
+          ) : (
+            <div className="tl-t5-body">{text}</div>
+          )
         ) : null}
         <RecordPhoto photo={entry.photo}/>
         {hasTags && (
@@ -8061,11 +9195,161 @@ function createWeightRecordEntry({value, unit}){
   };
 }
 
+/* ============ 卡片扇 · 紧凑选择器（方案 I） ============ */
+
+const QUICK_SYMPTOM_TAGS = [
+  { id:'headache', label:'头痛', emoji:'🤕' },
+  { id:'bloat', label:'腹胀', emoji:'😣' },
+  { id:'cramp', label:'痛经', emoji:'😖' },
+  { id:'nausea', label:'恶心', emoji:'🤢' },
+  { id:'tired', label:'疲惫', emoji:'😩' },
+  { id:'back', label:'腰酸', emoji:'🦴' },
+  { id:'breast', label:'乳房胀', emoji:'💗' },
+  { id:'insomnia', label:'失眠', emoji:'😴' },
+];
+
+const QUICK_MOOD_LEVELS = [
+  { id:'very-sad', label:'好伤心', face:'very-sad', bg:'#FFC8DC' },
+  { id:'unhappy', label:'不开心', face:'unhappy', bg:'#FFC8DC' },
+  { id:'normal', label:'一般', face:'normal', bg:'#B8E8FF' },
+  { id:'happy', label:'挺开心', face:'happy', bg:'#FFE875' },
+  { id:'super-happy', label:'超开心', face:'super-happy', bg:'#FFE875' },
+];
+
+function QuickMoodFace({ level, color, size = 28 }) {
+  const sw = 1.6;
+  const mouths = {
+    1:'M9 16.2c1-1.6 5-1.6 6 0',
+    2:'M9.2 15.6c1-0.7 4.8-0.7 5.8 0',
+    3:'M9 15h6',
+    4:'M9.2 14.4c1 0.8 4.8 0.8 5.8 0',
+    5:'M9 14c1 1.6 5 1.6 6 0',
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth={sw}/>
+      <circle cx="9" cy="10.2" r="1.1" fill={color}/>
+      <circle cx="15" cy="10.2" r="1.1" fill={color}/>
+      <path d={mouths[level]} stroke={color} strokeWidth={sw} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+function QuickCardIcon({ kind, color = 'var(--my-text-primary)', size = 24 }) {
+  const sw = 1.7;
+  if(kind === 'mood'){
+    return <QuickMoodFace level={4} color={color} size={size}/>;
+  }
+  if(kind === 'symptom'){
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 21s-7-4.5-7-10a4.5 4.5 0 018-2.8A4.5 4.5 0 0119 11c0 5.5-7 10-7 10z" stroke={color} strokeWidth={sw} strokeLinejoin="round"/>
+        <path d="M9 11h6M12 8v6" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3.5" y="5.5" width="17" height="14" rx="2.5" stroke={color} strokeWidth={sw}/>
+      <path d="M9 9c0 1.7 1.3 3 3 3s3-1.3 3-3" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+      <circle cx="12" cy="6.5" r="0.8" fill={color}/>
+    </svg>
+  );
+}
+
+function QuickMoodPicker({ onSubmit }) {
+  const [level, setLevel] = React.useState(null);
+
+  React.useEffect(()=>{
+    if(level === null) return;
+    const mood = QUICK_MOOD_LEVELS[level - 1];
+    const t = window.setTimeout(()=>onSubmit?.([mood]), 320);
+    return ()=>window.clearTimeout(t);
+  }, [level, onSubmit]);
+
+  return (
+    <div className="quick-card-picker quick-card-picker--mood">
+      {[1, 2, 3, 4, 5].map(l=>(
+        <button
+          key={l}
+          type="button"
+          className={'quick-card-mood-btn'+(level === l ? ' is-selected' : '')}
+          onClick={()=>setLevel(l)}
+          aria-label={QUICK_MOOD_LEVELS[l - 1].label}
+        >
+          <QuickMoodFace level={l} color={level === l ? 'var(--my-brand-red)' : 'var(--my-text-primary)'} size={30}/>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function QuickSymptomPicker({ onSubmit }) {
+  const [sel, setSel] = React.useState([]);
+  const toggle = (id)=> setSel(s=> s.includes(id) ? s.filter(x=>x!==id) : [...s, id]);
+  const picked = QUICK_SYMPTOM_TAGS.filter(t=>sel.includes(t.id));
+
+  return (
+    <div className="quick-card-picker quick-card-picker--symptom">
+      <div className="quick-card-sym-tags">
+        {QUICK_SYMPTOM_TAGS.map(t=>{
+          const on = sel.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={'quick-card-sym-tag'+(on ? ' is-selected' : '')}
+              onClick={()=>toggle(t.id)}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        className="quick-card-submit"
+        disabled={picked.length === 0}
+        onClick={()=>picked.length > 0 && onSubmit?.(picked)}
+      >
+        {picked.length ? `记录 ${picked.length} 项` : '选择后记录'}
+      </button>
+    </div>
+  );
+}
+
+function QuickWeightPicker({ onSubmit, current = 52.3 }) {
+  const [w, setW] = React.useState(current);
+  const step = (d)=> setW(v=>Math.max(20, Math.min(150, +(v + d).toFixed(1))));
+
+  return (
+    <div className="quick-card-picker quick-card-picker--weight">
+      <div className="quick-card-weight-stepper">
+        <button type="button" className="quick-card-weight-btn" onClick={()=>step(-0.1)} aria-label="减少">−</button>
+        <div className="quick-card-weight-val">
+          <span className="quick-card-weight-num">{w.toFixed(1)}</span>
+          <span className="quick-card-weight-unit">kg</span>
+        </div>
+        <button type="button" className="quick-card-weight-btn" onClick={()=>step(0.1)} aria-label="增加">+</button>
+      </div>
+      <button type="button" className="quick-card-submit" onClick={()=>onSubmit?.({ value: w, unit: 'kg' })}>
+        记录
+      </button>
+    </div>
+  );
+}
+
 Object.assign(window, {
   SYMPTOM_SECTIONS,
   SYMPTOM_OPTIONS,
   DockSymptomPicker,
   DockWeightPicker,
+  QUICK_SYMPTOM_TAGS,
+  QUICK_MOOD_LEVELS,
+  QuickCardIcon,
+  QuickMoodPicker,
+  QuickSymptomPicker,
+  QuickWeightPicker,
   createSymptomRecordEntry,
   createWeightRecordEntry,
 });
@@ -8187,14 +9471,22 @@ function CycleDayHeader({day, items, dayBlocks}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, axisDropAnim, children}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
+  const AxisDrop = window.RecordBlankAxisDropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(axisDropAnim?' is-axis-drop':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
-        <span className={'tl-rail-dot'+dotCls}/>
+        {axisDropAnim && AxisDrop ? (
+          <AxisDrop
+            onLand={axisDropAnim.onLand}
+            onComplete={axisDropAnim.onComplete}
+          />
+        ) : (
+          <span className={'tl-rail-dot'+dotCls}/>
+        )}
       </div>
       <div className="tl-rail-body">{children}</div>
     </div>
@@ -8524,11 +9816,19 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && (
     isNew || item.hiddenUntilSisterDone
   );
+  const isFirstDropTarget = !!(firstDropAnim && firstDropAnim.entryId === item.id);
+  const showAxisDrop = isFirstDropTarget && !firstDropAnim.done;
+  const typewriterBody = isFirstDropTarget && firstDropAnim.textReady;
+  const hideBodyUntilDrop = isFirstDropTarget && !firstDropAnim.textReady;
+  const axisDropAnim = showAxisDrop ? {
+    onLand: onFirstDropLand,
+    onComplete: onFirstDropComplete,
+  } : null;
 
   let body = null;
   if(item.kind === 'record-group'){
@@ -8569,6 +9869,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       <RecordCard
         entry={item}
         isNew={isNew}
+        typewriterBody={typewriterBody}
+        hideBodyUntilDrop={hideBodyUntilDrop}
         typewriterAiNote={!!(isNew && item.aiNote)}
       />
     );
@@ -8580,6 +9882,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : (item.ai && !item.primary ? 'ai' : undefined))}
       isFeedLast={isFeedLast}
       nodeKind={item.kind === 'record-group' ? (item.ai && !item.primary ? 'sister-card' : 'voice-card') : (sisterItem ? (item.kind === 'sync-card' ? 'sync-card' : 'voice-card') : item.kind)}
+      axisDropAnim={axisDropAnim}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
@@ -8602,11 +9905,13 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
+function RecordCard({entry, isNew, typewriterAiNote, typewriterBody, hideBodyUntilDrop, animateAnalysis}){
   return (
     <SegmentedRecordCard
       entry={entry}
       isNew={isNew}
+      typewriterBody={typewriterBody}
+      hideBodyUntilDrop={hideBodyUntilDrop}
       typewriterAiNote={typewriterAiNote}
       animateAnalysis={animateAnalysis}
     />
@@ -8659,7 +9964,7 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
@@ -8682,6 +9987,9 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
+          firstDropAnim={firstDropAnim}
+          onFirstDropLand={onFirstDropLand}
+          onFirstDropComplete={onFirstDropComplete}
         />
         );
       })}
@@ -8704,7 +10012,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
   const dayBlocks = blocks.filter(b => b.type === 'day');
 
@@ -8723,6 +10031,9 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 hideTodayGuide={hideTodayGuide}
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
+                firstDropAnim={firstDropAnim}
+                onFirstDropLand={onFirstDropLand}
+                onFirstDropComplete={onFirstDropComplete}
               />
             );
           }
@@ -9192,22 +10503,384 @@ Object.assign(window, {
 
 <!-- record-blank.jsx -->
 <script type="text/babel">
-// ============ 记录 Tab · 空置页（场景三 — 在此修改空态） ============
-//
-// 标准记录页结构：顶栏 + 今日分日头 + 空态区 + 底部 Dock（由 app.jsx 渲染）
-// 与场景二 landing 引导（record-empty.jsx）分离，方便独立迭代空态设计。
+// ============ 记录 Tab · 空置页（场景三 — 空态 + 第一滴仪式） ============
 
-function RecordBlankPlaceholder(){
+const { useState, useEffect, useRef } = React;
+
+function RecordBlankDroplet({ className, size = 'md', animateFloat = false, style }) {
+  const uid = React.useId().replace(/:/g, '');
+  const gradId = 'rbGrad' + uid;
+  const shineId = 'rbShine' + uid;
+  const w = size === 'lg' ? 36 : 22;
+  const h = size === 'lg' ? 48 : 30;
+  const pathCls = 'record-blank-droplet-shape' + (animateFloat ? ' is-floating' : '');
   return (
-    <div className="record-blank-placeholder" aria-label="记录页空态">
-      <div className="record-blank-icon" aria-hidden="true">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <rect x="8" y="6" width="32" height="36" rx="8" stroke="rgba(255,77,136,0.35)" strokeWidth="1.5"/>
-          <path d="M16 18h16M16 24h12M16 30h14" stroke="rgba(0,0,0,0.12)" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
+    <svg
+      className={'record-blank-droplet' + (className ? ' ' + className : '')}
+      width={w}
+      height={h}
+      viewBox="0 0 22 30"
+      fill="none"
+      aria-hidden="true"
+      style={style}
+    >
+      <defs>
+        <linearGradient id={gradId} x1="11" y1="1" x2="11" y2="28" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffb8d0" stopOpacity="0.55"/>
+          <stop offset="38%" stopColor="#ff8fb4" stopOpacity="0.78"/>
+          <stop offset="100%" stopColor="#ff4d88" stopOpacity="0.92"/>
+        </linearGradient>
+        <radialGradient id={shineId} cx="0.32" cy="0.28" r="0.55">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.42"/>
+          <stop offset="100%" stopColor="#fff" stopOpacity="0"/>
+        </radialGradient>
+        <filter id={'rbShadow' + uid} x="-20%" y="-10%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" floodColor="#ff4d88" floodOpacity="0.22"/>
+        </filter>
+      </defs>
+      <path
+        className={pathCls}
+        d="M11 2 C11 2, 2 14, 2 18 C2 23, 6 27, 11 27 C16 27, 20 23, 20 18 C20 14, 11 2, 11 2Z"
+        fill={`url(#${gradId})`}
+        filter={`url(#rbShadow${uid})`}
+      />
+      <path
+        d="M11 2 C11 2, 2 14, 2 18 C2 23, 6 27, 11 27 C16 27, 20 23, 20 18 C20 14, 11 2, 11 2Z"
+        fill={`url(#${shineId})`}
+        opacity="0.85"
+      />
+      <ellipse
+        cx="8"
+        cy="14"
+        rx="2.2"
+        ry="3.2"
+        fill="#fff"
+        fillOpacity="0.38"
+        transform="rotate(-22 8 14)"
+      />
+      <ellipse
+        cx="13.2"
+        cy="19"
+        rx="1"
+        ry="1.4"
+        fill="#fff"
+        fillOpacity="0.18"
+      />
+    </svg>
+  );
+}
+
+const AXIS_FALL_MS = 540;
+const AXIS_SPLASH_MS = 480;
+const AXIS_SHRINK_MS = 160;
+const AXIS_LAND_MS = AXIS_FALL_MS;
+const AXIS_SETTLE_MS = AXIS_FALL_MS + AXIS_SPLASH_MS;
+const AXIS_DONE_MS = AXIS_SETTLE_MS + AXIS_SHRINK_MS;
+const SPLASH_ANGLES = [0, 60, 120, 180, 240, 300];
+
+function easeInQuad(t){
+  return t * t;
+}
+
+function easeOutCubic(t){
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function easeOutQuart(t){
+  return 1 - Math.pow(1 - t, 4);
+}
+
+function computeAxisFall(t, distance){
+  const p = Math.min(1, t / AXIS_FALL_MS);
+  const gravity = easeInQuad(p);
+  let y = -distance + gravity * distance;
+  let sx = 1;
+  let sy = 1;
+
+  const speed = p < 1 ? Math.min(1, p * 1.35) : 0;
+  const stretch = speed * (1 - p * 0.45);
+  sy = 1 + stretch * 0.16;
+  sx = 1 - stretch * 0.06;
+
+  if(p >= 0.78){
+    const u = (p - 0.78) / 0.22;
+    const bounce = Math.sin(u * Math.PI);
+    sy = 1 - bounce * 0.24;
+    sx = 1 + bounce * 0.16;
+    y -= bounce * 4;
+  }
+
+  const fadeTail = p > 0.94 ? (p - 0.94) / 0.06 : 0;
+  return {
+    y,
+    sx,
+    sy,
+    opacity: 1 - fadeTail * 0.85,
+  };
+}
+
+function RecordBlankAxisSplash({ elapsed, shrinkElapsed = 0 }) {
+  const uid = React.useId().replace(/:/g, '');
+  const gradId = 'rbAxisGrad' + uid;
+  const p = Math.min(1, elapsed / AXIS_SPLASH_MS);
+  const burst = easeOutCubic(Math.min(1, p / 0.36));
+  const fade = p > 0.5 ? easeOutQuart((p - 0.5) / 0.5) : 0;
+  const shrinkT = Math.min(1, shrinkElapsed / AXIS_SHRINK_MS);
+  const shrinkEase = easeOutCubic(shrinkT);
+  const dropScale = (1 - fade * 0.18) * (1 - shrinkEase * 0.86);
+  const ringScale = 0.4 + burst * 1.05;
+  const ringOp = 0.38 * (1 - easeOutQuart(p));
+
+  return (
+    <div className="record-blank-axis-splash" aria-hidden="true">
+      <span
+        className="record-blank-axis-splash-ring is-outer"
+        style={{
+          transform: `scale(${ringScale})`,
+          opacity: ringOp * (1 - shrinkEase),
+        }}
+      />
+      <span
+        className="record-blank-axis-splash-ring is-inner"
+        style={{
+          transform: `scale(${0.35 + burst * 0.72})`,
+          opacity: ringOp * 0.82 * (1 - shrinkEase),
+        }}
+      />
+      <svg
+        className="record-blank-axis-splash-svg"
+        width="48"
+        height="48"
+        viewBox="0 0 48 48"
+        fill="none"
+        style={{ transform: `scale(${dropScale})` }}
+      >
+        <defs>
+          <linearGradient id={gradId} x1="24" y1="10" x2="24" y2="36" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#ffb8d0" stopOpacity="0.55"/>
+            <stop offset="38%" stopColor="#ff8fb4" stopOpacity="0.78"/>
+            <stop offset="100%" stopColor="#ff4d88" stopOpacity="0.92"/>
+          </linearGradient>
+        </defs>
+        {SPLASH_ANGLES.map((deg, i) => {
+          const delay = i * 32;
+          const local = Math.max(0, elapsed - delay);
+          const lp = Math.min(1, local / (AXIS_SPLASH_MS * 0.72));
+          const expand = easeOutCubic(lp);
+          const particleFade = lp > 0.58 ? easeOutQuart((lp - 0.58) / 0.42) : 0;
+          const orbit = 2 + expand * 15 - particleFade * 4;
+          const dotOp = 0.58 * (1 - particleFade) * (1 - shrinkEase * 0.9);
+          const rad = (deg - 90) * Math.PI / 180;
+          const r = 3.4 - particleFade * 1.4;
+          if(dotOp <= 0.02) return null;
+          return (
+            <circle
+              key={deg}
+              cx={24 + Math.cos(rad) * orbit}
+              cy={24 + Math.sin(rad) * orbit}
+              r={r}
+              fill="#ff4d88"
+              fillOpacity={dotOp}
+            />
+          );
+        })}
+        <path
+          d="M24 11 C24 11, 17 20, 17 23.5 C17 27.2, 20.1 30, 24 30 C27.9 30, 31 27.2, 31 23.5 C31 20, 24 11, 24 11Z"
+          fill={`url(#${gradId})`}
+          fillOpacity={1 - shrinkEase * 0.15}
+        />
+        <ellipse
+          cx="21.5"
+          cy="21"
+          rx="1.6"
+          ry="2.2"
+          fill="#fff"
+          fillOpacity={0.42 * (1 - shrinkEase)}
+          transform="rotate(-18 21.5 21)"
+        />
+      </svg>
+      {shrinkEase > 0.08 && (
+        <span
+          className="record-blank-axis-settle-dot"
+          style={{
+            transform: `scale(${0.18 + shrinkEase * 0.12})`,
+            opacity: shrinkEase,
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function RecordBlankAxisLand({ t, variant = 'ceremony' }) {
+  const distance = variant === 'timeline' ? 76 : 128;
+  const landClass = 'record-blank-axis-land' + (variant === 'timeline' ? ' is-timeline' : '');
+  const fallT = Math.min(t, AXIS_LAND_MS);
+  const fall = computeAxisFall(fallT, distance);
+  const splashElapsed = Math.max(0, t - AXIS_LAND_MS);
+  const shrinkElapsed = Math.max(0, t - AXIS_SETTLE_MS);
+  const inFall = t < AXIS_LAND_MS;
+  const inSplash = t >= AXIS_LAND_MS && t < AXIS_DONE_MS;
+  const preSplash = t >= AXIS_LAND_MS - 64 && t < AXIS_LAND_MS;
+  const preSplashMix = preSplash ? (t - (AXIS_LAND_MS - 64)) / 64 : 0;
+  const showFallDroplet = inFall && fall.opacity > 0.08;
+  const showSplash = inSplash || preSplashMix > 0.12;
+  const showCeremonyDot = variant !== 'timeline' && t >= AXIS_DONE_MS;
+
+  const innerTransform = inFall
+    ? `translateY(${fall.y}px) scale(${fall.sx}, ${fall.sy})`
+    : 'translateY(0) scale(1, 1)';
+
+  return (
+    <div className={landClass} aria-hidden="true">
+      <div
+        className="record-blank-axis-land-inner"
+        style={{ transform: innerTransform }}
+      >
+        {showFallDroplet && (
+          <RecordBlankDroplet
+            className="is-axis-fall"
+            style={{ opacity: fall.opacity * (1 - preSplashMix * 0.75) }}
+          />
+        )}
+        {showSplash && (
+          <div
+            className="record-blank-axis-splash-wrap"
+            style={{ opacity: inSplash ? 1 : preSplashMix * 0.55 }}
+          >
+            <RecordBlankAxisSplash
+              elapsed={inSplash ? splashElapsed : 0}
+              shrinkElapsed={variant === 'timeline' ? shrinkElapsed : 0}
+            />
+          </div>
+        )}
+        {showCeremonyDot && <span className="record-blank-node-dot is-landed"/>}
       </div>
-      <p className="record-blank-title">还没有记录</p>
-      <p className="record-blank-desc">说句话，或点下方按钮开始第一次记录</p>
+    </div>
+  );
+}
+
+function RecordBlankAxisDropAnim({ onLand, onComplete }) {
+  const [t, setT] = useState(0);
+  const landRef = useRef(false);
+  const completeRef = useRef(false);
+  const startRef = useRef(performance.now());
+
+  useEffect(() => {
+    landRef.current = false;
+    completeRef.current = false;
+    startRef.current = performance.now();
+    setT(0);
+    let raf;
+    const tick = () => {
+      const elapsed = performance.now() - startRef.current;
+      setT(elapsed);
+      if(elapsed < AXIS_DONE_MS + 40) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  useEffect(() => {
+    if(t >= AXIS_LAND_MS && !landRef.current){
+      landRef.current = true;
+      onLand?.();
+    }
+  }, [t, onLand]);
+
+  useEffect(() => {
+    if(t >= AXIS_DONE_MS && !completeRef.current){
+      completeRef.current = true;
+      onComplete?.();
+    }
+  }, [t, onComplete]);
+
+  return <RecordBlankAxisLand t={t} variant="timeline"/>;
+}
+
+function RecordBlankRipples({ className, variant = 'wait' }) {
+  return (
+    <div className={'record-blank-ripples' + (className ? ' ' + className : '') + (variant === 'splash' ? ' is-splash' : '')} aria-hidden="true">
+      <span className="record-blank-ripple"/>
+      <span className="record-blank-ripple"/>
+      <span className="record-blank-ripple"/>
+    </div>
+  );
+}
+
+function RecordBlankGuideCard({ showArrow }) {
+  return (
+    <div className="record-blank-guide-card">
+      <p className="record-blank-guide-title">
+        你的点滴，<br/>
+        从第一句话开始
+      </p>
+      <p className="record-blank-guide-sub">
+        说说今天吃了什么、心情怎么样<br/>
+        每一条都会变成时间轴上的一滴
+      </p>
+      <div className={'record-blank-guide-arrow-row' + (showArrow ? ' is-visible' : '')}>
+        <span className="record-blank-guide-arrow-btn" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 2v8m0 0l-3-3m3 3l3-3" stroke="#ff4d88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </span>
+        <span className="record-blank-guide-arrow-text">在下方输入框说点什么</span>
+      </div>
+    </div>
+  );
+}
+
+function RecordBlankGhostCards({ visible }) {
+  return (
+    <div className={'record-blank-ghost-stack' + (visible ? ' is-visible' : '')} aria-hidden="true">
+      <div className="record-blank-ghost">
+        <span className="record-blank-ghost-dot"/>
+        <div className="record-blank-ghost-body is-tall"/>
+      </div>
+      <div className="record-blank-ghost">
+        <span className="record-blank-ghost-dot"/>
+        <div className="record-blank-ghost-body is-short"/>
+      </div>
+    </div>
+  );
+}
+
+function RecordBlankEmptyState() {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase(1), 400),
+      setTimeout(() => setPhase(2), 1200),
+      setTimeout(() => setPhase(3), 2000),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="record-blank-empty" aria-label="记录页空态">
+      <div className="record-blank-axis-line"/>
+
+      <div className={'record-blank-droplet-hanger' + (phase >= 1 ? ' is-visible' : '')}>
+        <RecordBlankDroplet animateFloat={phase >= 1}/>
+      </div>
+
+      <div className={'record-blank-ripple-field' + (phase >= 2 ? ' is-visible' : '')}>
+        <div className="record-blank-ripple-core" aria-hidden="true">
+          {[0, 1, 2].map(i => (
+            <span key={'c' + i} className="record-blank-ripple-pulse" style={{ '--rb-pulse-i': i }}/>
+          ))}
+        </div>
+        {[0, 1, 2, 3, 4].map(i => (
+          <span key={i} className="record-blank-ripple-ring" style={{ '--rb-ring-i': i }}/>
+        ))}
+      </div>
+
+      <div className={'record-blank-content' + (phase >= 2 ? ' is-visible' : '')}>
+        <RecordBlankGuideCard showArrow={phase >= 3}/>
+        <RecordBlankGhostCards visible={phase >= 3}/>
+      </div>
     </div>
   );
 }
@@ -9223,6 +10896,9 @@ function RecordBlankStream({
   sisterCycleDone,
   hideTodayGuide,
   onSisterCycleComplete,
+  firstDropAnim,
+  onFirstDropLand,
+  onFirstDropComplete,
 }){
   const I = window.Icon;
   const TimelineStream = window.TimelineStream;
@@ -9257,21 +10933,30 @@ function RecordBlankStream({
         </div>
       </div>
 
-      <TimelineStream
-        blocks={timeline}
-        endRef={timelineEndRef}
-        sisterPlayAnimation={sisterPlayAnimation}
-        sisterCycleDone={sisterCycleDone}
-        hideTodayGuide={hideTodayGuide}
-        onSisterCycleComplete={onSisterCycleComplete}
-      />
-
-      {showBlank && <RecordBlankPlaceholder/>}
+      {showBlank ? (
+        <RecordBlankEmptyState/>
+      ) : (
+        <TimelineStream
+          blocks={timeline}
+          endRef={timelineEndRef}
+          sisterPlayAnimation={sisterPlayAnimation}
+          sisterCycleDone={sisterCycleDone}
+          hideTodayGuide={hideTodayGuide}
+          onSisterCycleComplete={onSisterCycleComplete}
+          firstDropAnim={firstDropAnim}
+          onFirstDropLand={onFirstDropLand}
+          onFirstDropComplete={onFirstDropComplete}
+        />
+      )}
     </div>
   );
 }
 
-Object.assign(window, { RecordBlankStream, RecordBlankPlaceholder });
+Object.assign(window, {
+  RecordBlankStream,
+  RecordBlankEmptyState,
+  RecordBlankAxisDropAnim,
+});
 
 </script>
 
@@ -9529,13 +11214,11 @@ Object.assign(window, { SearchPage, flattenSearchableItems });
 <script type="text/babel">
 // ============ 底部 Dock — 输入栏 + 右下悬浮快捷发布 ============
 
-/** 右下角 + — 5 项快捷发布 */
-const QUICK_PUBLISH = [
-  { id:'mood', emoji:'💛', label:'情绪', text:'今天情绪有点低落', bg:'#fff8e6' },
-  { id:'symptom', emoji:'🤒', label:'症状', text:'有点不舒服', bg:'#fff4ee' },
-  { id:'food', emoji:'🍽️', label:'饮食', text:'午餐吃了鸡胸肉和青菜', bg:'#eefaf3' },
-  { id:'weight', emoji:'⚖️', label:'体重', text:'今天体重 52.3kg', bg:'#eef4fc' },
-  { id:'sleep', emoji:'😴', label:'睡眠', text:'昨晚睡了 7 小时', bg:'#f0f4ff' },
+/** 方案 I · 卡片扇 — 仅 3 项 */
+const QUICK_CARDS = [
+  { id:'mood', label:'情绪', hint:'5 档表情', title:'记录情绪', x:-148, y:-32, angle:-12 },
+  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状', x:-74, y:-72, angle:0 },
+  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重', x:-4, y:-32, angle:12 },
 ];
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
@@ -9632,79 +11315,96 @@ function DockWavePlaceholder({show, focused}){
   );
 }
 
-/** 左半圆：从 + 向左侧展开（90° 上 → 180° 左 → 270° 下），不往右伸 */
-function fanArcPos(index, total, radius){
-  const startDeg = 90;
-  const endDeg = 270;
-  const t = total <= 1 ? 0.5 : index / (total - 1);
-  const deg = startDeg + (endDeg - startDeg) * t;
-  const rad = (deg * Math.PI) / 180;
-  return {
-    x: Math.round(radius * Math.cos(rad)),
-    y: Math.round(-radius * Math.sin(rad)),
-  };
-}
-
-function QuickFan({items, open, closing, onToggle, onPick, renderFab}){
-  /* 180° 左半圆 / 5 项 / 50px 圆：R ≥ 50/(2·sin22.5°) ≈ 66 */
-  const r = items.length >= 5 ? 76 : 64;
-  const fabTapLock = React.useRef(false);
-
-  const handleFabTap = (e)=>{
-    e.preventDefault();
-    if(fabTapLock.current) return;
-    fabTapLock.current = true;
-    onToggle(!open);
-    window.setTimeout(()=>{ fabTapLock.current = false; }, 360);
-  };
+function QuickCardFan({
+  open, selected, onFabTap, onSelectCard, onClose,
+  onMoodSubmit, onSymptomSubmit, onWeightSubmit,
+}){
+  const I = window.Icon;
+  const QuickCardIcon = window.QuickCardIcon;
+  const QuickMoodPicker = window.QuickMoodPicker;
+  const QuickSymptomPicker = window.QuickSymptomPicker;
+  const QuickWeightPicker = window.QuickWeightPicker;
 
   return (
-    <div className={'dock-fan dock-fan-corner'+(open?' open':'')+(closing?' closing':'')}>
-      <div className={'dock-fan-stage'+(open?' open':'')+(closing?' closing':'')}>
-        {items.map((item,i)=>{
-          const {x,y} = fanArcPos(i, items.length, r);
-          return (
+    <div className={'quick-card-fan'+(open ? ' is-open' : '')+(selected ? ' has-selected' : '')}>
+      {QUICK_CARDS.map((card, i)=>{
+        const isSel = selected === card.id;
+        const isOther = selected && !isSel;
+        const fanDelay = (open && !selected) ? i * 65 : (QUICK_CARDS.length - 1 - i) * 30;
+        const tDelay = isSel ? 0 : fanDelay;
+
+        return (
+          <div
+            key={card.id}
+            className={'quick-card-fan-item'
+              +(isSel ? ' is-selected' : '')
+              +(isOther ? ' is-faded' : '')
+              +(open ? ' is-visible' : '')}
+            data-card={card.id}
+            style={{
+              '--card-x': card.x+'px',
+              '--card-y': card.y+'px',
+              '--card-angle': card.angle+'deg',
+              '--card-delay': tDelay+'ms',
+            }}
+          >
             <button
-              key={item.id}
               type="button"
-              className="dock-fan-node"
-              style={{
-                '--fx': x+'px',
-                '--fy': y+'px',
-                '--zi': i,
-                '--delay': (0.02 + i * 0.045)+'s',
-                '--close-delay': ((items.length - 1 - i) * 0.028)+'s',
+              className="quick-card-fan-face"
+              onClick={()=>{
+                if(open && !selected) onSelectCard(card.id);
               }}
-              onClick={()=> onPick(item)}
-              aria-label={item.label}
+              aria-label={card.label}
+              tabIndex={open && !selected ? 0 : -1}
             >
-              <span
-                className="dock-fan-node-ico dock-fan-node-ico--stack"
-                style={item.bg ? { background: item.bg } : undefined}
-              >
-                <span className="dock-fan-node-em" aria-hidden="true">{item.emoji}</span>
-                <span className="dock-fan-node-lbl">{item.label}</span>
+              <span className="quick-card-fan-ico">
+                <QuickCardIcon kind={card.id} color="var(--my-brand-red)" size={24}/>
+              </span>
+              <span className="quick-card-fan-meta">
+                <span className="quick-card-fan-lbl">{card.label}</span>
+                <span className="quick-card-fan-hint">{card.hint}</span>
               </span>
             </button>
-          );
-        })}
-        <button
-          type="button"
-          className={'dock-fab dock-fab-media'+(open?' open':'')}
-          onPointerUp={handleFabTap}
-          aria-expanded={open}
-          aria-label={open ? '收起' : '快捷发布'}
-        >
-          {renderFab(open)}
-        </button>
-      </div>
+
+            <div className="quick-card-fan-panel" aria-hidden={!isSel}>
+              <div className="quick-card-fan-panel-hd">
+                <span className="quick-card-fan-panel-title">{card.title}</span>
+                <button type="button" className="quick-card-fan-panel-close" onClick={onClose} aria-label="关闭">
+                  ×
+                </button>
+              </div>
+              <div className="quick-card-fan-panel-body">
+                {card.id === 'mood' ? (
+                  <QuickMoodPicker onSubmit={onMoodSubmit}/>
+                ) : card.id === 'symptom' ? (
+                  <QuickSymptomPicker onSubmit={onSymptomSubmit}/>
+                ) : (
+                  <QuickWeightPicker onSubmit={onWeightSubmit}/>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <button
+        type="button"
+        className={'quick-card-fab'+(open ? ' is-open' : '')+(selected ? ' is-covered' : '')}
+        onClick={onFabTap}
+        aria-expanded={open}
+        aria-label={open ? '收起快捷记录' : '快捷记录'}
+      >
+        {open
+          ? <I name="close" size={20} stroke={2.2}/>
+          : <I name="plus" size={24} stroke={2.2}/>}
+      </button>
     </div>
   );
 }
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
-  onVoiceDone, onPhoto, onDockExpandedChange, activeTab,
+  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showFirstDropBubble,
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -9712,41 +11412,31 @@ function DockPublisher({
   const DockWeightPicker = window.DockWeightPicker;
   const [inputMode, setInputMode] = React.useState('text');
   const [quickOpen, setQuickOpen] = React.useState(false);
-  const [quickClosing, setQuickClosing] = React.useState(false);
+  const [quickSelected, setQuickSelected] = React.useState(null);
   const [dockSheet, setDockSheet] = React.useState(null);
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
   const [inputFocused, setInputFocused] = React.useState(false);
   const recTimer = React.useRef(null);
-
-  const quickOpenedAt = React.useRef(0);
   const prevTabRef = React.useRef(activeTab);
 
   React.useEffect(()=>{
     if(activeTab === 'note' && prevTabRef.current !== 'note'){
       setQuickOpen(false);
-      setQuickClosing(false);
+      setQuickSelected(null);
       setDockSheet(null);
     }
     prevTabRef.current = activeTab;
   }, [activeTab]);
 
-  const toggleQuick = (next)=>{
-    if(next === undefined) next = !quickOpen;
-    if(next){
-      if(quickOpen || quickClosing) return;
-      quickOpenedAt.current = Date.now();
-      setQuickClosing(false);
-      setQuickOpen(true);
-      return;
-    }
-    if(!quickOpen || quickClosing) return;
-    if(Date.now() - quickOpenedAt.current < 380) return;
-    setQuickClosing(true);
-    setTimeout(()=>{
-      setQuickOpen(false);
-      setQuickClosing(false);
-    }, 340);
+  const closeQuick = ()=>{
+    setQuickSelected(null);
+    setQuickOpen(false);
+  };
+
+  const handleFabTap = ()=>{
+    if(quickOpen) closeQuick();
+    else setQuickOpen(true);
   };
 
 
@@ -9769,27 +11459,24 @@ function DockPublisher({
 
   const toggleMode = ()=>{
     setInputMode(m=>m==='text' ? 'voice' : 'text');
-    toggleQuick(false);
+    closeQuick();
   };
 
   const closeDockSheet = ()=> setDockSheet(null);
 
-  const handleQuick = (item)=>{
-    toggleQuick(false);
-    if(item?.id === 'mood'){
-      setDockSheet('mood');
-      return;
-    }
-    if(item?.id === 'symptom'){
-      setDockSheet('symptom');
-      return;
-    }
-    if(item?.id === 'weight'){
-      setDockSheet('weight');
-      return;
-    }
-    setDockSheet(null);
-    if(item) onQuickMark?.(item);
+  const handleQuickMoodSubmit = (moods)=>{
+    closeQuick();
+    onMoodConfirm?.(moods);
+  };
+
+  const handleQuickSymptomSubmit = (symptoms)=>{
+    closeQuick();
+    onSymptomConfirm?.(symptoms);
+  };
+
+  const handleQuickWeightSubmit = (payload)=>{
+    closeQuick();
+    onWeightConfirm?.(payload);
   };
 
   const handleMoodConfirm = (moods)=>{
@@ -9808,25 +11495,31 @@ function DockPublisher({
   };
 
   React.useEffect(()=>{
-    onDockExpandedChange?.(!!dockSheet);
-  }, [dockSheet, onDockExpandedChange]);
+    onDockExpandedChange?.(!!dockSheet || !!quickSelected);
+  }, [dockSheet, quickSelected, onDockExpandedChange]);
 
   const isDockExpanded = !!dockSheet;
+  const isQuickActive = quickOpen || !!quickSelected;
 
   return (
     <>
-      <div className={'quick-float-wrap'+(isDockExpanded?' is-covered':'')}>
-        <QuickFan
-          items={QUICK_PUBLISH}
+      <div className={'quick-float-wrap'+(isDockExpanded ? ' is-covered' : '')+(isQuickActive ? ' is-quick-active' : '')}>
+        {isQuickActive ? (
+          <div
+            className="quick-card-fan-scrim"
+            onClick={closeQuick}
+            aria-hidden="false"
+          />
+        ) : null}
+        <QuickCardFan
           open={quickOpen}
-          closing={quickClosing}
-          onToggle={toggleQuick}
-          onPick={handleQuick}
-          renderFab={(open)=>(
-            open
-              ? <I name="close" size={20} stroke={2.2}/>
-              : <I name="plus" size={24} stroke={2.2}/>
-          )}
+          selected={quickSelected}
+          onFabTap={handleFabTap}
+          onSelectCard={setQuickSelected}
+          onClose={closeQuick}
+          onMoodSubmit={handleQuickMoodSubmit}
+          onSymptomSubmit={handleQuickSymptomSubmit}
+          onWeightSubmit={handleQuickWeightSubmit}
         />
       </div>
 
@@ -9863,6 +11556,9 @@ function DockPublisher({
 
               {inputMode==='text' ? (
                 <div className={'dock-text-field'+(inputFocused?' is-focused':'')}>
+                  {showFirstDropBubble && !inputFocused ? (
+                    <div className="dock-first-drop-bubble" role="status">💧 落下你的第一滴</div>
+                  ) : null}
                   <DockWavePlaceholder
                     show={!draft.trim()}
                     focused={inputFocused}
@@ -9974,8 +11670,8 @@ const DEMO_SCENES = {
 
   'record-direct': {
     id: 'record-direct',
-    label: '场景二 · 未记录landing引导',
-    description: '新用户首次进入记录 Tab，landing 引导 +「记一切」演示动效',
+    label: '场景二 · 未记录运营引导',
+    description: '新用户首次进入记录 Tab，运营 landing 引导 +「记一切」演示动效',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
@@ -9999,8 +11695,8 @@ const DEMO_SCENES = {
 
   'record-blank': {
     id: 'record-blank',
-    label: '场景三 · 记录页空置',
-    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（空态见 record-blank.jsx）',
+    label: '场景三 · 未记录时间轴空值',
+    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（时间轴空态见 record-blank.jsx）',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
@@ -10711,6 +12407,7 @@ function App(){
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
+  const [firstDropAnim, setFirstDropAnim] = useState(null);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
@@ -10726,6 +12423,7 @@ function App(){
     setActiveTab(next.activeTab);
     setShowPhoto(false);
     setShowSearchPage(false);
+    setFirstDropAnim(null);
   };
 
   useEffect(()=>{
@@ -10804,11 +12502,13 @@ function App(){
   };
 
   const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
-  const showRecordBlank = !!(scene.record.blankState && window.isTimelineEmpty(timeline));
+  const showRecordBlank = !!scene.record.blankState;
+  const showBlankEmpty = showRecordBlank && window.isTimelineEmpty(timeline);
+  const showFirstDropBubble = showBlankEmpty;
 
   useEffect(()=>{
     if(activeTab !== 'note') return;
-    if(showRecordEmpty || showRecordBlank) return;
+    if(showRecordEmpty || showBlankEmpty) return;
     if(recordEnterModeRef.current === 'analysis'){
       recordEnterModeRef.current = 'idle';
       return;
@@ -10816,18 +12516,18 @@ function App(){
     const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
     recordEnterModeRef.current = 'idle';
     return ()=>clearTimeout(tm);
-  }, [activeTab, showRecordEmpty, showRecordBlank]);
+  }, [activeTab, showRecordEmpty, showBlankEmpty]);
 
   useEffect(()=>{
-    if(showRecordEmpty || showRecordBlank) return;
+    if(showRecordEmpty || showBlankEmpty) return;
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, [t.demoScene, showRecordEmpty, showRecordBlank]);
+  }, [t.demoScene, showRecordEmpty, showBlankEmpty]);
 
   useEffect(()=>{
-    if(showRecordEmpty || showRecordBlank) return;
+    if(showRecordEmpty || showBlankEmpty) return;
     scrollTimelineToEnd('smooth');
-  }, [timeline, showRecordEmpty, showRecordBlank]);
+  }, [timeline, showRecordEmpty, showBlankEmpty]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -10847,6 +12547,23 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const tryStartFirstDrop = (entry, text)=>{
+    if(!scene.record.blankState || firstDropAnim || !window.isTimelineEmpty(timeline)) return false;
+    const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    setFirstDropAnim({ entryId: entry.id, textReady: false, done: false });
+    return true;
+  };
+
+  const handleFirstDropLand = React.useCallback(()=>{
+    setFirstDropAnim(prev=>prev ? { ...prev, textReady: true } : prev);
+  }, []);
+
+  const handleFirstDropComplete = React.useCallback(()=>{
+    setFirstDropAnim(prev=>prev ? { ...prev, done: true } : prev);
+    setTimeout(()=>setFirstDropAnim(null), 2800);
+  }, []);
+
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
@@ -10854,22 +12571,27 @@ function App(){
     const hits = window.extractKeywords(text);
     setDraft('');
     markUserRecorded();
-    pushToTimeline(buildTimelineEntry(text, hits, opts), text);
+    const entry = buildTimelineEntry(text, hits, opts);
+    if(tryStartFirstDrop(entry, text)) return;
+    pushToTimeline(entry, text);
   };
 
   const submitVoice = (transcript, durSec)=>{
     markUserRecorded();
     if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
       const entry = window.buildScene2VoiceEntry(durSec);
+      if(tryStartFirstDrop(entry, entry.voiceText)) return;
       pushToTimeline(entry, entry.voiceText);
       return;
     }
     const text = transcript.trim();
     if(!text) return;
     const hits = window.extractKeywords(text);
-    pushToTimeline(buildTimelineEntry(text, hits, {
+    const entry = buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
-    }), text);
+    });
+    if(tryStartFirstDrop(entry, text)) return;
+    pushToTimeline(entry, text);
   };
 
   const submitQuickMark = (mark)=>{
@@ -10879,6 +12601,7 @@ function App(){
   const submitMoodRecord = (moods)=>{
     markUserRecorded();
     const entry = window.createMoodRecordEntry(moods);
+    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -10887,6 +12610,7 @@ function App(){
   const submitSymptomRecord = (symptoms)=>{
     markUserRecorded();
     const entry = window.createSymptomRecordEntry(symptoms);
+    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -10895,6 +12619,7 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
+    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -10903,14 +12628,16 @@ function App(){
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
-    pushToTimeline({
+    const entry = {
       id:'e-'+Date.now(),
       time: window.formatNowTime(),
       body:'',
       photo:true, photoTone:'warm', photoEmoji:'🌸',
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
-    }, '');
+    };
+    if(tryStartFirstDrop(entry, '')) return;
+    pushToTimeline(entry, '');
   };
 
   const sceneForHealth = {
@@ -10978,6 +12705,9 @@ function App(){
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={!showTodayGuide}
           onSisterCycleComplete={handleSisterCycleComplete}
+          firstDropAnim={firstDropAnim}
+          onFirstDropLand={handleFirstDropLand}
+          onFirstDropComplete={handleFirstDropComplete}
         />
         <DockPublisher
           draft={draft}
@@ -10991,6 +12721,7 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
+          showFirstDropBubble={showFirstDropBubble}
         />
         </>
         ) : (

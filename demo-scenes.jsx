@@ -31,8 +31,8 @@ const DEMO_SCENES = {
 
   'record-direct': {
     id: 'record-direct',
-    label: '场景二 · 未记录landing引导',
-    description: '新用户首次进入记录 Tab，landing 引导 +「记一切」演示动效',
+    label: '场景二 · 未记录运营引导',
+    description: '新用户首次进入记录 Tab，运营 landing 引导 +「记一切」演示动效',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
@@ -56,8 +56,8 @@ const DEMO_SCENES = {
 
   'record-blank': {
     id: 'record-blank',
-    label: '场景三 · 记录页空置',
-    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（空态见 record-blank.jsx）',
+    label: '场景三 · 未记录时间轴空值',
+    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（时间轴空态见 record-blank.jsx）',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),

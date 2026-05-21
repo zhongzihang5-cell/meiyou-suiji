@@ -549,10 +549,398 @@
 .quick-float-wrap.is-covered{
   pointer-events:none;
 }
-.quick-float-wrap.is-covered .dock-fan-corner{
+.quick-float-wrap.is-covered .quick-card-fan{
   opacity:0;
   transform:scale(0.88) translateY(8px);
   pointer-events:none;
+}
+.quick-float-wrap.is-quick-active{
+  z-index:100;
+  top:0;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  height:auto;
+  pointer-events:none;
+}
+
+/* 快捷卡片扇打开时 — 禁用背景交互 */
+.phone:has(.quick-float-wrap.is-quick-active) .suiji-stream,
+.phone:has(.quick-float-wrap.is-quick-active) .statusbar,
+.phone:has(.quick-float-wrap.is-quick-active) .nav,
+.phone:has(.quick-float-wrap.is-quick-active) .dock-wrap,
+.phone:has(.quick-float-wrap.is-quick-active) .tabbar,
+.phone:has(.quick-float-wrap.is-quick-active) .calendar-page,
+.phone:has(.quick-float-wrap.is-quick-active) .record-empty-root,
+.phone:has(.quick-float-wrap.is-quick-active) .record-blank-root{
+  pointer-events:none;
+}
+
+/* ============ 方案 I · 卡片扇 ============ */
+.quick-card-fan-scrim{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:rgba(20,18,22,0.54);
+  backdrop-filter:blur(5px) saturate(90%);
+  -webkit-backdrop-filter:blur(5px) saturate(90%);
+  pointer-events:auto;
+  animation:quickScrimIn 240ms ease both;
+}
+@keyframes quickScrimIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+.quick-card-fan{
+  position:absolute;
+  right:12px;
+  bottom:0;
+  width:56px;
+  height:56px;
+  pointer-events:auto;
+  z-index:1;
+  overflow:visible;
+}
+.quick-card-fan.has-selected{
+  right:0;
+  left:0;
+  width:auto;
+  height:auto;
+  top:auto;
+}
+.quick-float-wrap.is-quick-active .quick-card-fan{
+  bottom:var(--my-dock-float-b);
+}
+
+.quick-card-fan-item{
+  position:absolute;
+  right:0;
+  bottom:56px;
+  width:100px;
+  height:124px;
+  border-radius:16px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow:0 12px 32px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.08);
+  transform:translate(0,0) rotate(0deg) scale(0.4);
+  opacity:0;
+  transform-origin:100% 100%;
+  pointer-events:none;
+  z-index:2;
+  transition:
+    transform 360ms cubic-bezier(0.32,0.94,0.38,1) var(--card-delay, 0ms),
+    opacity 240ms ease var(--card-delay, 0ms);
+}
+.quick-card-fan-item.is-visible{
+  pointer-events:auto;
+}
+.quick-card-fan-item.is-visible:not(.is-selected){
+  transform:translate(var(--card-x), var(--card-y)) rotate(var(--card-angle)) scale(1);
+  opacity:1;
+  transition:
+    transform 360ms cubic-bezier(0.32,0.94,0.38,1) var(--card-delay, 0ms),
+    opacity 240ms ease var(--card-delay, 0ms);
+}
+.quick-card-fan-item.is-faded{
+  opacity:0;
+  pointer-events:none;
+  transform:translate(var(--card-x), var(--card-y)) rotate(var(--card-angle)) scale(0.96);
+  transition:
+    transform 280ms cubic-bezier(0.32,0.94,0.38,1),
+    opacity 260ms ease;
+}
+.quick-card-fan-item.is-selected{
+  right:12px;
+  bottom:64px;
+  width:240px;
+  max-width:calc(100% - 24px);
+  height:124px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  transform:translate(0,0) rotate(0deg) scale(1);
+  opacity:1;
+  z-index:4;
+  transform-origin:100% 100%;
+  transition:
+    right 360ms cubic-bezier(0.32,0.94,0.38,1),
+    bottom 360ms cubic-bezier(0.32,0.94,0.38,1),
+    width 360ms cubic-bezier(0.32,0.94,0.38,1),
+    height 360ms cubic-bezier(0.32,0.94,0.38,1),
+    transform 360ms cubic-bezier(0.32,0.94,0.38,1),
+    opacity 200ms ease;
+}
+.quick-card-fan-item.is-selected[data-card="mood"]{
+  height:136px;
+}
+.quick-card-fan-item.is-selected[data-card="symptom"]{
+  height:232px;
+}
+.quick-card-fan-item.is-selected[data-card="weight"]{
+  height:172px;
+}
+
+.quick-card-fan-face{
+  position:absolute;
+  inset:0;
+  border:0;
+  background:transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  cursor:pointer;
+  padding:0;
+  transition:opacity 200ms ease, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
+}
+.quick-card-fan-item.is-selected .quick-card-fan-face{
+  opacity:0;
+  pointer-events:none;
+  transform:scale(0.92);
+  transition:opacity 180ms ease 60ms, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
+}
+.quick-card-fan-ico{
+  width:48px;
+  height:48px;
+  border-radius:24px;
+  background:var(--my-brand-soft);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.quick-card-fan-meta{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+.quick-card-fan-lbl{
+  font-size:13px;
+  font-weight:500;
+  color:var(--my-text-primary);
+}
+.quick-card-fan-hint{
+  font-size:10px;
+  color:var(--my-text-tertiary);
+}
+
+.quick-card-fan-panel{
+  position:absolute;
+  inset:0;
+  padding:12px 14px 14px;
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 280ms ease 180ms;
+}
+.quick-card-fan-item.is-selected .quick-card-fan-panel{
+  opacity:1;
+  pointer-events:auto;
+  transition:opacity 300ms ease 220ms;
+}
+.quick-card-fan-panel-hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+  flex-shrink:0;
+}
+.quick-card-fan-panel-title{
+  font-size:14px;
+  font-weight:500;
+  color:var(--my-text-primary);
+}
+.quick-card-fan-panel-close{
+  border:0;
+  background:transparent;
+  color:var(--my-text-tertiary);
+  font-size:22px;
+  line-height:1;
+  width:24px;
+  height:24px;
+  padding:0;
+  cursor:pointer;
+}
+.quick-card-fan-panel-body{
+  flex:0 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  overflow:visible;
+}
+.quick-card-fan-item.is-selected .quick-card-fan-panel-body{
+  overflow:visible;
+}
+
+.quick-card-fab{
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:56px;
+  height:56px;
+  border-radius:28px;
+  border:none;
+  background:radial-gradient(circle at 30% 25%, #ff7aa8 0%, var(--my-brand-red) 60%, var(--my-brand-red) 100%);
+  color:#fff;
+  box-shadow:0 8px 20px rgba(255,77,136,0.4), 0 2px 4px rgba(255,77,136,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:5;
+  touch-action:manipulation;
+  transform-origin:center center;
+  transition:transform 220ms ease;
+}
+.quick-card-fab.is-open{
+  transform:scale(0.92);
+}
+.quick-card-fab.is-covered{
+  z-index:3;
+}
+.quick-card-fab:active{
+  transform:scale(0.88);
+}
+.quick-card-fab.is-open:active{
+  transform:scale(0.84);
+}
+
+/* 卡片内紧凑选择器 */
+.quick-card-picker{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  box-sizing:border-box;
+}
+.quick-card-picker--mood{
+  flex-direction:row;
+  justify-content:space-between;
+  gap:2px;
+  width:100%;
+  padding:2px 0;
+}
+.quick-card-picker--symptom{
+  width:100%;
+  gap:8px;
+  align-items:stretch;
+}
+.quick-card-picker--weight{
+  width:100%;
+  padding:4px 0;
+}
+.quick-card-mood-btn{
+  border:0;
+  background:transparent;
+  border-radius:20px;
+  padding:4px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform 160ms ease, background 160ms ease;
+  flex:1;
+  min-width:0;
+}
+.quick-card-mood-btn.is-selected{
+  background:var(--my-brand-soft);
+  transform:scale(1.08);
+}
+.quick-card-sym-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:flex-start;
+  width:100%;
+}
+.quick-card-sym-tag{
+  border:1px solid rgba(0,0,0,0.10);
+  background:#fff;
+  color:var(--my-text-primary);
+  padding:5px 10px;
+  border-radius:14px;
+  font-size:12px;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:400;
+  white-space:nowrap;
+  flex-shrink:0;
+  transition:all 140ms ease;
+}
+.quick-card-sym-tag.is-selected{
+  border-color:var(--my-brand-red);
+  background:var(--my-brand-soft);
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.quick-card-weight-stepper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.quick-card-weight-btn{
+  width:32px;
+  height:32px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,0.10);
+  background:#fff;
+  font-size:16px;
+  line-height:1;
+  color:var(--my-text-primary);
+  cursor:pointer;
+  font-family:inherit;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.quick-card-weight-val{
+  display:flex;
+  align-items:baseline;
+  gap:3px;
+  min-width:0;
+  flex:1;
+  justify-content:center;
+}
+.quick-card-weight-num{
+  font-size:28px;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-0.02em;
+  line-height:1;
+}
+.quick-card-weight-unit{
+  font-size:13px;
+  color:var(--my-text-tertiary);
+}
+.quick-card-submit{
+  border:0;
+  background:var(--my-brand-red);
+  color:#fff;
+  padding:9px 24px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:500;
+  cursor:pointer;
+  font-family:inherit;
+  width:100%;
+  box-sizing:border-box;
+}
+.quick-card-submit:disabled{
+  background:#e5e2dc;
+  cursor:default;
 }
 
 /* ============ 底部栏：仅输入 + 相机 ============ */
@@ -581,6 +969,7 @@
   visibility:hidden!important;
 }
 
+.dock-fan-stage{
   position:relative;
   width:48px;
   height:48px;

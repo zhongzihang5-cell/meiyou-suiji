@@ -4,11 +4,13 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
+function RecordCard({entry, isNew, typewriterAiNote, typewriterBody, hideBodyUntilDrop, animateAnalysis}){
   return (
     <SegmentedRecordCard
       entry={entry}
       isNew={isNew}
+      typewriterBody={typewriterBody}
+      hideBodyUntilDrop={hideBodyUntilDrop}
       typewriterAiNote={typewriterAiNote}
       animateAnalysis={animateAnalysis}
     />
@@ -61,7 +63,7 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
@@ -84,6 +86,9 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
+          firstDropAnim={firstDropAnim}
+          onFirstDropLand={onFirstDropLand}
+          onFirstDropComplete={onFirstDropComplete}
         />
         );
       })}
@@ -106,7 +111,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
   const dayBlocks = blocks.filter(b => b.type === 'day');
 
@@ -125,6 +130,9 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 hideTodayGuide={hideTodayGuide}
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
+                firstDropAnim={firstDropAnim}
+                onFirstDropLand={onFirstDropLand}
+                onFirstDropComplete={onFirstDropComplete}
               />
             );
           }

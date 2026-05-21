@@ -57,6 +57,27 @@ body.standalone-demo .phone .dock-wrap{
 body.standalone-demo .phone .quick-float-wrap{
   bottom:var(--my-dock-float-b);
 }
+body.standalone-demo .phone .quick-float-wrap.is-quick-active{
+  top:0;
+  bottom:0;
+  height:auto;
+}
+body.standalone-demo .phone .quick-card-fan{
+  bottom:0;
+}
+body.standalone-demo .phone .quick-float-wrap.is-quick-active .quick-card-fan{
+  bottom:var(--my-dock-float-b);
+}
+body.standalone-demo .phone .quick-card-fan-scrim{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  transform:none;
+  max-width:none;
+  width:100%;
+}
 
 body.standalone-demo .phone .record-empty-voice-wrap{
   bottom:var(--my-tabbar-h, 58px);

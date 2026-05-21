@@ -55,6 +55,7 @@ function App(){
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
+  const [firstDropAnim, setFirstDropAnim] = useState(null);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
@@ -70,6 +71,7 @@ function App(){
     setActiveTab(next.activeTab);
     setShowPhoto(false);
     setShowSearchPage(false);
+    setFirstDropAnim(null);
   };
 
   useEffect(()=>{
@@ -148,11 +150,13 @@ function App(){
   };
 
   const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
-  const showRecordBlank = !!(scene.record.blankState && window.isTimelineEmpty(timeline));
+  const showRecordBlank = !!scene.record.blankState;
+  const showBlankEmpty = showRecordBlank && window.isTimelineEmpty(timeline);
+  const showFirstDropBubble = showBlankEmpty;
 
   useEffect(()=>{
     if(activeTab !== 'note') return;
-    if(showRecordEmpty || showRecordBlank) return;
+    if(showRecordEmpty || showBlankEmpty) return;
     if(recordEnterModeRef.current === 'analysis'){
       recordEnterModeRef.current = 'idle';
       return;
@@ -160,18 +164,18 @@ function App(){
     const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
     recordEnterModeRef.current = 'idle';
     return ()=>clearTimeout(tm);
-  }, [activeTab, showRecordEmpty, showRecordBlank]);
+  }, [activeTab, showRecordEmpty, showBlankEmpty]);
 
   useEffect(()=>{
-    if(showRecordEmpty || showRecordBlank) return;
+    if(showRecordEmpty || showBlankEmpty) return;
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, [t.demoScene, showRecordEmpty, showRecordBlank]);
+  }, [t.demoScene, showRecordEmpty, showBlankEmpty]);
 
   useEffect(()=>{
-    if(showRecordEmpty || showRecordBlank) return;
+    if(showRecordEmpty || showBlankEmpty) return;
     scrollTimelineToEnd('smooth');
-  }, [timeline, showRecordEmpty, showRecordBlank]);
+  }, [timeline, showRecordEmpty, showBlankEmpty]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -191,6 +195,23 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const tryStartFirstDrop = (entry, text)=>{
+    if(!scene.record.blankState || firstDropAnim || !window.isTimelineEmpty(timeline)) return false;
+    const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    setFirstDropAnim({ entryId: entry.id, textReady: false, done: false });
+    return true;
+  };
+
+  const handleFirstDropLand = React.useCallback(()=>{
+    setFirstDropAnim(prev=>prev ? { ...prev, textReady: true } : prev);
+  }, []);
+
+  const handleFirstDropComplete = React.useCallback(()=>{
+    setFirstDropAnim(prev=>prev ? { ...prev, done: true } : prev);
+    setTimeout(()=>setFirstDropAnim(null), 2800);
+  }, []);
+
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
@@ -198,22 +219,27 @@ function App(){
     const hits = window.extractKeywords(text);
     setDraft('');
     markUserRecorded();
-    pushToTimeline(buildTimelineEntry(text, hits, opts), text);
+    const entry = buildTimelineEntry(text, hits, opts);
+    if(tryStartFirstDrop(entry, text)) return;
+    pushToTimeline(entry, text);
   };
 
   const submitVoice = (transcript, durSec)=>{
     markUserRecorded();
     if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
       const entry = window.buildScene2VoiceEntry(durSec);
+      if(tryStartFirstDrop(entry, entry.voiceText)) return;
       pushToTimeline(entry, entry.voiceText);
       return;
     }
     const text = transcript.trim();
     if(!text) return;
     const hits = window.extractKeywords(text);
-    pushToTimeline(buildTimelineEntry(text, hits, {
+    const entry = buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
-    }), text);
+    });
+    if(tryStartFirstDrop(entry, text)) return;
+    pushToTimeline(entry, text);
   };
 
   const submitQuickMark = (mark)=>{
@@ -223,6 +249,7 @@ function App(){
   const submitMoodRecord = (moods)=>{
     markUserRecorded();
     const entry = window.createMoodRecordEntry(moods);
+    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -231,6 +258,7 @@ function App(){
   const submitSymptomRecord = (symptoms)=>{
     markUserRecorded();
     const entry = window.createSymptomRecordEntry(symptoms);
+    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -239,6 +267,7 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
+    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -247,14 +276,16 @@ function App(){
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
-    pushToTimeline({
+    const entry = {
       id:'e-'+Date.now(),
       time: window.formatNowTime(),
       body:'',
       photo:true, photoTone:'warm', photoEmoji:'🌸',
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
-    }, '');
+    };
+    if(tryStartFirstDrop(entry, '')) return;
+    pushToTimeline(entry, '');
   };
 
   const sceneForHealth = {
@@ -322,6 +353,9 @@ function App(){
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={!showTodayGuide}
           onSisterCycleComplete={handleSisterCycleComplete}
+          firstDropAnim={firstDropAnim}
+          onFirstDropLand={handleFirstDropLand}
+          onFirstDropComplete={handleFirstDropComplete}
         />
         <DockPublisher
           draft={draft}
@@ -335,6 +369,7 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
+          showFirstDropBubble={showFirstDropBubble}
         />
         </>
         ) : (

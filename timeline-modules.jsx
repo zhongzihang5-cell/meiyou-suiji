@@ -111,14 +111,22 @@ function CycleDayHeader({day, items, dayBlocks}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, axisDropAnim, children}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
+  const AxisDrop = window.RecordBlankAxisDropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(axisDropAnim?' is-axis-drop':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
-        <span className={'tl-rail-dot'+dotCls}/>
+        {axisDropAnim && AxisDrop ? (
+          <AxisDrop
+            onLand={axisDropAnim.onLand}
+            onComplete={axisDropAnim.onComplete}
+          />
+        ) : (
+          <span className={'tl-rail-dot'+dotCls}/>
+        )}
       </div>
       <div className="tl-rail-body">{children}</div>
     </div>
@@ -448,11 +456,19 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && (
     isNew || item.hiddenUntilSisterDone
   );
+  const isFirstDropTarget = !!(firstDropAnim && firstDropAnim.entryId === item.id);
+  const showAxisDrop = isFirstDropTarget && !firstDropAnim.done;
+  const typewriterBody = isFirstDropTarget && firstDropAnim.textReady;
+  const hideBodyUntilDrop = isFirstDropTarget && !firstDropAnim.textReady;
+  const axisDropAnim = showAxisDrop ? {
+    onLand: onFirstDropLand,
+    onComplete: onFirstDropComplete,
+  } : null;
 
   let body = null;
   if(item.kind === 'record-group'){
@@ -493,6 +509,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       <RecordCard
         entry={item}
         isNew={isNew}
+        typewriterBody={typewriterBody}
+        hideBodyUntilDrop={hideBodyUntilDrop}
         typewriterAiNote={!!(isNew && item.aiNote)}
       />
     );
@@ -504,6 +522,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : (item.ai && !item.primary ? 'ai' : undefined))}
       isFeedLast={isFeedLast}
       nodeKind={item.kind === 'record-group' ? (item.ai && !item.primary ? 'sister-card' : 'voice-card') : (sisterItem ? (item.kind === 'sync-card' ? 'sync-card' : 'voice-card') : item.kind)}
+      axisDropAnim={axisDropAnim}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
