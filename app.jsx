@@ -148,10 +148,11 @@ function App(){
   };
 
   const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
+  const showRecordBlank = !!(scene.record.blankState && window.isTimelineEmpty(timeline));
 
   useEffect(()=>{
     if(activeTab !== 'note') return;
-    if(showRecordEmpty) return;
+    if(showRecordEmpty || showRecordBlank) return;
     if(recordEnterModeRef.current === 'analysis'){
       recordEnterModeRef.current = 'idle';
       return;
@@ -159,18 +160,18 @@ function App(){
     const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
     recordEnterModeRef.current = 'idle';
     return ()=>clearTimeout(tm);
-  }, [activeTab, showRecordEmpty]);
+  }, [activeTab, showRecordEmpty, showRecordBlank]);
 
   useEffect(()=>{
-    if(showRecordEmpty) return;
+    if(showRecordEmpty || showRecordBlank) return;
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, [t.demoScene, showRecordEmpty]);
+  }, [t.demoScene, showRecordEmpty, showRecordBlank]);
 
   useEffect(()=>{
-    if(showRecordEmpty) return;
+    if(showRecordEmpty || showRecordBlank) return;
     scrollTimelineToEnd('smooth');
-  }, [timeline, showRecordEmpty]);
+  }, [timeline, showRecordEmpty, showRecordBlank]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -201,10 +202,15 @@ function App(){
   };
 
   const submitVoice = (transcript, durSec)=>{
+    markUserRecorded();
+    if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
+      const entry = window.buildScene2VoiceEntry(durSec);
+      pushToTimeline(entry, entry.voiceText);
+      return;
+    }
     const text = transcript.trim();
     if(!text) return;
     const hits = window.extractKeywords(text);
-    markUserRecorded();
     pushToTimeline(buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     }), text);
@@ -269,6 +275,7 @@ function App(){
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
+  const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
 
   const openSearchPage = ()=>setShowSearchPage(true);
@@ -297,11 +304,39 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
           <RecordEmptyScreen onVoiceDone={submitVoice}/>
+        ) : showRecordBlank ? (
+        <>
+        <RecordBlankStream
+          streamRef={streamRef}
+          timelineEndRef={timelineEndRef}
+          timeline={timeline}
+          scene={scene}
+          onOpenCalendar={()=>setActiveTab('cal')}
+          onOpenSearch={openSearchPage}
+          sisterPlayAnimation={sisterPlayAnimation}
+          sisterCycleDone={sisterCycleDone}
+          hideTodayGuide={!showTodayGuide}
+          onSisterCycleComplete={handleSisterCycleComplete}
+        />
+        <DockPublisher
+          draft={draft}
+          onDraft={setDraft}
+          onSend={()=>submitText()}
+          onQuickMark={submitQuickMark}
+          onMoodConfirm={submitMoodRecord}
+          onSymptomConfirm={submitSymptomRecord}
+          onWeightConfirm={submitWeightRecord}
+          onVoiceDone={submitVoice}
+          onPhoto={()=>setShowPhoto(true)}
+          onDockExpandedChange={setDockExpanded}
+          activeTab={activeTab}
+        />
+        </>
         ) : (
         <>
         <div className="suiji-stream" ref={streamRef}>

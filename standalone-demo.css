@@ -59,7 +59,21 @@ body.standalone-demo .phone .quick-float-wrap{
 }
 
 body.standalone-demo .phone .record-empty-voice-wrap{
-  padding-bottom:calc(var(--my-tabbar-h, 58px) + 10px);
+  bottom:var(--my-tabbar-h, 58px);
+  padding-bottom:10px;
+}
+
+body.standalone-demo .phone .suiji-shell--empty{
+  height:calc(100% - 44px - var(--my-tabbar-h, 58px));
+  max-height:calc(100% - 44px - var(--my-tabbar-h, 58px));
+}
+
+body.standalone-demo .phone{
+  height:100dvh;
+  max-height:100dvh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
 }
 
 body.standalone-demo .phone .toast-stack{

@@ -1,7 +1,10 @@
 /* ============ 记录 Tab · 新用户空值页 ============ */
 .suiji-shell--empty{
   background:linear-gradient(180deg, #FFFFFF 0%, #F2F2F5 100%);
-  min-height:calc(100vh - 44px);
+  height:calc(100vh - 44px - var(--my-tabbar-h, 58px));
+  height:calc(100dvh - 44px - var(--my-tabbar-h, 58px));
+  max-height:calc(100vh - 44px - var(--my-tabbar-h, 58px));
+  max-height:calc(100dvh - 44px - var(--my-tabbar-h, 58px));
   position:relative;
   overflow:hidden;
 }
@@ -12,9 +15,9 @@
   z-index:1;
   display:flex;
   flex-direction:column;
-  min-height:calc(100vh - 44px - var(--my-tabbar-h, 58px));
-  min-height:calc(100dvh - 44px - var(--my-tabbar-h, 58px));
-  padding-bottom:8px;
+  height:100%;
+  min-height:0;
+  overflow:hidden;
   font-family:"PingFang SC", -apple-system, "Helvetica Neue", sans-serif;
   color:#323232;
 }
@@ -65,8 +68,10 @@
 }
 .record-empty-demo{
   flex:1;
-  padding:20px 22px 0;
+  padding:20px 22px 168px;
   min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   position:relative;
   z-index:2;
   display:flex;
@@ -220,16 +225,24 @@
   color:#8E8E93;
 }
 .record-empty-voice-wrap{
-  padding:20px 22px calc(var(--my-tabbar-h, 58px) + 14px);
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:var(--my-tabbar-h, 58px);
+  padding:8px 22px 10px;
   display:flex;
   flex-direction:column;
   align-items:center;
-  position:relative;
-  z-index:2;
-  margin-top:auto;
+  z-index:99;
+  background:linear-gradient(180deg, rgba(242,242,245,0) 0%, rgba(242,242,245,0.96) 32%, #F2F2F5 100%);
+  pointer-events:none;
+}
+.record-empty-voice-wrap .record-empty-mic,
+.record-empty-voice-wrap .record-empty-voice-hint{
+  pointer-events:auto;
 }
 .record-empty-voice-hint{
-  margin:14px 0 0;
+  margin:10px 0 0;
   font-size:13px;
   color:#8E8E93;
   letter-spacing:0.04em;

@@ -1,7 +1,8 @@
 // Demo 场景配置 — 控制默认 Tab、页面展示与交互流程
 //
 // 场景一 period-calendar：默认日历 Tab，通过「月经来了」触发浮动分析 → 跳转记录页周期分析
-// 场景二 record-empty：新用户未记录空值页（_Tab__standalone.html）
+// 场景二 record-direct：未记录 landing 引导（record-empty.jsx）
+// 场景三 record-blank：记录 Tab 无数据空置页（record-blank.jsx）
 
 const DEMO_SCENES = {
   'period-calendar': {
@@ -30,8 +31,8 @@ const DEMO_SCENES = {
 
   'record-direct': {
     id: 'record-direct',
-    label: '场景二 · 未记录空值',
-    description: '新用户进入记录 Tab，空时间轴 +「记一切」演示动效',
+    label: '场景二 · 未记录landing引导',
+    description: '新用户首次进入记录 Tab，landing 引导 +「记一切」演示动效',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
@@ -45,6 +46,31 @@ const DEMO_SCENES = {
     record: {
       showHealthCard: false,
       emptyState: true,
+      sisterAnalysis: {
+        trigger: 'none',
+        initialDone: true,
+      },
+      todayGuide: false,
+    },
+  },
+
+  'record-blank': {
+    id: 'record-blank',
+    label: '场景三 · 记录页空置',
+    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（空态见 record-blank.jsx）',
+    defaultTab: 'note',
+    identity: 'period',
+    getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
+    calendar: {
+      enabled: true,
+      periodFlow: false,
+    },
+    floatNotice: {
+      enabled: false,
+    },
+    record: {
+      showHealthCard: false,
+      blankState: true,
       sisterAnalysis: {
         trigger: 'none',
         initialDone: true,

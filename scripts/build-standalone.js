@@ -6,13 +6,15 @@
  *
  * Outputs (project root):
  *   meiyou-scene1-period-calendar.html
- *   meiyou-scene2-record-empty.html
+ *   meiyou-scene2-record-empty.html  → 场景二 landing 引导
+ *   meiyou-scene3-record-blank.html  → 场景三 记录页空置
  *   meiyou-record-standalone.html
  *
  * Outputs (docs/ — for GitHub Pages):
- *   index.html   入口页，链到两个场景
+ *   index.html   入口页，链到三个场景
  *   scene1.html  场景一
  *   scene2.html  场景二
+ *   scene3.html  场景三
  */
 
 const fs = require('fs');
@@ -32,7 +34,7 @@ const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const inlineStyleMatch = indexHtml.match(/<style>([\s\S]*?)<\/style>/);
 const inlineStyles = inlineStyleMatch ? inlineStyleMatch[1] : '';
 
-const cssFiles = ['cloud.css', 'timeline.css', 'calendar.css', 'record-empty.css', 'search.css'];
+const cssFiles = ['cloud.css', 'timeline.css', 'calendar.css', 'record-empty.css', 'record-blank.css', 'search.css'];
 const css = cssFiles
   .map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8'))
   .join('\n\n');
@@ -49,6 +51,7 @@ const scriptFiles = [
   'timeline-modules.jsx',
   'timeline.jsx',
   'record-empty.jsx',
+  'record-blank.jsx',
   'search-page.jsx',
   'cloud-publisher.jsx',
   'demo-scenes.jsx',
@@ -78,10 +81,18 @@ const BUILDS = [
   {
     outfile: 'meiyou-scene2-record-empty.html',
     pagesName: 'scene2.html',
-    title: '美柚 · 场景二 · 未记录空值',
+    title: '美柚 · 场景二 · 未记录landing引导',
     demoScene: 'record-direct',
     locked: true,
-    comment: '场景二：新用户记录 Tab 空值页 +「记一切」演示动效',
+    comment: '场景二：新用户 landing 引导 +「记一切」演示动效',
+  },
+  {
+    outfile: 'meiyou-scene3-record-blank.html',
+    pagesName: 'scene3.html',
+    title: '美柚 · 场景三 · 记录页空置',
+    demoScene: 'record-blank',
+    locked: true,
+    comment: '场景三：记录 Tab 无数据空置页（可改 record-blank.jsx）',
   },
   {
     outfile: 'meiyou-record-standalone.html',
@@ -89,7 +100,7 @@ const BUILDS = [
     title: '美柚 · 记录 · 场景原型',
     demoScene: 'period-calendar',
     locked: false,
-    comment: '双场景合一版（含底部场景切换栏，适合桌面预览）',
+    comment: '三场景合一版（含底部场景切换栏，适合桌面预览）',
   },
 ];
 
@@ -147,9 +158,14 @@ function buildLandingPage(builtAt) {
         <span class="go">进入场景一 →</span>
       </a>
       <a class="card" href="./scene2.html">
-        <div class="card-title">场景二 · 未记录空值</div>
-        <div class="card-desc">新用户进入记录 Tab，空值页 +「记一切」演示动效。</div>
+        <div class="card-title">场景二 · 未记录landing引导</div>
+        <div class="card-desc">新用户首次进入记录 Tab，landing 引导 +「记一切」演示动效。</div>
         <span class="go">进入场景二 →</span>
+      </a>
+      <a class="card" href="./scene3.html">
+        <div class="card-title">场景三 · 记录页空置</div>
+        <div class="card-desc">记录 Tab 无数据，标准页结构 + 底部输入 Dock，空态可独立修改。</div>
+        <span class="go">进入场景三 →</span>
       </a>
     </div>
     <footer>构建 ${builtAt}<br>微信内若无法加载，点右上角 ··· 用 Safari 打开</footer>
@@ -184,6 +200,7 @@ function writeLegacyRedirects() {
     { file: 'index.html', target: '../', label: '演示入口' },
     { file: 'scene1.html', target: '../scene1.html', label: '场景一' },
     { file: 'scene2.html', target: '../scene2.html', label: '场景二' },
+    { file: 'scene3.html', target: '../scene3.html', label: '场景三' },
   ];
   redirects.forEach(({ file, target, label }) => {
     fs.writeFileSync(path.join(legacyDir, file), buildRedirectPage(target, label), 'utf8');

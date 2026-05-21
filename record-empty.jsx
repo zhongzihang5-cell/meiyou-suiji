@@ -40,6 +40,27 @@ const EMPTY_PALETTE = {
 
 const EMPTY_DEMO_TRANSCRIPT = '今天有点累，肚子胀，午饭吃了三明治';
 
+const SCENE2_RECORD_TEXT = '今天有点累，肚子也有点胀，午饭吃了三明治，下午还一直有点犯困。';
+
+const SCENE2_VOICE_TAGS = [
+  { cat:'情绪', val:'疲惫', icon:'mood' },
+  { cat:'症状', val:'腹胀', icon:'sym' },
+  { cat:'饮食', val:'三明治', icon:'food' },
+];
+
+function buildScene2VoiceEntry(durSec){
+  return {
+    id:'e-'+Date.now(),
+    kind:'voice-card',
+    time: window.formatNowTime(),
+    isNew: true,
+    tagLayout: 'v3',
+    voiceText: SCENE2_RECORD_TEXT,
+    voice: { duration: window.formatVoiceDur(Math.max(durSec || 0, 18)) },
+    tags: SCENE2_VOICE_TAGS.map(t=>({...t})),
+  };
+}
+
 function RecordEmptyTagIcon({ name, color }) {
   if(name === 'mood'){
     return (
@@ -289,11 +310,7 @@ function RecordEmptyMiniChart({ progress, P }) {
 }
 
 function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
-  const t = useLoopTime(2.4, 1);
-  const pulse = (Math.sin(t * Math.PI * 2 / 2.4) + 1) / 2;
-  const scale = pressed ? 0.94 : 1 + pulse * 0.012;
-  const ringScale = 1 + pulse * 0.18;
-  const ringOpacity = 0.4 - pulse * 0.35;
+  const scale = pressed ? 0.94 : 1;
 
   return (
     <div
@@ -310,16 +327,14 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
         className="record-empty-mic-ring record-empty-mic-ring--glow"
         style={{
           background: P.primary,
-          opacity: ringOpacity,
-          transform: `scale(${ringScale})`,
+          opacity: 0.14,
         }}
       />
       <div
         className="record-empty-mic-ring record-empty-mic-ring--stroke"
         style={{
           borderColor: P.primary,
-          opacity: 0.25 - pulse * 0.25,
-          transform: `scale(${1 + pulse * 0.25})`,
+          opacity: 0.16,
         }}
       />
       <div
@@ -342,4 +357,9 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
   );
 }
 
-Object.assign(window, { RecordEmptyScreen, EMPTY_DEMO_TRANSCRIPT });
+Object.assign(window, {
+  RecordEmptyScreen,
+  EMPTY_DEMO_TRANSCRIPT,
+  SCENE2_VOICE_TAGS,
+  buildScene2VoiceEntry,
+});

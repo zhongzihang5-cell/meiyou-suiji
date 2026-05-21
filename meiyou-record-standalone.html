@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>美柚 · 记录 · 场景原型</title>
 <!--
-  双场景合一版（含底部场景切换栏，适合桌面预览）
+  三场景合一版（含底部场景切换栏，适合桌面预览）
   生成日期: 2026-05-21
 
   手机演示：
@@ -3272,26 +3272,30 @@ html,body{
   margin:0 0 0 4px;
   position:relative;
   top:-1px;
-  height:20px;
-  min-height:20px;
-  padding:0 5px 0 1px;
+  height:24px;
+  min-height:24px;
+  min-width:0;
+  padding:0 6px 0 2px;
   gap:3px;
 }
 .tl-voice-block.has-voice-pill .tl-voice-pill-ico{
-  width:16px;
-  height:16px;
+  width:18px;
+  height:18px;
 }
 .tl-voice-block.has-voice-pill .tl-voice-pill-ico svg{
-  width:7px;
-  height:7px;
+  width:8px;
+  height:8px;
 }
 .tl-voice-block.has-voice-pill .tl-voice-pill .tl-voice-wave.is-mini{
-  width:12px;
-  height:8px;
-  gap:1.5px;
+  width:16px;
+  height:10px;
+  gap:1px;
+}
+.tl-voice-block.has-voice-pill .tl-voice-pill .tl-voice-wave.is-mini span{
+  width:1.5px;
 }
 .tl-voice-block.has-voice-pill .tl-voice-pill-dur{
-  font-size:10px;
+  font-size:11px;
 }
 .tl-voice-text{
   margin:0;
@@ -4319,7 +4323,10 @@ html,body{
 /* ============ 记录 Tab · 新用户空值页 ============ */
 .suiji-shell--empty{
   background:linear-gradient(180deg, #FFFFFF 0%, #F2F2F5 100%);
-  min-height:calc(100vh - 44px);
+  height:calc(100vh - 44px - var(--my-tabbar-h, 58px));
+  height:calc(100dvh - 44px - var(--my-tabbar-h, 58px));
+  max-height:calc(100vh - 44px - var(--my-tabbar-h, 58px));
+  max-height:calc(100dvh - 44px - var(--my-tabbar-h, 58px));
   position:relative;
   overflow:hidden;
 }
@@ -4330,9 +4337,9 @@ html,body{
   z-index:1;
   display:flex;
   flex-direction:column;
-  min-height:calc(100vh - 44px - var(--my-tabbar-h, 58px));
-  min-height:calc(100dvh - 44px - var(--my-tabbar-h, 58px));
-  padding-bottom:8px;
+  height:100%;
+  min-height:0;
+  overflow:hidden;
   font-family:"PingFang SC", -apple-system, "Helvetica Neue", sans-serif;
   color:#323232;
 }
@@ -4383,8 +4390,10 @@ html,body{
 }
 .record-empty-demo{
   flex:1;
-  padding:20px 22px 0;
+  padding:20px 22px 168px;
   min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   position:relative;
   z-index:2;
   display:flex;
@@ -4538,16 +4547,24 @@ html,body{
   color:#8E8E93;
 }
 .record-empty-voice-wrap{
-  padding:20px 22px calc(var(--my-tabbar-h, 58px) + 14px);
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:var(--my-tabbar-h, 58px);
+  padding:8px 22px 10px;
   display:flex;
   flex-direction:column;
   align-items:center;
-  position:relative;
-  z-index:2;
-  margin-top:auto;
+  z-index:99;
+  background:linear-gradient(180deg, rgba(242,242,245,0) 0%, rgba(242,242,245,0.96) 32%, #F2F2F5 100%);
+  pointer-events:none;
+}
+.record-empty-voice-wrap .record-empty-mic,
+.record-empty-voice-wrap .record-empty-voice-hint{
+  pointer-events:auto;
 }
 .record-empty-voice-hint{
-  margin:14px 0 0;
+  margin:10px 0 0;
   font-size:13px;
   color:#8E8E93;
   letter-spacing:0.04em;
@@ -4582,6 +4599,50 @@ html,body{
   justify-content:center;
   position:relative;
   transition:transform 0.08s ease;
+}
+
+
+/* 场景三 · 记录页空置 */
+.record-blank-stream{
+  position:relative;
+}
+
+.record-blank-placeholder{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:28px 24px 40px;
+  margin-top:-8px;
+}
+
+.record-blank-icon{
+  width:72px;
+  height:72px;
+  border-radius:36px;
+  background:rgba(255,77,136,0.06);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:12px;
+}
+
+.record-blank-title{
+  font-size:15px;
+  font-weight:500;
+  color:rgba(0,0,0,0.78);
+  line-height:1.47;
+  margin:0 0 4px;
+}
+
+.record-blank-desc{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.42);
+  line-height:1.47;
+  margin:0;
+  max-width:240px;
 }
 
 
@@ -6138,7 +6199,7 @@ Object.assign(window, { CalendarPage, FloatNotice });
 
 const VOICE_WAVE_HEIGHTS = [6,11,16,9,13,7,17,12,8,15,10,18,9,14,7,12,16,8,13,6,11,15,9,7];
 const MINI_WAVE_HEIGHTS = [4, 8, 11, 7, 5];
-const COMPACT_WAVE_HEIGHTS = [3, 7, 4];
+const COMPACT_WAVE_HEIGHTS = [4, 8, 10, 7, 5];
 
 const CC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAfACEDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUHCAMG/8QAKhAAAgEDAwIDCQAAAAAAAAAAAQIDAAQRBQYhEjEHExQWJTJxgYKhsfH/xAAXAQEBAQEAAAAAAAAAAAAAAAACBQED/8QAHBEAAQUBAQEAAAAAAAAAAAAAAgABAwURBBJh/9oADAMBAAIRAxEAPwDZLEAZP7pdc6vYQTxwSTxiSQ9IGaNyytDod5IrYKwuQftNRGzknvr5LeMl5ZGzk9uaYjqsVlY3YJET4zK2prWnNcrbi5j8xk6wM96YRsrqCpyCM96hOu2t1o18IrnJJxyOx/lVHwyuXudrwNJIXIyAT86RDjJWFSPNCM0Zazr1FFFFclFSjeCO+278Rgl/TyYA7/Caz5oOtPpOqpdeWSUOCpPNaYYBhgjOR9KTy7a0KaVpJNJsXZjkkwAk02LFcqLaPijOOQPTEoVufdDa3cxOYuhIxwM9zmq94Q9fsdbs64LEn8mmw2tt7j3NY8HPEC03t4o4YwkcYjUDAUAACsck7O4h6oBgiDyzfdXSijFFFQF//9k=';
 
@@ -6679,7 +6740,7 @@ function SisterSignalCard({animated}){
       <div className={'signal-card'+(animated && !isFinal?' sc-animating':'')}>
         <div className="cc-head">
           <span className="cc-title">
-            <img className="cc-icon" src={SC_ICON} width="18" height="18" alt="" aria-hidden="true"/>
+            <img className="cc-icon" src={SC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
             周期天数评估
           </span>
         </div>
@@ -8707,6 +8768,27 @@ const EMPTY_PALETTE = {
 
 const EMPTY_DEMO_TRANSCRIPT = '今天有点累，肚子胀，午饭吃了三明治';
 
+const SCENE2_RECORD_TEXT = '今天有点累，肚子也有点胀，午饭吃了三明治，下午还一直有点犯困。';
+
+const SCENE2_VOICE_TAGS = [
+  { cat:'情绪', val:'疲惫', icon:'mood' },
+  { cat:'症状', val:'腹胀', icon:'sym' },
+  { cat:'饮食', val:'三明治', icon:'food' },
+];
+
+function buildScene2VoiceEntry(durSec){
+  return {
+    id:'e-'+Date.now(),
+    kind:'voice-card',
+    time: window.formatNowTime(),
+    isNew: true,
+    tagLayout: 'v3',
+    voiceText: SCENE2_RECORD_TEXT,
+    voice: { duration: window.formatVoiceDur(Math.max(durSec || 0, 18)) },
+    tags: SCENE2_VOICE_TAGS.map(t=>({...t})),
+  };
+}
+
 function RecordEmptyTagIcon({ name, color }) {
   if(name === 'mood'){
     return (
@@ -8956,11 +9038,7 @@ function RecordEmptyMiniChart({ progress, P }) {
 }
 
 function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
-  const t = useLoopTime(2.4, 1);
-  const pulse = (Math.sin(t * Math.PI * 2 / 2.4) + 1) / 2;
-  const scale = pressed ? 0.94 : 1 + pulse * 0.012;
-  const ringScale = 1 + pulse * 0.18;
-  const ringOpacity = 0.4 - pulse * 0.35;
+  const scale = pressed ? 0.94 : 1;
 
   return (
     <div
@@ -8977,16 +9055,14 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
         className="record-empty-mic-ring record-empty-mic-ring--glow"
         style={{
           background: P.primary,
-          opacity: ringOpacity,
-          transform: `scale(${ringScale})`,
+          opacity: 0.14,
         }}
       />
       <div
         className="record-empty-mic-ring record-empty-mic-ring--stroke"
         style={{
           borderColor: P.primary,
-          opacity: 0.25 - pulse * 0.25,
-          transform: `scale(${1 + pulse * 0.25})`,
+          opacity: 0.16,
         }}
       />
       <div
@@ -9009,7 +9085,97 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
   );
 }
 
-Object.assign(window, { RecordEmptyScreen, EMPTY_DEMO_TRANSCRIPT });
+Object.assign(window, {
+  RecordEmptyScreen,
+  EMPTY_DEMO_TRANSCRIPT,
+  SCENE2_VOICE_TAGS,
+  buildScene2VoiceEntry,
+});
+
+</script>
+
+<!-- record-blank.jsx -->
+<script type="text/babel">
+// ============ 记录 Tab · 空置页（场景三 — 在此修改空态） ============
+//
+// 标准记录页结构：顶栏 + 今日分日头 + 空态区 + 底部 Dock（由 app.jsx 渲染）
+// 与场景二 landing 引导（record-empty.jsx）分离，方便独立迭代空态设计。
+
+function RecordBlankPlaceholder(){
+  return (
+    <div className="record-blank-placeholder" aria-label="记录页空态">
+      <div className="record-blank-icon" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect x="8" y="6" width="32" height="36" rx="8" stroke="rgba(255,77,136,0.35)" strokeWidth="1.5"/>
+          <path d="M16 18h16M16 24h12M16 30h14" stroke="rgba(0,0,0,0.12)" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <p className="record-blank-title">还没有记录</p>
+      <p className="record-blank-desc">说句话，或点下方按钮开始第一次记录</p>
+    </div>
+  );
+}
+
+function RecordBlankStream({
+  streamRef,
+  timelineEndRef,
+  timeline,
+  scene,
+  onOpenCalendar,
+  onOpenSearch,
+  sisterPlayAnimation,
+  sisterCycleDone,
+  hideTodayGuide,
+  onSisterCycleComplete,
+}){
+  const I = window.Icon;
+  const TimelineStream = window.TimelineStream;
+  const showBlank = window.isTimelineEmpty(timeline);
+
+  return (
+    <div className="suiji-stream record-blank-stream" ref={streamRef}>
+      <div className="stream-header">
+        <div>
+          <h1 className="stream-title">记录</h1>
+          <p className="stream-sub">情绪 · 身体 · 体重</p>
+        </div>
+        <div className="stream-actions">
+          {scene.calendar.enabled && (
+            <button
+              className="stream-action"
+              aria-label="日历"
+              type="button"
+              onClick={onOpenCalendar}
+            >
+              <I name="calendar" size={20} stroke={1.7}/>
+            </button>
+          )}
+          <button
+            className="stream-action"
+            aria-label="搜索"
+            type="button"
+            onClick={onOpenSearch}
+          >
+            <I name="search" size={20} stroke={1.7}/>
+          </button>
+        </div>
+      </div>
+
+      <TimelineStream
+        blocks={timeline}
+        endRef={timelineEndRef}
+        sisterPlayAnimation={sisterPlayAnimation}
+        sisterCycleDone={sisterCycleDone}
+        hideTodayGuide={hideTodayGuide}
+        onSisterCycleComplete={onSisterCycleComplete}
+      />
+
+      {showBlank && <RecordBlankPlaceholder/>}
+    </div>
+  );
+}
+
+Object.assign(window, { RecordBlankStream, RecordBlankPlaceholder });
 
 </script>
 
@@ -9682,7 +9848,8 @@ Object.assign(window, { DockPublisher, CloudPublisher: DockPublisher });
 // Demo 场景配置 — 控制默认 Tab、页面展示与交互流程
 //
 // 场景一 period-calendar：默认日历 Tab，通过「月经来了」触发浮动分析 → 跳转记录页周期分析
-// 场景二 record-empty：新用户未记录空值页（_Tab__standalone.html）
+// 场景二 record-direct：未记录 landing 引导（record-empty.jsx）
+// 场景三 record-blank：记录 Tab 无数据空置页（record-blank.jsx）
 
 const DEMO_SCENES = {
   'period-calendar': {
@@ -9711,8 +9878,8 @@ const DEMO_SCENES = {
 
   'record-direct': {
     id: 'record-direct',
-    label: '场景二 · 未记录空值',
-    description: '新用户进入记录 Tab，空时间轴 +「记一切」演示动效',
+    label: '场景二 · 未记录landing引导',
+    description: '新用户首次进入记录 Tab，landing 引导 +「记一切」演示动效',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
@@ -9726,6 +9893,31 @@ const DEMO_SCENES = {
     record: {
       showHealthCard: false,
       emptyState: true,
+      sisterAnalysis: {
+        trigger: 'none',
+        initialDone: true,
+      },
+      todayGuide: false,
+    },
+  },
+
+  'record-blank': {
+    id: 'record-blank',
+    label: '场景三 · 记录页空置',
+    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（空态见 record-blank.jsx）',
+    defaultTab: 'note',
+    identity: 'period',
+    getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
+    calendar: {
+      enabled: true,
+      periodFlow: false,
+    },
+    floatNotice: {
+      enabled: false,
+    },
+    record: {
+      showHealthCard: false,
+      blankState: true,
       sisterAnalysis: {
         trigger: 'none',
         initialDone: true,
@@ -10516,10 +10708,11 @@ function App(){
   };
 
   const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
+  const showRecordBlank = !!(scene.record.blankState && window.isTimelineEmpty(timeline));
 
   useEffect(()=>{
     if(activeTab !== 'note') return;
-    if(showRecordEmpty) return;
+    if(showRecordEmpty || showRecordBlank) return;
     if(recordEnterModeRef.current === 'analysis'){
       recordEnterModeRef.current = 'idle';
       return;
@@ -10527,18 +10720,18 @@ function App(){
     const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
     recordEnterModeRef.current = 'idle';
     return ()=>clearTimeout(tm);
-  }, [activeTab, showRecordEmpty]);
+  }, [activeTab, showRecordEmpty, showRecordBlank]);
 
   useEffect(()=>{
-    if(showRecordEmpty) return;
+    if(showRecordEmpty || showRecordBlank) return;
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, [t.demoScene, showRecordEmpty]);
+  }, [t.demoScene, showRecordEmpty, showRecordBlank]);
 
   useEffect(()=>{
-    if(showRecordEmpty) return;
+    if(showRecordEmpty || showRecordBlank) return;
     scrollTimelineToEnd('smooth');
-  }, [timeline, showRecordEmpty]);
+  }, [timeline, showRecordEmpty, showRecordBlank]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -10569,10 +10762,15 @@ function App(){
   };
 
   const submitVoice = (transcript, durSec)=>{
+    markUserRecorded();
+    if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
+      const entry = window.buildScene2VoiceEntry(durSec);
+      pushToTimeline(entry, entry.voiceText);
+      return;
+    }
     const text = transcript.trim();
     if(!text) return;
     const hits = window.extractKeywords(text);
-    markUserRecorded();
     pushToTimeline(buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     }), text);
@@ -10637,6 +10835,7 @@ function App(){
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
+  const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
 
   const openSearchPage = ()=>setShowSearchPage(true);
@@ -10665,11 +10864,39 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
           <RecordEmptyScreen onVoiceDone={submitVoice}/>
+        ) : showRecordBlank ? (
+        <>
+        <RecordBlankStream
+          streamRef={streamRef}
+          timelineEndRef={timelineEndRef}
+          timeline={timeline}
+          scene={scene}
+          onOpenCalendar={()=>setActiveTab('cal')}
+          onOpenSearch={openSearchPage}
+          sisterPlayAnimation={sisterPlayAnimation}
+          sisterCycleDone={sisterCycleDone}
+          hideTodayGuide={!showTodayGuide}
+          onSisterCycleComplete={handleSisterCycleComplete}
+        />
+        <DockPublisher
+          draft={draft}
+          onDraft={setDraft}
+          onSend={()=>submitText()}
+          onQuickMark={submitQuickMark}
+          onMoodConfirm={submitMoodRecord}
+          onSymptomConfirm={submitSymptomRecord}
+          onWeightConfirm={submitWeightRecord}
+          onVoiceDone={submitVoice}
+          onPhoto={()=>setShowPhoto(true)}
+          onDockExpandedChange={setDockExpanded}
+          activeTab={activeTab}
+        />
+        </>
         ) : (
         <>
         <div className="suiji-stream" ref={streamRef}>
