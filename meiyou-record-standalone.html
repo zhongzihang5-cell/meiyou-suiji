@@ -9131,13 +9131,23 @@ function QuickCardIcon({ kind, color = 'var(--my-text-primary)', size = 24 }) {
 
 function QuickMoodPicker({ onSubmit }) {
   const [level, setLevel] = React.useState(null);
+  const timerRef = React.useRef(null);
+  const onSubmitRef = React.useRef(onSubmit);
+  onSubmitRef.current = onSubmit;
 
-  React.useEffect(()=>{
-    if(level === null) return;
-    const mood = QUICK_MOOD_LEVELS[level - 1];
-    const t = window.setTimeout(()=>onSubmit?.([mood]), 320);
-    return ()=>window.clearTimeout(t);
-  }, [level, onSubmit]);
+  React.useEffect(()=>()=>{
+    if(timerRef.current) window.clearTimeout(timerRef.current);
+  }, []);
+
+  const pickLevel = (l)=>{
+    if(timerRef.current) window.clearTimeout(timerRef.current);
+    setLevel(l);
+    timerRef.current = window.setTimeout(()=>{
+      timerRef.current = null;
+      const mood = QUICK_MOOD_LEVELS[l - 1];
+      onSubmitRef.current?.([mood]);
+    }, 320);
+  };
 
   return (
     <div className="quick-card-picker quick-card-picker--mood">
@@ -9146,7 +9156,7 @@ function QuickMoodPicker({ onSubmit }) {
           key={l}
           type="button"
           className={'quick-card-mood-btn'+(level === l ? ' is-selected' : '')}
-          onClick={()=>setLevel(l)}
+          onClick={()=>pickLevel(l)}
           aria-label={QUICK_MOOD_LEVELS[l - 1].label}
         >
           <QuickMoodFace level={l} color={level === l ? 'var(--my-brand-red)' : 'var(--my-text-primary)'} size={30}/>
