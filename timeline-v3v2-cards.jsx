@@ -256,17 +256,21 @@ function V3Chevron({open}){
   );
 }
 
-function V3v2Header({kind, label, time}){
-  const isChart = kind === 'chart';
+function V3v2Header({time, title}){
+  if(!time && !title) return null;
   return (
-    <div style={{display:'flex', alignItems:'center', gap:6}}>
-      <div style={{fontSize:11.5, color:TL_TEXT, fontWeight:500, fontVariantNumeric:'tabular-nums', flexShrink:0}}>{time}</div>
-      <TLKindIcon kind={kind} color={isChart ? TL_PRIMARY : TL_MUTED} size={12}/>
-      <div style={{
-        fontSize:11, color:isChart ? TL_PRIMARY : TL_MUTED,
-        fontWeight:isChart ? 500 : 500, letterSpacing:'0.04em',
-        whiteSpace:'nowrap', flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis',
-      }}>{label}</div>
+    <div style={{display:'flex', alignItems:'center', gap:6, minWidth:0}}>
+      {time && (
+        <div style={{
+          fontSize:11.5, color:TL_MUTED, fontWeight:400, fontVariantNumeric:'tabular-nums', flexShrink:0,
+        }}>{time}</div>
+      )}
+      {title && (
+        <div style={{
+          fontSize:12, color:TL_TEXT, fontWeight:500,
+          flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+        }}>{title}</div>
+      )}
     </div>
   );
 }
@@ -326,7 +330,6 @@ function V3v2PrimaryBody({entry}){
   );
 }
 
-const KIND_LABELS = { voice:'语音', image:'图片', text:'文字', chart:'AI 分析' };
 
 function normalizeV3Entry(raw){
   if(!raw) return null;
@@ -351,7 +354,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 12px',
       }}>
-        <V3v2Header kind="chart" label={a.title} time={a.time}/>
+        <V3v2Header time={a.time} title={a.title}/>
         <div style={{marginTop:8}}>
           <TLChart type={a.chartType}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
@@ -360,14 +363,12 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
     );
   }
 
-  const kindLabel = KIND_LABELS[p.kind] || '文字';
-
   return (
     <div className={isNew ? 'fade-in' : undefined} style={{
       background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
       padding:'11px 12px 4px', overflow:'hidden',
     }}>
-      <V3v2Header kind={p.kind} label={kindLabel} time={p.time}/>
+      <V3v2Header time={p.time}/>
       <div style={{marginTop:8, paddingBottom:a ? 10 : 8}}>
         <V3v2PrimaryBody entry={p}/>
       </div>

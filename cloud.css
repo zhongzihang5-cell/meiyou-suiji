@@ -573,9 +573,14 @@
 }
 
 .dock-fan-left{width:48px}
-.dock-fan-corner{width:48px}
+/* 快捷扇形：禁止任何全屏遮罩（含旧版缓存 DOM） */
+.dock-fan-scrim{
+  display:none!important;
+  pointer-events:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
 
-.dock-fan-stage{
   position:relative;
   width:48px;
   height:48px;

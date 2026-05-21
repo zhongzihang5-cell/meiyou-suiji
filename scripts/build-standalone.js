@@ -193,15 +193,19 @@ function writeLegacyRedirects() {
 function buildHtml({ title, demoScene, locked, comment, builtAt }) {
   const extraCss = locked ? STANDALONE_DEMO_CSS : '';
   const bodyClass = locked ? ' class="standalone-demo"' : '';
+  const buildId = `${builtAt}-nomask`;
   const lockedScript = locked
-    ? 'window.__STANDALONE_LOCKED_SCENE = true;'
-    : 'window.__STANDALONE_LOCKED_SCENE = false;';
+    ? `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = true;`
+    : `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = false;`;
 
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">

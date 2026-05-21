@@ -2,6 +2,7 @@
 
 const VOICE_WAVE_HEIGHTS = [6,11,16,9,13,7,17,12,8,15,10,18,9,14,7,12,16,8,13,6,11,15,9,7];
 const MINI_WAVE_HEIGHTS = [4, 8, 11, 7, 5];
+const COMPACT_WAVE_HEIGHTS = [3, 7, 4];
 
 const CC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAfACEDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUHCAMG/8QAKhAAAgEDAwIDCQAAAAAAAAAAAQIDAAQRBQYhEjEHExQWJTJxgYKhsfH/xAAXAQEBAQEAAAAAAAAAAAAAAAACBQED/8QAHBEAAQUBAQEAAAAAAAAAAAAAAgABAwURBBJh/9oADAMBAAIRAxEAPwDZLEAZP7pdc6vYQTxwSTxiSQ9IGaNyytDod5IrYKwuQftNRGzknvr5LeMl5ZGzk9uaYjqsVlY3YJET4zK2prWnNcrbi5j8xk6wM96YRsrqCpyCM96hOu2t1o18IrnJJxyOx/lVHwyuXudrwNJIXIyAT86RDjJWFSPNCM0Zazr1FFFFclFSjeCO+278Rgl/TyYA7/Caz5oOtPpOqpdeWSUOCpPNaYYBhgjOR9KTy7a0KaVpJNJsXZjkkwAk02LFcqLaPijOOQPTEoVufdDa3cxOYuhIxwM9zmq94Q9fsdbs64LEn8mmw2tt7j3NY8HPEC03t4o4YwkcYjUDAUAACsck7O4h6oBgiDyzfdXSijFFFQF//9k=';
 
@@ -61,17 +62,11 @@ function inferRecordKind(entry){
   return { kind:'text', label:'文字' };
 }
 
-function TlRecCardHead({time, kind, label}){
-  if(!time && !label) return null;
+function TlRecCardHead({time}){
+  if(!time) return null;
   return (
     <div className="tl-rec-card-hd">
-      {time && <span className="tl-rec-card-time">{time}</span>}
-      {label && (
-        <span className="tl-rec-card-kind">
-          <TlRecKindIcon kind={kind}/>
-          {label}
-        </span>
-      )}
+      <span className="tl-rec-card-time">{time}</span>
     </div>
   );
 }
@@ -322,8 +317,10 @@ function RecordPhoto({photo}){
   );
 }
 
-function VoiceWave({playing, mini}){
-  const heights = mini ? MINI_WAVE_HEIGHTS : VOICE_WAVE_HEIGHTS;
+function VoiceWave({playing, mini, compact}){
+  const heights = compact
+    ? COMPACT_WAVE_HEIGHTS
+    : (mini ? MINI_WAVE_HEIGHTS : VOICE_WAVE_HEIGHTS);
   return (
     <div className={'tl-voice-wave'+(mini?' is-mini':'')+(playing?' is-playing':'')} aria-hidden="true">
       {heights.map((h, i) => (
@@ -333,7 +330,7 @@ function VoiceWave({playing, mini}){
   );
 }
 
-function TlVoicePlayBtn({voice}){
+function TlVoicePlayBtn({voice, compact}){
   const [playing, setPlaying] = React.useState(false);
   const raw = voice?.duration || '0:00';
   const duration = /^\d+["″]?$/.test(raw)
@@ -342,7 +339,7 @@ function TlVoicePlayBtn({voice}){
   return (
     <button
       type="button"
-      className={'tl-voice-pill'+(playing?' is-playing':'')}
+      className={'tl-voice-pill'+(playing?' is-playing':'')+(compact?' is-compact':'')}
       onClick={()=>setPlaying(p=>!p)}
       aria-label={playing?'暂停':'播放语音'}
     >
@@ -356,7 +353,7 @@ function TlVoicePlayBtn({voice}){
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         )}
       </span>
-      <VoiceWave playing={playing} mini/>
+      <VoiceWave playing={playing} mini compact={compact}/>
       <span className="tl-voice-pill-dur">{duration}</span>
     </button>
   );
@@ -368,10 +365,17 @@ function TlVoiceBar({voice}){
 
 function TlVoiceInline({voice, text}){
   if(!voice && !text) return null;
+  if(!voice){
+    return text ? (
+      <div className="tl-voice-block">
+        <span className="tl-voice-text">{text}</span>
+      </div>
+    ) : null;
+  }
   return (
-    <div className={'tl-voice-block'+(voice?' has-voice-pill':'')}>
-      {text && <p className="tl-voice-text">{text}</p>}
-      {voice && <TlVoicePlayBtn voice={voice}/>}
+    <div className="tl-voice-block has-voice-pill">
+      {text && <span className="tl-voice-text">{text}</span>}
+      <TlVoicePlayBtn voice={voice} compact/>
     </div>
   );
 }
@@ -389,11 +393,9 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, a
     !!animateAnalysis || (analysisProps.playAnimation > 0)
   );
 
-  const recKind = inferRecordKind(entry);
-
   return (
     <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')}>
-      <TlRecCardHead time={entry.time} kind={recKind.kind} label={recKind.label}/>
+      <TlRecCardHead time={entry.time}/>
       <section className="tl-t5-main">
         {hasVoice ? (
           <TlVoiceInline voice={entry.voice} text={text}/>
@@ -539,9 +541,9 @@ function SisterSignalCard({animated}){
   return (
     <div className="chart-block" style={{background:'transparent', border:'none', padding:0}}>
       <div className={'signal-card'+(animated && !isFinal?' sc-animating':'')}>
-        <div className="sc-head">
-          <span className="sc-title">
-            <img className="sc-icon" src={SC_ICON} width="18" height="18" alt="" aria-hidden="true"/>
+        <div className="cc-head">
+          <span className="cc-title">
+            <img className="cc-icon" src={SC_ICON} width="18" height="18" alt="" aria-hidden="true"/>
             周期天数评估
           </span>
         </div>

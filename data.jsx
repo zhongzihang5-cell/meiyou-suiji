@@ -326,7 +326,7 @@ const TIMELINE_BLOCKS = [
         primary:{
           id:'t1', time:'14:23', kind:'voice',
           duration:'0:18',
-          text:'今天有点累，肚子胀，午饭吃了三明治和拿铁',
+          text:'今天有点累，肚子也有点胀，午饭吃了三明治和拿铁，下午还一直有点犯困。',
           tags:[
             { cat:'情绪', val:'疲惫', icon:'mood' },
             { cat:'症状', val:'腹胀', icon:'sym' },

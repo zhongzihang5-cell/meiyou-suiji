@@ -348,13 +348,11 @@ function WeeklyTrendCard({item}){
   const isWellness = item.kind === 'wellness';
   const [open, setOpen] = React.useState(false);
 
-  const recKind = window.inferRecordKind?.(item) || { kind:'ai', label:'AI 分析' };
-
   if(isWellness){
     return (
       <div className="tl-weekly-bubble is-wellness">
         <div className="tl-weekly-surface">
-          <TlRecCardHead time={item.time} kind={recKind.kind} label={recKind.label}/>
+          <TlRecCardHead time={item.time}/>
           {overview && <p className="tl-weekly-overview">{overview}</p>}
           {panels.length > 0 && (
             <div className="tl-weekly-stack-inline">
@@ -375,7 +373,7 @@ function WeeklyTrendCard({item}){
   return (
     <div className={'tl-weekly-bubble'+(open ? ' is-open' : '')}>
       <div className="tl-weekly-surface">
-        <TlRecCardHead time={item.time} kind={recKind.kind} label={recKind.label}/>
+        <TlRecCardHead time={item.time}/>
         {overview && <p className="tl-weekly-overview">{overview}</p>}
         {moodPanel && (
           <div className="tl-weekly-stack-inline">
