@@ -479,7 +479,7 @@ function SisterCycleChart({animated, onComplete, staticView = false}){
       <div className={'cycle-card'+(!animated?' cycle-card--static':'')}>
         <div className={'cc-head cc-seg'+(headSeen?' seen':'')}>
           <span className="cc-title">
-            <img className="cc-icon" src={CC_ICON} width="18" height="18" alt="" aria-hidden="true"/>
+            <img className="cc-icon" src={CC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
             最近3个周期
           </span>
         </div>
@@ -543,7 +543,7 @@ function SisterSignalCard({animated}){
       <div className={'signal-card'+(animated && !isFinal?' sc-animating':'')}>
         <div className="cc-head">
           <span className="cc-title">
-            <img className="cc-icon" src={SC_ICON} width="18" height="18" alt="" aria-hidden="true"/>
+            <img className="cc-icon" src={SC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
             周期天数评估
           </span>
         </div>
