@@ -276,6 +276,155 @@ function DockMoodPicker({onConfirm, onCancel}){
 
 function createMoodRecordEntry(moods){
   const list = Array.isArray(moods) ? moods : [moods];
+  const primary = list[0];
+  const time = window.formatNowTime();
+  const score = moodScoreOf(primary);
+  return {
+    id:'e-'+Date.now(),
+    kind:'mood-insight',
+    time,
+    isNew: true,
+    skipExtractLabel: true,
+    moods: list,
+    primaryMood: primary,
+    copy: buildMoodCopy(primary),
+    phaseCopy: buildPhaseCopy(primary),
+    followUp: buildFollowUp(primary),
+    guideText: (()=>{
+      const c = buildMoodCopy(primary);
+      const f = buildFollowUp(primary);
+      return f ? c + '。' + f : c;
+    })(),
+    chart: {
+      title:'近 1 周情绪波动曲线',
+      data: buildMoodTrend(primary),
+    },
+    quickMood: {
+      label: primary?.label || '',
+      score,
+      time,
+    },
+  };
+}
+
+const MOOD_SCORE_MAP = {
+  'super-happy':5,'excited':5,'surprised':5,'satisfied':5,'heart-flutter':5,'confident':5,
+  'happy':4,'relaxed':4,
+  'normal':3,'calm':3,'indifferent':3,
+  'unhappy':2,'irritable':2,'temper':2,'anxious':2,'overthink':2,'stressed':2,'scared':2,
+  'very-sad':1,'angry':1,
+};
+
+const MOOD_WEEK_BASELINE = [
+  { d:'周一', v:3 },
+  { d:'周二', v:2 },
+  { d:'周三', v:3 },
+  { d:'周四', v:4 },
+  { d:'周五', v:3 },
+  { d:'周六', v:4 },
+];
+
+function moodScoreOf(mood){
+  if(!mood) return 3;
+  if(typeof mood.score === 'number') return mood.score;
+  return MOOD_SCORE_MAP[mood.id] || MOOD_SCORE_MAP[mood.face] || 3;
+}
+
+function buildMoodTrend(currentMood){
+  const todayScore = moodScoreOf(currentMood);
+  return [
+    ...MOOD_WEEK_BASELINE,
+    { d:'今天', v: todayScore, isToday:true },
+  ];
+}
+
+function buildMoodCopy(mood){
+  const id = mood?.id || '';
+  if(id === 'very-sad' || id === 'angry') return '这一刻的难过是真实的，允许自己兴趣低落';
+  if(id === 'unhappy' || MOOD_SCORE_MAP[id] === 2) return '不开心也是今天的一部分，不用急着赶走它';
+  if(id === 'super-happy' || id === 'excited' || id === 'heart-flutter') return '这份雀跃挺珍贵，慢慢享受它';
+  if(MOOD_SCORE_MAP[id] >= 4) return '今天的好心情值得被记下来';
+  return '平平淡淡也是一种状态，不必勉强自己振作';
+}
+
+function buildFollowUp(mood){
+  const id = mood?.id || '';
+  const label = mood?.label || '';
+  const triggered = (
+    id === 'very-sad' || id === 'angry' ||
+    id === 'unhappy' || MOOD_SCORE_MAP[id] === 2 ||
+    id === 'happy' || id === 'relaxed' ||
+    id === 'super-happy' || id === 'excited' || id === 'heart-flutter' || id === 'confident'
+  );
+  if(!triggered || !label) return '';
+  return `是因为什么事${label}呢？可以通过语音告诉我，我帮你记录下来。`;
+}
+
+function buildPhaseCopy(mood){
+  const id = mood?.id || '';
+  const score = MOOD_SCORE_MAP[id] || 3;
+  if(id === 'very-sad' || id === 'angry') return '卵泡期雌激素正在回升，身体会帮你慢慢恢复力气';
+  if(score <= 2) return '卵泡期通常情绪相对平稳，如果今天格外低落，可能和睡眠、压力更相关';
+  if(score === 3) return '卵泡期身体处于修复阶段，"还行"其实是不错的信号';
+  if(id === 'super-happy' || id === 'excited' || id === 'heart-flutter') return '卵泡期是一个周期里精力和情绪的高点，适合做点想做很久的事';
+  if(score >= 4) return '卵泡期雌激素上升，大脑对愉悦的感受会更敏锐一些';
+  return '卵泡期身体处于修复阶段，"还行"其实是不错的信号';
+}
+
+function timeStrToMinutes(s){
+  if(!s) return 0;
+  const parts = String(s).split(':');
+  return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+}
+
+function buildTodayMoodPoints(history, currentMood){
+  const list = (history || []).map(h => ({
+    t: timeStrToMinutes(h.time),
+    v: h.score,
+    label: h.label,
+  }));
+  const time = window.formatNowTime();
+  list.push({
+    t: timeStrToMinutes(time),
+    v: moodScoreOf(currentMood),
+    label: currentMood?.label || '',
+    isLast: true,
+  });
+  list.sort((a, b) => a.t - b.t);
+  return { points: list, time };
+}
+
+function createMoodQuickEntry(moods, history){
+  const list = Array.isArray(moods) ? moods : [moods];
+  const primary = list[0];
+  const label = primary?.label || '愉快';
+  const { time } = buildTodayMoodPoints(history, primary);
+  const score = moodScoreOf(primary);
+  const stamp = Date.now();
+
+  return {
+    kind:'record-group',
+    id:'e-mood-quick-'+stamp,
+    isNew: true,
+    skipExtractLabel: true,
+    isQuickMood: true,
+    primary:{
+      id:'e-mood-quick-p-'+stamp,
+      kind:'mood-face',
+      time,
+      text: label,
+      primaryMood: primary,
+    },
+    quickMood: {
+      label,
+      score,
+      time,
+    },
+  };
+}
+
+function createMoodRecordEntryLegacy(moods){
+  const list = Array.isArray(moods) ? moods : [moods];
   return {
     id:'e-'+Date.now(),
     kind:'rec',
@@ -293,4 +442,12 @@ Object.assign(window, {
   MoodFace,
   DockMoodPicker,
   createMoodRecordEntry,
+  createMoodRecordEntryLegacy,
+  createMoodQuickEntry,
+  moodScoreOf,
+  buildMoodTrend,
+  buildMoodCopy,
+  buildPhaseCopy,
+  buildTodayMoodPoints,
+  timeStrToMinutes,
 });

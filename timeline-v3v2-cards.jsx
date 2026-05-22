@@ -241,10 +241,81 @@ function ChartCaloriePanel({compact = false}){
   );
 }
 
-function TLChart({type, compact = false}){
+function ChartTodayMoodWave({data, compact = false}){
+  const gradId = React.useMemo(()=>'v3tm'+Math.random().toString(36).slice(2,9), []);
+  const w = 100;
+  const h = compact ? 36 : 60;
+  const minV = 1;
+  const maxV = 5;
+  const range = maxV - minV;
+  const points = (data || []).filter(d => Number.isFinite(d.v));
+
+  if(points.length === 0){
+    return (
+      <div style={{height: h, display:'flex', alignItems:'center', justifyContent:'center', color:TL_MUTED, fontSize:11}}>
+        今天暂未记录情绪
+      </div>
+    );
+  }
+
+  if(points.length === 1){
+    const only = points[0];
+    const y = h - ((only.v - minV) / range) * (h - 10) - 5;
+    return (
+      <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{display:'block'}}>
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={TL_PRIMARY} stopOpacity="0.25"/>
+            <stop offset="100%" stopColor={TL_PRIMARY} stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        <line x1="0" y1={y} x2={w} y2={y} stroke={TL_PRIMARY} strokeWidth="1.2" strokeOpacity="0.35" strokeDasharray="2,3"/>
+        <circle cx={w / 2} cy={y} r="2.4" fill={TL_PRIMARY}/>
+      </svg>
+    );
+  }
+
+  const xs = points.map(p => p.t);
+  const minT = Math.min(...xs);
+  const maxT = Math.max(...xs);
+  const tRange = maxT - minT || 1;
+  const xy = points.map(p => {
+    const x = ((p.t - minT) / tRange) * w;
+    const y = h - ((p.v - minV) / range) * (h - 10) - 5;
+    return [x, y];
+  });
+  const path = xy.map(([x, y], i)=>`${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+  const fill = `${path} L${w} ${h} L0 ${h} Z`;
+  const [lastX, lastY] = xy[xy.length - 1];
+
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{display:'block'}}>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={TL_PRIMARY} stopOpacity="0.25"/>
+          <stop offset="100%" stopColor={TL_PRIMARY} stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d={fill} fill={`url(#${gradId})`}/>
+      <path
+        d={path}
+        fill="none"
+        stroke={TL_PRIMARY}
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+      <circle cx={lastX} cy={lastY} r="2" fill={TL_PRIMARY}/>
+    </svg>
+  );
+}
+
+function TLChart({type, compact = false, data}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
   if(type === 'weightTrend') return <ChartWeightTrend compact={compact}/>;
   if(type === 'caloriePanel') return <ChartCaloriePanel compact={compact}/>;
+  if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   return null;
 }
 
@@ -276,6 +347,23 @@ function V3v2Header({time, title}){
 }
 
 function V3v2PrimaryBody({entry}){
+  if(entry.kind === 'mood-face'){
+    const MoodFace = window.MoodFace;
+    const mood = entry.primaryMood;
+    return (
+      <div style={{display:'flex', alignItems:'center', gap:10}}>
+        {MoodFace && mood && (
+          <div style={{width:40, height:40, borderRadius:'50%', overflow:'hidden', flexShrink:0,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(255,77,136,0.06)',
+          }}>
+            <MoodFace face={mood.face} bg={mood.bg}/>
+          </div>
+        )}
+        <span style={{fontSize:18, fontWeight:500, color:TL_TEXT, lineHeight:1.2}}>{entry.text}</span>
+      </div>
+    );
+  }
   if(entry.kind === 'voice'){
     const text = entry.text || entry.body || '';
     const voice = entry.voice || (entry.duration ? { duration: entry.duration } : null);
@@ -356,7 +444,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
       }}>
         <V3v2Header time={a.time} title={a.title}/>
         <div style={{marginTop:8}}>
-          <TLChart type={a.chartType}/>
+          <TLChart type={a.chartType} data={a.chartData}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
         </div>
       </div>
@@ -397,7 +485,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
           </button>
           {open && (
             <div style={{paddingBottom:12}}>
-              {a.chartType && <TLChart type={a.chartType}/>}
+              {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
               {a.note && (
                 <div style={{
                   fontSize:13, color:TL_TEXT, lineHeight:1.55,

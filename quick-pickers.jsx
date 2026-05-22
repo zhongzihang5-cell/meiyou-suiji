@@ -274,6 +274,16 @@ function QuickCardIcon({ kind, color = 'var(--my-text-primary)', size = 24 }) {
       </svg>
     );
   }
+  if(kind === 'diet'){
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 5.5v6.3c0 1.3 1 2.3 2.3 2.3h1.2v4.8" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+        <path d="M8.5 5.5v4.2M6.8 5.5v4.2" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+        <path d="M14.6 5.8c2.2.1 3.9 1.9 3.9 4.1v9" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+        <path d="M14.6 11h3.9" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+      </svg>
+    );
+  }
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="3.5" y="5.5" width="17" height="14" rx="2.5" stroke={color} strokeWidth={sw}/>
@@ -375,6 +385,68 @@ function QuickWeightPicker({ onSubmit, current = 52.3 }) {
   );
 }
 
+const QUICK_FOOD_OPTIONS = [
+  { id:'breakfast', label:'早餐' },
+  { id:'lunch', label:'午餐' },
+  { id:'dinner', label:'晚餐' },
+  { id:'snack', label:'加餐' },
+  { id:'fruit', label:'水果' },
+  { id:'coffee', label:'咖啡/茶' },
+  { id:'water', label:'补水' },
+  { id:'dessert', label:'甜食' },
+];
+
+function QuickFoodPicker({ onSubmit }) {
+  const [sel, setSel] = React.useState([]);
+  const toggle = (id)=> setSel(s=> {
+    if(s.includes(id)) return s.filter(x=>x!==id);
+    if(s.length >= 3) return [...s.slice(1), id];
+    return [...s, id];
+  });
+  const picked = QUICK_FOOD_OPTIONS.filter(t=>sel.includes(t.id));
+
+  return (
+    <div className="quick-card-picker quick-card-picker--food">
+      <div className="quick-card-food-tags">
+        {QUICK_FOOD_OPTIONS.map(t=>{
+          const on = sel.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={'quick-card-food-tag'+(on ? ' is-selected' : '')}
+              onClick={()=>toggle(t.id)}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        className="quick-card-submit"
+        disabled={picked.length === 0}
+        onClick={()=>picked.length > 0 && onSubmit?.(picked)}
+      >
+        {picked.length ? `记录饮食 · ${picked.length} 项` : '选择后记录'}
+      </button>
+    </div>
+  );
+}
+
+function createFoodRecordEntry(foods){
+  const list = Array.isArray(foods) ? foods : [foods];
+  return {
+    id:'e-'+Date.now(),
+    kind:'rec',
+    time: window.formatNowTime(),
+    body:'',
+    tags:list.map(s=>({ label:'饮食 '+s.label, cat:'diet' })),
+    tagLayout:'t5',
+    isNew: true,
+  };
+}
+
 Object.assign(window, {
   SYMPTOM_SECTIONS,
   SYMPTOM_OPTIONS,
@@ -386,6 +458,9 @@ Object.assign(window, {
   QuickMoodPicker,
   QuickSymptomPicker,
   QuickWeightPicker,
+  QuickFoodPicker,
+  QUICK_FOOD_OPTIONS,
+  createFoodRecordEntry,
   createSymptomRecordEntry,
   createWeightRecordEntry,
 });

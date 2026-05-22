@@ -4,13 +4,14 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
+function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis, hideBodyUntilDrop}){
   return (
     <SegmentedRecordCard
       entry={entry}
       isNew={isNew}
       typewriterAiNote={typewriterAiNote}
       animateAnalysis={animateAnalysis}
+      hideBodyUntilDrop={hideBodyUntilDrop}
     />
   );
 }
@@ -45,7 +46,7 @@ function WeeklyCard({item}){
 
 function filterDayItems(items, sisterCycleDone, hideTodayGuide){
   return (items || []).filter(it=>{
-    if(it.kind === 'guide' && hideTodayGuide) return false;
+    if(it.kind === 'guide' && hideTodayGuide && !it.alwaysShow) return false;
     if(!it.hiddenUntilSisterDone) return true;
     return sisterCycleDone;
   });
@@ -61,7 +62,7 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
@@ -86,6 +87,9 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
+          firstDropAnim={firstDropAnim}
+          onFirstDropLand={onFirstDropLand}
+          onFirstDropComplete={onFirstDropComplete}
         />
         );
       })}
@@ -108,7 +112,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
   const dayBlocks = blocks.filter(b => b.type === 'day');
 
@@ -128,6 +132,9 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
                 hideDayHeader={hideDayHeader}
+                firstDropAnim={firstDropAnim}
+                onFirstDropLand={onFirstDropLand}
+                onFirstDropComplete={onFirstDropComplete}
               />
             );
           }

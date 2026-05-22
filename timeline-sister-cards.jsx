@@ -577,7 +577,7 @@ function SisterSignalCard({animated}){
         <div className="cc-head">
           <span className="cc-title">
             <img className="cc-icon" src={SC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
-            周期天数评估
+            月经信号灯
           </span>
         </div>
         <div className="sc-lights">

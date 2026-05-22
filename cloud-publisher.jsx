@@ -1,25 +1,40 @@
 // ============ 底部 Dock — 输入栏 + 右下悬浮快捷发布 ============
 
-/** 方案 I · 卡片扇 — 仅 3 项 */
+/** 方案 I · 卡片扇 — 4 项快捷发布 */
 const QUICK_CARDS = [
-  { id:'mood', label:'情绪', hint:'5 档表情', title:'记录情绪', x:-148, y:-32, angle:-12 },
-  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状', x:-74, y:-72, angle:0 },
-  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重', x:-4, y:-32, angle:12 },
+  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情', x:-99, y:-14, angle:-8 },
+  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状', x:-85, y:-53, angle:-2 },
+  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重', x:-56, y:-83, angle:4 },
+  { id:'diet', label:'饮食', hint:'餐食速记', title:'今日饮食', x:-17, y:-98, angle:9 },
 ];
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
 
 const DOCK_PLACEHOLDER = '记录生活点滴';
 
+function DockWavePlaceholder({show, focused}){
+  if(!show) return null;
+
+  return (
+    <span
+      className={'dock-float-ph'+(focused ? ' is-focused' : '')}
+      aria-hidden="true"
+    >
+      <span className="dock-float-ph-char is-idle">{DOCK_PLACEHOLDER}</span>
+    </span>
+  );
+}
+
 function QuickCardFan({
   open, selected, onFabTap, onSelectCard, onClose,
-  onMoodSubmit, onSymptomSubmit, onWeightSubmit,
+  onMoodSubmit, onSymptomSubmit, onWeightSubmit, onFoodSubmit,
 }){
   const I = window.Icon;
   const QuickCardIcon = window.QuickCardIcon;
   const QuickMoodPicker = window.QuickMoodPicker;
   const QuickSymptomPicker = window.QuickSymptomPicker;
   const QuickWeightPicker = window.QuickWeightPicker;
+  const QuickFoodPicker = window.QuickFoodPicker;
 
   return (
     <div className={'quick-card-fan'+(open ? ' is-open' : '')+(selected ? ' has-selected' : '')}>
@@ -74,6 +89,8 @@ function QuickCardFan({
                   <QuickMoodPicker onSubmit={onMoodSubmit}/>
                 ) : card.id === 'symptom' ? (
                   <QuickSymptomPicker onSubmit={onSymptomSubmit}/>
+                ) : card.id === 'diet' ? (
+                  <QuickFoodPicker onSubmit={onFoodSubmit}/>
                 ) : (
                   <QuickWeightPicker onSubmit={onWeightSubmit}/>
                 )}
@@ -100,8 +117,9 @@ function QuickCardFan({
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
+  onFoodConfirm,
   onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
-  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
+  highlightScheme3Input, showFirstDropBubble, dockPlaceholder, defaultInputMode = 'text',
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -186,6 +204,11 @@ function DockPublisher({
     onWeightConfirm?.(payload);
   };
 
+  const handleQuickFoodSubmit = (foods)=>{
+    closeQuick();
+    onFoodConfirm?.(foods);
+  };
+
   const handleMoodConfirm = (moods)=>{
     setDockSheet(null);
     onMoodConfirm?.(moods);
@@ -228,6 +251,7 @@ function DockPublisher({
           onMoodSubmit={handleQuickMoodSubmit}
           onSymptomSubmit={handleQuickSymptomSubmit}
           onWeightSubmit={handleQuickWeightSubmit}
+          onFoodSubmit={handleQuickFoodSubmit}
         />
       </div>
 
@@ -250,6 +274,11 @@ function DockPublisher({
             />
           ) : (
           <div className="dock-bar">
+            {showFirstDropBubble && !draft.trim() && !inputFocused ? (
+              <span className="dock-first-drop-bubble" aria-hidden="true">
+                第一滴已落下，继续记录吧
+              </span>
+            ) : null}
             <div className="dock-input-row">
               <button
                 type="button"
@@ -266,14 +295,18 @@ function DockPublisher({
                 <div className={'dock-text-field'
                   +(inputFocused?' is-focused':'')
                   +(highlightScheme3Input?' is-scheme3-highlight':'')}>
-                  {showScheme3Bubble && !draft.trim() && !inputFocused ? (
+                  {showScheme3Bubble && !draft.trim() && !inputFocused && !showFirstDropBubble ? (
                     <span className="dock-scheme3-bubble" aria-hidden="true">
                       ✏️ 记下第一刻
                     </span>
                   ) : null}
+                  <DockWavePlaceholder
+                    show={inputMode === 'text' && !draft.trim() && !showScheme3Bubble && !showFirstDropBubble}
+                    focused={inputFocused}
+                  />
                   <textarea
                     rows="1"
-                    placeholder={inputPlaceholder}
+                    placeholder=""
                     aria-label={inputPlaceholder}
                     value={draft}
                     onChange={(e)=>{

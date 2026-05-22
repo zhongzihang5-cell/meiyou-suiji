@@ -2166,3 +2166,205 @@
   display:block;
   height:100%;
 }
+/* ============ 心情洞察卡（首次记录情绪 · V3v2规范） ============ */
+.tl-mood-insight{
+  background:#ffffff;
+  border-radius:14px;
+  border:0.5px solid rgba(0,0,0,0.06);
+  padding:11px 12px 4px;
+  overflow:hidden;
+}
+.tl-mood-insight-hd{
+  display:flex;
+  align-items:center;
+  font-size:11.5px;
+  color:var(--my-text-tertiary);
+  font-variant-numeric:tabular-nums;
+  margin-bottom:8px;
+}
+.tl-mood-insight-time{
+  font-variant-numeric:tabular-nums;
+}
+/* 用户记录区 */
+.tl-mood-insight-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding-bottom:10px;
+  min-height:44px;
+}
+.tl-mood-insight-face{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  overflow:hidden;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,77,136,0.06);
+}
+.tl-mood-insight-face .mood-face-svg{
+  width:40px;
+  height:40px;
+  display:block;
+}
+.tl-mood-insight-mood-meta{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+.tl-mood-insight-mood-label{
+  font-size:11px;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-insight-mood-value{
+  font-size:18px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.2;
+}
+/* AI 折叠区 */
+.tl-mood-insight-ai-wrap{
+  margin-inline:-12px;
+}
+.tl-mood-insight-divider{
+  height:0;
+  border-top:0.5px dashed rgba(0,0,0,0.08);
+}
+.tl-mood-insight-ai-toggle{
+  width:100%;
+  background:transparent;
+  border:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-family:inherit;
+}
+.tl-mood-insight-ai-badge{
+  width:18px;
+  height:18px;
+  border-radius:9px;
+  background:var(--my-brand-soft);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--my-brand-red);
+  flex-shrink:0;
+}
+.tl-mood-insight-ai-label{
+  font-size:11px;
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.tl-mood-insight-ai-title{
+  font-size:12.5px;
+  color:var(--my-text-primary);
+  font-weight:500;
+  flex:1;
+  text-align:left;
+}
+.tl-mood-insight-ai-chev{
+  flex-shrink:0;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-insight-ai-body{
+  padding:0 12px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.tl-mood-insight-copy{
+  font-size:13px;
+  line-height:1.55;
+  color:var(--my-text-primary);
+  margin:0;
+}
+.tl-mood-insight-follow-up{
+  font-size:12.5px;
+  line-height:1.55;
+  color:var(--my-text-secondary);
+  margin:0;
+  padding:8px 10px;
+  background:rgba(255,77,136,0.04);
+  border-radius:10px;
+  border-left:2px solid var(--my-brand-red);
+}
+/* 曲线标题+图表紧凑组 */
+.tl-mood-insight-chart-block{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.tl-mood-insight-inner-sep{
+  height:0;
+  border-top:0.5px solid rgba(0,0,0,0.06);
+  margin-bottom:6px;
+}
+.tl-mood-insight-chart-label{
+  font-size:12px;
+  color:var(--my-text-secondary);
+  font-weight:500;
+  padding-left:2px;
+}
+/* 情绪与周期行 */
+.tl-mood-insight-phase-row{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:9px 10px;
+  background:rgba(79,124,174,0.06);
+  border-radius:10px;
+}
+.tl-mood-insight-phase-pill{
+  padding:2px 8px;
+  background:rgba(79,124,174,0.18);
+  color:#3f6590;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:500;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.tl-mood-insight-phase-text{
+  font-size:13px;
+  line-height:1.5;
+  color:var(--my-text-primary);
+}
+/* 曲线图（共用） */
+.tl-mood-curve{
+  position:relative;
+  width:100%;
+}
+.tl-mood-curve svg{
+  display:block;
+}
+.tl-mood-curve-axis{
+  margin-top:-14px;
+  display:flex;
+  justify-content:space-between;
+  padding:0 6px;
+}
+.tl-mood-curve-day{
+  font-size:10px;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-curve-day.is-today{
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+/* 流式淡入：用 --mi-i 错峰 */
+.tl-mood-insight.is-stream .tl-mood-insight-hd,
+.tl-mood-insight.is-stream .tl-mood-insight-user,
+.tl-mood-insight.is-stream .tl-mood-insight-ai-wrap{
+  opacity:0;
+  transform:translateY(5px);
+  animation:miSlotIn 0.38s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay:calc(60ms + var(--mi-i,0) * 260ms);
+}
+@keyframes miSlotIn{
+  to{opacity:1;transform:translateY(0)}
+}

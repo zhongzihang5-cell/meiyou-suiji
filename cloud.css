@@ -619,12 +619,12 @@
   position:absolute;
   right:0;
   bottom:56px;
-  width:100px;
-  height:124px;
-  border-radius:16px;
-  background:#fff;
-  overflow:hidden;
-  box-shadow:0 12px 32px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.08);
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:transparent;
+  overflow:visible;
+  box-shadow:none;
   transform:translate(0,0) rotate(0deg) scale(0.4);
   opacity:0;
   transform-origin:100% 100%;
@@ -633,6 +633,12 @@
   transition:
     transform 360ms cubic-bezier(0.32,0.94,0.38,1) var(--card-delay, 0ms),
     opacity 240ms ease var(--card-delay, 0ms);
+}
+.quick-card-fan-item::before{
+  content:none;
+}
+.quick-card-fan-item::after{
+  content:none;
 }
 .quick-card-fan-item.is-visible{
   pointer-events:auto;
@@ -654,10 +660,13 @@
 }
 .quick-card-fan-item.is-selected{
   right:12px;
-  bottom:64px;
-  width:240px;
-  max-width:calc(100% - 24px);
-  height:124px;
+  bottom:0;
+  width:calc(100% - 24px);
+  max-width:366px;
+  height:150px;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 14px 34px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -674,28 +683,35 @@
     opacity 200ms ease;
 }
 .quick-card-fan-item.is-selected[data-card="mood"]{
-  height:136px;
+  height:186px;
 }
 .quick-card-fan-item.is-selected[data-card="symptom"]{
-  height:232px;
+  height:260px;
 }
 .quick-card-fan-item.is-selected[data-card="weight"]{
-  height:172px;
+  height:196px;
+}
+.quick-card-fan-item.is-selected[data-card="diet"]{
+  height:224px;
 }
 
 .quick-card-fan-face{
   position:absolute;
   inset:0;
   border:0;
-  background:transparent;
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:50%;
+  box-shadow:0 8px 20px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:10px;
+  gap:2px;
   cursor:pointer;
   padding:0;
   transition:opacity 200ms ease, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
+  z-index:1;
 }
 .quick-card-fan-item.is-selected .quick-card-fan-face{
   opacity:0;
@@ -704,28 +720,37 @@
   transition:opacity 180ms ease 60ms, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
 }
 .quick-card-fan-ico{
-  width:48px;
-  height:48px;
-  border-radius:24px;
-  background:var(--my-brand-soft);
+  width:24px;
+  height:20px;
+  border-radius:50%;
+  background:transparent;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 .quick-card-fan-meta{
+  position:static;
+  transform:none;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:2px;
+  gap:0;
+  text-align:center;
 }
 .quick-card-fan-lbl{
-  font-size:13px;
+  font-size:9px;
   font-weight:500;
   color:var(--my-text-primary);
+  line-height:1.1;
+  white-space:nowrap;
+  background:transparent;
+  border:none;
+  border-radius:0;
+  padding:0;
+  box-shadow:none;
 }
 .quick-card-fan-hint{
-  font-size:10px;
-  color:var(--my-text-tertiary);
+  display:none;
 }
 
 .quick-card-fan-panel{
@@ -837,6 +862,11 @@
   width:100%;
   padding:4px 0;
 }
+.quick-card-picker--food{
+  width:100%;
+  gap:8px;
+  align-items:stretch;
+}
 .quick-card-mood-btn{
   border:0;
   background:transparent;
@@ -880,6 +910,32 @@
   background:var(--my-brand-soft);
   color:var(--my-brand-red);
   font-weight:500;
+}
+.quick-card-food-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:flex-start;
+  width:100%;
+}
+.quick-card-food-tag{
+  border:1px solid rgba(79,124,174,0.22);
+  background:rgba(79,124,174,0.08);
+  color:#3f6590;
+  padding:5px 10px;
+  border-radius:14px;
+  font-size:12px;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:500;
+  white-space:nowrap;
+  flex-shrink:0;
+  transition:all 140ms ease;
+}
+.quick-card-food-tag.is-selected{
+  border-color:#3f6590;
+  background:rgba(79,124,174,0.18);
+  color:#2c4b70;
 }
 .quick-card-weight-stepper{
   display:flex;
@@ -952,6 +1008,12 @@
   gap:8px;
   padding:8px 12px 10px;
   position:relative;
+  overflow:visible;
+}
+.dock-bar .dock-first-drop-bubble{
+  position:absolute;
+  left:68px;
+  bottom:calc(100% - 2px);
 }
 
 .dock-fan{

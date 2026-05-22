@@ -1525,7 +1525,7 @@
   white-space:nowrap;
   pointer-events:none;
   box-shadow:0 2px 12px rgba(255,77,136,0.25);
-  animation:rbBubbleIn 0.4s ease 2s both;
+  animation:rbBubbleIn 0.4s ease 0.55s both;
   z-index:2;
 }
 

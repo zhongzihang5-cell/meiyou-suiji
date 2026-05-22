@@ -59,6 +59,24 @@ function App(){
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
+  const firstRecordAnimDoneRef = useRef(false);
+  const moodGuideQueueRef = useRef(null);
+  const firstDropBubbleTimerRef = useRef(null);
+  const dropLandRevealRef = useRef(false);
+  const [firstDropAnim, setFirstDropAnim] = useState(null);
+  const [showFirstDropBubble, setShowFirstDropBubble] = useState(false);
+
+  const recordFeedback = !!scene.record.recordFeedback;
+
+  React.useEffect(()=>{
+    const handler = ()=>{
+      const fn = moodGuideQueueRef.current;
+      moodGuideQueueRef.current = null;
+      fn?.();
+    };
+    window.addEventListener('moodCardStreamDone', handler);
+    return ()=>window.removeEventListener('moodCardStreamDone', handler);
+  }, []);
 
   const resetSceneState = (demoSceneId)=>{
     const next = window.getSceneInitialState(demoSceneId);
@@ -72,6 +90,15 @@ function App(){
     setShowPhoto(false);
     setShowSearchPage(false);
     scheme3FirstVisitRef.current = null;
+    setFirstDropAnim(null);
+    setShowFirstDropBubble(false);
+    firstRecordAnimDoneRef.current = false;
+    moodGuideQueueRef.current = null;
+    dropLandRevealRef.current = false;
+    if(firstDropBubbleTimerRef.current){
+      clearTimeout(firstDropBubbleTimerRef.current);
+      firstDropBubbleTimerRef.current = null;
+    }
   };
 
   useEffect(()=>{
@@ -201,6 +228,61 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const revealFirstDropEntry = React.useCallback(()=>{
+    if(dropLandRevealRef.current) return;
+    dropLandRevealRef.current = true;
+    setTimeline(blocks=>blocks.map(b=>{
+      if(b.type !== 'day') return b;
+      const items = (b.items || b.entries || []).map(it=>{
+        if(it.id !== firstDropAnim?.entryId) return it;
+        const next = { ...it };
+        delete next.hideBodyUntilDrop;
+        delete next.pendingDrop;
+        if(it.kind === 'mood-insight' || it.kind === 'record-group') next.isNew = true;
+        return next;
+      });
+      return { ...b, items, entries: undefined };
+    }));
+    requestAnimationFrame(()=>{
+      setTimeout(()=>scrollTimelineToLastItem('smooth'), 80);
+    });
+  }, [firstDropAnim]);
+
+  const handleFirstDropLand = React.useCallback(()=>{
+    revealFirstDropEntry();
+  }, [revealFirstDropEntry]);
+
+  const handleFirstDropComplete = React.useCallback(()=>{
+    setFirstDropAnim(null);
+    dropLandRevealRef.current = false;
+  }, []);
+
+  useEffect(()=>{
+    if(draft.trim()) setShowFirstDropBubble(false);
+  }, [draft]);
+
+  const tryStartFirstDrop = (entry, text)=>{
+    if(!recordFeedback || firstRecordAnimDoneRef.current) return false;
+    firstRecordAnimDoneRef.current = true;
+
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId(text || entry.body || '', timeline);
+
+    const pending = (entry.kind === 'mood-insight' || entry.kind === 'record-group')
+      ? { ...entry, pendingDrop: true, isNew: false }
+      : { ...entry, hideBodyUntilDrop: true, isNew: true };
+
+    setFirstDropAnim({ entryId: pending.id });
+    setShowFirstDropBubble(true);
+    if(firstDropBubbleTimerRef.current) clearTimeout(firstDropBubbleTimerRef.current);
+    firstDropBubbleTimerRef.current = setTimeout(()=>{
+      setShowFirstDropBubble(false);
+      firstDropBubbleTimerRef.current = null;
+    }, 6500);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, pending, { dayId }));
+    return true;
+  };
+
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
@@ -209,6 +291,7 @@ function App(){
     setDraft('');
     markUserRecorded();
     const entry = buildTimelineEntry(text, hits, opts);
+    if(recordFeedback && tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -225,6 +308,7 @@ function App(){
     const entry = buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     });
+    if(recordFeedback && tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -232,9 +316,56 @@ function App(){
     submitText(mark.text, { quickTag: { emoji: mark.emoji, label: mark.label } });
   };
 
+  const collectTodayQuickMoodHistory = ()=>{
+    const today = timeline.find(b=>b.type==='day' && b.isToday);
+    if(!today) return [];
+    const items = today.items || today.entries || [];
+    return items
+      .filter(it=>it && it.quickMood)
+      .map(it=>it.quickMood);
+  };
+
+  const appendMoodGuide = (guideText, dayId)=>{
+    moodGuideQueueRef.current = ()=>{
+      const guide = {
+        id: 'e-mood-guide-' + Date.now(),
+        kind: 'guide',
+        isNew: true,
+        alwaysShow: true,
+        guideDelay: 200,
+        text: guideText,
+      };
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, guide, { dayId }));
+    };
+  };
+
   const submitMoodRecord = (moods)=>{
     markUserRecorded();
-    const entry = window.createMoodRecordEntry(moods);
+    if(recordFeedback){
+      const history = collectTodayQuickMoodHistory();
+      const isFirst = history.length === 0;
+      if(!isFirst) moodGuideQueueRef.current = null;
+      const entry = isFirst
+        ? window.createMoodRecordEntry(moods)
+        : window.createMoodQuickEntry(moods, history);
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId('', timeline);
+      if(tryStartFirstDrop(entry, '')){
+        if(isFirst && entry.guideText) appendMoodGuide(entry.guideText, dayId);
+        return;
+      }
+      setTimeline(blocks=>{
+        const cleaned = !isFirst ? blocks.map(b=>{
+          if(b.type !== 'day') return b;
+          const items = (b.items || b.entries || []).filter(it=>!(it.kind === 'guide' && it.alwaysShow));
+          return { ...b, items, entries: undefined };
+        }) : blocks;
+        return window.appendTimelineEntry(cleaned, entry, { dayId });
+      });
+      if(isFirst && entry.guideText) appendMoodGuide(entry.guideText, dayId);
+      return;
+    }
+    const entry = window.createMoodRecordEntryLegacy(moods);
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -243,6 +374,7 @@ function App(){
   const submitSymptomRecord = (symptoms)=>{
     markUserRecorded();
     const entry = window.createSymptomRecordEntry(symptoms);
+    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -251,6 +383,16 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
+    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitFoodRecord = (foods)=>{
+    markUserRecorded();
+    const entry = window.createFoodRecordEntry(foods);
+    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -353,6 +495,7 @@ function App(){
           onMoodConfirm={submitMoodRecord}
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
+          onFoodConfirm={submitFoodRecord}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
@@ -404,6 +547,9 @@ function App(){
             sisterCycleDone={sisterCycleDone}
             hideTodayGuide={!showTodayGuide}
             onSisterCycleComplete={handleSisterCycleComplete}
+            firstDropAnim={recordFeedback ? firstDropAnim : null}
+            onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}
+            onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
         </div>
 
@@ -415,10 +561,12 @@ function App(){
           onMoodConfirm={submitMoodRecord}
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
+          onFoodConfirm={submitFoodRecord}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
+          showFirstDropBubble={recordFeedback && showFirstDropBubble}
         />
         </>
         )}

@@ -1512,12 +1512,12 @@ html,body{
   position:absolute;
   right:0;
   bottom:56px;
-  width:100px;
-  height:124px;
-  border-radius:16px;
-  background:#fff;
-  overflow:hidden;
-  box-shadow:0 12px 32px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.08);
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:transparent;
+  overflow:visible;
+  box-shadow:none;
   transform:translate(0,0) rotate(0deg) scale(0.4);
   opacity:0;
   transform-origin:100% 100%;
@@ -1526,6 +1526,12 @@ html,body{
   transition:
     transform 360ms cubic-bezier(0.32,0.94,0.38,1) var(--card-delay, 0ms),
     opacity 240ms ease var(--card-delay, 0ms);
+}
+.quick-card-fan-item::before{
+  content:none;
+}
+.quick-card-fan-item::after{
+  content:none;
 }
 .quick-card-fan-item.is-visible{
   pointer-events:auto;
@@ -1547,10 +1553,13 @@ html,body{
 }
 .quick-card-fan-item.is-selected{
   right:12px;
-  bottom:64px;
-  width:240px;
-  max-width:calc(100% - 24px);
-  height:124px;
+  bottom:0;
+  width:calc(100% - 24px);
+  max-width:366px;
+  height:150px;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 14px 34px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -1567,28 +1576,35 @@ html,body{
     opacity 200ms ease;
 }
 .quick-card-fan-item.is-selected[data-card="mood"]{
-  height:136px;
+  height:186px;
 }
 .quick-card-fan-item.is-selected[data-card="symptom"]{
-  height:232px;
+  height:260px;
 }
 .quick-card-fan-item.is-selected[data-card="weight"]{
-  height:172px;
+  height:196px;
+}
+.quick-card-fan-item.is-selected[data-card="diet"]{
+  height:224px;
 }
 
 .quick-card-fan-face{
   position:absolute;
   inset:0;
   border:0;
-  background:transparent;
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:50%;
+  box-shadow:0 8px 20px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:10px;
+  gap:2px;
   cursor:pointer;
   padding:0;
   transition:opacity 200ms ease, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
+  z-index:1;
 }
 .quick-card-fan-item.is-selected .quick-card-fan-face{
   opacity:0;
@@ -1597,28 +1613,37 @@ html,body{
   transition:opacity 180ms ease 60ms, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
 }
 .quick-card-fan-ico{
-  width:48px;
-  height:48px;
-  border-radius:24px;
-  background:var(--my-brand-soft);
+  width:24px;
+  height:20px;
+  border-radius:50%;
+  background:transparent;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 .quick-card-fan-meta{
+  position:static;
+  transform:none;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:2px;
+  gap:0;
+  text-align:center;
 }
 .quick-card-fan-lbl{
-  font-size:13px;
+  font-size:9px;
   font-weight:500;
   color:var(--my-text-primary);
+  line-height:1.1;
+  white-space:nowrap;
+  background:transparent;
+  border:none;
+  border-radius:0;
+  padding:0;
+  box-shadow:none;
 }
 .quick-card-fan-hint{
-  font-size:10px;
-  color:var(--my-text-tertiary);
+  display:none;
 }
 
 .quick-card-fan-panel{
@@ -1730,6 +1755,11 @@ html,body{
   width:100%;
   padding:4px 0;
 }
+.quick-card-picker--food{
+  width:100%;
+  gap:8px;
+  align-items:stretch;
+}
 .quick-card-mood-btn{
   border:0;
   background:transparent;
@@ -1773,6 +1803,32 @@ html,body{
   background:var(--my-brand-soft);
   color:var(--my-brand-red);
   font-weight:500;
+}
+.quick-card-food-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:flex-start;
+  width:100%;
+}
+.quick-card-food-tag{
+  border:1px solid rgba(79,124,174,0.22);
+  background:rgba(79,124,174,0.08);
+  color:#3f6590;
+  padding:5px 10px;
+  border-radius:14px;
+  font-size:12px;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:500;
+  white-space:nowrap;
+  flex-shrink:0;
+  transition:all 140ms ease;
+}
+.quick-card-food-tag.is-selected{
+  border-color:#3f6590;
+  background:rgba(79,124,174,0.18);
+  color:#2c4b70;
 }
 .quick-card-weight-stepper{
   display:flex;
@@ -1845,6 +1901,12 @@ html,body{
   gap:8px;
   padding:8px 12px 10px;
   position:relative;
+  overflow:visible;
+}
+.dock-bar .dock-first-drop-bubble{
+  position:absolute;
+  left:68px;
+  bottom:calc(100% - 2px);
 }
 
 .dock-fan{
@@ -4460,6 +4522,208 @@ html,body{
   display:block;
   height:100%;
 }
+/* ============ 心情洞察卡（首次记录情绪 · V3v2规范） ============ */
+.tl-mood-insight{
+  background:#ffffff;
+  border-radius:14px;
+  border:0.5px solid rgba(0,0,0,0.06);
+  padding:11px 12px 4px;
+  overflow:hidden;
+}
+.tl-mood-insight-hd{
+  display:flex;
+  align-items:center;
+  font-size:11.5px;
+  color:var(--my-text-tertiary);
+  font-variant-numeric:tabular-nums;
+  margin-bottom:8px;
+}
+.tl-mood-insight-time{
+  font-variant-numeric:tabular-nums;
+}
+/* 用户记录区 */
+.tl-mood-insight-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding-bottom:10px;
+  min-height:44px;
+}
+.tl-mood-insight-face{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  overflow:hidden;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,77,136,0.06);
+}
+.tl-mood-insight-face .mood-face-svg{
+  width:40px;
+  height:40px;
+  display:block;
+}
+.tl-mood-insight-mood-meta{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+.tl-mood-insight-mood-label{
+  font-size:11px;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-insight-mood-value{
+  font-size:18px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.2;
+}
+/* AI 折叠区 */
+.tl-mood-insight-ai-wrap{
+  margin-inline:-12px;
+}
+.tl-mood-insight-divider{
+  height:0;
+  border-top:0.5px dashed rgba(0,0,0,0.08);
+}
+.tl-mood-insight-ai-toggle{
+  width:100%;
+  background:transparent;
+  border:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-family:inherit;
+}
+.tl-mood-insight-ai-badge{
+  width:18px;
+  height:18px;
+  border-radius:9px;
+  background:var(--my-brand-soft);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--my-brand-red);
+  flex-shrink:0;
+}
+.tl-mood-insight-ai-label{
+  font-size:11px;
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.tl-mood-insight-ai-title{
+  font-size:12.5px;
+  color:var(--my-text-primary);
+  font-weight:500;
+  flex:1;
+  text-align:left;
+}
+.tl-mood-insight-ai-chev{
+  flex-shrink:0;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-insight-ai-body{
+  padding:0 12px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.tl-mood-insight-copy{
+  font-size:13px;
+  line-height:1.55;
+  color:var(--my-text-primary);
+  margin:0;
+}
+.tl-mood-insight-follow-up{
+  font-size:12.5px;
+  line-height:1.55;
+  color:var(--my-text-secondary);
+  margin:0;
+  padding:8px 10px;
+  background:rgba(255,77,136,0.04);
+  border-radius:10px;
+  border-left:2px solid var(--my-brand-red);
+}
+/* 曲线标题+图表紧凑组 */
+.tl-mood-insight-chart-block{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.tl-mood-insight-inner-sep{
+  height:0;
+  border-top:0.5px solid rgba(0,0,0,0.06);
+  margin-bottom:6px;
+}
+.tl-mood-insight-chart-label{
+  font-size:12px;
+  color:var(--my-text-secondary);
+  font-weight:500;
+  padding-left:2px;
+}
+/* 情绪与周期行 */
+.tl-mood-insight-phase-row{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:9px 10px;
+  background:rgba(79,124,174,0.06);
+  border-radius:10px;
+}
+.tl-mood-insight-phase-pill{
+  padding:2px 8px;
+  background:rgba(79,124,174,0.18);
+  color:#3f6590;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:500;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.tl-mood-insight-phase-text{
+  font-size:13px;
+  line-height:1.5;
+  color:var(--my-text-primary);
+}
+/* 曲线图（共用） */
+.tl-mood-curve{
+  position:relative;
+  width:100%;
+}
+.tl-mood-curve svg{
+  display:block;
+}
+.tl-mood-curve-axis{
+  margin-top:-14px;
+  display:flex;
+  justify-content:space-between;
+  padding:0 6px;
+}
+.tl-mood-curve-day{
+  font-size:10px;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-curve-day.is-today{
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+/* 流式淡入：用 --mi-i 错峰 */
+.tl-mood-insight.is-stream .tl-mood-insight-hd,
+.tl-mood-insight.is-stream .tl-mood-insight-user,
+.tl-mood-insight.is-stream .tl-mood-insight-ai-wrap{
+  opacity:0;
+  transform:translateY(5px);
+  animation:miSlotIn 0.38s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay:calc(60ms + var(--mi-i,0) * 260ms);
+}
+@keyframes miSlotIn{
+  to{opacity:1;transform:translateY(0)}
+}
 
 
 /* ============ 日历 Tab（经期记录页） ============ */
@@ -6530,7 +6794,7 @@ html,body{
   white-space:nowrap;
   pointer-events:none;
   box-shadow:0 2px 12px rgba(255,77,136,0.25);
-  animation:rbBubbleIn 0.4s ease 2s both;
+  animation:rbBubbleIn 0.4s ease 0.55s both;
   z-index:2;
 }
 
@@ -8679,7 +8943,7 @@ function SisterSignalCard({animated}){
         <div className="cc-head">
           <span className="cc-title">
             <img className="cc-icon" src={SC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
-            周期天数评估
+            月经信号灯
           </span>
         </div>
         <div className="sc-lights">
@@ -9194,10 +9458,81 @@ function ChartCaloriePanel({compact = false}){
   );
 }
 
-function TLChart({type, compact = false}){
+function ChartTodayMoodWave({data, compact = false}){
+  const gradId = React.useMemo(()=>'v3tm'+Math.random().toString(36).slice(2,9), []);
+  const w = 100;
+  const h = compact ? 36 : 60;
+  const minV = 1;
+  const maxV = 5;
+  const range = maxV - minV;
+  const points = (data || []).filter(d => Number.isFinite(d.v));
+
+  if(points.length === 0){
+    return (
+      <div style={{height: h, display:'flex', alignItems:'center', justifyContent:'center', color:TL_MUTED, fontSize:11}}>
+        今天暂未记录情绪
+      </div>
+    );
+  }
+
+  if(points.length === 1){
+    const only = points[0];
+    const y = h - ((only.v - minV) / range) * (h - 10) - 5;
+    return (
+      <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{display:'block'}}>
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={TL_PRIMARY} stopOpacity="0.25"/>
+            <stop offset="100%" stopColor={TL_PRIMARY} stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        <line x1="0" y1={y} x2={w} y2={y} stroke={TL_PRIMARY} strokeWidth="1.2" strokeOpacity="0.35" strokeDasharray="2,3"/>
+        <circle cx={w / 2} cy={y} r="2.4" fill={TL_PRIMARY}/>
+      </svg>
+    );
+  }
+
+  const xs = points.map(p => p.t);
+  const minT = Math.min(...xs);
+  const maxT = Math.max(...xs);
+  const tRange = maxT - minT || 1;
+  const xy = points.map(p => {
+    const x = ((p.t - minT) / tRange) * w;
+    const y = h - ((p.v - minV) / range) * (h - 10) - 5;
+    return [x, y];
+  });
+  const path = xy.map(([x, y], i)=>`${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+  const fill = `${path} L${w} ${h} L0 ${h} Z`;
+  const [lastX, lastY] = xy[xy.length - 1];
+
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{display:'block'}}>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={TL_PRIMARY} stopOpacity="0.25"/>
+          <stop offset="100%" stopColor={TL_PRIMARY} stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d={fill} fill={`url(#${gradId})`}/>
+      <path
+        d={path}
+        fill="none"
+        stroke={TL_PRIMARY}
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+      <circle cx={lastX} cy={lastY} r="2" fill={TL_PRIMARY}/>
+    </svg>
+  );
+}
+
+function TLChart({type, compact = false, data}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
   if(type === 'weightTrend') return <ChartWeightTrend compact={compact}/>;
   if(type === 'caloriePanel') return <ChartCaloriePanel compact={compact}/>;
+  if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   return null;
 }
 
@@ -9229,6 +9564,23 @@ function V3v2Header({time, title}){
 }
 
 function V3v2PrimaryBody({entry}){
+  if(entry.kind === 'mood-face'){
+    const MoodFace = window.MoodFace;
+    const mood = entry.primaryMood;
+    return (
+      <div style={{display:'flex', alignItems:'center', gap:10}}>
+        {MoodFace && mood && (
+          <div style={{width:40, height:40, borderRadius:'50%', overflow:'hidden', flexShrink:0,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(255,77,136,0.06)',
+          }}>
+            <MoodFace face={mood.face} bg={mood.bg}/>
+          </div>
+        )}
+        <span style={{fontSize:18, fontWeight:500, color:TL_TEXT, lineHeight:1.2}}>{entry.text}</span>
+      </div>
+    );
+  }
   if(entry.kind === 'voice'){
     const text = entry.text || entry.body || '';
     const voice = entry.voice || (entry.duration ? { duration: entry.duration } : null);
@@ -9309,7 +9661,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
       }}>
         <V3v2Header time={a.time} title={a.title}/>
         <div style={{marginTop:8}}>
-          <TLChart type={a.chartType}/>
+          <TLChart type={a.chartType} data={a.chartData}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
         </div>
       </div>
@@ -9350,7 +9702,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
           </button>
           {open && (
             <div style={{paddingBottom:12}}>
-              {a.chartType && <TLChart type={a.chartType}/>}
+              {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
               {a.note && (
                 <div style={{
                   fontSize:13, color:TL_TEXT, lineHeight:1.55,
@@ -9662,6 +10014,155 @@ function DockMoodPicker({onConfirm, onCancel}){
 
 function createMoodRecordEntry(moods){
   const list = Array.isArray(moods) ? moods : [moods];
+  const primary = list[0];
+  const time = window.formatNowTime();
+  const score = moodScoreOf(primary);
+  return {
+    id:'e-'+Date.now(),
+    kind:'mood-insight',
+    time,
+    isNew: true,
+    skipExtractLabel: true,
+    moods: list,
+    primaryMood: primary,
+    copy: buildMoodCopy(primary),
+    phaseCopy: buildPhaseCopy(primary),
+    followUp: buildFollowUp(primary),
+    guideText: (()=>{
+      const c = buildMoodCopy(primary);
+      const f = buildFollowUp(primary);
+      return f ? c + '。' + f : c;
+    })(),
+    chart: {
+      title:'近 1 周情绪波动曲线',
+      data: buildMoodTrend(primary),
+    },
+    quickMood: {
+      label: primary?.label || '',
+      score,
+      time,
+    },
+  };
+}
+
+const MOOD_SCORE_MAP = {
+  'super-happy':5,'excited':5,'surprised':5,'satisfied':5,'heart-flutter':5,'confident':5,
+  'happy':4,'relaxed':4,
+  'normal':3,'calm':3,'indifferent':3,
+  'unhappy':2,'irritable':2,'temper':2,'anxious':2,'overthink':2,'stressed':2,'scared':2,
+  'very-sad':1,'angry':1,
+};
+
+const MOOD_WEEK_BASELINE = [
+  { d:'周一', v:3 },
+  { d:'周二', v:2 },
+  { d:'周三', v:3 },
+  { d:'周四', v:4 },
+  { d:'周五', v:3 },
+  { d:'周六', v:4 },
+];
+
+function moodScoreOf(mood){
+  if(!mood) return 3;
+  if(typeof mood.score === 'number') return mood.score;
+  return MOOD_SCORE_MAP[mood.id] || MOOD_SCORE_MAP[mood.face] || 3;
+}
+
+function buildMoodTrend(currentMood){
+  const todayScore = moodScoreOf(currentMood);
+  return [
+    ...MOOD_WEEK_BASELINE,
+    { d:'今天', v: todayScore, isToday:true },
+  ];
+}
+
+function buildMoodCopy(mood){
+  const id = mood?.id || '';
+  if(id === 'very-sad' || id === 'angry') return '这一刻的难过是真实的，允许自己兴趣低落';
+  if(id === 'unhappy' || MOOD_SCORE_MAP[id] === 2) return '不开心也是今天的一部分，不用急着赶走它';
+  if(id === 'super-happy' || id === 'excited' || id === 'heart-flutter') return '这份雀跃挺珍贵，慢慢享受它';
+  if(MOOD_SCORE_MAP[id] >= 4) return '今天的好心情值得被记下来';
+  return '平平淡淡也是一种状态，不必勉强自己振作';
+}
+
+function buildFollowUp(mood){
+  const id = mood?.id || '';
+  const label = mood?.label || '';
+  const triggered = (
+    id === 'very-sad' || id === 'angry' ||
+    id === 'unhappy' || MOOD_SCORE_MAP[id] === 2 ||
+    id === 'happy' || id === 'relaxed' ||
+    id === 'super-happy' || id === 'excited' || id === 'heart-flutter' || id === 'confident'
+  );
+  if(!triggered || !label) return '';
+  return `是因为什么事${label}呢？可以通过语音告诉我，我帮你记录下来。`;
+}
+
+function buildPhaseCopy(mood){
+  const id = mood?.id || '';
+  const score = MOOD_SCORE_MAP[id] || 3;
+  if(id === 'very-sad' || id === 'angry') return '卵泡期雌激素正在回升，身体会帮你慢慢恢复力气';
+  if(score <= 2) return '卵泡期通常情绪相对平稳，如果今天格外低落，可能和睡眠、压力更相关';
+  if(score === 3) return '卵泡期身体处于修复阶段，"还行"其实是不错的信号';
+  if(id === 'super-happy' || id === 'excited' || id === 'heart-flutter') return '卵泡期是一个周期里精力和情绪的高点，适合做点想做很久的事';
+  if(score >= 4) return '卵泡期雌激素上升，大脑对愉悦的感受会更敏锐一些';
+  return '卵泡期身体处于修复阶段，"还行"其实是不错的信号';
+}
+
+function timeStrToMinutes(s){
+  if(!s) return 0;
+  const parts = String(s).split(':');
+  return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+}
+
+function buildTodayMoodPoints(history, currentMood){
+  const list = (history || []).map(h => ({
+    t: timeStrToMinutes(h.time),
+    v: h.score,
+    label: h.label,
+  }));
+  const time = window.formatNowTime();
+  list.push({
+    t: timeStrToMinutes(time),
+    v: moodScoreOf(currentMood),
+    label: currentMood?.label || '',
+    isLast: true,
+  });
+  list.sort((a, b) => a.t - b.t);
+  return { points: list, time };
+}
+
+function createMoodQuickEntry(moods, history){
+  const list = Array.isArray(moods) ? moods : [moods];
+  const primary = list[0];
+  const label = primary?.label || '愉快';
+  const { time } = buildTodayMoodPoints(history, primary);
+  const score = moodScoreOf(primary);
+  const stamp = Date.now();
+
+  return {
+    kind:'record-group',
+    id:'e-mood-quick-'+stamp,
+    isNew: true,
+    skipExtractLabel: true,
+    isQuickMood: true,
+    primary:{
+      id:'e-mood-quick-p-'+stamp,
+      kind:'mood-face',
+      time,
+      text: label,
+      primaryMood: primary,
+    },
+    quickMood: {
+      label,
+      score,
+      time,
+    },
+  };
+}
+
+function createMoodRecordEntryLegacy(moods){
+  const list = Array.isArray(moods) ? moods : [moods];
   return {
     id:'e-'+Date.now(),
     kind:'rec',
@@ -9679,6 +10180,14 @@ Object.assign(window, {
   MoodFace,
   DockMoodPicker,
   createMoodRecordEntry,
+  createMoodRecordEntryLegacy,
+  createMoodQuickEntry,
+  moodScoreOf,
+  buildMoodTrend,
+  buildMoodCopy,
+  buildPhaseCopy,
+  buildTodayMoodPoints,
+  timeStrToMinutes,
 });
 
 </script>
@@ -9961,6 +10470,16 @@ function QuickCardIcon({ kind, color = 'var(--my-text-primary)', size = 24 }) {
       </svg>
     );
   }
+  if(kind === 'diet'){
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 5.5v6.3c0 1.3 1 2.3 2.3 2.3h1.2v4.8" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+        <path d="M8.5 5.5v4.2M6.8 5.5v4.2" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+        <path d="M14.6 5.8c2.2.1 3.9 1.9 3.9 4.1v9" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+        <path d="M14.6 11h3.9" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
+      </svg>
+    );
+  }
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="3.5" y="5.5" width="17" height="14" rx="2.5" stroke={color} strokeWidth={sw}/>
@@ -10062,6 +10581,68 @@ function QuickWeightPicker({ onSubmit, current = 52.3 }) {
   );
 }
 
+const QUICK_FOOD_OPTIONS = [
+  { id:'breakfast', label:'早餐' },
+  { id:'lunch', label:'午餐' },
+  { id:'dinner', label:'晚餐' },
+  { id:'snack', label:'加餐' },
+  { id:'fruit', label:'水果' },
+  { id:'coffee', label:'咖啡/茶' },
+  { id:'water', label:'补水' },
+  { id:'dessert', label:'甜食' },
+];
+
+function QuickFoodPicker({ onSubmit }) {
+  const [sel, setSel] = React.useState([]);
+  const toggle = (id)=> setSel(s=> {
+    if(s.includes(id)) return s.filter(x=>x!==id);
+    if(s.length >= 3) return [...s.slice(1), id];
+    return [...s, id];
+  });
+  const picked = QUICK_FOOD_OPTIONS.filter(t=>sel.includes(t.id));
+
+  return (
+    <div className="quick-card-picker quick-card-picker--food">
+      <div className="quick-card-food-tags">
+        {QUICK_FOOD_OPTIONS.map(t=>{
+          const on = sel.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={'quick-card-food-tag'+(on ? ' is-selected' : '')}
+              onClick={()=>toggle(t.id)}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        className="quick-card-submit"
+        disabled={picked.length === 0}
+        onClick={()=>picked.length > 0 && onSubmit?.(picked)}
+      >
+        {picked.length ? `记录饮食 · ${picked.length} 项` : '选择后记录'}
+      </button>
+    </div>
+  );
+}
+
+function createFoodRecordEntry(foods){
+  const list = Array.isArray(foods) ? foods : [foods];
+  return {
+    id:'e-'+Date.now(),
+    kind:'rec',
+    time: window.formatNowTime(),
+    body:'',
+    tags:list.map(s=>({ label:'饮食 '+s.label, cat:'diet' })),
+    tagLayout:'t5',
+    isNew: true,
+  };
+}
+
 Object.assign(window, {
   SYMPTOM_SECTIONS,
   SYMPTOM_OPTIONS,
@@ -10073,6 +10654,9 @@ Object.assign(window, {
   QuickMoodPicker,
   QuickSymptomPicker,
   QuickWeightPicker,
+  QuickFoodPicker,
+  QUICK_FOOD_OPTIONS,
+  createFoodRecordEntry,
   createSymptomRecordEntry,
   createWeightRecordEntry,
 });
@@ -10194,14 +10778,20 @@ function CycleDayHeader({day, items, dayBlocks}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, dropAnim, onDropLand, onDropComplete}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
+  const RecordBlankAxisDropAnim = window.RecordBlankAxisDropAnim;
+  const isDrop = !!dropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(isDrop?' is-axis-drop':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
-        <span className={'tl-rail-dot'+dotCls}/>
+        {isDrop && RecordBlankAxisDropAnim ? (
+          <RecordBlankAxisDropAnim onLand={onDropLand} onComplete={onDropComplete}/>
+        ) : (
+          <span className={'tl-rail-dot'+dotCls}/>
+        )}
       </div>
       <div className="tl-rail-body">{children}</div>
     </div>
@@ -10531,7 +11121,192 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+function MoodCurveChart({data}){
+  const w = 280;
+  const h = 64;
+  const padX = 14;
+  const padTop = 8;
+  const padBot = 22;
+  const minV = 1;
+  const maxV = 5;
+  const range = maxV - minV;
+  const innerW = w - padX * 2;
+  const innerH = h - padTop - padBot;
+  const points = (data || []).map((d, i)=>{
+    const x = padX + (innerW * i) / Math.max(1, (data.length - 1));
+    const y = padTop + innerH - ((d.v - minV) / range) * innerH;
+    return { x, y, d };
+  });
+  const linePath = points.length ? points.map((p, i)=>(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ') : '';
+  const areaPath = points.length
+    ? `${linePath} L${points[points.length-1].x.toFixed(1)},${padTop + innerH} L${points[0].x.toFixed(1)},${padTop + innerH} Z`
+    : '';
+
+  return (
+    <div className="tl-mood-curve" aria-hidden="true">
+      <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="moodCurveFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ff4d88" stopOpacity="0.22"/>
+            <stop offset="100%" stopColor="#ff4d88" stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        {areaPath && <path d={areaPath} fill="url(#moodCurveFill)"/>}
+        {linePath && (
+          <path
+            d={linePath}
+            fill="none"
+            stroke="#ff4d88"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+        {points.map((p, i)=>(
+          <circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r={p.d.isToday ? 4 : 2.2}
+            fill={p.d.isToday ? '#ff4d88' : '#fff'}
+            stroke={p.d.isToday ? '#fff' : '#ff4d88'}
+            strokeWidth={p.d.isToday ? 1.5 : 1.4}
+          />
+        ))}
+      </svg>
+      <div className="tl-mood-curve-axis">
+        {(data || []).map((d, i)=>(
+          <span
+            key={i}
+            className={'tl-mood-curve-day'+(d.isToday ? ' is-today' : '')}
+          >
+            {d.d}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MoodInsightCard({item, isNew}){
+  const MoodFace = window.MoodFace;
+  const TypewriterText = window.TypewriterText;
+  const [aiOpen, setAiOpen] = React.useState(true);
+  const [step, setStep] = React.useState(isNew ? 0 : 10);
+  const doneRef = React.useRef(false);
+
+  const primary = item.primaryMood || (item.moods && item.moods[0]);
+  const moodLabel = primary?.label || '愉快';
+  const chart = item.chart || {};
+  const phaseCopy = item.phaseCopy || '';
+  const hasAi = !!(phaseCopy || chart.data?.length > 0);
+
+  React.useEffect(()=>{
+    if(!isNew) return;
+    const ts = [
+      setTimeout(()=>setStep(1), 80),
+      setTimeout(()=>setStep(2), 600),
+      setTimeout(()=>setStep(3), 1200),
+      setTimeout(()=>setStep(4), 1600),
+    ];
+    return ()=>ts.forEach(clearTimeout);
+  }, [isNew]);
+
+  React.useEffect(()=>{
+    if(!isNew || step !== 4 || phaseCopy) return;
+    const t = setTimeout(()=>setStep(5), 300);
+    return ()=>clearTimeout(t);
+  }, [step, isNew, phaseCopy]);
+
+  const handlePhaseTyped = React.useCallback(()=>{
+    setStep(s => Math.max(s, 5));
+  }, []);
+
+  React.useEffect(()=>{
+    if(!isNew || doneRef.current) return;
+    const targetStep = hasAi ? 5 : 3;
+    if(step >= targetStep){
+      doneRef.current = true;
+      const t = setTimeout(()=>{
+        window.dispatchEvent(new CustomEvent('moodCardStreamDone'));
+      }, 500);
+      return ()=>clearTimeout(t);
+    }
+  }, [step, isNew, hasAi]);
+
+  const vis = n => isNew ? {
+    opacity: step >= n ? 1 : 0,
+    transform: step >= n ? 'translateY(0)' : 'translateY(6px)',
+    transition: 'opacity 0.4s ease, transform 0.38s ease',
+  } : {};
+
+  return (
+    <article className="tl-mood-insight">
+      <header className="tl-mood-insight-hd" style={vis(1)}>
+        <span className="tl-mood-insight-time">{item.time}</span>
+      </header>
+
+      <div className="tl-mood-insight-user" style={vis(2)}>
+        <span className="tl-mood-insight-face">
+          {primary && MoodFace ? <MoodFace face={primary.face} bg={primary.bg}/> : null}
+        </span>
+        <span className="tl-mood-insight-mood-value">{moodLabel}</span>
+      </div>
+
+      {hasAi && step >= 3 && (
+        <div className="tl-mood-insight-ai-wrap" style={vis(3)}>
+          <div className="tl-mood-insight-divider"/>
+          <button
+            type="button"
+            className="tl-mood-insight-ai-toggle"
+            onClick={()=>setAiOpen(v=>!v)}
+            aria-expanded={aiOpen}
+          >
+            <span className="tl-mood-insight-ai-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 20V6M4 20h16M8 16v-4M12 16V8M16 16v-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+              </svg>
+            </span>
+            <span className="tl-mood-insight-ai-label">AI</span>
+            <span className="tl-mood-insight-ai-title">情绪与周期分析</span>
+            <svg
+              className="tl-mood-insight-ai-chev"
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              style={{transform: aiOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition:'transform 0.2s'}}
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          {aiOpen && step >= 4 && (
+            <div className="tl-mood-insight-ai-body">
+              {phaseCopy && (
+                <div className="tl-mood-insight-phase-row">
+                  <span className="tl-mood-insight-phase-pill">卵泡期</span>
+                  <span className="tl-mood-insight-phase-text">
+                    {(isNew && TypewriterText)
+                      ? <TypewriterText text={phaseCopy} active charMs={55} onComplete={handlePhaseTyped}/>
+                      : phaseCopy}
+                  </span>
+                </div>
+              )}
+              {step >= 5 && chart.data?.length > 0 && (
+                <div className="tl-mood-insight-chart-block" style={vis(5)}>
+                  <div className="tl-mood-insight-inner-sep"/>
+                  <span className="tl-mood-insight-chart-label">{chart.title || '近 1 周情绪波动曲线'}</span>
+                  <MoodCurveChart data={chart.data}/>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && (
     isNew || item.hiddenUntilSisterDone
@@ -10539,9 +11314,11 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
 
   let body = null;
   if(item.kind === 'record-group'){
-    body = <V3RecordGroupCard group={item} isNew={isNew}/>;
+    body = item.pendingDrop ? null : <V3RecordGroupCard group={item} isNew={isNew}/>;
   } else if(item.kind === 'guide'){
     body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
+  } else if(item.kind === 'mood-insight'){
+    body = item.pendingDrop ? null : <MoodInsightCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card' || item.kind === 'sync-card'){
@@ -10577,9 +11354,12 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
         entry={item}
         isNew={isNew}
         typewriterAiNote={!!(isNew && item.aiNote)}
+        hideBodyUntilDrop={item.hideBodyUntilDrop}
       />
     );
   }
+
+  const isDropTarget = firstDropAnim?.entryId === item.id;
 
   return (
     <TimelineRailNode
@@ -10587,6 +11367,9 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : (item.ai && !item.primary ? 'ai' : undefined))}
       isFeedLast={isFeedLast}
       nodeKind={item.kind === 'record-group' ? (item.ai && !item.primary ? 'sister-card' : 'voice-card') : (sisterItem ? (item.kind === 'sync-card' ? 'sync-card' : 'voice-card') : item.kind)}
+      dropAnim={isDropTarget}
+      onDropLand={isDropTarget ? onFirstDropLand : undefined}
+      onDropComplete={isDropTarget ? onFirstDropComplete : undefined}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
@@ -10597,6 +11380,7 @@ Object.assign(window, {
   CycleDayHeader, TimelineRailNode, TlNodeCaption, summarizeDayItems,
   resolveDayTitleLabel, formatDayMeta,
   ModulePlaceholder, TodayGuideCard, WeeklyTrendCard, TimelineItem,
+  MoodInsightCard, MoodCurveChart,
 });
 
 </script>
@@ -10609,13 +11393,14 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
+function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis, hideBodyUntilDrop}){
   return (
     <SegmentedRecordCard
       entry={entry}
       isNew={isNew}
       typewriterAiNote={typewriterAiNote}
       animateAnalysis={animateAnalysis}
+      hideBodyUntilDrop={hideBodyUntilDrop}
     />
   );
 }
@@ -10650,7 +11435,7 @@ function WeeklyCard({item}){
 
 function filterDayItems(items, sisterCycleDone, hideTodayGuide){
   return (items || []).filter(it=>{
-    if(it.kind === 'guide' && hideTodayGuide) return false;
+    if(it.kind === 'guide' && hideTodayGuide && !it.alwaysShow) return false;
     if(!it.hiddenUntilSisterDone) return true;
     return sisterCycleDone;
   });
@@ -10666,7 +11451,7 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
@@ -10691,6 +11476,9 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
+          firstDropAnim={firstDropAnim}
+          onFirstDropLand={onFirstDropLand}
+          onFirstDropComplete={onFirstDropComplete}
         />
         );
       })}
@@ -10713,7 +11501,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
   const dayBlocks = blocks.filter(b => b.type === 'day');
 
@@ -10733,6 +11521,9 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
                 hideDayHeader={hideDayHeader}
+                firstDropAnim={firstDropAnim}
+                onFirstDropLand={onFirstDropLand}
+                onFirstDropComplete={onFirstDropComplete}
               />
             );
           }
@@ -12312,26 +13103,41 @@ Object.assign(window, { SearchPage, flattenSearchableItems });
 <script type="text/babel">
 // ============ 底部 Dock — 输入栏 + 右下悬浮快捷发布 ============
 
-/** 方案 I · 卡片扇 — 仅 3 项 */
+/** 方案 I · 卡片扇 — 4 项快捷发布 */
 const QUICK_CARDS = [
-  { id:'mood', label:'情绪', hint:'5 档表情', title:'记录情绪', x:-148, y:-32, angle:-12 },
-  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状', x:-74, y:-72, angle:0 },
-  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重', x:-4, y:-32, angle:12 },
+  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情', x:-99, y:-14, angle:-8 },
+  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状', x:-85, y:-53, angle:-2 },
+  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重', x:-56, y:-83, angle:4 },
+  { id:'diet', label:'饮食', hint:'餐食速记', title:'今日饮食', x:-17, y:-98, angle:9 },
 ];
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
 
 const DOCK_PLACEHOLDER = '记录生活点滴';
 
+function DockWavePlaceholder({show, focused}){
+  if(!show) return null;
+
+  return (
+    <span
+      className={'dock-float-ph'+(focused ? ' is-focused' : '')}
+      aria-hidden="true"
+    >
+      <span className="dock-float-ph-char is-idle">{DOCK_PLACEHOLDER}</span>
+    </span>
+  );
+}
+
 function QuickCardFan({
   open, selected, onFabTap, onSelectCard, onClose,
-  onMoodSubmit, onSymptomSubmit, onWeightSubmit,
+  onMoodSubmit, onSymptomSubmit, onWeightSubmit, onFoodSubmit,
 }){
   const I = window.Icon;
   const QuickCardIcon = window.QuickCardIcon;
   const QuickMoodPicker = window.QuickMoodPicker;
   const QuickSymptomPicker = window.QuickSymptomPicker;
   const QuickWeightPicker = window.QuickWeightPicker;
+  const QuickFoodPicker = window.QuickFoodPicker;
 
   return (
     <div className={'quick-card-fan'+(open ? ' is-open' : '')+(selected ? ' has-selected' : '')}>
@@ -12386,6 +13192,8 @@ function QuickCardFan({
                   <QuickMoodPicker onSubmit={onMoodSubmit}/>
                 ) : card.id === 'symptom' ? (
                   <QuickSymptomPicker onSubmit={onSymptomSubmit}/>
+                ) : card.id === 'diet' ? (
+                  <QuickFoodPicker onSubmit={onFoodSubmit}/>
                 ) : (
                   <QuickWeightPicker onSubmit={onWeightSubmit}/>
                 )}
@@ -12412,8 +13220,9 @@ function QuickCardFan({
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
+  onFoodConfirm,
   onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
-  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
+  highlightScheme3Input, showFirstDropBubble, dockPlaceholder, defaultInputMode = 'text',
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -12498,6 +13307,11 @@ function DockPublisher({
     onWeightConfirm?.(payload);
   };
 
+  const handleQuickFoodSubmit = (foods)=>{
+    closeQuick();
+    onFoodConfirm?.(foods);
+  };
+
   const handleMoodConfirm = (moods)=>{
     setDockSheet(null);
     onMoodConfirm?.(moods);
@@ -12540,6 +13354,7 @@ function DockPublisher({
           onMoodSubmit={handleQuickMoodSubmit}
           onSymptomSubmit={handleQuickSymptomSubmit}
           onWeightSubmit={handleQuickWeightSubmit}
+          onFoodSubmit={handleQuickFoodSubmit}
         />
       </div>
 
@@ -12562,6 +13377,11 @@ function DockPublisher({
             />
           ) : (
           <div className="dock-bar">
+            {showFirstDropBubble && !draft.trim() && !inputFocused ? (
+              <span className="dock-first-drop-bubble" aria-hidden="true">
+                第一滴已落下，继续记录吧
+              </span>
+            ) : null}
             <div className="dock-input-row">
               <button
                 type="button"
@@ -12578,14 +13398,18 @@ function DockPublisher({
                 <div className={'dock-text-field'
                   +(inputFocused?' is-focused':'')
                   +(highlightScheme3Input?' is-scheme3-highlight':'')}>
-                  {showScheme3Bubble && !draft.trim() && !inputFocused ? (
+                  {showScheme3Bubble && !draft.trim() && !inputFocused && !showFirstDropBubble ? (
                     <span className="dock-scheme3-bubble" aria-hidden="true">
                       ✏️ 记下第一刻
                     </span>
                   ) : null}
+                  <DockWavePlaceholder
+                    show={inputMode === 'text' && !draft.trim() && !showScheme3Bubble && !showFirstDropBubble}
+                    focused={inputFocused}
+                  />
                   <textarea
                     rows="1"
-                    placeholder={inputPlaceholder}
+                    placeholder=""
                     aria-label={inputPlaceholder}
                     value={draft}
                     onChange={(e)=>{
@@ -12816,8 +13640,8 @@ const DEMO_SCENES = {
 
   'note-quick-record': {
     id: 'note-quick-record',
-    label: '场景四 · 点滴页快捷记录',
-    description: '基于场景一：保留点滴页与静态记录页，移除记录页顶部横幅及横幅跳转链路',
+    label: '场景四 · 记录心情反馈',
+    description: '首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS)),
@@ -12835,6 +13659,7 @@ const DEMO_SCENES = {
         initialDone: true,
       },
       todayGuide: true,
+      recordFeedback: true,
     },
   },
 
@@ -13535,6 +14360,24 @@ function App(){
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
+  const firstRecordAnimDoneRef = useRef(false);
+  const moodGuideQueueRef = useRef(null);
+  const firstDropBubbleTimerRef = useRef(null);
+  const dropLandRevealRef = useRef(false);
+  const [firstDropAnim, setFirstDropAnim] = useState(null);
+  const [showFirstDropBubble, setShowFirstDropBubble] = useState(false);
+
+  const recordFeedback = !!scene.record.recordFeedback;
+
+  React.useEffect(()=>{
+    const handler = ()=>{
+      const fn = moodGuideQueueRef.current;
+      moodGuideQueueRef.current = null;
+      fn?.();
+    };
+    window.addEventListener('moodCardStreamDone', handler);
+    return ()=>window.removeEventListener('moodCardStreamDone', handler);
+  }, []);
 
   const resetSceneState = (demoSceneId)=>{
     const next = window.getSceneInitialState(demoSceneId);
@@ -13548,6 +14391,15 @@ function App(){
     setShowPhoto(false);
     setShowSearchPage(false);
     scheme3FirstVisitRef.current = null;
+    setFirstDropAnim(null);
+    setShowFirstDropBubble(false);
+    firstRecordAnimDoneRef.current = false;
+    moodGuideQueueRef.current = null;
+    dropLandRevealRef.current = false;
+    if(firstDropBubbleTimerRef.current){
+      clearTimeout(firstDropBubbleTimerRef.current);
+      firstDropBubbleTimerRef.current = null;
+    }
   };
 
   useEffect(()=>{
@@ -13677,6 +14529,61 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const revealFirstDropEntry = React.useCallback(()=>{
+    if(dropLandRevealRef.current) return;
+    dropLandRevealRef.current = true;
+    setTimeline(blocks=>blocks.map(b=>{
+      if(b.type !== 'day') return b;
+      const items = (b.items || b.entries || []).map(it=>{
+        if(it.id !== firstDropAnim?.entryId) return it;
+        const next = { ...it };
+        delete next.hideBodyUntilDrop;
+        delete next.pendingDrop;
+        if(it.kind === 'mood-insight' || it.kind === 'record-group') next.isNew = true;
+        return next;
+      });
+      return { ...b, items, entries: undefined };
+    }));
+    requestAnimationFrame(()=>{
+      setTimeout(()=>scrollTimelineToLastItem('smooth'), 80);
+    });
+  }, [firstDropAnim]);
+
+  const handleFirstDropLand = React.useCallback(()=>{
+    revealFirstDropEntry();
+  }, [revealFirstDropEntry]);
+
+  const handleFirstDropComplete = React.useCallback(()=>{
+    setFirstDropAnim(null);
+    dropLandRevealRef.current = false;
+  }, []);
+
+  useEffect(()=>{
+    if(draft.trim()) setShowFirstDropBubble(false);
+  }, [draft]);
+
+  const tryStartFirstDrop = (entry, text)=>{
+    if(!recordFeedback || firstRecordAnimDoneRef.current) return false;
+    firstRecordAnimDoneRef.current = true;
+
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId(text || entry.body || '', timeline);
+
+    const pending = (entry.kind === 'mood-insight' || entry.kind === 'record-group')
+      ? { ...entry, pendingDrop: true, isNew: false }
+      : { ...entry, hideBodyUntilDrop: true, isNew: true };
+
+    setFirstDropAnim({ entryId: pending.id });
+    setShowFirstDropBubble(true);
+    if(firstDropBubbleTimerRef.current) clearTimeout(firstDropBubbleTimerRef.current);
+    firstDropBubbleTimerRef.current = setTimeout(()=>{
+      setShowFirstDropBubble(false);
+      firstDropBubbleTimerRef.current = null;
+    }, 6500);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, pending, { dayId }));
+    return true;
+  };
+
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
@@ -13685,6 +14592,7 @@ function App(){
     setDraft('');
     markUserRecorded();
     const entry = buildTimelineEntry(text, hits, opts);
+    if(recordFeedback && tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -13701,6 +14609,7 @@ function App(){
     const entry = buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     });
+    if(recordFeedback && tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -13708,9 +14617,56 @@ function App(){
     submitText(mark.text, { quickTag: { emoji: mark.emoji, label: mark.label } });
   };
 
+  const collectTodayQuickMoodHistory = ()=>{
+    const today = timeline.find(b=>b.type==='day' && b.isToday);
+    if(!today) return [];
+    const items = today.items || today.entries || [];
+    return items
+      .filter(it=>it && it.quickMood)
+      .map(it=>it.quickMood);
+  };
+
+  const appendMoodGuide = (guideText, dayId)=>{
+    moodGuideQueueRef.current = ()=>{
+      const guide = {
+        id: 'e-mood-guide-' + Date.now(),
+        kind: 'guide',
+        isNew: true,
+        alwaysShow: true,
+        guideDelay: 200,
+        text: guideText,
+      };
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, guide, { dayId }));
+    };
+  };
+
   const submitMoodRecord = (moods)=>{
     markUserRecorded();
-    const entry = window.createMoodRecordEntry(moods);
+    if(recordFeedback){
+      const history = collectTodayQuickMoodHistory();
+      const isFirst = history.length === 0;
+      if(!isFirst) moodGuideQueueRef.current = null;
+      const entry = isFirst
+        ? window.createMoodRecordEntry(moods)
+        : window.createMoodQuickEntry(moods, history);
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId('', timeline);
+      if(tryStartFirstDrop(entry, '')){
+        if(isFirst && entry.guideText) appendMoodGuide(entry.guideText, dayId);
+        return;
+      }
+      setTimeline(blocks=>{
+        const cleaned = !isFirst ? blocks.map(b=>{
+          if(b.type !== 'day') return b;
+          const items = (b.items || b.entries || []).filter(it=>!(it.kind === 'guide' && it.alwaysShow));
+          return { ...b, items, entries: undefined };
+        }) : blocks;
+        return window.appendTimelineEntry(cleaned, entry, { dayId });
+      });
+      if(isFirst && entry.guideText) appendMoodGuide(entry.guideText, dayId);
+      return;
+    }
+    const entry = window.createMoodRecordEntryLegacy(moods);
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -13719,6 +14675,7 @@ function App(){
   const submitSymptomRecord = (symptoms)=>{
     markUserRecorded();
     const entry = window.createSymptomRecordEntry(symptoms);
+    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -13727,6 +14684,16 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
+    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitFoodRecord = (foods)=>{
+    markUserRecorded();
+    const entry = window.createFoodRecordEntry(foods);
+    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -13829,6 +14796,7 @@ function App(){
           onMoodConfirm={submitMoodRecord}
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
+          onFoodConfirm={submitFoodRecord}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
@@ -13880,6 +14848,9 @@ function App(){
             sisterCycleDone={sisterCycleDone}
             hideTodayGuide={!showTodayGuide}
             onSisterCycleComplete={handleSisterCycleComplete}
+            firstDropAnim={recordFeedback ? firstDropAnim : null}
+            onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}
+            onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
         </div>
 
@@ -13891,10 +14862,12 @@ function App(){
           onMoodConfirm={submitMoodRecord}
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
+          onFoodConfirm={submitFoodRecord}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
+          showFirstDropBubble={recordFeedback && showFirstDropBubble}
         />
         </>
         )}

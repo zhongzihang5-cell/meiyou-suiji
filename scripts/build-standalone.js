@@ -131,10 +131,10 @@ const BUILDS = [
   {
     outfile: 'meiyou-scene4-note-quick-record.html',
     pagesName: 'scene4.html',
-    title: '美柚 · 场景四 · 点滴页快捷记录',
+    title: '美柚 · 场景四 · 记录心情反馈',
     demoScene: 'note-quick-record',
     locked: true,
-    comment: '场景四：点滴页 + 静态记录页，无顶部横幅与横幅跳转链路',
+    comment: '记录心情反馈：首次记录水滴动画 + 心情洞察卡',
   },
   {
     outfile: 'meiyou-record-standalone.html',
@@ -225,8 +225,8 @@ function buildLandingPage(builtAt) {
         <span class="go">进入方案三 →</span>
       </a>
       <a class="card" href="./scene4.html">
-        <div class="card-title">场景四 · 点滴页快捷记录</div>
-        <div class="card-desc">基于场景一：保留点滴页与静态记录页，移除顶部横幅及横幅跳转链路。</div>
+        <div class="card-title">场景四 · 记录心情反馈</div>
+        <div class="card-desc">首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈。</div>
         <span class="go">进入场景四 →</span>
       </a>
     </div>
@@ -266,7 +266,7 @@ function writeLegacyRedirects() {
     { file: 'scene3-1.html', target: '../scene3-1.html', label: '场景三 · 方案一' },
     { file: 'scene3-2.html', target: '../scene3-2.html', label: '场景三 · 方案二' },
     { file: 'scene3-3.html', target: '../scene3-3.html', label: '场景三 · 方案三' },
-    { file: 'scene4.html', target: '../scene4.html', label: '场景四' },
+    { file: 'scene4.html', target: '../scene4.html', label: '场景四 · 记录心情反馈' },
   ];
   redirects.forEach(({ file, target, label }) => {
     fs.writeFileSync(path.join(legacyDir, file), buildRedirectPage(target, label), 'utf8');

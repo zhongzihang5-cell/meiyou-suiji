@@ -157,8 +157,8 @@ const DEMO_SCENES = {
 
   'note-quick-record': {
     id: 'note-quick-record',
-    label: '场景四 · 点滴页快捷记录',
-    description: '基于场景一：保留点滴页与静态记录页，移除记录页顶部横幅及横幅跳转链路',
+    label: '场景四 · 记录心情反馈',
+    description: '首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈',
     defaultTab: 'note',
     identity: 'period',
     getTimeline: () => JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS)),
@@ -176,6 +176,7 @@ const DEMO_SCENES = {
         initialDone: true,
       },
       todayGuide: true,
+      recordFeedback: true,
     },
   },
 
