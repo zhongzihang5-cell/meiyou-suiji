@@ -641,7 +641,7 @@ function MoodInsightCard({item, isNew}){
 
 function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
-  const guideAnimate = item.kind === 'guide' && (
+  const guideAnimate = item.kind === 'guide' && !item.noAnimate && (
     isNew || item.hiddenUntilSisterDone
   );
 

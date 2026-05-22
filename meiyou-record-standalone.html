@@ -1901,12 +1901,6 @@ html,body{
   gap:8px;
   padding:8px 12px 10px;
   position:relative;
-  overflow:visible;
-}
-.dock-bar .dock-first-drop-bubble{
-  position:absolute;
-  left:68px;
-  bottom:calc(100% - 2px);
 }
 
 .dock-fan{
@@ -6778,48 +6772,6 @@ html,body{
   padding-top:0;
 }
 
-/* 输入框上方引导气泡 — 对齐输入框左侧 */
-.dock-text-field .dock-first-drop-bubble{
-  position:absolute;
-  left:12px;
-  bottom:calc(100% + 8px);
-  transform:none;
-  background:#ff4d88;
-  color:#fff;
-  font-size:13px;
-  font-weight:400;
-  line-height:1.29;
-  padding:8px 14px;
-  border-radius:10px;
-  white-space:nowrap;
-  pointer-events:none;
-  box-shadow:0 2px 12px rgba(255,77,136,0.25);
-  animation:rbBubbleIn 0.4s ease 0.55s both;
-  z-index:2;
-}
-
-.dock-text-field .dock-first-drop-bubble::after{
-  content:'';
-  position:absolute;
-  left:24px;
-  bottom:-6px;
-  transform:none;
-  border-left:6px solid transparent;
-  border-right:6px solid transparent;
-  border-top:6px solid #ff4d88;
-}
-
-@keyframes rbBubbleIn{
-  from{
-    opacity:0;
-    transform:translateY(6px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
 
 /* ============ 记录搜索页 ============ */
 .search-page{
@@ -11308,7 +11260,7 @@ function MoodInsightCard({item, isNew}){
 
 function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
-  const guideAnimate = item.kind === 'guide' && (
+  const guideAnimate = item.kind === 'guide' && !item.noAnimate && (
     isNew || item.hiddenUntilSisterDone
   );
 
@@ -13222,7 +13174,7 @@ function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
   onFoodConfirm,
   onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
-  highlightScheme3Input, showFirstDropBubble, dockPlaceholder, defaultInputMode = 'text',
+  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -13377,11 +13329,6 @@ function DockPublisher({
             />
           ) : (
           <div className="dock-bar">
-            {showFirstDropBubble && !draft.trim() && !inputFocused ? (
-              <span className="dock-first-drop-bubble" aria-hidden="true">
-                第一滴已落下，继续记录吧
-              </span>
-            ) : null}
             <div className="dock-input-row">
               <button
                 type="button"
@@ -13398,13 +13345,13 @@ function DockPublisher({
                 <div className={'dock-text-field'
                   +(inputFocused?' is-focused':'')
                   +(highlightScheme3Input?' is-scheme3-highlight':'')}>
-                  {showScheme3Bubble && !draft.trim() && !inputFocused && !showFirstDropBubble ? (
+                  {showScheme3Bubble && !draft.trim() && !inputFocused ? (
                     <span className="dock-scheme3-bubble" aria-hidden="true">
                       ✏️ 记下第一刻
                     </span>
                   ) : null}
                   <DockWavePlaceholder
-                    show={inputMode === 'text' && !draft.trim() && !showScheme3Bubble && !showFirstDropBubble}
+                    show={inputMode === 'text' && !draft.trim() && !showScheme3Bubble}
                     focused={inputFocused}
                   />
                   <textarea
@@ -13644,7 +13591,16 @@ const DEMO_SCENES = {
     description: '首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈',
     defaultTab: 'note',
     identity: 'period',
-    getTimeline: () => JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS)),
+    getTimeline: ()=>{
+      const blocks = JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS));
+      blocks.forEach(block=>{
+        if(block.type !== 'day') return;
+        (block.items || []).forEach(it=>{
+          if(it?.kind === 'guide' && it.id === 'g-518-post') it.noAnimate = true;
+        });
+      });
+      return blocks;
+    },
     calendar: {
       enabled: true,
       periodFlow: false,
@@ -14362,10 +14318,8 @@ function App(){
   const recordEnterModeRef = useRef('idle');
   const firstRecordAnimDoneRef = useRef(false);
   const moodGuideQueueRef = useRef(null);
-  const firstDropBubbleTimerRef = useRef(null);
   const dropLandRevealRef = useRef(false);
   const [firstDropAnim, setFirstDropAnim] = useState(null);
-  const [showFirstDropBubble, setShowFirstDropBubble] = useState(false);
 
   const recordFeedback = !!scene.record.recordFeedback;
 
@@ -14392,14 +14346,9 @@ function App(){
     setShowSearchPage(false);
     scheme3FirstVisitRef.current = null;
     setFirstDropAnim(null);
-    setShowFirstDropBubble(false);
     firstRecordAnimDoneRef.current = false;
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
-    if(firstDropBubbleTimerRef.current){
-      clearTimeout(firstDropBubbleTimerRef.current);
-      firstDropBubbleTimerRef.current = null;
-    }
   };
 
   useEffect(()=>{
@@ -14558,10 +14507,6 @@ function App(){
     dropLandRevealRef.current = false;
   }, []);
 
-  useEffect(()=>{
-    if(draft.trim()) setShowFirstDropBubble(false);
-  }, [draft]);
-
   const tryStartFirstDrop = (entry, text)=>{
     if(!recordFeedback || firstRecordAnimDoneRef.current) return false;
     firstRecordAnimDoneRef.current = true;
@@ -14574,12 +14519,6 @@ function App(){
       : { ...entry, hideBodyUntilDrop: true, isNew: true };
 
     setFirstDropAnim({ entryId: pending.id });
-    setShowFirstDropBubble(true);
-    if(firstDropBubbleTimerRef.current) clearTimeout(firstDropBubbleTimerRef.current);
-    firstDropBubbleTimerRef.current = setTimeout(()=>{
-      setShowFirstDropBubble(false);
-      firstDropBubbleTimerRef.current = null;
-    }, 6500);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, pending, { dayId }));
     return true;
   };
@@ -14867,7 +14806,6 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          showFirstDropBubble={recordFeedback && showFirstDropBubble}
         />
         </>
         )}

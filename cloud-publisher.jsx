@@ -119,7 +119,7 @@ function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
   onFoodConfirm,
   onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
-  highlightScheme3Input, showFirstDropBubble, dockPlaceholder, defaultInputMode = 'text',
+  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -274,11 +274,6 @@ function DockPublisher({
             />
           ) : (
           <div className="dock-bar">
-            {showFirstDropBubble && !draft.trim() && !inputFocused ? (
-              <span className="dock-first-drop-bubble" aria-hidden="true">
-                第一滴已落下，继续记录吧
-              </span>
-            ) : null}
             <div className="dock-input-row">
               <button
                 type="button"
@@ -295,13 +290,13 @@ function DockPublisher({
                 <div className={'dock-text-field'
                   +(inputFocused?' is-focused':'')
                   +(highlightScheme3Input?' is-scheme3-highlight':'')}>
-                  {showScheme3Bubble && !draft.trim() && !inputFocused && !showFirstDropBubble ? (
+                  {showScheme3Bubble && !draft.trim() && !inputFocused ? (
                     <span className="dock-scheme3-bubble" aria-hidden="true">
                       ✏️ 记下第一刻
                     </span>
                   ) : null}
                   <DockWavePlaceholder
-                    show={inputMode === 'text' && !draft.trim() && !showScheme3Bubble && !showFirstDropBubble}
+                    show={inputMode === 'text' && !draft.trim() && !showScheme3Bubble}
                     focused={inputFocused}
                   />
                   <textarea

@@ -61,10 +61,8 @@ function App(){
   const recordEnterModeRef = useRef('idle');
   const firstRecordAnimDoneRef = useRef(false);
   const moodGuideQueueRef = useRef(null);
-  const firstDropBubbleTimerRef = useRef(null);
   const dropLandRevealRef = useRef(false);
   const [firstDropAnim, setFirstDropAnim] = useState(null);
-  const [showFirstDropBubble, setShowFirstDropBubble] = useState(false);
 
   const recordFeedback = !!scene.record.recordFeedback;
 
@@ -91,14 +89,9 @@ function App(){
     setShowSearchPage(false);
     scheme3FirstVisitRef.current = null;
     setFirstDropAnim(null);
-    setShowFirstDropBubble(false);
     firstRecordAnimDoneRef.current = false;
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
-    if(firstDropBubbleTimerRef.current){
-      clearTimeout(firstDropBubbleTimerRef.current);
-      firstDropBubbleTimerRef.current = null;
-    }
   };
 
   useEffect(()=>{
@@ -257,10 +250,6 @@ function App(){
     dropLandRevealRef.current = false;
   }, []);
 
-  useEffect(()=>{
-    if(draft.trim()) setShowFirstDropBubble(false);
-  }, [draft]);
-
   const tryStartFirstDrop = (entry, text)=>{
     if(!recordFeedback || firstRecordAnimDoneRef.current) return false;
     firstRecordAnimDoneRef.current = true;
@@ -273,12 +262,6 @@ function App(){
       : { ...entry, hideBodyUntilDrop: true, isNew: true };
 
     setFirstDropAnim({ entryId: pending.id });
-    setShowFirstDropBubble(true);
-    if(firstDropBubbleTimerRef.current) clearTimeout(firstDropBubbleTimerRef.current);
-    firstDropBubbleTimerRef.current = setTimeout(()=>{
-      setShowFirstDropBubble(false);
-      firstDropBubbleTimerRef.current = null;
-    }, 6500);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, pending, { dayId }));
     return true;
   };
@@ -566,7 +549,6 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          showFirstDropBubble={recordFeedback && showFirstDropBubble}
         />
         </>
         )}

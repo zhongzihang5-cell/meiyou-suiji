@@ -161,7 +161,16 @@ const DEMO_SCENES = {
     description: '首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈',
     defaultTab: 'note',
     identity: 'period',
-    getTimeline: () => JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS)),
+    getTimeline: ()=>{
+      const blocks = JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS));
+      blocks.forEach(block=>{
+        if(block.type !== 'day') return;
+        (block.items || []).forEach(it=>{
+          if(it?.kind === 'guide' && it.id === 'g-518-post') it.noAnimate = true;
+        });
+      });
+      return blocks;
+    },
     calendar: {
       enabled: true,
       periodFlow: false,

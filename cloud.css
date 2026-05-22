@@ -1008,12 +1008,6 @@
   gap:8px;
   padding:8px 12px 10px;
   position:relative;
-  overflow:visible;
-}
-.dock-bar .dock-first-drop-bubble{
-  position:absolute;
-  left:68px;
-  bottom:calc(100% - 2px);
 }
 
 .dock-fan{
