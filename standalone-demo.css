@@ -7,6 +7,9 @@ body.standalone-demo{
 body.standalone-demo .demo-scene-dock{
   display:none!important;
 }
+body.standalone-demo.standalone-demo-scheme3 .demo-scene-dock{
+  display:flex!important;
+}
 
 body.standalone-demo #root{
   min-height:100vh;

@@ -8,13 +8,15 @@
  *   meiyou-scene1-period-calendar.html
  *   meiyou-scene2-record-empty.html  → 场景二 landing 引导
  *   meiyou-scene3-record-blank.html  → 场景三 记录页空置
+ *   meiyou-scene4-note-quick-record.html → 场景四 点滴页快捷记录
  *   meiyou-record-standalone.html
  *
  * Outputs (docs/ — for GitHub Pages):
- *   index.html   入口页，链到三个场景
+ *   index.html   入口页，链到四个场景
  *   scene1.html  场景一
  *   scene2.html  场景二
- *   scene3.html  场景三
+ *   scene3.html  场景三（页内可切换方案一/二/三）
+ *   scene4.html  场景四
  */
 
 const fs = require('fs');
@@ -102,9 +104,18 @@ const BUILDS = [
     outfile: 'meiyou-scene3-record-blank.html',
     pagesName: 'scene3.html',
     title: '美柚 · 场景三 · 未记录时间轴',
-    demoScene: 'record-blank-3',
+    demoScene: 'record-blank-1',
     locked: true,
-    comment: '场景三：方案一空白 / 方案二蒙层 / 方案三生长时间轴引导',
+    schemeHub: true,
+    comment: '场景三：方案一空白 / 方案二蒙层 / 方案三生长时间轴引导（页内可切换）',
+  },
+  {
+    outfile: 'meiyou-scene4-note-quick-record.html',
+    pagesName: 'scene4.html',
+    title: '美柚 · 场景四 · 点滴页快捷记录',
+    demoScene: 'note-quick-record',
+    locked: true,
+    comment: '场景四：点滴页 + 静态记录页，无顶部横幅与横幅跳转链路',
   },
   {
     outfile: 'meiyou-record-standalone.html',
@@ -176,8 +187,13 @@ function buildLandingPage(builtAt) {
       </a>
       <a class="card" href="./scene3.html">
         <div class="card-title">场景三 · 未记录时间轴</div>
-        <div class="card-desc">三套方案：方案一空白、方案二示例蒙层、方案三待接入。进入后可在页内切换。</div>
+        <div class="card-desc">三套方案：方案一空白、方案二示例蒙层、方案三生长引导。进入后可在页内切换。</div>
         <span class="go">进入场景三 →</span>
+      </a>
+      <a class="card" href="./scene4.html">
+        <div class="card-title">场景四 · 点滴页快捷记录</div>
+        <div class="card-desc">基于场景一：保留点滴页与静态记录页，移除顶部横幅及横幅跳转链路。</div>
+        <span class="go">进入场景四 →</span>
       </a>
     </div>
     <footer>构建 ${builtAt}<br>微信内若无法加载，点右上角 ··· 用 Safari 打开</footer>
@@ -213,18 +229,21 @@ function writeLegacyRedirects() {
     { file: 'scene1.html', target: '../scene1.html', label: '场景一' },
     { file: 'scene2.html', target: '../scene2.html', label: '场景二' },
     { file: 'scene3.html', target: '../scene3.html', label: '场景三' },
+    { file: 'scene4.html', target: '../scene4.html', label: '场景四' },
   ];
   redirects.forEach(({ file, target, label }) => {
     fs.writeFileSync(path.join(legacyDir, file), buildRedirectPage(target, label), 'utf8');
   });
 }
 
-function buildHtml({ title, demoScene, locked, comment, builtAt }) {
+function buildHtml({ title, demoScene, locked, schemeHub, comment, builtAt }) {
   const extraCss = locked ? STANDALONE_DEMO_CSS : '';
-  const bodyClass = locked ? ' class="standalone-demo"' : '';
+  const bodyClass = locked
+    ? ` class="standalone-demo${schemeHub ? ' standalone-demo-scheme3' : ''}"`
+    : '';
   const buildId = `${builtAt}-nomask`;
   const lockedScript = locked
-    ? `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = true;`
+    ? `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = true;${schemeHub ? '\nwindow.__SCENE3_SCHEME_HUB = true;' : ''}`
     : `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = false;`;
 
   return `<!DOCTYPE html>

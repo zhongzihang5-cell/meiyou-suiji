@@ -7,7 +7,7 @@
 // 场景三拆为三套方案（record-blank.jsx）
 //   方案一 record-blank-1：时间轴空白
 //   方案二 record-blank-2：示例数据 + 蒙层
-//   方案三 record-blank-3：时间轴方案（待接入）
+//   方案三 record-blank-3：生长时间轴空态引导
 
 const SCENE3_SCHEME_OPTIONS = [
   { value: 'record-blank-1', label: '方案一' },
@@ -155,6 +155,30 @@ const DEMO_SCENES = {
     },
   },
 
+  'note-quick-record': {
+    id: 'note-quick-record',
+    label: '场景四 · 点滴页快捷记录',
+    description: '基于场景一：保留点滴页与静态记录页，移除记录页顶部横幅及横幅跳转链路',
+    defaultTab: 'note',
+    identity: 'period',
+    getTimeline: () => JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS)),
+    calendar: {
+      enabled: true,
+      periodFlow: false,
+    },
+    floatNotice: {
+      enabled: false,
+    },
+    record: {
+      showHealthCard: false,
+      sisterAnalysis: {
+        trigger: 'none',
+        initialDone: true,
+      },
+      todayGuide: true,
+    },
+  },
+
 };
 
 const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
@@ -212,4 +236,27 @@ function DemoSceneBar({ value, onChange, description }) {
   );
 }
 
-Object.assign(window, { DemoSceneBar });
+function DemoScheme3Bar({ value, onChange, description }) {
+  const options = window.SCENE3_SCHEME_OPTIONS;
+  return (
+    <div className="demo-scene-dock" role="toolbar" aria-label="空态方案切换">
+      <div className="demo-scene-dock-label">空态方案</div>
+      <div className="demo-scene-dock-options">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            className={'demo-scene-dock-btn' + (value === opt.value ? ' active' : '')}
+            aria-pressed={value === opt.value}
+            onClick={() => onChange(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      {description && <p className="demo-scene-dock-hint">{description}</p>}
+    </div>
+  );
+}
+
+Object.assign(window, { DemoSceneBar, DemoScheme3Bar });

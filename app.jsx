@@ -287,6 +287,7 @@ function App(){
 
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
+  const DemoScheme3Bar = window.DemoScheme3Bar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
@@ -434,13 +435,19 @@ function App(){
       {!showSearchPage && <TabBar active={activeTab} onChange={handleTabChange}/>}
       </div>
 
-      {!window.__STANDALONE_LOCKED_SCENE && (
+      {window.__SCENE3_SCHEME_HUB ? (
+        <DemoScheme3Bar
+          value={t.demoScene}
+          onChange={(v)=>setTweak('demoScene', v)}
+          description={scene.description}
+        />
+      ) : !window.__STANDALONE_LOCKED_SCENE ? (
         <DemoSceneBar
           value={t.demoScene}
           onChange={(v)=>setTweak('demoScene', v)}
           description={scene.description}
         />
-      )}
+      ) : null}
     </>
   );
 }
