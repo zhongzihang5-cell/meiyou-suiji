@@ -340,7 +340,7 @@ function buildMoodTrend(currentMood){
 
 function buildMoodCopy(mood){
   const id = mood?.id || '';
-  if(id === 'very-sad' || id === 'angry') return '这一刻的难过是真实的，允许自己兴趣低落';
+  if(id === 'very-sad' || id === 'angry') return '这一刻的难过是真实的，允许自己情绪低落';
   if(id === 'unhappy' || MOOD_SCORE_MAP[id] === 2) return '不开心也是今天的一部分，不用急着赶走它';
   if(id === 'super-happy' || id === 'excited' || id === 'heart-flutter') return '这份雀跃挺珍贵，慢慢享受它';
   if(MOOD_SCORE_MAP[id] >= 4) return '今天的好心情值得被记下来';

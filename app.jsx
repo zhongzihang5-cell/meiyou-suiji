@@ -315,10 +315,16 @@ function App(){
         kind: 'guide',
         isNew: true,
         alwaysShow: true,
-        guideDelay: 200,
         text: guideText,
       };
       setTimeline(blocks=>window.appendTimelineEntry(blocks, guide, { dayId }));
+      requestAnimationFrame(()=>{
+        setTimeout(()=>{
+          window.scrollFeedContentIntoView?.(
+            document.querySelector('.tl-rail-node.is-feed-last .tl-rail-guide-text')
+          );
+        }, 80);
+      });
     };
   };
 

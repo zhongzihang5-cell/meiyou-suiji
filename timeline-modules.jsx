@@ -179,33 +179,37 @@ const GUIDE_REVEAL_DELAY_MS = 1800;
 const GUIDE_TYPEWRITER_MS = 84;
 
 function TodayGuideCard({item, isNew, animate}){
-  const [ready, setReady] = React.useState(!animate);
+  const scrollFeed = window.scrollFeedContentIntoView;
+  const textRef = React.useRef(null);
+  const skipDelay = !!(item.skipRevealDelay || item.alwaysShow);
+  const [ready, setReady] = React.useState(!animate || skipDelay);
 
   React.useEffect(()=>{
     if(!animate){
       setReady(true);
       return;
     }
+    if(skipDelay){
+      setReady(true);
+      return;
+    }
     setReady(false);
     const t = setTimeout(()=>setReady(true), GUIDE_REVEAL_DELAY_MS);
     return ()=>clearTimeout(t);
-  }, [animate, item.text]);
+  }, [animate, item.text, skipDelay]);
 
   React.useEffect(()=>{
     if(!ready || !animate) return;
     requestAnimationFrame(()=>{
-      setTimeout(()=>{
-        const end = document.querySelector('.tl-feed-end');
-        end?.scrollIntoView({ behavior:'smooth', block:'end' });
-      }, 80);
+      scrollFeed?.(textRef.current);
     });
-  }, [ready, animate]);
+  }, [ready, animate, scrollFeed]);
 
   if(!ready) return null;
 
   return (
     <div className={'tl-rail-guide'+(isNew?' fade-in':'')}>
-      <p className="tl-rail-guide-text">
+      <p className="tl-rail-guide-text" ref={textRef}>
         {animate ? (
           <TypewriterText text={item.text} active charMs={GUIDE_TYPEWRITER_MS} followScroll/>
         ) : item.text}
@@ -454,7 +458,7 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function MoodCurveChart({data}){
+function MoodCurveChart({data, animateToday = false, onTodayAnimated}){
   const w = 280;
   const h = 64;
   const padX = 14;
@@ -465,53 +469,100 @@ function MoodCurveChart({data}){
   const range = maxV - minV;
   const innerW = w - padX * 2;
   const innerH = h - padTop - padBot;
-  const points = (data || []).map((d, i)=>{
-    const x = padX + (innerW * i) / Math.max(1, (data.length - 1));
+  const gradId = React.useId().replace(/:/g, '');
+  const wrapRef = React.useRef(null);
+  const doneRef = React.useRef(false);
+  const allData = data || [];
+
+  const toPoint = (d, i)=>{
+    const x = padX + (innerW * i) / Math.max(1, (allData.length - 1));
     const y = padTop + innerH - ((d.v - minV) / range) * innerH;
     return { x, y, d };
-  });
-  const linePath = points.length ? points.map((p, i)=>(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ') : '';
-  const areaPath = points.length
-    ? `${linePath} L${points[points.length-1].x.toFixed(1)},${padTop + innerH} L${points[0].x.toFixed(1)},${padTop + innerH} Z`
+  };
+
+  const allPoints = allData.map(toPoint);
+
+  const pathFrom = pts => pts.length
+    ? pts.map((p, i)=>(i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ')
     : '';
+  const areaFrom = pts => {
+    if(!pts.length) return '';
+    const line = pathFrom(pts);
+    const last = pts[pts.length - 1];
+    const first = pts[0];
+    const floor = padTop + innerH;
+    return `${line} L${last.x.toFixed(1)},${floor} L${first.x.toFixed(1)},${floor} Z`;
+  };
+
+  const fullLine = pathFrom(allPoints);
+  const fullArea = areaFrom(allPoints);
+  const pointCount = allPoints.length;
+  const axisFinishMs = 80 + Math.max(0, pointCount - 1) * 92 + 340;
+  const revealMs = animateToday ? Math.max(880, 120 + pointCount * 100, axisFinishMs) : 0;
+
+  React.useEffect(()=>{
+    if(!animateToday) return;
+    doneRef.current = false;
+    requestAnimationFrame(()=>{
+      window.scrollFeedContentIntoView?.(wrapRef.current);
+    });
+    const t = setTimeout(()=>{
+      if(doneRef.current) return;
+      doneRef.current = true;
+      onTodayAnimated?.();
+    }, revealMs + 80);
+    return ()=>clearTimeout(t);
+  }, [animateToday, onTodayAnimated, revealMs, allData]);
 
   return (
-    <div className="tl-mood-curve" aria-hidden="true">
-      <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="moodCurveFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ff4d88" stopOpacity="0.22"/>
-            <stop offset="100%" stopColor="#ff4d88" stopOpacity="0"/>
-          </linearGradient>
-        </defs>
-        {areaPath && <path d={areaPath} fill="url(#moodCurveFill)"/>}
-        {linePath && (
-          <path
-            d={linePath}
-            fill="none"
-            stroke="#ff4d88"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        )}
-        {points.map((p, i)=>(
-          <circle
-            key={i}
-            cx={p.x}
-            cy={p.y}
-            r={p.d.isToday ? 4 : 2.2}
-            fill={p.d.isToday ? '#ff4d88' : '#fff'}
-            stroke={p.d.isToday ? '#fff' : '#ff4d88'}
-            strokeWidth={p.d.isToday ? 1.5 : 1.4}
-          />
-        ))}
-      </svg>
+    <div
+      ref={wrapRef}
+      className={'tl-mood-curve' + (animateToday ? ' is-anim' : '')}
+      style={animateToday ? { '--mood-reveal-ms': revealMs + 'ms' } : undefined}
+      aria-hidden="true"
+    >
+      <div className="tl-mood-curve-reveal">
+        <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id={'moodCurveFill' + gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff4d88" stopOpacity="0.22"/>
+              <stop offset="100%" stopColor="#ff4d88" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          {fullArea && (
+            <path d={fullArea} fill={'url(#moodCurveFill' + gradId + ')'}/>
+          )}
+          {fullLine && (
+            <path
+              d={fullLine}
+              fill="none"
+              stroke="#ff4d88"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+          {allPoints.map((p, i)=>(
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={p.d.isToday ? 4 : 2.2}
+              fill={p.d.isToday ? '#ff4d88' : '#fff'}
+              stroke={p.d.isToday ? '#fff' : '#ff4d88'}
+              strokeWidth={p.d.isToday ? 1.5 : 1.4}
+            />
+          ))}
+        </svg>
+      </div>
       <div className="tl-mood-curve-axis">
-        {(data || []).map((d, i)=>(
+        {allData.map((d, i)=>(
           <span
             key={i}
-            className={'tl-mood-curve-day'+(d.isToday ? ' is-today' : '')}
+            className={'tl-mood-curve-day'
+              + (d.isToday ? ' is-today' : '')
+              + (animateToday ? ' is-reveal' : '')}
+            style={animateToday ? { '--day-i': i } : undefined}
           >
             {d.d}
           </span>
@@ -521,9 +572,13 @@ function MoodCurveChart({data}){
   );
 }
 
+const MOOD_GUIDE_AFTER_CHART_MS = 900;
+
 function MoodInsightCard({item, isNew}){
   const MoodFace = window.MoodFace;
   const TypewriterText = window.TypewriterText;
+  const scrollFeed = window.scrollFeedContentIntoView;
+  const cardRef = React.useRef(null);
   const [aiOpen, setAiOpen] = React.useState(true);
   const [step, setStep] = React.useState(isNew ? 0 : 10);
   const doneRef = React.useRef(false);
@@ -533,9 +588,21 @@ function MoodInsightCard({item, isNew}){
   const chart = item.chart || {};
   const phaseCopy = item.phaseCopy || '';
   const hasAi = !!(phaseCopy || chart.data?.length > 0);
+  const hasTodayPoint = !!(chart.data || []).some(d => d.isToday);
+  const chartAnimatesToday = isNew && hasTodayPoint;
+  const [chartDone, setChartDone] = React.useState(!chartAnimatesToday);
+
+  React.useEffect(()=>{
+    if(!isNew || step < 1) return;
+    requestAnimationFrame(()=>{
+      scrollFeed?.(cardRef.current);
+    });
+  }, [step, isNew, scrollFeed]);
 
   React.useEffect(()=>{
     if(!isNew) return;
+    setChartDone(!chartAnimatesToday);
+    doneRef.current = false;
     const ts = [
       setTimeout(()=>setStep(1), 80),
       setTimeout(()=>setStep(2), 600),
@@ -543,7 +610,7 @@ function MoodInsightCard({item, isNew}){
       setTimeout(()=>setStep(4), 1600),
     ];
     return ()=>ts.forEach(clearTimeout);
-  }, [isNew]);
+  }, [isNew, chartAnimatesToday]);
 
   React.useEffect(()=>{
     if(!isNew || step !== 4 || phaseCopy) return;
@@ -555,17 +622,27 @@ function MoodInsightCard({item, isNew}){
     setStep(s => Math.max(s, 5));
   }, []);
 
+  const handleChartTodayAnimated = React.useCallback(()=>{
+    setChartDone(true);
+  }, []);
+
   React.useEffect(()=>{
     if(!isNew || doneRef.current) return;
     const targetStep = hasAi ? 5 : 3;
-    if(step >= targetStep){
-      doneRef.current = true;
-      const t = setTimeout(()=>{
-        window.dispatchEvent(new CustomEvent('moodCardStreamDone'));
-      }, 500);
-      return ()=>clearTimeout(t);
-    }
-  }, [step, isNew, hasAi]);
+    if(step < targetStep) return;
+    if(chartAnimatesToday && step >= 5 && !chartDone) return;
+    doneRef.current = true;
+    const t = setTimeout(()=>{
+      window.dispatchEvent(new CustomEvent('moodCardStreamDone'));
+    }, chartAnimatesToday ? MOOD_GUIDE_AFTER_CHART_MS : 500);
+    return ()=>clearTimeout(t);
+  }, [step, isNew, hasAi, chartAnimatesToday, chartDone]);
+
+  React.useEffect(()=>{
+    if(!isNew || !chartAnimatesToday || chartDone) return;
+    const t = setTimeout(()=>setChartDone(true), 2600);
+    return ()=>clearTimeout(t);
+  }, [isNew, chartAnimatesToday, chartDone]);
 
   const vis = n => isNew ? {
     opacity: step >= n ? 1 : 0,
@@ -574,7 +651,7 @@ function MoodInsightCard({item, isNew}){
   } : {};
 
   return (
-    <article className="tl-mood-insight">
+    <article className="tl-mood-insight" ref={cardRef}>
       <header className="tl-mood-insight-hd" style={vis(1)}>
         <span className="tl-mood-insight-time">{item.time}</span>
       </header>
@@ -619,7 +696,7 @@ function MoodInsightCard({item, isNew}){
                   <span className="tl-mood-insight-phase-pill">卵泡期</span>
                   <span className="tl-mood-insight-phase-text">
                     {(isNew && TypewriterText)
-                      ? <TypewriterText text={phaseCopy} active charMs={55} onComplete={handlePhaseTyped}/>
+                      ? <TypewriterText text={phaseCopy} active charMs={55} followScroll onComplete={handlePhaseTyped}/>
                       : phaseCopy}
                   </span>
                 </div>
@@ -628,7 +705,11 @@ function MoodInsightCard({item, isNew}){
                 <div className="tl-mood-insight-chart-block" style={vis(5)}>
                   <div className="tl-mood-insight-inner-sep"/>
                   <span className="tl-mood-insight-chart-label">{chart.title || '近 1 周情绪波动曲线'}</span>
-                  <MoodCurveChart data={chart.data}/>
+                  <MoodCurveChart
+                    data={chart.data}
+                    animateToday={chartAnimatesToday}
+                    onTodayAnimated={handleChartTodayAnimated}
+                  />
                 </div>
               )}
             </div>

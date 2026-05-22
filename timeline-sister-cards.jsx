@@ -92,16 +92,40 @@ function renderTypedSegments(segments, len){
   return out;
 }
 
-function scrollFeedContentIntoView(el, bottomReserve = 210){
+function measureFeedBottomReserve(stream){
+  if(!stream) return 280;
+  const streamRect = stream.getBoundingClientRect();
+  let reserve = 220;
+
+  const phone = stream.closest('.phone');
+  const fab = phone?.querySelector('.quick-card-fab:not(.is-covered)');
+  if(fab){
+    const fabRect = fab.getBoundingClientRect();
+    if(fabRect.height > 0){
+      reserve = Math.max(reserve, streamRect.bottom - fabRect.top + 28);
+    }
+  }
+
+  const dock = phone?.querySelector('.dock-wrap');
+  if(dock){
+    const dockRect = dock.getBoundingClientRect();
+    reserve = Math.max(reserve, streamRect.bottom - dockRect.top + 16);
+  }
+
+  return reserve;
+}
+
+function scrollFeedContentIntoView(el, bottomReserve){
   if(!el) return;
   const stream = el.closest('.suiji-stream');
   if(!stream) return;
   const streamRect = stream.getBoundingClientRect();
   const target = el.querySelector?.('.tl-typewriter-cursor') || el;
   const targetRect = target.getBoundingClientRect();
-  const visibleBottom = streamRect.bottom - bottomReserve;
+  const reserve = bottomReserve ?? measureFeedBottomReserve(stream);
+  const visibleBottom = streamRect.bottom - reserve;
   if(targetRect.bottom > visibleBottom){
-    stream.scrollTop += targetRect.bottom - visibleBottom + 16;
+    stream.scrollTop += targetRect.bottom - visibleBottom + 20;
   }
 }
 
@@ -843,4 +867,5 @@ function SisterAnalysisCard({playAnimation, onCycleComplete, animateText}){
 Object.assign(window, {
   TlRecCardHead, TlRecKindIcon, inferRecordKind, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
   SegmentedRecordCard, VoiceRecordCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent,
+  scrollFeedContentIntoView,
 });
