@@ -2,7 +2,75 @@
 //
 // 场景一 period-calendar：默认日历 Tab，通过「月经来了」触发浮动分析 → 跳转记录页周期分析
 // 场景二 record-direct：未记录 landing 引导（record-empty.jsx）
-// 场景三 record-blank：记录 Tab 无数据空置页（record-blank.jsx）
+// 场景三 record-blank-1/2/3：三套时间轴空态方案（record-blank.jsx）
+
+// 场景三拆为三套方案（record-blank.jsx）
+//   方案一 record-blank-1：时间轴空白
+//   方案二 record-blank-2：示例数据 + 蒙层
+//   方案三 record-blank-3：时间轴方案（待接入）
+
+const SCENE3_SCHEME_OPTIONS = [
+  { value: 'record-blank-1', label: '方案一' },
+  { value: 'record-blank-2', label: '方案二' },
+  { value: 'record-blank-3', label: '方案三' },
+];
+
+function getBlankScheme2PreviewTimeline(){
+  const blocks = window.TIMELINE_BLOCKS;
+  const day514 = blocks.find(b => b.type === 'day' && b.id === 'd-5-14');
+  const day519 = blocks.find(b => b.type === 'day' && b.id === 'd-5-19');
+  const clone = (obj) => JSON.parse(JSON.stringify(obj));
+  const pickGroup = (day, groupId) => day?.items?.find(i => i.id === groupId);
+
+  const voiceDietGroup = pickGroup(day519, 'y1-g');
+  const weightGroup = pickGroup(day514, 't5-g-514');
+  const items = [];
+
+  if(voiceDietGroup){
+    items.push(clone(voiceDietGroup));
+  }
+  if(weightGroup){
+    items.push({ ...clone(weightGroup), aiDefaultOpen: true });
+  }
+
+  if(!items.length) return [];
+
+  const day = clone(day519);
+  day.id = 's2-preview-day';
+  day.date = '5/19';
+  day.weekday = '周一';
+  day.isToday = false;
+  day.phaseTag = undefined;
+  day.phaseKind = undefined;
+  day.cycleDay = undefined;
+  day.periodLen = undefined;
+  day.summaryStats = undefined;
+  day.items = items;
+
+  return [day];
+}
+
+const BLANK_SCHEME_BASE = {
+  defaultTab: 'note',
+  identity: 'period',
+  getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
+  calendar: {
+    enabled: true,
+    periodFlow: false,
+  },
+  floatNotice: {
+    enabled: false,
+  },
+  record: {
+    showHealthCard: false,
+    blankState: true,
+    sisterAnalysis: {
+      trigger: 'none',
+      initialDone: true,
+    },
+    todayGuide: false,
+  },
+};
 
 const DEMO_SCENES = {
   'period-calendar': {
@@ -54,30 +122,39 @@ const DEMO_SCENES = {
     },
   },
 
-  'record-blank': {
-    id: 'record-blank',
-    label: '场景三 · 未记录时间轴空值',
-    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（时间轴空态见 record-blank.jsx）',
-    defaultTab: 'note',
-    identity: 'period',
-    getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
-    calendar: {
-      enabled: true,
-      periodFlow: false,
-    },
-    floatNotice: {
-      enabled: false,
-    },
+  'record-blank-1': {
+    ...BLANK_SCHEME_BASE,
+    id: 'record-blank-1',
+    label: '场景三 · 方案一',
+    description: '居中极简空态：生活的点滴都值得被记下',
     record: {
-      showHealthCard: false,
-      blankState: true,
-      sisterAnalysis: {
-        trigger: 'none',
-        initialDone: true,
-      },
-      todayGuide: false,
+      ...BLANK_SCHEME_BASE.record,
+      blankScheme: 1,
     },
   },
+
+  'record-blank-2': {
+    ...BLANK_SCHEME_BASE,
+    id: 'record-blank-2',
+    label: '场景三 · 方案二',
+    description: '示例时间轴数据预览，半透明蒙层 + 空态引导',
+    record: {
+      ...BLANK_SCHEME_BASE.record,
+      blankScheme: 2,
+    },
+  },
+
+  'record-blank-3': {
+    ...BLANK_SCHEME_BASE,
+    id: 'record-blank-3',
+    label: '场景三 · 方案三',
+    description: '生长时间轴空态引导 + 首条记录仪式',
+    record: {
+      ...BLANK_SCHEME_BASE.record,
+      blankScheme: 3,
+    },
+  },
+
 };
 
 const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
@@ -86,7 +163,8 @@ const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
 }));
 
 function getDemoScene(id){
-  return DEMO_SCENES[id] || DEMO_SCENES['period-calendar'];
+  const resolved = id === 'record-blank' ? 'record-blank-1' : id;
+  return DEMO_SCENES[resolved] || DEMO_SCENES['period-calendar'];
 }
 
 function getSceneInitialState(id){
@@ -105,8 +183,10 @@ function getSceneInitialState(id){
 Object.assign(window, {
   DEMO_SCENES,
   DEMO_SCENE_OPTIONS,
+  SCENE3_SCHEME_OPTIONS,
   getDemoScene,
   getSceneInitialState,
+  getBlankScheme2PreviewTimeline,
 });
 
 function DemoSceneBar({ value, onChange, description }) {

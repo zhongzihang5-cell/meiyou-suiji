@@ -380,6 +380,31 @@ function RecordBlankEmptyState() {
   );
 }
 
+function RecordBlankScheme1Empty({ exiting }){
+  return (
+    <RecordBlankScheme1 ceremonyEntry={null}/>
+  );
+}
+
+function RecordBlankScheme2Stack({ previewBlocks }) {
+  const TimelineStream = window.TimelineStream;
+  return (
+    <div className="record-blank-scheme2-stack" aria-label="示例数据预览">
+      <div className="record-blank-scheme2-preview" aria-hidden="true">
+        <TimelineStream
+          blocks={previewBlocks}
+          sisterPlayAnimation={0}
+          sisterCycleDone={true}
+          hideTodayGuide={true}
+          hideGapDivider={true}
+          hideDayHeader={true}
+        />
+      </div>
+      <div className="record-blank-scheme2-mask" aria-hidden="true"/>
+    </div>
+  );
+}
+
 function RecordBlankStream({
   streamRef,
   timelineEndRef,
@@ -391,20 +416,39 @@ function RecordBlankStream({
   sisterCycleDone,
   hideTodayGuide,
   onSisterCycleComplete,
-  firstDropAnim,
-  onFirstDropLand,
-  onFirstDropComplete,
 }){
   const I = window.Icon;
   const TimelineStream = window.TimelineStream;
   const showBlank = window.isTimelineEmpty(timeline);
+  const scheme = scene.record.blankScheme || 1;
+  const previewBlocks = scheme === 2 && showBlank ? window.getBlankScheme2PreviewTimeline() : null;
+
+  const renderBlankBody = ()=>{
+    if(scheme === 2 && previewBlocks){
+      return <RecordBlankScheme2Stack previewBlocks={previewBlocks}/>;
+    }
+    if(scheme === 3){
+      return (
+        <RecordBlankScheme3Guide exiting={false}/>
+      );
+    }
+    if(scheme === 1){
+      return (
+        <RecordBlankScheme1 ceremonyEntry={null}/>
+      );
+    }
+    return <div className="record-blank-plain" aria-hidden="true"/>;
+  };
+
+  const schemeCls = scheme === 1 && showBlank ? ' is-scheme1'
+    : (scheme === 2 && showBlank ? ' is-scheme2'
+    : (scheme === 3 && showBlank ? ' is-scheme3' : ''));
 
   return (
-    <div className="suiji-stream record-blank-stream" ref={streamRef}>
+    <div className={'suiji-stream record-blank-stream' + schemeCls} ref={streamRef}>
       <div className="stream-header">
         <div>
           <h1 className="stream-title">点滴</h1>
-          <p className="stream-sub">记录生活点滴</p>
         </div>
         <div className="stream-actions">
           {scene.calendar.enabled && (
@@ -428,9 +472,7 @@ function RecordBlankStream({
         </div>
       </div>
 
-      {showBlank ? (
-        <RecordBlankEmptyState/>
-      ) : (
+      {showBlank ? renderBlankBody() : (
         <TimelineStream
           blocks={timeline}
           endRef={timelineEndRef}
@@ -438,9 +480,6 @@ function RecordBlankStream({
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={hideTodayGuide}
           onSisterCycleComplete={onSisterCycleComplete}
-          firstDropAnim={firstDropAnim}
-          onFirstDropLand={onFirstDropLand}
-          onFirstDropComplete={onFirstDropComplete}
         />
       )}
     </div>

@@ -1223,7 +1223,7 @@
   padding:8px 0;max-height:72px;
   position:relative;z-index:1;
 }
-.dock-text-field textarea::placeholder{color:transparent}
+.dock-text-field textarea::placeholder{color:var(--my-text-tertiary)}
 
 .dock-voice-wrap{
   flex:1;

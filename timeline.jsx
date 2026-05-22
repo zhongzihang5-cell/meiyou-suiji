@@ -4,13 +4,11 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew, typewriterAiNote, typewriterBody, hideBodyUntilDrop, animateAnalysis}){
+function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
   return (
     <SegmentedRecordCard
       entry={entry}
       isNew={isNew}
-      typewriterBody={typewriterBody}
-      hideBodyUntilDrop={hideBodyUntilDrop}
       typewriterAiNote={typewriterAiNote}
       animateAnalysis={animateAnalysis}
     />
@@ -63,14 +61,16 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader}){
   const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
     <>
-      <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
-        <CycleDayHeader day={day} items={items} dayBlocks={dayBlocks}/>
-      </div>
+      {hideDayHeader ? null : (
+        <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
+          <CycleDayHeader day={day} items={items} dayBlocks={dayBlocks}/>
+        </div>
+      )}
       {items.map((it, idx)=>{
         if(it.kind === 'sister-card' && (items[idx - 1]?.kind === 'voice-card' || items[idx - 1]?.kind === 'sync-card')) return null;
         const sisterItem = (it.kind === 'voice-card' || it.kind === 'sync-card') && items[idx + 1]?.kind === 'sister-card'
@@ -86,9 +86,6 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
-          firstDropAnim={firstDropAnim}
-          onFirstDropLand={onFirstDropLand}
-          onFirstDropComplete={onFirstDropComplete}
         />
         );
       })}
@@ -111,7 +108,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
   const dayBlocks = blocks.filter(b => b.type === 'day');
 
@@ -130,9 +127,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 hideTodayGuide={hideTodayGuide}
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
-                firstDropAnim={firstDropAnim}
-                onFirstDropLand={onFirstDropLand}
-                onFirstDropComplete={onFirstDropComplete}
+                hideDayHeader={hideDayHeader}
               />
             );
           }
@@ -144,6 +139,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
             );
           }
           if(block.type === 'gap'){
+            if(hideGapDivider) return null;
             return (
               <div key={block.id || ('gap-'+i)} className="tl-gap-divider tl-feed-more tl-rail-break">
                 上滑查看更多

@@ -9,97 +9,7 @@ const QUICK_CARDS = [
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
 
-const DOCK_SELLING_POINTS = [
-  '记点什么…',
-  '记录今天的心情…',
-  '身体有什么变化…',
-  '刚才吃了什么…',
-  '睡眠怎么样…',
-];
-const DOCK_PH_CHAR_STAGGER = 72;
-const DOCK_PH_CHAR_ENTER = 440;
-const DOCK_PH_DWELL = 2600;
-const DOCK_PH_LEAVE = 360;
-
-function DockWavePlaceholder({show, focused}){
-  const [index, setIndex] = React.useState(0);
-  const [phase, setPhase] = React.useState('enter');
-  const timersRef = React.useRef([]);
-  const runIdRef = React.useRef(0);
-
-  const clearTimers = ()=>{
-    timersRef.current.forEach(t=>window.clearTimeout(t));
-    timersRef.current = [];
-  };
-
-  const pushTimer = (fn, ms)=>{
-    const id = window.setTimeout(fn, ms);
-    timersRef.current.push(id);
-    return id;
-  };
-
-  React.useEffect(()=>{
-    if(!show || focused){
-      clearTimers();
-      runIdRef.current += 1;
-      return;
-    }
-
-    const runId = ++runIdRef.current;
-    const startCycle = (pointIndex)=>{
-      if(runId !== runIdRef.current) return;
-      const text = DOCK_SELLING_POINTS[pointIndex];
-      const enterMs = Math.max(0, text.length - 1) * DOCK_PH_CHAR_STAGGER + DOCK_PH_CHAR_ENTER;
-
-      setIndex(pointIndex);
-      setPhase('enter');
-
-      pushTimer(()=>{
-        if(runId !== runIdRef.current) return;
-        setPhase('idle');
-        pushTimer(()=>{
-          if(runId !== runIdRef.current) return;
-          setPhase('leave');
-          pushTimer(()=>{
-            if(runId !== runIdRef.current) return;
-            startCycle((pointIndex + 1) % DOCK_SELLING_POINTS.length);
-          }, DOCK_PH_LEAVE);
-        }, DOCK_PH_DWELL);
-      }, enterMs);
-    };
-
-    startCycle(0);
-    return ()=>{
-      runIdRef.current += 1;
-      clearTimers();
-    };
-  }, [show, focused]);
-
-  if(!show) return null;
-
-  const text = DOCK_SELLING_POINTS[index];
-  const chars = Array.from(text);
-  const charPhase = phase === 'enter' ? 'enter' : 'idle';
-
-  return (
-    <span
-      className={'dock-float-ph'
-        +(focused ? ' is-focused' : '')
-        +(phase === 'leave' ? ' is-leaving' : '')}
-      aria-hidden="true"
-    >
-      {chars.map((ch, i)=>(
-        <span
-          key={index+'-'+i}
-          className={'dock-float-ph-char is-'+charPhase}
-          style={{'--i': i}}
-        >
-          {ch}
-        </span>
-      ))}
-    </span>
-  );
-}
+const DOCK_PLACEHOLDER = '记录生活点滴';
 
 function QuickCardFan({
   open, selected, onFabTap, onSelectCard, onClose,
@@ -190,13 +100,14 @@ function QuickCardFan({
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
-  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showFirstDropBubble,
+  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
+  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
   const DockSymptomPicker = window.DockSymptomPicker;
   const DockWeightPicker = window.DockWeightPicker;
-  const [inputMode, setInputMode] = React.useState('text');
+  const [inputMode, setInputMode] = React.useState(defaultInputMode);
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickSelected, setQuickSelected] = React.useState(null);
   const [dockSheet, setDockSheet] = React.useState(null);
@@ -207,6 +118,10 @@ function DockPublisher({
   const prevTabRef = React.useRef(activeTab);
 
   React.useEffect(()=>{
+    setInputMode(defaultInputMode);
+  }, [defaultInputMode]);
+
+  React.useEffect(()=>{
     if(activeTab === 'note' && prevTabRef.current !== 'note'){
       setQuickOpen(false);
       setQuickSelected(null);
@@ -214,6 +129,12 @@ function DockPublisher({
     }
     prevTabRef.current = activeTab;
   }, [activeTab]);
+
+  React.useEffect(()=>{
+    if(!showScheme3Bubble) return;
+    const tm = setTimeout(()=>window.markScheme3BubbleSeen?.(), 2400);
+    return ()=>clearTimeout(tm);
+  }, [showScheme3Bubble]);
 
   const closeQuick = ()=>{
     setQuickSelected(null);
@@ -286,6 +207,7 @@ function DockPublisher({
 
   const isDockExpanded = !!dockSheet;
   const isQuickActive = quickOpen || !!quickSelected;
+  const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
 
   return (
     <>
@@ -341,18 +263,18 @@ function DockPublisher({
               </button>
 
               {inputMode==='text' ? (
-                <div className={'dock-text-field'+(inputFocused?' is-focused':'')}>
-                  {showFirstDropBubble && !inputFocused ? (
-                    <div className="dock-first-drop-bubble" role="status">💧 落下你的第一滴</div>
+                <div className={'dock-text-field'
+                  +(inputFocused?' is-focused':'')
+                  +(highlightScheme3Input?' is-scheme3-highlight':'')}>
+                  {showScheme3Bubble && !draft.trim() && !inputFocused ? (
+                    <span className="dock-scheme3-bubble" aria-hidden="true">
+                      ✏️ 记下第一刻
+                    </span>
                   ) : null}
-                  <DockWavePlaceholder
-                    show={!draft.trim()}
-                    focused={inputFocused}
-                  />
                   <textarea
                     rows="1"
-                    placeholder=""
-                    aria-label={DOCK_SELLING_POINTS[0]}
+                    placeholder={inputPlaceholder}
+                    aria-label={inputPlaceholder}
                     value={draft}
                     onChange={(e)=>{
                       onDraft(e.target.value);

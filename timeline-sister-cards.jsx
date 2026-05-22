@@ -92,12 +92,31 @@ function renderTypedSegments(segments, len){
   return out;
 }
 
-function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onComplete, className}){
+function scrollFeedContentIntoView(el, bottomReserve = 210){
+  if(!el) return;
+  const stream = el.closest('.suiji-stream');
+  if(!stream) return;
+  const streamRect = stream.getBoundingClientRect();
+  const target = el.querySelector?.('.tl-typewriter-cursor') || el;
+  const targetRect = target.getBoundingClientRect();
+  const visibleBottom = streamRect.bottom - bottomReserve;
+  if(targetRect.bottom > visibleBottom){
+    stream.scrollTop += targetRect.bottom - visibleBottom + 16;
+  }
+}
+
+function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onComplete, className, followScroll = false}){
   const full = segments ? segmentsFullText(segments) : (text || '');
   const [len, setLen] = React.useState(active ? 0 : full.length);
   const doneRef = React.useRef(!active);
   const onCompleteRef = React.useRef(onComplete);
+  const rootRef = React.useRef(null);
   onCompleteRef.current = onComplete;
+
+  React.useLayoutEffect(()=>{
+    if(!active || !followScroll || !rootRef.current) return;
+    scrollFeedContentIntoView(rootRef.current);
+  }, [len, active, followScroll]);
 
   React.useEffect(()=>{
     if(!active){
@@ -135,7 +154,7 @@ function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onCompl
   const content = segments ? renderTypedSegments(segments, len) : full.slice(0, len);
 
   return (
-    <span className={className}>
+    <span ref={rootRef} className={className}>
       {content}
       {showCursor && <span className="tl-typewriter-cursor" aria-hidden="true"/>}
     </span>
@@ -289,7 +308,7 @@ function AiNoteSection({aiNote, embedded, typewriter, onTypeComplete}){
           </>
         ) : typewriter ? (
           <p className="tl-combo-ai-text">
-            <TypewriterText text={aiNote.text} active onComplete={onTypeComplete}/>
+            <TypewriterText text={aiNote.text} active followScroll onComplete={onTypeComplete}/>
           </p>
         ) : (
           <p className="tl-combo-ai-text">{aiNote.text}</p>
@@ -404,7 +423,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
         ) : text ? (
           typewriterBody ? (
             <div className="tl-t5-body">
-              <TypewriterText text={text} active charMs={48}/>
+              <TypewriterText text={text} active charMs={48} followScroll/>
             </div>
           ) : (
             <div className="tl-t5-body">{text}</div>
@@ -458,8 +477,14 @@ function SisterCycleChart({animated, onComplete, staticView = false}){
   const [seenBars, setSeenBars] = React.useState(done ? [0, 1, 2] : []);
   const [grownBars, setGrownBars] = React.useState(done ? [0, 1, 2] : []);
   const [zoomPop, setZoomPop] = React.useState(done);
+  const chartRef = React.useRef(null);
   const onCompleteRef = React.useRef(onComplete);
   onCompleteRef.current = onComplete;
+
+  React.useLayoutEffect(()=>{
+    if(staticView || !animated) return;
+    requestAnimationFrame(()=>scrollFeedContentIntoView(chartRef.current));
+  }, [animated, staticView, headSeen, seenBars, grownBars, zoomPop]);
 
   React.useEffect(()=>{
     if(staticView){
@@ -483,7 +508,7 @@ function SisterCycleChart({animated, onComplete, staticView = false}){
   }, [animated, staticView]);
 
   return (
-    <div className="chart-block" style={{background:'transparent', border:'none', padding:0}}>
+    <div className="chart-block" ref={chartRef} style={{background:'transparent', border:'none', padding:0}}>
       <div className={'cycle-card'+(!animated?' cycle-card--static':'')}>
         <div className={'cc-head cc-seg'+(headSeen?' seen':'')}>
           <span className="cc-title">
@@ -688,7 +713,13 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const [closingDone, setClosingDone] = React.useState(!animateText);
   const prevPlayRef = React.useRef(playAnimation);
   const onCycleCompleteRef = React.useRef(onCycleComplete);
+  const bodyRef = React.useRef(null);
   onCycleCompleteRef.current = onCycleComplete;
+
+  React.useLayoutEffect(()=>{
+    if(!animateText || !bodyRef.current) return;
+    requestAnimationFrame(()=>scrollFeedContentIntoView(bodyRef.current));
+  }, [animateText, leadDone, chartDone, para1Done, showSignal, showClosing]);
 
   React.useEffect(()=>{
     if(!animateText){
@@ -746,10 +777,10 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const showPara1 = !animateText || (leadDone && chartDone);
 
   return (
-    <div className="tl-t5-analysis-body">
+    <div className="tl-t5-analysis-body" ref={bodyRef}>
       <p className="tl-t5-analysis-lead">
         {animateText && !leadDone ? (
-          <TypewriterText text={SISTER_LEAD} active onComplete={handleLeadComplete}/>
+          <TypewriterText text={SISTER_LEAD} active followScroll onComplete={handleLeadComplete}/>
         ) : SISTER_LEAD}
       </p>
       {showChart && (
@@ -765,6 +796,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
             <TypewriterText
               segments={SISTER_PARA1}
               active
+              followScroll
               onComplete={()=>setPara1Done(true)}
             />
           ) : (
@@ -784,6 +816,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
             <TypewriterText
               segments={SISTER_CLOSING}
               active
+              followScroll
               onComplete={()=>setClosingDone(true)}
             />
           ) : (

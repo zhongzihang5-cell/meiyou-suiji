@@ -9,10 +9,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>美柚 · 场景三 · 未记录时间轴空值</title>
+<title>美柚 · 场景三 · 未记录时间轴</title>
 <!--
-  场景三：未记录时间轴空值（可改 record-blank.jsx）
-  生成日期: 2026-05-21
+  场景三：方案一空白 / 方案二蒙层 / 方案三生长时间轴引导
+  生成日期: 2026-05-22
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -2116,7 +2116,7 @@ html,body{
   padding:8px 0;max-height:72px;
   position:relative;z-index:1;
 }
-.dock-text-field textarea::placeholder{color:transparent}
+.dock-text-field textarea::placeholder{color:var(--my-text-tertiary)}
 
 .dock-voice-wrap{
   flex:1;
@@ -5009,6 +5009,814 @@ html,body{
   position:relative;
 }
 
+.record-blank-plain{
+  min-height:360px;
+}
+
+/* 方案一 · 空态 + 首条记录（连续过渡） */
+.record-blank-stream.is-scheme1 .rb-s1-flow{
+  --rb-s1-top:max(8px, calc(10dvh - 4px));
+  min-height:calc(100dvh - 44px - var(--my-dock-float-b, 180px) - 76px);
+  box-sizing:border-box;
+}
+
+.rb-s1-flow{
+  position:relative;
+}
+
+.rb-s1-axis{
+  position:absolute;
+  left:16px;
+  top:var(--rb-s1-top);
+  bottom:56px;
+  width:14px;
+  pointer-events:none;
+  z-index:2;
+}
+
+.rb-s1-axis-rail{
+  position:absolute;
+  left:6px;
+  top:10px;
+  bottom:0;
+  width:2px;
+  border-radius:1px;
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.52) 0%,
+    rgba(255,77,136,0.28) 16%,
+    rgba(255,77,136,0.16) 32%,
+    rgba(255,77,136,0.1) 50%,
+    rgba(255,77,136,0.06) 72%,
+    rgba(255,77,136,0.03) 100%
+  );
+  transition:background 0.85s cubic-bezier(0.4,0,0.2,1);
+}
+
+.rb-s1-flow.is-ceremony .rb-s1-axis-rail{
+  top:0;
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.48) 0%,
+    rgba(255,77,136,0.22) 6%,
+    rgba(0,0,0,0.07) 14%,
+    rgba(0,0,0,0.06) 100%
+  );
+}
+
+.rb-s1-axis-dot{
+  position:absolute;
+  left:50%;
+  top:0;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  box-sizing:border-box;
+  background:#ff4d88;
+  border:2px solid #fff;
+  box-shadow:
+    0 0 0 2px var(--my-bg),
+    0 0 0 5px rgba(255,77,136,0.14);
+  transform:translateX(-50%) scale(1);
+  transform-origin:center center;
+  transition:
+    box-shadow 0.55s cubic-bezier(0.4,0,0.2,1),
+    transform 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+
+.rb-s1-axis-dot.is-settling{
+  animation:rbS1DotSettle 0.72s cubic-bezier(0.34,1.15,0.64,1) forwards;
+}
+
+.rb-s1-axis-dot.is-settled{
+  width:6px;
+  height:6px;
+  border-width:1.5px;
+  box-shadow:0 0 0 2px var(--my-bg);
+  transform:translateX(-50%) scale(1);
+}
+
+@keyframes rbS1DotSettle{
+  0%{
+    transform:translateX(-50%) scale(1);
+    box-shadow:
+      0 0 0 2px var(--my-bg),
+      0 0 0 5px rgba(255,77,136,0.14);
+  }
+  38%{
+    transform:translateX(-50%) scale(1.34);
+    box-shadow:
+      0 0 0 2px var(--my-bg),
+      0 0 0 9px rgba(255,77,136,0.2);
+  }
+  62%{
+    transform:translateX(-50%) scale(0.88);
+  }
+  82%{
+    transform:translateX(-50%) scale(1.06);
+  }
+  100%{
+    transform:translateX(-50%) scale(1);
+    width:6px;
+    height:6px;
+    border-width:1.5px;
+    box-shadow:0 0 0 2px var(--my-bg);
+  }
+}
+
+.rb-s1-main{
+  position:relative;
+  z-index:1;
+}
+
+.rb-s1-hero{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:var(--rb-s1-top, max(8px, calc(10dvh - 4px))) 28px 24px;
+  transition:opacity 0.45s ease, transform 0.45s ease;
+}
+
+.rb-s1-hero.is-exiting{
+  opacity:0;
+  transform:translateY(-10px);
+  pointer-events:none;
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+}
+
+.rb-s1-timeline{
+  position:relative;
+  padding-top:var(--rb-s1-top, max(8px, calc(10dvh - 4px)));
+}
+
+.rb-s1-flow.is-ceremony .tl-rail-dot.is-axis-sync{
+  opacity:0;
+  width:6px;
+  height:6px;
+}
+
+.rb-s1-hero-title{
+  margin:0;
+  font-size:21px;
+  font-weight:500;
+  color:rgba(0,0,0,0.6);
+  line-height:1.47;
+  letter-spacing:0;
+  opacity:0;
+  transform:translateY(10px);
+  animation:rbS1FadeUp 0.6s ease forwards;
+}
+
+.rb-s1-hero-hint{
+  margin:10px 0 0;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.35);
+  line-height:1.47;
+  opacity:0;
+  transform:translateY(10px);
+  animation:rbS1FadeUp 0.6s ease 0.2s forwards;
+}
+
+.rb-s1-curly-arrow{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  top:0;
+  bottom:0;
+  pointer-events:none;
+  z-index:90;
+}
+
+.rb-s1-curly-arrow img{
+  position:absolute;
+  right:76px;
+  bottom:calc(var(--my-dock-float-b, 180px) + 28px);
+  width:92px;
+  height:auto;
+  opacity:0;
+  transform:translate(-6px,-6px) scale(0.96);
+  transform-origin:100% 100%;
+  animation:rbS1CurlyArrowIn 0.55s ease 0.55s forwards;
+}
+
+.phone:has(.quick-float-wrap.is-quick-active) .rb-s1-curly-arrow,
+.suiji-shell.is-mood-expanded .rb-s1-curly-arrow{
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.2s ease, visibility 0.2s ease;
+}
+
+@keyframes rbS1CurlyArrowIn{
+  from{
+    opacity:0;
+    transform:translate(-6px,-6px) scale(0.96);
+  }
+  to{
+    opacity:0.88;
+    transform:none;
+  }
+}
+
+@keyframes rbS1FadeUp{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* 方案一 · 首条记录仪式（并入 rb-s1-flow） */
+.rb-s1-record-slot{
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.rb-s1-record-slot.is-visible{
+  animation:rbS1RecordIn 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+@keyframes rbS1RecordIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s1-summary-head{
+  opacity:0;
+  transform:translateY(-10px);
+}
+
+.rb-s1-summary-head.is-visible{
+  animation:rbS1SummaryIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+@keyframes rbS1SummaryIn{
+  from{opacity:0;transform:translateY(-10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.dock-text-field.is-scheme1-highlight{
+  background:#fff;
+  border:1.5px solid #ff4d88;
+  box-shadow:0 0 0 3px rgba(255,77,136,0.1);
+}
+
+.dock-text-field.is-scheme1-highlight:focus-within,
+.dock-text-field.is-scheme1-highlight.is-focused{
+  border-color:#ff4d88;
+  box-shadow:0 0 0 4px rgba(255,77,136,0.14);
+}
+
+.dock-voice-wrap.is-scheme1-highlight{
+  background:#fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 0 0 0.5px rgba(0,0,0,0.04),
+    0 0 0 1.5px #ff4d88,
+    0 0 0 4px rgba(255,77,136,0.1);
+}
+
+.dock-voice-wrap.is-scheme1-highlight.is-recording{
+  background:linear-gradient(180deg, #fff5f8 0%, #fff 100%);
+  box-shadow:
+    0 0 0 1.5px #ff4d88,
+    0 0 0 4px rgba(255,77,136,0.14);
+}
+
+.dock-text-field.is-scheme3-highlight{
+  background:#fff;
+  border:1.5px solid #ff4d88;
+  box-shadow:0 0 0 4px rgba(255,77,136,0.08);
+}
+
+.dock-text-field.is-scheme3-highlight:focus-within,
+.dock-text-field.is-scheme3-highlight.is-focused{
+  border-color:#ff4d88;
+  box-shadow:0 0 0 4px rgba(255,77,136,0.08);
+}
+
+/* 方案二 · 示例数据 + 蒙层 */
+.record-blank-scheme2-stack{
+  position:relative;
+  min-height:360px;
+  padding-top:4px;
+}
+
+.record-blank-scheme2-preview{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  overflow:hidden;
+  pointer-events:none;
+  opacity:1;
+  mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.35) 90%, transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.35) 90%, transparent 100%);
+}
+
+.record-blank-scheme2-preview .tl-feed{
+  pointer-events:none;
+}
+
+.record-blank-scheme2-preview .tl-rail-continuous{
+  padding-top:0;
+}
+
+.record-blank-scheme2-mask{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:linear-gradient(
+    180deg,
+    rgba(242,242,245,0.22) 0%,
+    rgba(242,242,245,0.38) 38%,
+    rgba(242,242,245,0.52) 68%,
+    rgba(242,242,245,0.66) 100%
+  );
+  pointer-events:none;
+}
+
+/* ============ 方案三 · 生长时间轴空态引导 ============ */
+
+.rb-s3-guide{
+  position:relative;
+  min-height:480px;
+  padding-top:40px;
+}
+
+.rb-s3-guide.is-exiting{
+  animation:rbS3GuideExit 0.28s ease forwards;
+  pointer-events:none;
+}
+
+@keyframes rbS3GuideExit{
+  from{opacity:1;transform:translateY(0)}
+  to{opacity:0;transform:translateY(-8px)}
+}
+
+.rb-s3-axis-wrap{
+  position:absolute;
+  left:16px;
+  top:40px;
+  width:14px;
+  height:340px;
+  pointer-events:none;
+}
+
+.rb-s3-axis{
+  position:absolute;
+  left:50%;
+  top:0;
+  width:1.5px;
+  height:0;
+  margin-left:-0.75px;
+  border-radius:1px;
+  overflow:visible;
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.15) 0%,
+    rgba(255,77,136,0.55) 72%,
+    rgba(255,77,136,0) 100%
+  );
+  transition:height 0.9s linear;
+}
+
+.rb-s3-axis.is-phase-1{height:48px}
+.rb-s3-axis.is-phase-2{height:85px}
+.rb-s3-axis.is-phase-3{height:170px}
+.rb-s3-axis.is-phase-4{height:255px}
+.rb-s3-axis.is-phase-5{height:340px}
+
+.rb-s3-axis.is-flowing{
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.1) 0%,
+    rgba(255,77,136,0.35) 28%,
+    rgba(255,77,136,0.62) 58%,
+    rgba(255,77,136,0.28) 82%,
+    rgba(255,77,136,0) 100%
+  );
+  background-size:100% 240%;
+  animation:rbS3AxisDrift 2.6s ease-in-out infinite;
+}
+
+.rb-s3-axis-tip{
+  position:absolute;
+  left:50%;
+  bottom:-2px;
+  width:6px;
+  height:6px;
+  margin-left:-3px;
+  border-radius:50%;
+  background:#ff4d88;
+  box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 0 8px rgba(255,77,136,0.35);
+  opacity:0;
+  transform:scale(0.6);
+  transition:opacity 0.4s ease, transform 0.4s ease;
+}
+
+.rb-s3-axis.is-phase-1 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-2 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-3 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-4 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-5 .rb-s3-axis-tip{
+  opacity:1;
+  transform:scale(1);
+  animation:rbS3AxisTipPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes rbS3AxisDrift{
+  0%,100%{background-position:0 0}
+  50%{background-position:0 28%}
+}
+
+@keyframes rbS3AxisTipPulse{
+  0%,100%{
+    opacity:0.55;
+    transform:scale(0.92);
+    box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 0 6px rgba(255,77,136,0.22);
+  }
+  50%{
+    opacity:1;
+    transform:scale(1.08);
+    box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 0 10px rgba(255,77,136,0.42);
+  }
+}
+
+.rb-s3-copy{
+  position:relative;
+  padding-left:40px;
+  padding-right:4px;
+}
+
+.rb-s3-headline{
+  margin:0 0 10px;
+  font-size:22px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+  opacity:0;
+  transform:translateY(8px);
+  max-height:40px;
+  overflow:hidden;
+  transition:max-height 0.35s ease, margin 0.35s ease;
+}
+
+.rb-s3-headline.is-visible{
+  animation:rbS3GuideFadeUp 0.5s ease forwards;
+}
+
+.rb-s3-headline.is-visible.is-exiting{
+  animation:rbS3HeadlineOut 0.45s ease forwards;
+}
+
+.rb-s3-headline.is-gone{
+  opacity:0;
+  max-height:0;
+  margin:0;
+  pointer-events:none;
+}
+
+@keyframes rbS3HeadlineOut{
+  from{
+    opacity:1;
+    transform:translateY(0);
+  }
+  to{
+    opacity:0;
+    transform:translateY(-6px);
+  }
+}
+
+.rb-s3-subcopy{
+  margin:0 0 16px;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.35);
+  line-height:1.47;
+  opacity:0;
+  transform:translateY(8px);
+}
+
+.rb-s3-subcopy.is-visible{
+  animation:rbS3GuideFadeUp 0.5s ease forwards;
+}
+
+.rb-s3-cards{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.rb-s3-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:60px;
+  padding:12px 14px;
+  background:#fff;
+  border-radius:12px;
+  opacity:0;
+  transform:translateY(12px);
+}
+
+.rb-s3-card.is-visible{
+  animation:rbS3CardIn 0.75s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+@keyframes rbS3CardIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s3-card-icon{
+  flex-shrink:0;
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  background:rgba(255,77,136,0.07);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  line-height:1;
+}
+
+.rb-s3-card-text{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.rb-s3-card-title{
+  font-size:15px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+
+.rb-s3-card-desc{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+
+@keyframes rbS3GuideFadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* —— 首条记录仪式 —— */
+.rb-s3-ceremony{
+  padding-top:4px;
+}
+
+.rb-s3-date-head{
+  opacity:0;
+  transform:translateY(-12px);
+}
+
+.rb-s3-date-head.is-visible{
+  animation:rbS3DateIn 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+@keyframes rbS3DateIn{
+  from{opacity:0;transform:translateY(-12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s3-node-dot{
+  display:block;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#ff4d88;
+  border:2px solid #fff;
+  box-shadow:0 0 0 3px rgba(255,77,136,0.15);
+  opacity:0;
+  transform:scale(0);
+}
+
+.rb-s3-node-dot.is-pop{
+  animation:rbS3DotPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+@keyframes rbS3DotPop{
+  0%{transform:scale(0);opacity:0}
+  60%{transform:scale(1.3);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+
+.rb-s3-record-slot{
+  opacity:0;
+  transform:translateY(12px);
+}
+
+.rb-s3-record-slot.is-visible{
+  animation:rbS3FadeUp 0.45s ease forwards;
+}
+
+@keyframes rbS3FadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s3-ai-card{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  margin-top:10px;
+  padding:14px;
+  border-radius:12px;
+  background:linear-gradient(135deg, #fff 0%, #fff5f8 100%);
+  border:0.5px solid rgba(255,77,136,0.12);
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.rb-s3-ai-card.is-visible{
+  animation:rbS3FadeUp 0.45s ease forwards;
+}
+
+.rb-s3-ai-avatar{
+  flex-shrink:0;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #ffb8d0 0%, #ff4d88 100%);
+  color:#fff;
+  font-size:11px;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+}
+
+.rb-s3-ai-body{
+  flex:1;
+  min-width:0;
+}
+
+.rb-s3-ai-title{
+  margin:0 0 4px;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+
+.rb-s3-ai-text{
+  margin:0;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.55);
+  line-height:1.47;
+}
+
+.rb-s3-sync-line{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding-left:2px;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.35);
+  line-height:1.29;
+  opacity:0;
+  transform:translateY(8px);
+}
+
+.rb-s3-sync-line.is-visible{
+  animation:rbS3FadeUp 0.4s ease forwards;
+}
+
+.rb-s3-celebrate{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:28px;
+  padding:0 12px 24px;
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.rb-s3-celebrate.is-visible{
+  animation:rbS3FadeUp 0.5s ease forwards;
+}
+
+.rb-s3-celebrate-ripple{
+  position:relative;
+  width:60px;
+  height:60px;
+  margin-bottom:10px;
+}
+
+.rb-s3-celeb-ring.is-outer{
+  transform-origin:30px 30px;
+  animation:rbS3CelebRingOuter 0.9s 0.15s ease-out forwards;
+}
+
+.rb-s3-celeb-ring.is-inner{
+  transform-origin:30px 30px;
+  animation:rbS3CelebRingInner 0.75s 0.25s ease-out forwards;
+}
+
+@keyframes rbS3CelebRingOuter{
+  from{transform:scale(1);opacity:0.18}
+  to{transform:scale(3);opacity:0}
+}
+
+@keyframes rbS3CelebRingInner{
+  from{transform:scale(1);opacity:0.24}
+  to{transform:scale(4.2);opacity:0}
+}
+
+.rb-s3-splash-drop{
+  transform-origin:30px 30px;
+  opacity:0;
+  animation:rbS3SplashDrop 0.55s calc(0.12s * var(--rb-s3-drop-i, 0)) ease-out forwards;
+}
+
+@keyframes rbS3SplashDrop{
+  0%{
+    opacity:0.55;
+    transform:rotate(var(--rb-s3-angle)) translateY(0);
+  }
+  100%{
+    opacity:0;
+    transform:rotate(var(--rb-s3-angle)) translateY(-18px);
+  }
+}
+
+.rb-s3-celebrate-title{
+  margin:0 0 4px;
+  font-size:15px;
+  font-weight:500;
+  color:#ff4d88;
+  text-align:center;
+  line-height:1.47;
+}
+
+.rb-s3-celebrate-sub{
+  margin:0;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.4);
+  text-align:center;
+  line-height:1.47;
+}
+
+.dock-text-field .dock-scheme3-bubble{
+  position:absolute;
+  left:12px;
+  bottom:calc(100% + 8px);
+  background:#ff4d88;
+  color:#fff;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.29;
+  padding:8px 14px;
+  border-radius:10px;
+  white-space:nowrap;
+  pointer-events:none;
+  box-shadow:0 2px 12px rgba(255,77,136,0.25);
+  animation:rbS3BubbleIn 0.45s ease 3.6s both;
+  z-index:2;
+}
+
+.dock-text-field .dock-scheme3-bubble::after{
+  content:'';
+  position:absolute;
+  left:24px;
+  bottom:-6px;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:6px solid #ff4d88;
+}
+
+@keyframes rbS3BubbleIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.record-blank-stream.is-scheme3 .record-blank-plain{
+  min-height:0;
+}
+
 .record-blank-stream.is-ceremony{
   overflow:hidden;
 }
@@ -6113,10 +6921,10 @@ body.standalone-demo .phone .suiji-shell--scene::before{
 
 <script>
 const TWEAK_DEFAULTS = {
-  "demoScene": "record-blank"
+  "demoScene": "record-blank-3"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-window.__BUILD__ = "2026-05-21-nomask";
+window.__BUILD__ = "2026-05-22-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 </script>
 
@@ -7514,12 +8322,31 @@ function renderTypedSegments(segments, len){
   return out;
 }
 
-function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onComplete, className}){
+function scrollFeedContentIntoView(el, bottomReserve = 210){
+  if(!el) return;
+  const stream = el.closest('.suiji-stream');
+  if(!stream) return;
+  const streamRect = stream.getBoundingClientRect();
+  const target = el.querySelector?.('.tl-typewriter-cursor') || el;
+  const targetRect = target.getBoundingClientRect();
+  const visibleBottom = streamRect.bottom - bottomReserve;
+  if(targetRect.bottom > visibleBottom){
+    stream.scrollTop += targetRect.bottom - visibleBottom + 16;
+  }
+}
+
+function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onComplete, className, followScroll = false}){
   const full = segments ? segmentsFullText(segments) : (text || '');
   const [len, setLen] = React.useState(active ? 0 : full.length);
   const doneRef = React.useRef(!active);
   const onCompleteRef = React.useRef(onComplete);
+  const rootRef = React.useRef(null);
   onCompleteRef.current = onComplete;
+
+  React.useLayoutEffect(()=>{
+    if(!active || !followScroll || !rootRef.current) return;
+    scrollFeedContentIntoView(rootRef.current);
+  }, [len, active, followScroll]);
 
   React.useEffect(()=>{
     if(!active){
@@ -7557,7 +8384,7 @@ function TypewriterText({text, segments, active, charMs = TYPEWRITER_MS, onCompl
   const content = segments ? renderTypedSegments(segments, len) : full.slice(0, len);
 
   return (
-    <span className={className}>
+    <span ref={rootRef} className={className}>
       {content}
       {showCursor && <span className="tl-typewriter-cursor" aria-hidden="true"/>}
     </span>
@@ -7711,7 +8538,7 @@ function AiNoteSection({aiNote, embedded, typewriter, onTypeComplete}){
           </>
         ) : typewriter ? (
           <p className="tl-combo-ai-text">
-            <TypewriterText text={aiNote.text} active onComplete={onTypeComplete}/>
+            <TypewriterText text={aiNote.text} active followScroll onComplete={onTypeComplete}/>
           </p>
         ) : (
           <p className="tl-combo-ai-text">{aiNote.text}</p>
@@ -7826,7 +8653,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
         ) : text ? (
           typewriterBody ? (
             <div className="tl-t5-body">
-              <TypewriterText text={text} active charMs={48}/>
+              <TypewriterText text={text} active charMs={48} followScroll/>
             </div>
           ) : (
             <div className="tl-t5-body">{text}</div>
@@ -7880,8 +8707,14 @@ function SisterCycleChart({animated, onComplete, staticView = false}){
   const [seenBars, setSeenBars] = React.useState(done ? [0, 1, 2] : []);
   const [grownBars, setGrownBars] = React.useState(done ? [0, 1, 2] : []);
   const [zoomPop, setZoomPop] = React.useState(done);
+  const chartRef = React.useRef(null);
   const onCompleteRef = React.useRef(onComplete);
   onCompleteRef.current = onComplete;
+
+  React.useLayoutEffect(()=>{
+    if(staticView || !animated) return;
+    requestAnimationFrame(()=>scrollFeedContentIntoView(chartRef.current));
+  }, [animated, staticView, headSeen, seenBars, grownBars, zoomPop]);
 
   React.useEffect(()=>{
     if(staticView){
@@ -7905,7 +8738,7 @@ function SisterCycleChart({animated, onComplete, staticView = false}){
   }, [animated, staticView]);
 
   return (
-    <div className="chart-block" style={{background:'transparent', border:'none', padding:0}}>
+    <div className="chart-block" ref={chartRef} style={{background:'transparent', border:'none', padding:0}}>
       <div className={'cycle-card'+(!animated?' cycle-card--static':'')}>
         <div className={'cc-head cc-seg'+(headSeen?' seen':'')}>
           <span className="cc-title">
@@ -8110,7 +8943,13 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const [closingDone, setClosingDone] = React.useState(!animateText);
   const prevPlayRef = React.useRef(playAnimation);
   const onCycleCompleteRef = React.useRef(onCycleComplete);
+  const bodyRef = React.useRef(null);
   onCycleCompleteRef.current = onCycleComplete;
+
+  React.useLayoutEffect(()=>{
+    if(!animateText || !bodyRef.current) return;
+    requestAnimationFrame(()=>scrollFeedContentIntoView(bodyRef.current));
+  }, [animateText, leadDone, chartDone, para1Done, showSignal, showClosing]);
 
   React.useEffect(()=>{
     if(!animateText){
@@ -8168,10 +9007,10 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const showPara1 = !animateText || (leadDone && chartDone);
 
   return (
-    <div className="tl-t5-analysis-body">
+    <div className="tl-t5-analysis-body" ref={bodyRef}>
       <p className="tl-t5-analysis-lead">
         {animateText && !leadDone ? (
-          <TypewriterText text={SISTER_LEAD} active onComplete={handleLeadComplete}/>
+          <TypewriterText text={SISTER_LEAD} active followScroll onComplete={handleLeadComplete}/>
         ) : SISTER_LEAD}
       </p>
       {showChart && (
@@ -8187,6 +9026,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
             <TypewriterText
               segments={SISTER_PARA1}
               active
+              followScroll
               onComplete={()=>setPara1Done(true)}
             />
           ) : (
@@ -8206,6 +9046,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
             <TypewriterText
               segments={SISTER_CLOSING}
               active
+              followScroll
               onComplete={()=>setClosingDone(true)}
             />
           ) : (
@@ -9481,22 +10322,14 @@ function CycleDayHeader({day, items, dayBlocks}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, axisDropAnim, children}){
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children}){
   const dotCls = railDot === 'ai'
     ? ' ai'
     : (phaseKind ? ' '+phaseKind : '');
-  const AxisDrop = window.RecordBlankAxisDropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(axisDropAnim?' is-axis-drop':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
-        {axisDropAnim && AxisDrop ? (
-          <AxisDrop
-            onLand={axisDropAnim.onLand}
-            onComplete={axisDropAnim.onComplete}
-          />
-        ) : (
-          <span className={'tl-rail-dot'+dotCls}/>
-        )}
+        <span className={'tl-rail-dot'+dotCls}/>
       </div>
       <div className="tl-rail-body">{children}</div>
     </div>
@@ -9579,7 +10412,7 @@ function TodayGuideCard({item, isNew, animate}){
     <div className={'tl-rail-guide'+(isNew?' fade-in':'')}>
       <p className="tl-rail-guide-text">
         {animate ? (
-          <TypewriterText text={item.text} active charMs={GUIDE_TYPEWRITER_MS}/>
+          <TypewriterText text={item.text} active charMs={GUIDE_TYPEWRITER_MS} followScroll/>
         ) : item.text}
       </p>
     </div>
@@ -9826,19 +10659,11 @@ function TimelineItemWrap({item, children}){
   );
 }
 
-function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && (
     isNew || item.hiddenUntilSisterDone
   );
-  const isFirstDropTarget = !!(firstDropAnim && firstDropAnim.entryId === item.id);
-  const showAxisDrop = isFirstDropTarget && !firstDropAnim.done;
-  const typewriterBody = isFirstDropTarget && firstDropAnim.textReady;
-  const hideBodyUntilDrop = isFirstDropTarget && !firstDropAnim.textReady;
-  const axisDropAnim = showAxisDrop ? {
-    onLand: onFirstDropLand,
-    onComplete: onFirstDropComplete,
-  } : null;
 
   let body = null;
   if(item.kind === 'record-group'){
@@ -9879,8 +10704,6 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       <RecordCard
         entry={item}
         isNew={isNew}
-        typewriterBody={typewriterBody}
-        hideBodyUntilDrop={hideBodyUntilDrop}
         typewriterAiNote={!!(isNew && item.aiNote)}
       />
     );
@@ -9892,7 +10715,6 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       railDot={item.railDot || sisterItem?.railDot || (item.kind === 'sister-card' ? 'ai' : (item.ai && !item.primary ? 'ai' : undefined))}
       isFeedLast={isFeedLast}
       nodeKind={item.kind === 'record-group' ? (item.ai && !item.primary ? 'sister-card' : 'voice-card') : (sisterItem ? (item.kind === 'sync-card' ? 'sync-card' : 'voice-card') : item.kind)}
-      axisDropAnim={axisDropAnim}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
@@ -9915,13 +10737,11 @@ function VoiceBar({voice}){
   return <TlVoiceBar voice={voice}/>;
 }
 
-function RecordCard({entry, isNew, typewriterAiNote, typewriterBody, hideBodyUntilDrop, animateAnalysis}){
+function RecordCard({entry, isNew, typewriterAiNote, animateAnalysis}){
   return (
     <SegmentedRecordCard
       entry={entry}
       isNew={isNew}
-      typewriterBody={typewriterBody}
-      hideBodyUntilDrop={hideBodyUntilDrop}
       typewriterAiNote={typewriterAiNote}
       animateAnalysis={animateAnalysis}
     />
@@ -9974,14 +10794,16 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader}){
   const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
   const phaseCls = day.phaseKind || '';
   return (
     <>
-      <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
-        <CycleDayHeader day={day} items={items} dayBlocks={dayBlocks}/>
-      </div>
+      {hideDayHeader ? null : (
+        <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
+          <CycleDayHeader day={day} items={items} dayBlocks={dayBlocks}/>
+        </div>
+      )}
       {items.map((it, idx)=>{
         if(it.kind === 'sister-card' && (items[idx - 1]?.kind === 'voice-card' || items[idx - 1]?.kind === 'sync-card')) return null;
         const sisterItem = (it.kind === 'voice-card' || it.kind === 'sync-card') && items[idx + 1]?.kind === 'sister-card'
@@ -9997,9 +10819,6 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
-          firstDropAnim={firstDropAnim}
-          onFirstDropLand={onFirstDropLand}
-          onFirstDropComplete={onFirstDropComplete}
         />
         );
       })}
@@ -10022,7 +10841,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader}){
   const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
   const dayBlocks = blocks.filter(b => b.type === 'day');
 
@@ -10041,9 +10860,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 hideTodayGuide={hideTodayGuide}
                 onSisterCycleComplete={onSisterCycleComplete}
                 lastItemId={lastItemId}
-                firstDropAnim={firstDropAnim}
-                onFirstDropLand={onFirstDropLand}
-                onFirstDropComplete={onFirstDropComplete}
+                hideDayHeader={hideDayHeader}
               />
             );
           }
@@ -10055,6 +10872,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
             );
           }
           if(block.type === 'gap'){
+            if(hideGapDivider) return null;
             return (
               <div key={block.id || ('gap-'+i)} className="tl-gap-divider tl-feed-more tl-rail-break">
                 上滑查看更多
@@ -10895,6 +11713,31 @@ function RecordBlankEmptyState() {
   );
 }
 
+function RecordBlankScheme1Empty({ exiting }){
+  return (
+    <RecordBlankScheme1 ceremonyEntry={null}/>
+  );
+}
+
+function RecordBlankScheme2Stack({ previewBlocks }) {
+  const TimelineStream = window.TimelineStream;
+  return (
+    <div className="record-blank-scheme2-stack" aria-label="示例数据预览">
+      <div className="record-blank-scheme2-preview" aria-hidden="true">
+        <TimelineStream
+          blocks={previewBlocks}
+          sisterPlayAnimation={0}
+          sisterCycleDone={true}
+          hideTodayGuide={true}
+          hideGapDivider={true}
+          hideDayHeader={true}
+        />
+      </div>
+      <div className="record-blank-scheme2-mask" aria-hidden="true"/>
+    </div>
+  );
+}
+
 function RecordBlankStream({
   streamRef,
   timelineEndRef,
@@ -10906,20 +11749,39 @@ function RecordBlankStream({
   sisterCycleDone,
   hideTodayGuide,
   onSisterCycleComplete,
-  firstDropAnim,
-  onFirstDropLand,
-  onFirstDropComplete,
 }){
   const I = window.Icon;
   const TimelineStream = window.TimelineStream;
   const showBlank = window.isTimelineEmpty(timeline);
+  const scheme = scene.record.blankScheme || 1;
+  const previewBlocks = scheme === 2 && showBlank ? window.getBlankScheme2PreviewTimeline() : null;
+
+  const renderBlankBody = ()=>{
+    if(scheme === 2 && previewBlocks){
+      return <RecordBlankScheme2Stack previewBlocks={previewBlocks}/>;
+    }
+    if(scheme === 3){
+      return (
+        <RecordBlankScheme3Guide exiting={false}/>
+      );
+    }
+    if(scheme === 1){
+      return (
+        <RecordBlankScheme1 ceremonyEntry={null}/>
+      );
+    }
+    return <div className="record-blank-plain" aria-hidden="true"/>;
+  };
+
+  const schemeCls = scheme === 1 && showBlank ? ' is-scheme1'
+    : (scheme === 2 && showBlank ? ' is-scheme2'
+    : (scheme === 3 && showBlank ? ' is-scheme3' : ''));
 
   return (
-    <div className="suiji-stream record-blank-stream" ref={streamRef}>
+    <div className={'suiji-stream record-blank-stream' + schemeCls} ref={streamRef}>
       <div className="stream-header">
         <div>
           <h1 className="stream-title">点滴</h1>
-          <p className="stream-sub">记录生活点滴</p>
         </div>
         <div className="stream-actions">
           {scene.calendar.enabled && (
@@ -10943,9 +11805,7 @@ function RecordBlankStream({
         </div>
       </div>
 
-      {showBlank ? (
-        <RecordBlankEmptyState/>
-      ) : (
+      {showBlank ? renderBlankBody() : (
         <TimelineStream
           blocks={timeline}
           endRef={timelineEndRef}
@@ -10953,9 +11813,6 @@ function RecordBlankStream({
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={hideTodayGuide}
           onSisterCycleComplete={onSisterCycleComplete}
-          firstDropAnim={firstDropAnim}
-          onFirstDropLand={onFirstDropLand}
-          onFirstDropComplete={onFirstDropComplete}
         />
       )}
     </div>
@@ -10967,6 +11824,365 @@ Object.assign(window, {
   RecordBlankEmptyState,
   RecordBlankAxisDropAnim,
 });
+
+</script>
+
+<!-- record-blank-scheme3.jsx -->
+<script type="text/babel">
+// ============ 场景三 · 方案三 — 生长时间轴空态引导 ============
+
+const { useState, useEffect, useRef } = React;
+
+const SCHEME3_BUBBLE_KEY = 'diandi_scheme3_bubble_seen';
+const AXIS_GROW_PX = 340;
+
+const CAPABILITY_CARDS = [
+  { icon: '✏️', title: '记下此刻', desc: '心情 · 体重 · 症状 · 日常' },
+  { icon: '🤖', title: 'AI 即时反馈', desc: 'AI分析 · 趋势图' },
+  { icon: '📊', title: '趋势浮现', desc: '越了解自己的变化' },
+];
+
+function shouldShowScheme3Bubble(){
+  try{
+    return !localStorage.getItem(SCHEME3_BUBBLE_KEY);
+  }catch{
+    return true;
+  }
+}
+
+function markScheme3BubbleSeen(){
+  try{
+    localStorage.setItem(SCHEME3_BUBBLE_KEY, '1');
+  }catch{}
+}
+
+function formatCeremonyDayTitle(day){
+  if(!day) return '今天 · 1条';
+  return `${day.date} ${day.weekday} · 1条`;
+}
+
+const AXIS_STEP_MS = 900;
+const SUBCOPY_AT = 2400;
+const FIRST_CARD_AT = SUBCOPY_AT + AXIS_STEP_MS;
+const SECOND_CARD_AT = FIRST_CARD_AT + AXIS_STEP_MS;
+const THIRD_CARD_AT = SECOND_CARD_AT + AXIS_STEP_MS;
+
+function RecordBlankScheme3Guide({ exiting }){
+  const [headlinePhase, setHeadlinePhase] = useState('idle');
+  const [axisPhase, setAxisPhase] = useState(0);
+  const [showSubcopy, setShowSubcopy] = useState(false);
+  const [visibleCardCount, setVisibleCardCount] = useState(0);
+
+  useEffect(()=>{
+    const timers = [
+      setTimeout(()=>{
+        setHeadlinePhase('in');
+        setAxisPhase(1);
+      }, 200),
+      setTimeout(()=>setHeadlinePhase('out'), 1600),
+      setTimeout(()=>setHeadlinePhase('gone'), 2100),
+      setTimeout(()=>{
+        setShowSubcopy(true);
+        setAxisPhase(2);
+      }, SUBCOPY_AT),
+      setTimeout(()=>{
+        setVisibleCardCount(1);
+        setAxisPhase(3);
+      }, FIRST_CARD_AT),
+      setTimeout(()=>{
+        setVisibleCardCount(2);
+        setAxisPhase(4);
+      }, SECOND_CARD_AT),
+      setTimeout(()=>{
+        setVisibleCardCount(3);
+        setAxisPhase(5);
+      }, THIRD_CARD_AT),
+    ];
+    return ()=>timers.forEach(clearTimeout);
+  }, []);
+
+  const headlineCls = headlinePhase === 'in' ? ' is-visible'
+    : headlinePhase === 'out' ? ' is-visible is-exiting'
+    : headlinePhase === 'gone' ? ' is-gone' : '';
+
+  return (
+    <div
+      className={'rb-s3-guide'+(exiting ? ' is-exiting' : '')}
+      aria-label="时间轴空态引导"
+    >
+      <div className="rb-s3-axis-wrap" aria-hidden="true">
+        <div className={'rb-s3-axis is-phase-'+axisPhase+(axisPhase >= 1 ? ' is-flowing' : '')}>
+          <span className="rb-s3-axis-tip"/>
+        </div>
+      </div>
+
+      <div className="rb-s3-copy">
+        <h2 className={'rb-s3-headline'+headlineCls}>
+          时间一直在走
+        </h2>
+        <p className={'rb-s3-subcopy'+(showSubcopy ? ' is-visible' : '')}>
+          你记下的点滴，都会留在这条时间轴上
+        </p>
+
+        <div className="rb-s3-cards">
+          {CAPABILITY_CARDS.map((card, i)=>(
+            <div
+              key={card.title}
+              className={'rb-s3-card'+(visibleCardCount > i ? ' is-visible' : '')}
+            >
+              <span className="rb-s3-card-icon" aria-hidden="true">{card.icon}</span>
+              <div className="rb-s3-card-text">
+                <span className="rb-s3-card-title">{card.title}</span>
+                <span className="rb-s3-card-desc">{card.desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecordBlankScheme3Ripple(){
+  const uid = React.useId().replace(/:/g, '');
+  return (
+    <div className="rb-s3-celebrate-ripple" aria-hidden="true">
+      <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+        <circle
+          className="rb-s3-celeb-ring is-outer"
+          cx="30"
+          cy="30"
+          r="8"
+          stroke="#ff4d88"
+          strokeWidth="1.5"
+          fill="none"
+          opacity="0.2"
+        />
+        <circle
+          className="rb-s3-celeb-ring is-inner"
+          cx="30"
+          cy="30"
+          r="5"
+          stroke="#ff4d88"
+          strokeWidth="1"
+          fill="none"
+          opacity="0.28"
+        />
+        {[0, 72, 144, 216, 288].map((deg, i)=>(
+          <circle
+            key={deg}
+            className="rb-s3-splash-drop"
+            cx="30"
+            cy="30"
+            r="2"
+            fill="#ff4d88"
+            style={{ '--rb-s3-angle': deg + 'deg', '--rb-s3-drop-i': i }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function RecordBlankScheme3Ceremony({ entry, dayBlock, onComplete }){
+  const TlRecCardHead = window.TlRecCardHead;
+  const [phase, setPhase] = useState(0);
+  const doneRef = useRef(false);
+  const text = entry.voiceText || entry.body || '';
+
+  useEffect(()=>{
+    const timers = [
+      setTimeout(()=>setPhase(1), 280),
+      setTimeout(()=>setPhase(2), 520),
+      setTimeout(()=>setPhase(3), 1120),
+      setTimeout(()=>setPhase(4), 1450),
+      setTimeout(()=>setPhase(5), 2000),
+      setTimeout(()=>{
+        if(!doneRef.current){
+          doneRef.current = true;
+          onComplete?.(entry);
+        }
+      }, 4200),
+    ];
+    return ()=>timers.forEach(clearTimeout);
+  }, [entry, onComplete]);
+
+  return (
+    <div className="rb-s3-ceremony tl-feed" aria-live="polite">
+      <div className="tl-rail-continuous">
+        <div className={'rb-s3-date-head'+(phase >= 1 ? ' is-visible' : '')}>
+          <div className="tl-day-summary is-today">
+            <div className="tl-day-summary-top">
+              <span className="tl-day-summary-title">{formatCeremonyDayTitle(dayBlock)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="tl-rail-node is-feed-last">
+          <div className="tl-rail-marker" aria-hidden="true">
+            <span className={'rb-s3-node-dot'+(phase >= 2 ? ' is-pop' : '')}/>
+          </div>
+          <div className="tl-rail-body">
+            <div className={'rb-s3-record-slot'+(phase >= 2 ? ' is-visible' : '')}>
+              <div className="tl-card tl-t5-card">
+                <TlRecCardHead time={entry.time}/>
+                <section className="tl-t5-main">
+                  <div className="tl-t5-body">{text}</div>
+                </section>
+              </div>
+            </div>
+
+            <div className={'rb-s3-ai-card'+(phase >= 3 ? ' is-visible' : '')}>
+              <div className="rb-s3-ai-avatar" aria-hidden="true">AI</div>
+              <div className="rb-s3-ai-body">
+                <p className="rb-s3-ai-title">小柚收到啦</p>
+                <p className="rb-s3-ai-text">
+                  已经帮你记下来了～记满 7 天，我就能告诉你这周的变化趋势
+                </p>
+              </div>
+            </div>
+
+            <div className={'rb-s3-sync-line'+(phase >= 4 ? ' is-visible' : '')}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="6.5" stroke="#00cc99" strokeWidth="1"/>
+                <path d="M4 7l2 2 4-4" stroke="#00cc99" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>已自动同步到「记录」日历</span>
+            </div>
+
+            <div className={'rb-s3-celebrate'+(phase >= 5 ? ' is-visible' : '')}>
+              <RecordBlankScheme3Ripple/>
+              <p className="rb-s3-celebrate-title">时间轴长出了第一节 🌱</p>
+              <p className="rb-s3-celebrate-sub">它会随你的记录一直延伸</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  RecordBlankScheme3Guide,
+  RecordBlankScheme3Ceremony,
+  shouldShowScheme3Bubble,
+  markScheme3BubbleSeen,
+  SCHEME3_BUBBLE_KEY,
+});
+
+</script>
+
+<!-- record-blank-scheme1-ceremony.jsx -->
+<script type="text/babel">
+// ============ 场景三 · 方案一 — 空态 + 首条记录（连续过渡） ============
+
+const { useState, useEffect, useRef } = React;
+
+function RecordBlankScheme1({ ceremonyEntry, dayBlock, onCeremonyComplete }){
+  const TlRecCardHead = window.TlRecCardHead;
+  const TypewriterText = window.TypewriterText;
+  const CycleDayHeader = window.CycleDayHeader;
+  const inCeremony = !!ceremonyEntry;
+  const [phase, setPhase] = useState(0);
+  const [typedDone, setTypedDone] = useState(false);
+  const doneRef = useRef(false);
+  const entry = ceremonyEntry;
+  const text = entry?.voiceText || entry?.body || '';
+  const dayBlocks = dayBlock ? [dayBlock] : [];
+  const items = entry ? [entry] : [];
+
+  useEffect(()=>{
+    if(!inCeremony){
+      setPhase(0);
+      setTypedDone(false);
+      doneRef.current = false;
+      return;
+    }
+    setTypedDone(false);
+    doneRef.current = false;
+    setPhase(1);
+    const timers = [
+      setTimeout(()=>setPhase(2), 560),
+    ];
+    return ()=>timers.forEach(clearTimeout);
+  }, [inCeremony, entry?.id]);
+
+  useEffect(()=>{
+    if(!typedDone || !entry) return;
+    setPhase(3);
+    const tm = setTimeout(()=>{
+      if(!doneRef.current){
+        doneRef.current = true;
+        onCeremonyComplete?.(entry);
+      }
+    }, 1100);
+    return ()=>clearTimeout(tm);
+  }, [typedDone, entry, onCeremonyComplete]);
+
+  const dotCls = inCeremony
+    ? (phase >= 1 ? ' is-settling' : '') + (phase >= 2 ? ' is-settled' : '')
+    : '';
+
+  return (
+    <div className={'rb-s1-flow'+(inCeremony ? ' is-ceremony' : '')} aria-live="polite">
+      {inCeremony ? (
+        <div className="rb-s1-axis" aria-hidden="true">
+          <span className="rb-s1-axis-rail"/>
+          <span className={'rb-s1-axis-dot'+dotCls}/>
+        </div>
+      ) : null}
+
+      <div className="rb-s1-main">
+        <div className={'rb-s1-hero'+(inCeremony ? ' is-exiting' : '')}>
+          <h2 className="rb-s1-hero-title">
+            生活的点滴
+            <br/>
+            都值得被记下
+          </h2>
+          <p className="rb-s1-hero-hint">从记录此刻开始</p>
+        </div>
+
+        {inCeremony && entry && (
+          <div className="tl-feed tl-rail-continuous rb-s1-timeline">
+            {phase >= 3 && dayBlock && (
+              <div className="tl-day-section-head tl-rail-break is-today rb-s1-summary-head is-visible">
+                <CycleDayHeader day={dayBlock} items={items} dayBlocks={dayBlocks}/>
+              </div>
+            )}
+
+            <div className="tl-rail-node is-feed-last">
+              <div className="tl-rail-marker" aria-hidden="true">
+                <span className="tl-rail-dot is-axis-sync"/>
+              </div>
+              <div className="tl-rail-body">
+                <div className={'rb-s1-record-slot'+(phase >= 2 ? ' is-visible' : '')}>
+                  <div className="tl-card tl-t5-card">
+                    <TlRecCardHead time={entry.time}/>
+                    <section className="tl-t5-main">
+                      <div className="tl-t5-body">
+                        {phase >= 2 ? (
+                          <TypewriterText
+                            text={text}
+                            active={!typedDone}
+                            charMs={46}
+                            followScroll
+                            onComplete={()=>setTypedDone(true)}
+                          />
+                        ) : null}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { RecordBlankScheme1, RecordBlankScheme1Ceremony: RecordBlankScheme1 });
 
 </script>
 
@@ -11233,97 +12449,7 @@ const QUICK_CARDS = [
 
 const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
 
-const DOCK_SELLING_POINTS = [
-  '记点什么…',
-  '记录今天的心情…',
-  '身体有什么变化…',
-  '刚才吃了什么…',
-  '睡眠怎么样…',
-];
-const DOCK_PH_CHAR_STAGGER = 72;
-const DOCK_PH_CHAR_ENTER = 440;
-const DOCK_PH_DWELL = 2600;
-const DOCK_PH_LEAVE = 360;
-
-function DockWavePlaceholder({show, focused}){
-  const [index, setIndex] = React.useState(0);
-  const [phase, setPhase] = React.useState('enter');
-  const timersRef = React.useRef([]);
-  const runIdRef = React.useRef(0);
-
-  const clearTimers = ()=>{
-    timersRef.current.forEach(t=>window.clearTimeout(t));
-    timersRef.current = [];
-  };
-
-  const pushTimer = (fn, ms)=>{
-    const id = window.setTimeout(fn, ms);
-    timersRef.current.push(id);
-    return id;
-  };
-
-  React.useEffect(()=>{
-    if(!show || focused){
-      clearTimers();
-      runIdRef.current += 1;
-      return;
-    }
-
-    const runId = ++runIdRef.current;
-    const startCycle = (pointIndex)=>{
-      if(runId !== runIdRef.current) return;
-      const text = DOCK_SELLING_POINTS[pointIndex];
-      const enterMs = Math.max(0, text.length - 1) * DOCK_PH_CHAR_STAGGER + DOCK_PH_CHAR_ENTER;
-
-      setIndex(pointIndex);
-      setPhase('enter');
-
-      pushTimer(()=>{
-        if(runId !== runIdRef.current) return;
-        setPhase('idle');
-        pushTimer(()=>{
-          if(runId !== runIdRef.current) return;
-          setPhase('leave');
-          pushTimer(()=>{
-            if(runId !== runIdRef.current) return;
-            startCycle((pointIndex + 1) % DOCK_SELLING_POINTS.length);
-          }, DOCK_PH_LEAVE);
-        }, DOCK_PH_DWELL);
-      }, enterMs);
-    };
-
-    startCycle(0);
-    return ()=>{
-      runIdRef.current += 1;
-      clearTimers();
-    };
-  }, [show, focused]);
-
-  if(!show) return null;
-
-  const text = DOCK_SELLING_POINTS[index];
-  const chars = Array.from(text);
-  const charPhase = phase === 'enter' ? 'enter' : 'idle';
-
-  return (
-    <span
-      className={'dock-float-ph'
-        +(focused ? ' is-focused' : '')
-        +(phase === 'leave' ? ' is-leaving' : '')}
-      aria-hidden="true"
-    >
-      {chars.map((ch, i)=>(
-        <span
-          key={index+'-'+i}
-          className={'dock-float-ph-char is-'+charPhase}
-          style={{'--i': i}}
-        >
-          {ch}
-        </span>
-      ))}
-    </span>
-  );
-}
+const DOCK_PLACEHOLDER = '记录生活点滴';
 
 function QuickCardFan({
   open, selected, onFabTap, onSelectCard, onClose,
@@ -11414,13 +12540,14 @@ function QuickCardFan({
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
-  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showFirstDropBubble,
+  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
+  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
   const DockSymptomPicker = window.DockSymptomPicker;
   const DockWeightPicker = window.DockWeightPicker;
-  const [inputMode, setInputMode] = React.useState('text');
+  const [inputMode, setInputMode] = React.useState(defaultInputMode);
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickSelected, setQuickSelected] = React.useState(null);
   const [dockSheet, setDockSheet] = React.useState(null);
@@ -11431,6 +12558,10 @@ function DockPublisher({
   const prevTabRef = React.useRef(activeTab);
 
   React.useEffect(()=>{
+    setInputMode(defaultInputMode);
+  }, [defaultInputMode]);
+
+  React.useEffect(()=>{
     if(activeTab === 'note' && prevTabRef.current !== 'note'){
       setQuickOpen(false);
       setQuickSelected(null);
@@ -11438,6 +12569,12 @@ function DockPublisher({
     }
     prevTabRef.current = activeTab;
   }, [activeTab]);
+
+  React.useEffect(()=>{
+    if(!showScheme3Bubble) return;
+    const tm = setTimeout(()=>window.markScheme3BubbleSeen?.(), 2400);
+    return ()=>clearTimeout(tm);
+  }, [showScheme3Bubble]);
 
   const closeQuick = ()=>{
     setQuickSelected(null);
@@ -11510,6 +12647,7 @@ function DockPublisher({
 
   const isDockExpanded = !!dockSheet;
   const isQuickActive = quickOpen || !!quickSelected;
+  const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
 
   return (
     <>
@@ -11565,18 +12703,18 @@ function DockPublisher({
               </button>
 
               {inputMode==='text' ? (
-                <div className={'dock-text-field'+(inputFocused?' is-focused':'')}>
-                  {showFirstDropBubble && !inputFocused ? (
-                    <div className="dock-first-drop-bubble" role="status">💧 落下你的第一滴</div>
+                <div className={'dock-text-field'
+                  +(inputFocused?' is-focused':'')
+                  +(highlightScheme3Input?' is-scheme3-highlight':'')}>
+                  {showScheme3Bubble && !draft.trim() && !inputFocused ? (
+                    <span className="dock-scheme3-bubble" aria-hidden="true">
+                      ✏️ 记下第一刻
+                    </span>
                   ) : null}
-                  <DockWavePlaceholder
-                    show={!draft.trim()}
-                    focused={inputFocused}
-                  />
                   <textarea
                     rows="1"
-                    placeholder=""
-                    aria-label={DOCK_SELLING_POINTS[0]}
+                    placeholder={inputPlaceholder}
+                    aria-label={inputPlaceholder}
                     value={draft}
                     onChange={(e)=>{
                       onDraft(e.target.value);
@@ -11651,7 +12789,75 @@ Object.assign(window, { DockPublisher, CloudPublisher: DockPublisher });
 //
 // 场景一 period-calendar：默认日历 Tab，通过「月经来了」触发浮动分析 → 跳转记录页周期分析
 // 场景二 record-direct：未记录 landing 引导（record-empty.jsx）
-// 场景三 record-blank：记录 Tab 无数据空置页（record-blank.jsx）
+// 场景三 record-blank-1/2/3：三套时间轴空态方案（record-blank.jsx）
+
+// 场景三拆为三套方案（record-blank.jsx）
+//   方案一 record-blank-1：时间轴空白
+//   方案二 record-blank-2：示例数据 + 蒙层
+//   方案三 record-blank-3：时间轴方案（待接入）
+
+const SCENE3_SCHEME_OPTIONS = [
+  { value: 'record-blank-1', label: '方案一' },
+  { value: 'record-blank-2', label: '方案二' },
+  { value: 'record-blank-3', label: '方案三' },
+];
+
+function getBlankScheme2PreviewTimeline(){
+  const blocks = window.TIMELINE_BLOCKS;
+  const day514 = blocks.find(b => b.type === 'day' && b.id === 'd-5-14');
+  const day519 = blocks.find(b => b.type === 'day' && b.id === 'd-5-19');
+  const clone = (obj) => JSON.parse(JSON.stringify(obj));
+  const pickGroup = (day, groupId) => day?.items?.find(i => i.id === groupId);
+
+  const voiceDietGroup = pickGroup(day519, 'y1-g');
+  const weightGroup = pickGroup(day514, 't5-g-514');
+  const items = [];
+
+  if(voiceDietGroup){
+    items.push(clone(voiceDietGroup));
+  }
+  if(weightGroup){
+    items.push({ ...clone(weightGroup), aiDefaultOpen: true });
+  }
+
+  if(!items.length) return [];
+
+  const day = clone(day519);
+  day.id = 's2-preview-day';
+  day.date = '5/19';
+  day.weekday = '周一';
+  day.isToday = false;
+  day.phaseTag = undefined;
+  day.phaseKind = undefined;
+  day.cycleDay = undefined;
+  day.periodLen = undefined;
+  day.summaryStats = undefined;
+  day.items = items;
+
+  return [day];
+}
+
+const BLANK_SCHEME_BASE = {
+  defaultTab: 'note',
+  identity: 'period',
+  getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
+  calendar: {
+    enabled: true,
+    periodFlow: false,
+  },
+  floatNotice: {
+    enabled: false,
+  },
+  record: {
+    showHealthCard: false,
+    blankState: true,
+    sisterAnalysis: {
+      trigger: 'none',
+      initialDone: true,
+    },
+    todayGuide: false,
+  },
+};
 
 const DEMO_SCENES = {
   'period-calendar': {
@@ -11703,30 +12909,39 @@ const DEMO_SCENES = {
     },
   },
 
-  'record-blank': {
-    id: 'record-blank',
-    label: '场景三 · 未记录时间轴空值',
-    description: '记录 Tab 无数据，标准页结构 + 底部输入 Dock（时间轴空态见 record-blank.jsx）',
-    defaultTab: 'note',
-    identity: 'period',
-    getTimeline: () => JSON.parse(JSON.stringify(window.getTimelineEmpty(window.SCENE_CONTEXT.period))),
-    calendar: {
-      enabled: true,
-      periodFlow: false,
-    },
-    floatNotice: {
-      enabled: false,
-    },
+  'record-blank-1': {
+    ...BLANK_SCHEME_BASE,
+    id: 'record-blank-1',
+    label: '场景三 · 方案一',
+    description: '居中极简空态：生活的点滴都值得被记下',
     record: {
-      showHealthCard: false,
-      blankState: true,
-      sisterAnalysis: {
-        trigger: 'none',
-        initialDone: true,
-      },
-      todayGuide: false,
+      ...BLANK_SCHEME_BASE.record,
+      blankScheme: 1,
     },
   },
+
+  'record-blank-2': {
+    ...BLANK_SCHEME_BASE,
+    id: 'record-blank-2',
+    label: '场景三 · 方案二',
+    description: '示例时间轴数据预览，半透明蒙层 + 空态引导',
+    record: {
+      ...BLANK_SCHEME_BASE.record,
+      blankScheme: 2,
+    },
+  },
+
+  'record-blank-3': {
+    ...BLANK_SCHEME_BASE,
+    id: 'record-blank-3',
+    label: '场景三 · 方案三',
+    description: '生长时间轴空态引导 + 首条记录仪式',
+    record: {
+      ...BLANK_SCHEME_BASE.record,
+      blankScheme: 3,
+    },
+  },
+
 };
 
 const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
@@ -11735,7 +12950,8 @@ const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
 }));
 
 function getDemoScene(id){
-  return DEMO_SCENES[id] || DEMO_SCENES['period-calendar'];
+  const resolved = id === 'record-blank' ? 'record-blank-1' : id;
+  return DEMO_SCENES[resolved] || DEMO_SCENES['period-calendar'];
 }
 
 function getSceneInitialState(id){
@@ -11754,8 +12970,10 @@ function getSceneInitialState(id){
 Object.assign(window, {
   DEMO_SCENES,
   DEMO_SCENE_OPTIONS,
+  SCENE3_SCHEME_OPTIONS,
   getDemoScene,
   getSceneInitialState,
+  getBlankScheme2PreviewTimeline,
 });
 
 function DemoSceneBar({ value, onChange, description }) {
@@ -12417,7 +13635,7 @@ function App(){
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
-  const [firstDropAnim, setFirstDropAnim] = useState(null);
+  const scheme3FirstVisitRef = useRef(null);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
@@ -12433,7 +13651,7 @@ function App(){
     setActiveTab(next.activeTab);
     setShowPhoto(false);
     setShowSearchPage(false);
-    setFirstDropAnim(null);
+    scheme3FirstVisitRef.current = null;
   };
 
   useEffect(()=>{
@@ -12514,7 +13732,6 @@ function App(){
   const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
   const showRecordBlank = !!scene.record.blankState;
   const showBlankEmpty = showRecordBlank && window.isTimelineEmpty(timeline);
-  const showFirstDropBubble = showBlankEmpty;
 
   useEffect(()=>{
     if(activeTab !== 'note') return;
@@ -12552,27 +13769,17 @@ function App(){
     if(scene.record.todayGuide) setHideTodayGuide(true);
   };
 
+  const isScheme3 = scene.record.blankScheme === 3;
+  const isScheme1 = scene.record.blankScheme === 1;
+  const showScheme1Hints = isScheme1 && showBlankEmpty;
+  if(isScheme3 && scheme3FirstVisitRef.current === null){
+    scheme3FirstVisitRef.current = !!window.shouldShowScheme3Bubble?.();
+  }
+
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
-
-  const tryStartFirstDrop = (entry, text)=>{
-    if(!scene.record.blankState || firstDropAnim || !window.isTimelineEmpty(timeline)) return false;
-    const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
-    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
-    setFirstDropAnim({ entryId: entry.id, textReady: false, done: false });
-    return true;
-  };
-
-  const handleFirstDropLand = React.useCallback(()=>{
-    setFirstDropAnim(prev=>prev ? { ...prev, textReady: true } : prev);
-  }, []);
-
-  const handleFirstDropComplete = React.useCallback(()=>{
-    setFirstDropAnim(prev=>prev ? { ...prev, done: true } : prev);
-    setTimeout(()=>setFirstDropAnim(null), 2800);
-  }, []);
 
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
@@ -12582,7 +13789,6 @@ function App(){
     setDraft('');
     markUserRecorded();
     const entry = buildTimelineEntry(text, hits, opts);
-    if(tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -12590,7 +13796,6 @@ function App(){
     markUserRecorded();
     if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
       const entry = window.buildScene2VoiceEntry(durSec);
-      if(tryStartFirstDrop(entry, entry.voiceText)) return;
       pushToTimeline(entry, entry.voiceText);
       return;
     }
@@ -12600,7 +13805,6 @@ function App(){
     const entry = buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     });
-    if(tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -12611,7 +13815,6 @@ function App(){
   const submitMoodRecord = (moods)=>{
     markUserRecorded();
     const entry = window.createMoodRecordEntry(moods);
-    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -12620,7 +13823,6 @@ function App(){
   const submitSymptomRecord = (symptoms)=>{
     markUserRecorded();
     const entry = window.createSymptomRecordEntry(symptoms);
-    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -12629,7 +13831,6 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
-    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -12646,7 +13847,6 @@ function App(){
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
     };
-    if(tryStartFirstDrop(entry, '')) return;
     pushToTimeline(entry, '');
   };
 
@@ -12673,6 +13873,10 @@ function App(){
 
   const openSearchPage = ()=>setShowSearchPage(true);
   const closeSearchPage = ()=>setShowSearchPage(false);
+  const showScheme3Bubble = isScheme3 && showBlankEmpty
+    && window.shouldShowScheme3Bubble?.();
+  const highlightScheme3Input = isScheme3 && showBlankEmpty
+    && scheme3FirstVisitRef.current;
 
   return (
     <>
@@ -12715,10 +13919,12 @@ function App(){
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={!showTodayGuide}
           onSisterCycleComplete={handleSisterCycleComplete}
-          firstDropAnim={firstDropAnim}
-          onFirstDropLand={handleFirstDropLand}
-          onFirstDropComplete={handleFirstDropComplete}
         />
+        {showScheme1Hints ? (
+          <div className="rb-s1-curly-arrow" aria-hidden="true">
+            <img src="data:image/png;base64,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" alt=""/>
+          </div>
+        ) : null}
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -12731,7 +13937,9 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          showFirstDropBubble={showFirstDropBubble}
+          defaultInputMode={showScheme1Hints ? 'voice' : 'text'}
+          showScheme3Bubble={showScheme3Bubble}
+          highlightScheme3Input={highlightScheme3Input}
         />
         </>
         ) : (
@@ -12740,7 +13948,6 @@ function App(){
           <div className="stream-header">
             <div>
               <h1 className="stream-title">点滴</h1>
-              <p className="stream-sub">记录生活点滴</p>
             </div>
             <div className="stream-actions">
               {scene.calendar.enabled && (

@@ -55,7 +55,7 @@ function App(){
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
-  const [firstDropAnim, setFirstDropAnim] = useState(null);
+  const scheme3FirstVisitRef = useRef(null);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
@@ -71,7 +71,7 @@ function App(){
     setActiveTab(next.activeTab);
     setShowPhoto(false);
     setShowSearchPage(false);
-    setFirstDropAnim(null);
+    scheme3FirstVisitRef.current = null;
   };
 
   useEffect(()=>{
@@ -152,7 +152,6 @@ function App(){
   const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
   const showRecordBlank = !!scene.record.blankState;
   const showBlankEmpty = showRecordBlank && window.isTimelineEmpty(timeline);
-  const showFirstDropBubble = showBlankEmpty;
 
   useEffect(()=>{
     if(activeTab !== 'note') return;
@@ -190,27 +189,17 @@ function App(){
     if(scene.record.todayGuide) setHideTodayGuide(true);
   };
 
+  const isScheme3 = scene.record.blankScheme === 3;
+  const isScheme1 = scene.record.blankScheme === 1;
+  const showScheme1Hints = isScheme1 && showBlankEmpty;
+  if(isScheme3 && scheme3FirstVisitRef.current === null){
+    scheme3FirstVisitRef.current = !!window.shouldShowScheme3Bubble?.();
+  }
+
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
-
-  const tryStartFirstDrop = (entry, text)=>{
-    if(!scene.record.blankState || firstDropAnim || !window.isTimelineEmpty(timeline)) return false;
-    const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
-    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
-    setFirstDropAnim({ entryId: entry.id, textReady: false, done: false });
-    return true;
-  };
-
-  const handleFirstDropLand = React.useCallback(()=>{
-    setFirstDropAnim(prev=>prev ? { ...prev, textReady: true } : prev);
-  }, []);
-
-  const handleFirstDropComplete = React.useCallback(()=>{
-    setFirstDropAnim(prev=>prev ? { ...prev, done: true } : prev);
-    setTimeout(()=>setFirstDropAnim(null), 2800);
-  }, []);
 
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
@@ -220,7 +209,6 @@ function App(){
     setDraft('');
     markUserRecorded();
     const entry = buildTimelineEntry(text, hits, opts);
-    if(tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -228,7 +216,6 @@ function App(){
     markUserRecorded();
     if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
       const entry = window.buildScene2VoiceEntry(durSec);
-      if(tryStartFirstDrop(entry, entry.voiceText)) return;
       pushToTimeline(entry, entry.voiceText);
       return;
     }
@@ -238,7 +225,6 @@ function App(){
     const entry = buildTimelineEntry(text, hits, {
       voice: { duration: window.formatVoiceDur(durSec) },
     });
-    if(tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
   };
 
@@ -249,7 +235,6 @@ function App(){
   const submitMoodRecord = (moods)=>{
     markUserRecorded();
     const entry = window.createMoodRecordEntry(moods);
-    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -258,7 +243,6 @@ function App(){
   const submitSymptomRecord = (symptoms)=>{
     markUserRecorded();
     const entry = window.createSymptomRecordEntry(symptoms);
-    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -267,7 +251,6 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
-    if(tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
@@ -284,7 +267,6 @@ function App(){
       isNew: true,
       tags:[{ emoji:'📷', label:'照片' }],
     };
-    if(tryStartFirstDrop(entry, '')) return;
     pushToTimeline(entry, '');
   };
 
@@ -311,6 +293,10 @@ function App(){
 
   const openSearchPage = ()=>setShowSearchPage(true);
   const closeSearchPage = ()=>setShowSearchPage(false);
+  const showScheme3Bubble = isScheme3 && showBlankEmpty
+    && window.shouldShowScheme3Bubble?.();
+  const highlightScheme3Input = isScheme3 && showBlankEmpty
+    && scheme3FirstVisitRef.current;
 
   return (
     <>
@@ -353,10 +339,12 @@ function App(){
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={!showTodayGuide}
           onSisterCycleComplete={handleSisterCycleComplete}
-          firstDropAnim={firstDropAnim}
-          onFirstDropLand={handleFirstDropLand}
-          onFirstDropComplete={handleFirstDropComplete}
         />
+        {showScheme1Hints ? (
+          <div className="rb-s1-curly-arrow" aria-hidden="true">
+            <img src="assets/curly-arrow-pink.png" alt=""/>
+          </div>
+        ) : null}
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -369,7 +357,9 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          showFirstDropBubble={showFirstDropBubble}
+          defaultInputMode={showScheme1Hints ? 'voice' : 'text'}
+          showScheme3Bubble={showScheme3Bubble}
+          highlightScheme3Input={highlightScheme3Input}
         />
         </>
         ) : (
@@ -378,7 +368,6 @@ function App(){
           <div className="stream-header">
             <div>
               <h1 className="stream-title">点滴</h1>
-              <p className="stream-sub">记录生活点滴</p>
             </div>
             <div className="stream-actions">
               {scene.calendar.enabled && (

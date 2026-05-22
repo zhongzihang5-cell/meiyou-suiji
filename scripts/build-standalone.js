@@ -30,6 +30,13 @@ const MEAL_PHOTO_DATA_URI = (() => {
   return `data:image/png;base64,${b64}`;
 })();
 
+const CURLY_ARROW_DATA_URI = (() => {
+  const arrowPath = path.join(ROOT, 'assets', 'curly-arrow-pink.png');
+  if (!fs.existsSync(arrowPath)) return null;
+  const b64 = fs.readFileSync(arrowPath).toString('base64');
+  return `data:image/png;base64,${b64}`;
+})();
+
 const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const inlineStyleMatch = indexHtml.match(/<style>([\s\S]*?)<\/style>/);
 const inlineStyles = inlineStyleMatch ? inlineStyleMatch[1] : '';
@@ -52,6 +59,8 @@ const scriptFiles = [
   'timeline.jsx',
   'record-empty.jsx',
   'record-blank.jsx',
+  'record-blank-scheme3.jsx',
+  'record-blank-scheme1-ceremony.jsx',
   'search-page.jsx',
   'cloud-publisher.jsx',
   'demo-scenes.jsx',
@@ -63,6 +72,9 @@ const scripts = scriptFiles.map((f) => {
   let content = fs.readFileSync(path.join(ROOT, f), 'utf8');
   if (f === 'data.jsx' && MEAL_PHOTO_DATA_URI) {
     content = content.replace(/assets\/meal-519\.png/g, MEAL_PHOTO_DATA_URI);
+  }
+  if (f === 'app.jsx' && CURLY_ARROW_DATA_URI) {
+    content = content.replace(/assets\/curly-arrow-pink\.png/g, CURLY_ARROW_DATA_URI);
   }
   return `<!-- ${f} -->\n<script type="text/babel">\n${content}\n</script>`;
 });
@@ -89,10 +101,10 @@ const BUILDS = [
   {
     outfile: 'meiyou-scene3-record-blank.html',
     pagesName: 'scene3.html',
-    title: '美柚 · 场景三 · 未记录时间轴空值',
-    demoScene: 'record-blank',
+    title: '美柚 · 场景三 · 未记录时间轴',
+    demoScene: 'record-blank-3',
     locked: true,
-    comment: '场景三：未记录时间轴空值（可改 record-blank.jsx）',
+    comment: '场景三：方案一空白 / 方案二蒙层 / 方案三生长时间轴引导',
   },
   {
     outfile: 'meiyou-record-standalone.html',
@@ -163,8 +175,8 @@ function buildLandingPage(builtAt) {
         <span class="go">进入场景二 →</span>
       </a>
       <a class="card" href="./scene3.html">
-        <div class="card-title">场景三 · 未记录时间轴空值</div>
-        <div class="card-desc">记录 Tab 无数据，标准页结构 + 底部输入 Dock，时间轴空态可独立修改。</div>
+        <div class="card-title">场景三 · 未记录时间轴</div>
+        <div class="card-desc">三套方案：方案一空白、方案二示例蒙层、方案三待接入。进入后可在页内切换。</div>
         <span class="go">进入场景三 →</span>
       </a>
     </div>
