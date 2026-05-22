@@ -54,7 +54,7 @@ function WeeklyCard({item}){
 
 function filterDayItems(items, sisterCycleDone, hideTodayGuide){
   return (items || []).filter(it=>{
-    if(it.kind === 'guide' && hideTodayGuide) return false;
+    if(it.kind === 'guide' && hideTodayGuide && !it.alwaysShow) return false;
     if(!it.hiddenUntilSisterDone) return true;
     return sisterCycleDone;
   });

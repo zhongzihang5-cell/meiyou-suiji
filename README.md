@@ -4,10 +4,26 @@
 
 ## 本地预览
 
-在项目根目录启动静态服务后打开 `index.html`：
+推荐使用热更新预览（修改后自动刷新）：
 
 ```bash
-cd /Users/zhongzihang/Projects/meiyou-suiji
+cd "/Users/wangyingyue/Documents/GitHub/meiyou-suiji"
+npm run dev
+```
+
+浏览器访问：<http://127.0.0.1:5500/index.html>
+
+如需预览 `docs` 目录：
+
+```bash
+npm run dev:docs
+```
+
+浏览器访问：<http://127.0.0.1:5501/index.html>
+
+如果只想使用纯静态服务（无自动刷新）：
+
+```bash
 python3 -m http.server 8765
 ```
 

@@ -1,0 +1,8 @@
+{
+  "name": "meiyou-suiji-prototype",
+  "private": true,
+  "scripts": {
+    "dev": "npx --yes live-server . --port=5500 --open=index.html --watch=.",
+    "dev:docs": "npx --yes live-server docs --port=5501 --open=index.html --watch=."
+  }
+}

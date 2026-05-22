@@ -1360,3 +1360,531 @@
 .signal-card .sc-light.sc-final .sc-range{
   color:rgba(0,163,120,0.85);
 }
+<<<<<<< Updated upstream
+=======
+
+/* ============ V3v2 记录卡片 ============ */
+.v3-card{
+  background:#fff;
+  border-radius:14px;
+  border:0.5px solid rgba(0,0,0,0.06);
+  padding:11px 12px 4px;
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03);
+}
+.v3-card-ai-only{
+  padding-bottom:12px;
+}
+.v3-card-hd{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+}
+.v3-card-time{
+  font-size:11.5px;
+  font-weight:400;
+  color:rgba(0,0,0,0.42);
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+}
+.v3-card-kind{
+  font-size:11px;
+  color:#8E8E93;
+  font-weight:500;
+  letter-spacing:0.04em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  flex:1;
+  min-width:0;
+}
+.v3-card-kind.is-chart{
+  color:#FF4D88;
+  font-weight:500;
+}
+.v3-card-main{
+  margin-top:8px;
+  padding-bottom:8px;
+}
+.v3-card-main.has-ai{
+  padding-bottom:10px;
+}
+.v3-card-body{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.v3-card-text{
+  margin:0;
+  font-size:13.5px;
+  color:#323232;
+  line-height:1.5;
+}
+.v3-card-text.is-weight{
+  font-size:14px;
+}
+.v3-card-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.v3-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 8px;
+  background:#fde2e9;
+  border-radius:8px;
+  color:#ff4d88;
+  font-weight:500;
+  white-space:nowrap;
+  font-size:11.5px;
+}
+.v3-tag.is-xs{
+  padding:2px 6px;
+  font-size:10.5px;
+}
+.v3-tag-cat{
+  opacity:0.88;
+  font-size:0.92em;
+}
+.v3-tag-val{
+  font-size:1em;
+}
+.v3-voice-mini{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.v3-voice-mini-btn{
+  width:24px;
+  height:24px;
+  border-radius:12px;
+  padding:0;
+  border:0;
+  background:#4f7cae;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 3px rgba(79,124,174,0.28);
+}
+.v3-voice-mini-wave{
+  display:inline-flex;
+  align-items:center;
+  gap:1.5px;
+  height:10px;
+}
+.v3-voice-mini-wave span{
+  width:1.5px;
+  background:#6b8fc4;
+  opacity:0.78;
+  border-radius:1px;
+}
+.v3-voice-mini-dur{
+  font-size:11px;
+  color:#4f7cae;
+  font-variant-numeric:tabular-nums;
+}
+.v3-card-photo{
+  width:100%;
+  aspect-ratio:4/3;
+  border-radius:10px;
+  overflow:hidden;
+  background:#eee;
+}
+.v3-card-photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.v3-card-meal-list{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.v3-card-meal-list li{
+  font-size:13px;
+  color:#323232;
+  line-height:1.45;
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+}
+.v3-card-meal-list li::before{
+  content:'';
+  width:3px;
+  height:3px;
+  border-radius:1.5px;
+  background:#FF4D88;
+  flex-shrink:0;
+  align-self:center;
+}
+.v3-card-meal-total{
+  margin-top:4px;
+  padding-top:6px;
+  border-top:0.5px solid rgba(0,0,0,0.08);
+  font-weight:500;
+}
+.v3-card-meal-total::before{
+  display:none;
+}
+.v3-card-meal-total-lbl{
+  color:#8E8E93;
+  font-weight:500;
+}
+.v3-card-meal-total-val{
+  margin-left:auto;
+  color:#FF4D88;
+  font-variant-numeric:tabular-nums;
+  font-weight:500;
+}
+.v3-card-ai-divider{
+  border-top:0.5px dashed rgba(0,0,0,0.08);
+  margin:0 -12px;
+}
+.v3-card-ai-toggle{
+  width:100%;
+  background:transparent;
+  border:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 0;
+  cursor:pointer;
+  font-family:inherit;
+}
+.v3-card-ai-badge{
+  width:18px;
+  height:18px;
+  border-radius:9px;
+  background:#FFE0EC;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.v3-card-ai-label{
+  font-size:11px;
+  color:#FF4D88;
+  font-weight:500;
+}
+.v3-card-ai-title{
+  font-size:12.5px;
+  color:#323232;
+  font-weight:500;
+  flex:1;
+  text-align:left;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  min-width:0;
+}
+.v3-chevron{
+  flex-shrink:0;
+  transition:transform 0.2s;
+}
+.v3-chevron.is-open{
+  transform:rotate(180deg);
+}
+.v3-card-ai-panel,
+.v3-card-ai-body{
+  padding-bottom:12px;
+}
+.v3-card-ai-note{
+  margin:8px 0 0;
+  font-size:11px;
+  color:#8E8E93;
+  line-height:1.4;
+}
+.v3-chart-mood{
+  display:flex;
+  align-items:flex-end;
+  gap:6px;
+}
+.v3-chart-mood-col{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  justify-content:flex-end;
+  height:100%;
+}
+.v3-chart-mood-bar{
+  width:100%;
+  border-radius:4px;
+  background:rgba(255,77,136,0.25);
+}
+.v3-chart-mood-bar.is-today{
+  background:linear-gradient(180deg, #FF4D88, #FF7AA8);
+}
+.v3-chart-mood-lbl{
+  font-size:9px;
+  color:#8E8E93;
+}
+.v3-chart-weight{
+  display:block;
+}
+.v3-chart-cal{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.v3-chart-cal-ring{
+  position:relative;
+  flex-shrink:0;
+}
+.v3-chart-cal-pct{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:500;
+  color:#323232;
+}
+.v3-chart-cal-meta{
+  flex:1;
+  min-width:0;
+}
+.v3-chart-cal-lbl{
+  font-size:11px;
+  color:#8E8E93;
+  margin-bottom:4px;
+}
+.v3-chart-cal-val{
+  font-size:18px;
+  font-weight:500;
+  color:#323232;
+  font-variant-numeric:tabular-nums;
+}
+.v3-chart-cal-target{
+  font-size:11px;
+  font-weight:400;
+  color:#8E8E93;
+  margin-left:4px;
+}
+.v3-chart-cal-bar{
+  margin-top:6px;
+  display:flex;
+  gap:2px;
+  height:5px;
+  border-radius:3px;
+  overflow:hidden;
+  background:rgba(0,0,0,0.04);
+}
+.v3-chart-cal-bar span{
+  display:block;
+  height:100%;
+}
+
+/* ============ 心情洞察卡（首次记录情绪 · V3v2规范） ============ */
+.tl-mood-insight{
+  background:#ffffff;
+  border-radius:14px;
+  border:0.5px solid rgba(0,0,0,0.06);
+  padding:11px 12px 4px;
+  overflow:hidden;
+}
+.tl-mood-insight-hd{
+  display:flex;
+  align-items:center;
+  font-size:11.5px;
+  color:var(--my-text-tertiary);
+  font-variant-numeric:tabular-nums;
+  margin-bottom:8px;
+}
+.tl-mood-insight-time{
+  font-variant-numeric:tabular-nums;
+}
+/* 用户记录区 */
+.tl-mood-insight-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding-bottom:10px;
+  min-height:44px;
+}
+.tl-mood-insight-face{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  overflow:hidden;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,77,136,0.06);
+}
+.tl-mood-insight-face .mood-face-svg{
+  width:40px;
+  height:40px;
+  display:block;
+}
+.tl-mood-insight-mood-meta{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+.tl-mood-insight-mood-label{
+  font-size:11px;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-insight-mood-value{
+  font-size:18px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.2;
+}
+/* AI 折叠区 */
+.tl-mood-insight-ai-wrap{
+  margin-inline:-12px;
+}
+.tl-mood-insight-divider{
+  height:0;
+  border-top:0.5px dashed rgba(0,0,0,0.08);
+}
+.tl-mood-insight-ai-toggle{
+  width:100%;
+  background:transparent;
+  border:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-family:inherit;
+}
+.tl-mood-insight-ai-badge{
+  width:18px;
+  height:18px;
+  border-radius:9px;
+  background:var(--my-brand-soft);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--my-brand-red);
+  flex-shrink:0;
+}
+.tl-mood-insight-ai-label{
+  font-size:11px;
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.tl-mood-insight-ai-title{
+  font-size:12.5px;
+  color:var(--my-text-primary);
+  font-weight:500;
+  flex:1;
+  text-align:left;
+}
+.tl-mood-insight-ai-chev{
+  flex-shrink:0;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-insight-ai-body{
+  padding:0 12px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.tl-mood-insight-copy{
+  font-size:13px;
+  line-height:1.55;
+  color:var(--my-text-primary);
+  margin:0;
+}
+.tl-mood-insight-follow-up{
+  font-size:12.5px;
+  line-height:1.55;
+  color:var(--my-text-secondary);
+  margin:0;
+  padding:8px 10px;
+  background:rgba(255,77,136,0.04);
+  border-radius:10px;
+  border-left:2px solid var(--my-brand-red);
+}
+/* 曲线标题+图表紧凑组 */
+.tl-mood-insight-chart-block{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.tl-mood-insight-inner-sep{
+  height:0;
+  border-top:0.5px solid rgba(0,0,0,0.06);
+  margin-bottom:6px;
+}
+.tl-mood-insight-chart-label{
+  font-size:12px;
+  color:var(--my-text-secondary);
+  font-weight:500;
+  padding-left:2px;
+}
+/* 情绪与周期行 */
+.tl-mood-insight-phase-row{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:9px 10px;
+  background:rgba(79,124,174,0.06);
+  border-radius:10px;
+}
+.tl-mood-insight-phase-pill{
+  padding:2px 8px;
+  background:rgba(79,124,174,0.18);
+  color:#3f6590;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:500;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.tl-mood-insight-phase-text{
+  font-size:13px;
+  line-height:1.5;
+  color:var(--my-text-primary);
+}
+/* 曲线图（共用） */
+.tl-mood-curve{
+  position:relative;
+  width:100%;
+}
+.tl-mood-curve svg{
+  display:block;
+}
+.tl-mood-curve-axis{
+  margin-top:-14px;
+  display:flex;
+  justify-content:space-between;
+  padding:0 6px;
+}
+.tl-mood-curve-day{
+  font-size:10px;
+  color:var(--my-text-tertiary);
+}
+.tl-mood-curve-day.is-today{
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+/* 流式淡入：用 --mi-i 错峰 */
+.tl-mood-insight.is-stream .tl-mood-insight-hd,
+.tl-mood-insight.is-stream .tl-mood-insight-user,
+.tl-mood-insight.is-stream .tl-mood-insight-ai-wrap{
+  opacity:0;
+  transform:translateY(5px);
+  animation:miSlotIn 0.38s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay:calc(60ms + var(--mi-i,0) * 260ms);
+}
+@keyframes miSlotIn{
+  to{opacity:1;transform:translateY(0)}
+}
+>>>>>>> Stashed changes

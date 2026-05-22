@@ -87,7 +87,39 @@ function ModulePlaceholder({mod, cycleDay}){
   );
 }
 
+<<<<<<< Updated upstream
 function TodayGuideCard({item, isNew}){
+=======
+const GUIDE_REVEAL_DELAY_MS = 1800;
+const GUIDE_TYPEWRITER_MS = 84;
+
+function TodayGuideCard({item, isNew, animate}){
+  const [ready, setReady] = React.useState(!animate);
+  const delay = item.guideDelay !== undefined ? item.guideDelay : GUIDE_REVEAL_DELAY_MS;
+
+  React.useEffect(()=>{
+    if(!animate){
+      setReady(true);
+      return;
+    }
+    setReady(false);
+    const t = setTimeout(()=>setReady(true), delay);
+    return ()=>clearTimeout(t);
+  }, [animate, item.text]);
+
+  React.useEffect(()=>{
+    if(!ready || !animate) return;
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        const end = document.querySelector('.tl-feed-end');
+        end?.scrollIntoView({ behavior:'smooth', block:'end' });
+      }, 80);
+    });
+  }, [ready, animate]);
+
+  if(!ready) return null;
+
+>>>>>>> Stashed changes
   return (
     <div className={'tl-rail-guide'+(isNew?' fade-in':'')}>
       <p className="tl-rail-guide-text">{item.text}</p>
@@ -339,16 +371,236 @@ function TimelineItemWrap({item, children}){
   );
 }
 
+<<<<<<< Updated upstream
 function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete}){
+=======
+function MoodCurveChart({data}){
+  const w = 280;
+  const h = 64;
+  const padX = 14;
+  const padTop = 8;
+  const padBot = 22;
+  const minV = 1;
+  const maxV = 5;
+  const range = maxV - minV;
+  const innerW = w - padX * 2;
+  const innerH = h - padTop - padBot;
+  const points = (data || []).map((d, i)=>{
+    const x = padX + (innerW * i) / Math.max(1, (data.length - 1));
+    const y = padTop + innerH - ((d.v - minV) / range) * innerH;
+    return { x, y, d };
+  });
+  const linePath = points.length ? points.map((p, i)=>(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ') : '';
+  const areaPath = points.length
+    ? `${linePath} L${points[points.length-1].x.toFixed(1)},${padTop + innerH} L${points[0].x.toFixed(1)},${padTop + innerH} Z`
+    : '';
+
+  return (
+    <div className="tl-mood-curve" aria-hidden="true">
+      <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="moodCurveFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ff4d88" stopOpacity="0.22"/>
+            <stop offset="100%" stopColor="#ff4d88" stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        {areaPath && <path d={areaPath} fill="url(#moodCurveFill)"/>}
+        {linePath && (
+          <path
+            d={linePath}
+            fill="none"
+            stroke="#ff4d88"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+        {points.map((p, i)=>(
+          <circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r={p.d.isToday ? 4 : 2.2}
+            fill={p.d.isToday ? '#ff4d88' : '#fff'}
+            stroke={p.d.isToday ? '#fff' : '#ff4d88'}
+            strokeWidth={p.d.isToday ? 1.5 : 1.4}
+          />
+        ))}
+      </svg>
+      <div className="tl-mood-curve-axis">
+        {(data || []).map((d, i)=>(
+          <span
+            key={i}
+            className={'tl-mood-curve-day'+(d.isToday ? ' is-today' : '')}
+          >
+            {d.d}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MoodInsightCard({item, isNew}){
+  const MoodFace = window.MoodFace;
+  const TypewriterText = window.TypewriterText;
+  const [aiOpen, setAiOpen] = React.useState(true);
+  // step: 0=hidden, 1=header, 2=user, 3=AI toggle, 4=AI body(typewriter), 5=chart, 10=all(non-stream)
+  const [step, setStep] = React.useState(isNew ? 0 : 10);
+  const doneRef = React.useRef(false);
+
+  const primary = item.primaryMood || (item.moods && item.moods[0]);
+  const moodLabel = primary?.label || '愉快';
+  const chart = item.chart || {};
+  const phaseCopy = item.phaseCopy || '';
+  const hasAi = !!(phaseCopy || chart.data?.length > 0);
+
+  // sequential section reveal
+  React.useEffect(()=>{
+    if(!isNew) return;
+    const ts = [
+      setTimeout(()=>setStep(1), 80),
+      setTimeout(()=>setStep(2), 600),
+      setTimeout(()=>setStep(3), 1200),
+      setTimeout(()=>setStep(4), 1600),
+    ];
+    return ()=>ts.forEach(clearTimeout);
+  }, [isNew]);
+
+  // if no phaseCopy, skip straight to chart after body opens
+  React.useEffect(()=>{
+    if(!isNew || step !== 4 || phaseCopy) return;
+    const t = setTimeout(()=>setStep(5), 300);
+    return ()=>clearTimeout(t);
+  }, [step, isNew, phaseCopy]);
+
+  const handlePhaseTyped = React.useCallback(()=>{
+    setStep(s => Math.max(s, 5));
+  }, []);
+
+  // dispatch event when card is fully rendered
+  React.useEffect(()=>{
+    if(!isNew || doneRef.current) return;
+    const targetStep = hasAi ? 5 : 3;
+    if(step >= targetStep){
+      doneRef.current = true;
+      const t = setTimeout(()=>{
+        window.dispatchEvent(new CustomEvent('moodCardStreamDone'));
+      }, 500);
+      return ()=>clearTimeout(t);
+    }
+  }, [step, isNew, hasAi]);
+
+  const vis = n => isNew ? {
+    opacity: step >= n ? 1 : 0,
+    transform: step >= n ? 'translateY(0)' : 'translateY(6px)',
+    transition: 'opacity 0.4s ease, transform 0.38s ease',
+  } : {};
+
+  return (
+    <article className="tl-mood-insight">
+      {/* ── 时间头 ── */}
+      <header className="tl-mood-insight-hd" style={vis(1)}>
+        <span className="tl-mood-insight-time">{item.time}</span>
+      </header>
+
+      {/* ── 用户记录区 ── */}
+      <div className="tl-mood-insight-user" style={vis(2)}>
+        <span className="tl-mood-insight-face">
+          {primary && MoodFace ? <MoodFace face={primary.face} bg={primary.bg}/> : null}
+        </span>
+        <span className="tl-mood-insight-mood-value">{moodLabel}</span>
+      </div>
+
+      {/* ── 分割线 + AI 折叠区 ── */}
+      {hasAi && step >= 3 && (
+        <div className="tl-mood-insight-ai-wrap" style={vis(3)}>
+          <div className="tl-mood-insight-divider"/>
+          <button
+            type="button"
+            className="tl-mood-insight-ai-toggle"
+            onClick={()=>setAiOpen(v=>!v)}
+            aria-expanded={aiOpen}
+          >
+            <span className="tl-mood-insight-ai-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 20V6M4 20h16M8 16v-4M12 16V8M16 16v-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+              </svg>
+            </span>
+            <span className="tl-mood-insight-ai-label">AI</span>
+            <span className="tl-mood-insight-ai-title">情绪与周期分析</span>
+            <svg
+              className="tl-mood-insight-ai-chev"
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              style={{transform: aiOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition:'transform 0.2s'}}
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          {aiOpen && step >= 4 && (
+            <div className="tl-mood-insight-ai-body">
+              {phaseCopy && (
+                <div className="tl-mood-insight-phase-row">
+                  <span className="tl-mood-insight-phase-pill">卵泡期</span>
+                  <span className="tl-mood-insight-phase-text">
+                    {(isNew && TypewriterText)
+                      ? <TypewriterText text={phaseCopy} active charMs={55} onComplete={handlePhaseTyped}/>
+                      : phaseCopy}
+                  </span>
+                </div>
+              )}
+              {step >= 5 && chart.data?.length > 0 && (
+                <div className="tl-mood-insight-chart-block" style={vis(5)}>
+                  <div className="tl-mood-insight-inner-sep"/>
+                  <span className="tl-mood-insight-chart-label">{chart.title || '近 1 周情绪波动曲线'}</span>
+                  <MoodCurveChart data={chart.data}/>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+>>>>>>> Stashed changes
   const cycleDay = item.cycleDay;
 
   let body = null;
+<<<<<<< Updated upstream
   if(item.kind === 'guide'){
     body = <TodayGuideCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card'){
     body = <VoiceRecordCard item={item}/>;
+=======
+  if(item.kind === 'record-group'){
+    body = <V3RecordGroupCard group={item} isNew={isNew}/>;
+  } else if(item.kind === 'guide'){
+    body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
+  } else if(item.kind === 'mood-insight'){
+    body = <MoodInsightCard item={item} isNew={isNew}/>;
+  } else if(item.kind === 'weekly' || item.kind === 'wellness'){
+    body = <WeeklyTrendCard item={item}/>;
+  } else if(item.kind === 'voice-card' || item.kind === 'sync-card'){
+    body = (
+      <VoiceRecordCard
+        entry={item}
+        isNew={isNew}
+        typewriterBody={!!item.streamBody}
+        animateAnalysis={isFeedLast}
+        analysisProps={sisterItem ? {
+          playAnimation: sisterPlayAnimation,
+          onCycleComplete: onSisterCycleComplete,
+        } : null}
+      />
+    );
+>>>>>>> Stashed changes
   } else if(item.kind === 'sister-card'){
     body = (
       <SisterAnalysisCard
@@ -383,4 +635,5 @@ function TimelineItem({item, isNew, phaseKind, isFeedLast, sisterPlayAnimation, 
 Object.assign(window, {
   CycleDayHeader, TimelineRailNode, TlNodeCaption,
   ModulePlaceholder, TodayGuideCard, WeeklyTrendCard, TimelineItem,
+  MoodInsightCard, MoodCurveChart,
 });

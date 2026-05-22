@@ -290,10 +290,17 @@ function SisterSignalCard({animated}){
   return (
     <div className="chart-block" style={{background:'transparent', border:'none', padding:0}}>
       <div className={'signal-card'+(animated && !isFinal?' sc-animating':'')}>
+<<<<<<< Updated upstream
         <div className="sc-head">
           <span className="sc-title">
             <img className="sc-icon" src={SC_ICON} width="18" height="18" alt="" aria-hidden="true"/>
             周期天数评估
+=======
+        <div className="cc-head">
+          <span className="cc-title">
+            <img className="cc-icon" src={SC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
+            月经信号灯
+>>>>>>> Stashed changes
           </span>
         </div>
         <div className="sc-lights">
