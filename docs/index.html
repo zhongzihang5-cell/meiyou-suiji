@@ -22,6 +22,10 @@
     word-break:break-all;
   }
   .cards{display:flex;flex-direction:column;gap:12px}
+  .section-label{
+    font-size:13px;color:#8e8e93;font-weight:500;
+    margin:4px 0 -4px;padding-left:2px;
+  }
   a.card{
     display:block;text-decoration:none;color:inherit;
     background:#fff;border-radius:12px;padding:18px 16px;
@@ -55,10 +59,21 @@
         <div class="card-desc">新用户首次进入记录 Tab，运营 landing 引导 +「记一切」演示动效。</div>
         <span class="go">进入场景二 →</span>
       </a>
-      <a class="card" href="./scene3.html">
-        <div class="card-title">场景三 · 未记录时间轴</div>
-        <div class="card-desc">三套方案：方案一空白、方案二示例蒙层、方案三生长引导。进入后可在页内切换。</div>
-        <span class="go">进入场景三 →</span>
+      <p class="section-label">场景三 · 未记录时间轴</p>
+      <a class="card" href="./scene3-1.html">
+        <div class="card-title">方案一 · 空白时间轴</div>
+        <div class="card-desc">居中极简空态，粉色箭头指向快捷记录入口。</div>
+        <span class="go">进入方案一 →</span>
+      </a>
+      <a class="card" href="./scene3-2.html">
+        <div class="card-title">方案二 · 示例蒙层</div>
+        <div class="card-desc">两条示例记录 + 半透明蒙层，预览时间轴长什么样。</div>
+        <span class="go">进入方案二 →</span>
+      </a>
+      <a class="card" href="./scene3-3.html">
+        <div class="card-title">方案三 · 生长引导</div>
+        <div class="card-desc">时间轴生长动画 + 能力卡片，引导用户开始记录。</div>
+        <span class="go">进入方案三 →</span>
       </a>
       <a class="card" href="./scene4.html">
         <div class="card-title">场景四 · 点滴页快捷记录</div>

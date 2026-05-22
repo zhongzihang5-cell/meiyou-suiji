@@ -7,16 +7,20 @@
  * Outputs (project root):
  *   meiyou-scene1-period-calendar.html
  *   meiyou-scene2-record-empty.html  → 场景二 landing 引导
- *   meiyou-scene3-record-blank.html  → 场景三 记录页空置
- *   meiyou-scene4-note-quick-record.html → 场景四 点滴页快捷记录
+ *   meiyou-scene3-scheme1.html  → 场景三 · 方案一
+ *   meiyou-scene3-scheme2.html  → 场景三 · 方案二
+ *   meiyou-scene3-scheme3.html  → 场景三 · 方案三
+ *   meiyou-scene4-note-quick-record.html → 场景四
  *   meiyou-record-standalone.html
  *
  * Outputs (docs/ — for GitHub Pages):
- *   index.html   入口页，链到四个场景
- *   scene1.html  场景一
- *   scene2.html  场景二
- *   scene3.html  场景三（页内可切换方案一/二/三）
- *   scene4.html  场景四
+ *   index.html    入口页，链到各场景/方案
+ *   scene1.html   场景一
+ *   scene2.html   场景二
+ *   scene3-1.html 场景三 · 方案一
+ *   scene3-2.html 场景三 · 方案二
+ *   scene3-3.html 场景三 · 方案三
+ *   scene4.html   场景四
  */
 
 const fs = require('fs');
@@ -101,13 +105,28 @@ const BUILDS = [
     comment: '场景二：未记录运营引导 +「记一切」演示动效',
   },
   {
-    outfile: 'meiyou-scene3-record-blank.html',
-    pagesName: 'scene3.html',
-    title: '美柚 · 场景三 · 未记录时间轴',
+    outfile: 'meiyou-scene3-scheme1.html',
+    pagesName: 'scene3-1.html',
+    title: '美柚 · 场景三 · 方案一 · 空白时间轴',
     demoScene: 'record-blank-1',
     locked: true,
-    schemeHub: true,
-    comment: '场景三：方案一空白 / 方案二蒙层 / 方案三生长时间轴引导（页内可切换）',
+    comment: '场景三方案一：居中极简空态，从记录此刻开始',
+  },
+  {
+    outfile: 'meiyou-scene3-scheme2.html',
+    pagesName: 'scene3-2.html',
+    title: '美柚 · 场景三 · 方案二 · 示例蒙层',
+    demoScene: 'record-blank-2',
+    locked: true,
+    comment: '场景三方案二：示例时间轴数据预览 + 半透明蒙层引导',
+  },
+  {
+    outfile: 'meiyou-scene3-scheme3.html',
+    pagesName: 'scene3-3.html',
+    title: '美柚 · 场景三 · 方案三 · 生长引导',
+    demoScene: 'record-blank-3',
+    locked: true,
+    comment: '场景三方案三：生长时间轴空态引导',
   },
   {
     outfile: 'meiyou-scene4-note-quick-record.html',
@@ -152,6 +171,10 @@ function buildLandingPage(builtAt) {
     word-break:break-all;
   }
   .cards{display:flex;flex-direction:column;gap:12px}
+  .section-label{
+    font-size:13px;color:#8e8e93;font-weight:500;
+    margin:4px 0 -4px;padding-left:2px;
+  }
   a.card{
     display:block;text-decoration:none;color:inherit;
     background:#fff;border-radius:12px;padding:18px 16px;
@@ -185,10 +208,21 @@ function buildLandingPage(builtAt) {
         <div class="card-desc">新用户首次进入记录 Tab，运营 landing 引导 +「记一切」演示动效。</div>
         <span class="go">进入场景二 →</span>
       </a>
-      <a class="card" href="./scene3.html">
-        <div class="card-title">场景三 · 未记录时间轴</div>
-        <div class="card-desc">三套方案：方案一空白、方案二示例蒙层、方案三生长引导。进入后可在页内切换。</div>
-        <span class="go">进入场景三 →</span>
+      <p class="section-label">场景三 · 未记录时间轴</p>
+      <a class="card" href="./scene3-1.html">
+        <div class="card-title">方案一 · 空白时间轴</div>
+        <div class="card-desc">居中极简空态，粉色箭头指向快捷记录入口。</div>
+        <span class="go">进入方案一 →</span>
+      </a>
+      <a class="card" href="./scene3-2.html">
+        <div class="card-title">方案二 · 示例蒙层</div>
+        <div class="card-desc">两条示例记录 + 半透明蒙层，预览时间轴长什么样。</div>
+        <span class="go">进入方案二 →</span>
+      </a>
+      <a class="card" href="./scene3-3.html">
+        <div class="card-title">方案三 · 生长引导</div>
+        <div class="card-desc">时间轴生长动画 + 能力卡片，引导用户开始记录。</div>
+        <span class="go">进入方案三 →</span>
       </a>
       <a class="card" href="./scene4.html">
         <div class="card-title">场景四 · 点滴页快捷记录</div>
@@ -228,7 +262,10 @@ function writeLegacyRedirects() {
     { file: 'index.html', target: '../', label: '演示入口' },
     { file: 'scene1.html', target: '../scene1.html', label: '场景一' },
     { file: 'scene2.html', target: '../scene2.html', label: '场景二' },
-    { file: 'scene3.html', target: '../scene3.html', label: '场景三' },
+    { file: 'scene3.html', target: '../scene3-1.html', label: '场景三 · 方案一' },
+    { file: 'scene3-1.html', target: '../scene3-1.html', label: '场景三 · 方案一' },
+    { file: 'scene3-2.html', target: '../scene3-2.html', label: '场景三 · 方案二' },
+    { file: 'scene3-3.html', target: '../scene3-3.html', label: '场景三 · 方案三' },
     { file: 'scene4.html', target: '../scene4.html', label: '场景四' },
   ];
   redirects.forEach(({ file, target, label }) => {
@@ -236,14 +273,12 @@ function writeLegacyRedirects() {
   });
 }
 
-function buildHtml({ title, demoScene, locked, schemeHub, comment, builtAt }) {
+function buildHtml({ title, demoScene, locked, comment, builtAt }) {
   const extraCss = locked ? STANDALONE_DEMO_CSS : '';
-  const bodyClass = locked
-    ? ` class="standalone-demo${schemeHub ? ' standalone-demo-scheme3' : ''}"`
-    : '';
+  const bodyClass = locked ? ' class="standalone-demo"' : '';
   const buildId = `${builtAt}-nomask`;
   const lockedScript = locked
-    ? `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = true;${schemeHub ? '\nwindow.__SCENE3_SCHEME_HUB = true;' : ''}`
+    ? `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = true;`
     : `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = false;`;
 
   return `<!DOCTYPE html>
@@ -319,6 +354,13 @@ BUILDS.forEach((cfg) => {
 const landingPath = path.join(DOCS, 'index.html');
 fs.writeFileSync(landingPath, buildLandingPage(builtAt), 'utf8');
 console.log(`Wrote ${landingPath}`);
+
+fs.writeFileSync(
+  path.join(DOCS, 'scene3.html'),
+  buildRedirectPage('./scene3-1.html', '场景三 · 方案一'),
+  'utf8',
+);
+console.log('Wrote docs/scene3.html (redirect → scene3-1.html)');
 
 writeLegacyRedirects();
 console.log(`Wrote legacy redirects under ${path.join(DOCS, 'docs')}`);

@@ -9,9 +9,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>美柚 · 场景三 · 未记录时间轴</title>
+<title>美柚 · 场景三 · 方案二 · 示例蒙层</title>
 <!--
-  场景三：方案一空白 / 方案二蒙层 / 方案三生长时间轴引导（页内可切换）
+  场景三方案二：示例时间轴数据预览 + 半透明蒙层引导
   生成日期: 2026-05-22
 
   手机演示：
@@ -6793,9 +6793,6 @@ body.standalone-demo{
 body.standalone-demo .demo-scene-dock{
   display:none!important;
 }
-body.standalone-demo.standalone-demo-scheme3 .demo-scene-dock{
-  display:flex!important;
-}
 
 body.standalone-demo #root{
   min-height:100vh;
@@ -6918,18 +6915,17 @@ body.standalone-demo .phone .suiji-shell--scene::before{
 
 </style>
 </head>
-<body class="standalone-demo standalone-demo-scheme3">
+<body class="standalone-demo">
 
 <div id="root"></div>
 
 <script>
 const TWEAK_DEFAULTS = {
-  "demoScene": "record-blank-1"
+  "demoScene": "record-blank-2"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 window.__BUILD__ = "2026-05-22-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
-window.__SCENE3_SCHEME_HUB = true;
 </script>
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
@@ -13027,30 +13023,7 @@ function DemoSceneBar({ value, onChange, description }) {
   );
 }
 
-function DemoScheme3Bar({ value, onChange, description }) {
-  const options = window.SCENE3_SCHEME_OPTIONS;
-  return (
-    <div className="demo-scene-dock" role="toolbar" aria-label="空态方案切换">
-      <div className="demo-scene-dock-label">空态方案</div>
-      <div className="demo-scene-dock-options">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            className={'demo-scene-dock-btn' + (value === opt.value ? ' active' : '')}
-            aria-pressed={value === opt.value}
-            onClick={() => onChange(opt.value)}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-      {description && <p className="demo-scene-dock-hint">{description}</p>}
-    </div>
-  );
-}
-
-Object.assign(window, { DemoSceneBar, DemoScheme3Bar });
+Object.assign(window, { DemoSceneBar });
 
 </script>
 
@@ -13918,7 +13891,6 @@ function App(){
 
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
-  const DemoScheme3Bar = window.DemoScheme3Bar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
@@ -14066,19 +14038,13 @@ function App(){
       {!showSearchPage && <TabBar active={activeTab} onChange={handleTabChange}/>}
       </div>
 
-      {window.__SCENE3_SCHEME_HUB ? (
-        <DemoScheme3Bar
-          value={t.demoScene}
-          onChange={(v)=>setTweak('demoScene', v)}
-          description={scene.description}
-        />
-      ) : !window.__STANDALONE_LOCKED_SCENE ? (
+      {!window.__STANDALONE_LOCKED_SCENE && (
         <DemoSceneBar
           value={t.demoScene}
           onChange={(v)=>setTweak('demoScene', v)}
           description={scene.description}
         />
-      ) : null}
+      )}
     </>
   );
 }

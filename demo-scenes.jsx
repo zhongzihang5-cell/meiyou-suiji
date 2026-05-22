@@ -236,27 +236,4 @@ function DemoSceneBar({ value, onChange, description }) {
   );
 }
 
-function DemoScheme3Bar({ value, onChange, description }) {
-  const options = window.SCENE3_SCHEME_OPTIONS;
-  return (
-    <div className="demo-scene-dock" role="toolbar" aria-label="空态方案切换">
-      <div className="demo-scene-dock-label">空态方案</div>
-      <div className="demo-scene-dock-options">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            className={'demo-scene-dock-btn' + (value === opt.value ? ' active' : '')}
-            aria-pressed={value === opt.value}
-            onClick={() => onChange(opt.value)}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-      {description && <p className="demo-scene-dock-hint">{description}</p>}
-    </div>
-  );
-}
-
-Object.assign(window, { DemoSceneBar, DemoScheme3Bar });
+Object.assign(window, { DemoSceneBar });
