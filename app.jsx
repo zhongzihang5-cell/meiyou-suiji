@@ -168,6 +168,11 @@ function App(){
     });
   };
 
+  useEffect(()=>{
+    window.scrollTimelineToBottom = scrollTimelineToBottom;
+    return ()=>{ delete window.scrollTimelineToBottom; };
+  });
+
   const scrollTimelineToEnd = (behavior='smooth')=>{
     if(voiceTranscribe) scrollTimelineToBottom(behavior === 'smooth' ? 'smooth' : 'auto');
     else scrollTimelineToLastItem(behavior);

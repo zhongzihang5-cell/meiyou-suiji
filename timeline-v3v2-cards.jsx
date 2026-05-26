@@ -454,10 +454,23 @@ function normalizeV3Entry(raw){
 
 function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false}){
   const cardRef = React.useRef(null);
+  const aiPanelRef = React.useRef(null);
   const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
   const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
+
+  const scrollAfterAiChartReveal = React.useCallback(() => {
+    const run = () => {
+      if(typeof window.scrollTimelineToBottom === 'function'){
+        window.scrollTimelineToBottom('smooth');
+      } else {
+        const target = aiPanelRef.current || cardRef.current;
+        window.scrollFeedContentIntoView?.(target);
+      }
+    };
+    requestAnimationFrame(() => requestAnimationFrame(run));
+  }, []);
 
   React.useEffect(() => {
     if(!staggerReveal || !isNew){
@@ -471,15 +484,13 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     const tAi = setTimeout(() => {
       setRevealStep(2);
       setOpen(true);
-      requestAnimationFrame(() => {
-        window.scrollFeedContentIntoView?.(cardRef.current, 148);
-      });
+      setTimeout(scrollAfterAiChartReveal, 400);
     }, 980);
     return () => {
       clearTimeout(tTags);
       clearTimeout(tAi);
     };
-  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id]);
+  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id, scrollAfterAiChartReveal]);
 
   if(!p && a){
     return (
@@ -539,7 +550,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
             <V3Chevron open={open}/>
           </button>
           {open && (
-            <div className="v3-ai-panel-in" style={{paddingBottom:12}}>
+            <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
               {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
               {a.note && (
                 <div style={{
