@@ -12,7 +12,7 @@
 <title>美柚 · 场景四 · 记录心情反馈</title>
 <!--
   记录心情反馈：首次记录水滴动画 + 心情洞察卡
-  生成日期: 2026-05-22
+  生成日期: 2026-05-26
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -718,6 +718,10 @@ html,body{
   display:flex;
   flex-direction:column;
   gap:6px;
+  max-height:min(52vh, 420px);
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,0.15) transparent;
 }
 .demo-scene-dock-btn{
   appearance:none;
@@ -3756,6 +3760,24 @@ html,body{
 .tl-voice-block.has-voice-pill .tl-voice-pill-dur{
   font-size:11px;
 }
+.fade-in .tl-voice-pill,
+.v3-card-enter .tl-voice-pill{
+  animation:vtVoicePillIn 0.42s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+}
+.fade-in .tl-voice-pill:not(.is-playing) .tl-voice-wave.is-mini span,
+.v3-card-enter .tl-voice-pill:not(.is-playing) .tl-voice-wave.is-mini span{
+  animation:vtVoiceWavePop 0.48s cubic-bezier(0.22,1,0.36,1) both;
+  animation-delay:calc(0.14s + var(--i, 0) * 0.045s);
+}
+@keyframes vtVoicePillIn{
+  from{opacity:0;transform:scale(0.9) translateY(3px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+@keyframes vtVoiceWavePop{
+  0%{transform:scaleY(0.35);opacity:0.35}
+  65%{transform:scaleY(1.08);opacity:1}
+  100%{transform:scaleY(1);opacity:0.82}
+}
 .tl-voice-text{
   margin:0;
   font-size:14px;
@@ -4283,6 +4305,27 @@ html,body{
 }
 .v3-tag-val{
   font-size:1em;
+}
+.v3-card-enter{
+  animation:v3CardEnter 0.32s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes v3CardEnter{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.v3-ai-stagger-in{
+  animation:v3AiStaggerIn 0.36s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes v3AiStaggerIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.v3-ai-panel-in{
+  animation:v3AiPanelIn 0.34s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes v3AiPanelIn{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:translateY(0)}
 }
 .v3-voice-mini{
   display:inline-flex;
@@ -7023,6 +7066,332 @@ html,body{
   line-height:1.45;
 }
 
+
+/* 场景五 · 语音转写输入层（固定在 Tab 栏上方，与 Dock 对齐） */
+
+.suiji-shell--voice .suiji-stream{
+  padding-bottom:calc(188px + var(--my-safe-bottom));
+}
+.suiji-shell--voice .tl-rail-node.is-feed-last{
+  padding-bottom:28px;
+}
+.suiji-shell--voice .tl-feed-end{
+  height:32px;
+  scroll-margin-bottom:188px;
+}
+
+.vt-overlay-root{
+  position:fixed;
+  top:44px;
+  bottom:var(--my-tabbar-h);
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  pointer-events:none;
+  z-index:85;
+}
+
+.vt-bar-wrap{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:var(--my-tabbar-h);
+  width:100%;
+  max-width:390px;
+  z-index:90;
+  pointer-events:auto;
+  background:var(--my-surface, #fff);
+  border-top:0.5px solid var(--my-line, rgba(0,0,0,0.08));
+  box-shadow:0 -4px 24px rgba(0,0,0,0.06);
+  border-radius:16px 16px 0 0;
+  overflow:visible;
+}
+
+.vt-hint-bubble{
+  position:absolute;
+  bottom:96px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:11px;
+  padding:6px 12px;
+  border-radius:14px;
+  background:rgba(31,26,26,0.85);
+  color:#fff;
+  backdrop-filter:blur(8px);
+  white-space:nowrap;
+  animation:bloomUp 0.4s 0.4s both;
+  pointer-events:none;
+  z-index:25;
+  font-weight:500;
+}
+
+.vt-hint-tail{
+  position:absolute;
+  bottom:-4px;
+  left:50%;
+  transform:translateX(-50%) rotate(45deg);
+  width:8px;
+  height:8px;
+  background:rgba(31,26,26,0.85);
+}
+
+/* 实时转写卡 — 与最终语音卡同字号 */
+.tl-card.tl-t5-card.is-vt-live{
+  border-color:rgba(255,77,136,0.35);
+  box-shadow:0 4px 18px -6px rgba(255,77,136,0.18);
+  animation:vtLiveCardIn 0.38s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes vtLiveCardIn{
+  from{opacity:0;transform:translateY(10px) scale(0.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.tl-vt-live-body{
+  min-height:22px;
+}
+.tl-vt-live-body .tl-voice-text{
+  display:inline;
+}
+.tl-vt-live-placeholder{
+  color:var(--my-text-tertiary);
+  font-size:14px;
+  line-height:1.47;
+}
+
+@keyframes shimmerSweep {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+@keyframes pulseDot {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40%           { opacity: 1;    transform: translateY(-2px); }
+}
+@keyframes bloomUp {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0)    scale(0.6); opacity: 0; }
+  20%  { opacity: 0.9; }
+  80%  { opacity: 0.8; }
+  100% { transform: translateY(-160px) scale(1.2); opacity: 0; }
+}
+@keyframes liveBar {
+  0%, 100% { transform: scaleY(0.3); }
+  50%      { transform: scaleY(1);   }
+}
+@keyframes haloBreathe {
+  0%, 100% { transform: scale(1);   opacity: 0.55; }
+  50%      { transform: scale(1.18); opacity: 0.85; }
+}
+@keyframes bubbleFly {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  40%  { transform: translate(0, -40px) scale(1.02); opacity: 1; }
+  100% { transform: translate(var(--fly-x, -120px), var(--fly-y, -480px)) scale(0.4); opacity: 0; }
+}
+@keyframes growUp {
+  0%   { opacity: 0; transform: translateY(20px) scaleY(0.6); }
+  100% { opacity: 1; transform: translateY(0)    scaleY(1);   }
+}
+@keyframes growUpExit {
+  0%   { opacity: 1; transform: translateY(0)     scaleY(1); }
+  100% { opacity: 0; transform: translateY(-40px) scaleY(0.85); }
+}
+@keyframes floatAway {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-30px); filter: blur(2px); }
+}
+@keyframes caretBlink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes orbSpin {
+  0%   { transform: rotate(0deg);   }
+  100% { transform: rotate(360deg); }
+}
+@keyframes aiThinkPulse {
+  0%, 100% { transform: scale(1);   opacity: 0.9; }
+  50%      { transform: scale(1.06); opacity: 1;   }
+}
+
+.ai-text-shimmer {
+  background: linear-gradient(90deg, #323232 0%, #323232 35%, #ff4d88 50%, #323232 65%, #323232 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: shimmerSweep 2.2s linear infinite;
+}
+.ai-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  background: #ff4d88;
+  vertical-align: -2px;
+  animation: caretBlink 0.9s steps(1) infinite;
+  border-radius: 1px;
+}
+.live-bar { transform-origin: center; animation: liveBar 0.6s ease-in-out infinite; }
+
+.vt-rec-hint{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:100%;
+  margin-bottom:6px;
+  text-align:center;
+  padding:0 14px;
+  font-size:11px;
+  font-weight:400;
+  line-height:1.3;
+  color:rgba(0,0,0,0.35);
+  white-space:nowrap;
+  pointer-events:none;
+  background:transparent;
+  animation:vtRecHintIn 0.22s ease-out;
+}
+.vt-rec-hint.is-cancel{
+  color:#ff4d4d;
+  font-weight:500;
+}
+@keyframes vtRecHintIn{
+  from{ opacity:0; transform:translateY(4px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+.vt-input-bar{
+  padding:8px 12px 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:transparent;
+}
+
+.vt-chip-btn{
+  width:40px;
+  height:40px;
+  border-radius:20px;
+  border:none;
+  background:transparent;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  cursor:pointer;
+  color:rgba(0,0,0,0.55);
+}
+
+.vt-hold-btn{
+  flex:1;
+  height:44px;
+  border-radius:22px;
+  border:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:0 18px;
+  overflow:hidden;
+  cursor:pointer;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  font:inherit;
+  font-size:15px;
+  font-weight:500;
+  transition:background 0.2s, color 0.2s, transform 0.15s;
+}
+.vt-hold-btn.is-idle,
+.vt-hold-btn.is-recording{
+  background:linear-gradient(180deg, #f5f5f7 0%, #ececef 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 0 0 0.5px rgba(0,0,0,0.04);
+  color:rgba(0,0,0,0.8);
+  transform:none;
+  border:none;
+}
+.vt-hold-label.is-recording{
+  letter-spacing:normal;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+}
+.vt-hold-label{
+  font-size:15px;
+  font-weight:500;
+  color:inherit;
+}
+
+.vt-hold-waves{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  height:22px;
+}
+.vt-hold-wave{
+  width:2.5px;
+  border-radius:1.5px;
+  background:#ff4d88;
+  opacity:0.95;
+}
+
+.vt-atmosphere{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:5;
+  overflow:hidden;
+}
+.vt-atmosphere-glow{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse 120% 70% at 50% 100%, rgba(255,77,136,0.14) 0%, rgba(255,77,136,0.04) 35%, rgba(255,77,136,0) 70%);
+  animation:bloomUp 0.5s cubic-bezier(.2,.7,.3,1);
+}
+.vt-atmosphere-halo{
+  position:absolute;
+  left:50%;
+  bottom:60px;
+  transform:translateX(-50%);
+  width:340px;
+  height:260px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,180,210,0.28) 35%, rgba(255,77,136,0) 65%);
+  filter:blur(8px);
+  animation:haloBreathe 2.2s ease-in-out infinite;
+}
+
+.vt-live-bubble,
+.vt-live-grow{
+  position:absolute;
+  pointer-events:none;
+  z-index:38;
+}
+.vt-live-float{
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:calc(100% + 10px);
+  pointer-events:none;
+  z-index:2;
+}
+.vt-live-bubble{
+  left:18px;
+  right:18px;
+  bottom:96px;
+  display:flex;
+  justify-content:flex-start;
+  transform-origin:60px 100%;
+}
+.vt-live-grow{
+  left:14px;
+  right:14px;
+  bottom:90px;
+  transform-origin:50% 100%;
+}
+
 /* GitHub Pages / 单场景 HTML — 还原 390px 手机框，Dock 与 Tab 对齐 */
 
 body.standalone-demo{
@@ -7059,6 +7428,8 @@ body.standalone-demo .phone{
 /* fixed → absolute，收进 .phone，避免底部输入框与 Tab 错位 */
 body.standalone-demo .phone .tabbar,
 body.standalone-demo .phone .dock-wrap,
+body.standalone-demo .phone .vt-overlay-root,
+body.standalone-demo .phone .vt-bar-wrap,
 body.standalone-demo .phone .quick-float-wrap,
 body.standalone-demo .phone .toast-stack,
 body.standalone-demo .phone .sheet-mask,
@@ -7076,6 +7447,15 @@ body.standalone-demo .phone .tabbar{
 }
 
 body.standalone-demo .phone .dock-wrap{
+  bottom:var(--my-tabbar-h);
+}
+
+body.standalone-demo .phone .vt-overlay-root{
+  top:44px;
+  bottom:var(--my-tabbar-h);
+}
+
+body.standalone-demo .phone .vt-bar-wrap{
   bottom:var(--my-tabbar-h);
 }
 
@@ -7163,7 +7543,7 @@ const TWEAK_DEFAULTS = {
   "demoScene": "note-quick-record"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-window.__BUILD__ = "2026-05-22-nomask";
+window.__BUILD__ = "2026-05-26-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 </script>
 
@@ -8898,18 +9278,27 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   const hasAiNote = !!entry.aiNote;
   const hasAnalysis = !!analysisProps;
   const hasVoice = !!entry.voice;
-  const text = entry.voiceText || entry.body || '';
+  const isVtLive = !!entry.vtLive;
+  const text = isVtLive ? (entry.liveText || '') : (entry.voiceText || entry.body || '');
   const tagLayout = entry.tagLayout || 't5';
   const aiNoteTypewriter = !!(typewriterAiNote && hasAiNote);
-  const analysisAnimateText = hasAnalysis && (
+  const analysisAnimateText = hasAnalysis && !entry.instantAnalysis && (
     !!animateAnalysis || (analysisProps.playAnimation > 0)
   );
 
   return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')}>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')}>
       <TlRecCardHead time={entry.time}/>
       <section className="tl-t5-main">
-        {hasVoice ? (
+        {isVtLive ? (
+          <div className="tl-voice-block tl-vt-live-body">
+            {text ? (
+              <span className="tl-voice-text">{text}<span className="ai-caret" /></span>
+            ) : (
+              <span className="tl-vt-live-placeholder">正在听…</span>
+            )}
+          </div>
+        ) : hasVoice ? (
           <TlVoiceInline voice={entry.voice} text={text}/>
         ) : hideBodyUntilDrop ? (
           <div className="tl-t5-body tl-t5-body--pending" aria-hidden="true"/>
@@ -9691,7 +10080,8 @@ function V3v2Header({time, title}){
   );
 }
 
-function V3v2PrimaryBody({entry}){
+function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false}){
+  const tagRowStyle = { display: 'flex', gap: 6, flexWrap: 'wrap' };
   if(entry.kind === 'mood-face'){
     const MoodFace = window.MoodFace;
     const mood = entry.primaryMood;
@@ -9715,9 +10105,19 @@ function V3v2PrimaryBody({entry}){
     return (
       <div style={{display:'flex', flexDirection:'column', gap:8}}>
         <TlVoiceInline voice={voice} text={text}/>
-        <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
-          {(entry.tags || []).map((t, i)=><TLTag key={i} tag={t}/>)}
-        </div>
+        {showTags && (entry.tags || []).length > 0 && (
+          <div style={tagRowStyle}>
+            {(entry.tags || []).map((t, i)=>(
+              <span
+                key={i}
+                className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+                style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
+              >
+                <TLTag tag={t}/>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -9756,9 +10156,19 @@ function V3v2PrimaryBody({entry}){
   return (
     <div style={{display:'flex', flexDirection:'column', gap:8}}>
       <div style={{fontSize:14, color:TL_TEXT, lineHeight:1.5}}>{entry.text || entry.body}</div>
-      <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
-        {(entry.tags || []).map((t, i)=><TLTag key={i} tag={t}/>)}
-      </div>
+      {showTags && (entry.tags || []).length > 0 && (
+        <div style={tagRowStyle}>
+          {(entry.tags || []).map((t, i)=>(
+            <span
+              key={i}
+              className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+              style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
+            >
+              <TLTag tag={t}/>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -9776,10 +10186,34 @@ function normalizeV3Entry(raw){
   };
 }
 
-function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
-  const [open, setOpen] = React.useState(aiDefaultOpen);
+function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false}){
+  const cardRef = React.useRef(null);
+  const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
+  const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
+
+  React.useEffect(() => {
+    if(!staggerReveal || !isNew){
+      setRevealStep(2);
+      if(aiDefaultOpen) setOpen(true);
+      return;
+    }
+    setRevealStep(0);
+    setOpen(false);
+    const tTags = setTimeout(() => setRevealStep(1), 380);
+    const tAi = setTimeout(() => {
+      setRevealStep(2);
+      setOpen(true);
+      requestAnimationFrame(() => {
+        window.scrollFeedContentIntoView?.(cardRef.current, 148);
+      });
+    }, 980);
+    return () => {
+      clearTimeout(tTags);
+      clearTimeout(tAi);
+    };
+  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id]);
 
   if(!p && a){
     return (
@@ -9796,17 +10230,27 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
     );
   }
 
+  const shellClass = isNew
+    ? (staggerReveal ? 'v3-card-enter' : 'fade-in')
+    : undefined;
+  const showTags = revealStep >= 1;
+  const showAi = revealStep >= 2;
+
   return (
-    <div className={isNew ? 'fade-in' : undefined} style={{
-      background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
-      padding:'11px 12px 4px', overflow:'hidden',
-    }}>
+    <div
+      ref={cardRef}
+      className={shellClass}
+      style={{
+        background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
+        padding:'11px 12px 4px', overflow:'hidden',
+      }}
+    >
       <V3v2Header time={p.time}/>
-      <div style={{marginTop:8, paddingBottom:a ? 10 : 8}}>
-        <V3v2PrimaryBody entry={p}/>
+      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : 8}}>
+        <V3v2PrimaryBody entry={p} showTags={showTags} tagsAnimate={staggerReveal && showTags}/>
       </div>
-      {a && (
-        <>
+      {a && showAi && (
+        <div className="v3-ai-stagger-in">
           <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>
           <button
             type="button"
@@ -9829,7 +10273,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
             <V3Chevron open={open}/>
           </button>
           {open && (
-            <div style={{paddingBottom:12}}>
+            <div className="v3-ai-panel-in" style={{paddingBottom:12}}>
               {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
               {a.note && (
                 <div style={{
@@ -9839,7 +10283,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
               )}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
@@ -9852,6 +10296,7 @@ function V3RecordGroupCard({group, isNew}){
       ai={group.ai}
       aiDefaultOpen={group.aiDefaultOpen}
       isNew={isNew}
+      staggerReveal={!!group.staggerReveal}
     />
   );
 }
@@ -13683,6 +14128,672 @@ function DockPublisher({
 Object.assign(window, { DockPublisher, CloudPublisher: DockPublisher });
 </script>
 
+<!-- voice-transcribe-recorder.jsx -->
+<script type="text/babel">
+// voice-transcribe-recorder.jsx — 场景五 · 按住说话输入条
+/* global React */
+
+const { useState, useEffect, useRef } = React;
+
+const VT_T = window.VT_T || {
+  ink2: '#666666',
+  pink: '#ff4d88',
+  pinkDeep: '#e04378',
+  pinkBorder: 'rgba(255,77,136,0.28)',
+};
+window.VT_T = VT_T;
+
+function VoiceTranscribeBar({ onStart, onEnd, onCancel, recording, elapsed = 0, variant = 'live-drop' }) {
+  const startYRef = useRef(0);
+  const [cancelHover, setCancelHover] = useState(false);
+
+  const handleDown = (e) => {
+    e.preventDefault();
+    startYRef.current = (e.touches?.[0]?.clientY ?? e.clientY) || 0;
+    onStart && onStart();
+  };
+  const handleMove = (e) => {
+    if(!recording) return;
+    const y = (e.touches?.[0]?.clientY ?? e.clientY) || 0;
+    setCancelHover(startYRef.current - y > 80);
+  };
+  const handleUp = () => {
+    if(!recording) return;
+    if(cancelHover) onCancel && onCancel();
+    else onEnd && onEnd();
+    setCancelHover(false);
+  };
+
+  useEffect(() => {
+    if(!recording) return;
+    window.addEventListener('mouseup', handleUp);
+    window.addEventListener('touchend', handleUp);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove);
+    return () => {
+      window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('touchend', handleUp);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('touchmove', handleMove);
+    };
+  }, [recording, cancelHover]);
+
+  const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const ss = Math.floor(elapsed % 60).toString().padStart(2, '0');
+  const stroke = 'rgba(0,0,0,0.55)';
+
+  const showRecHint = recording && (variant !== 'live-float' || cancelHover);
+
+  return (
+    <>
+      {showRecHint && (
+        <div className={'vt-rec-hint' + (cancelHover ? ' is-cancel' : '')}>
+          {cancelHover ? '松开取消 ✕' : `↑ 上滑取消 · ${mm}:${ss}`}
+        </div>
+      )}
+
+      <div className="vt-input-bar">
+        <button type="button" className="vt-chip-btn" aria-label="键盘">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="2.5" y="6.5" width="19" height="12" rx="2.5" stroke={stroke} strokeWidth="1.6"/>
+            <path d="M6 11h.01M9 11h.01M12 11h.01M15 11h.01M18 11h.01M7 14.5h10" stroke={stroke} strokeWidth="1.6" strokeLinecap="round"/>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          className="vt-hold-btn is-idle"
+          onMouseDown={handleDown}
+          onTouchStart={handleDown}
+        >
+          <span className="vt-hold-label">按住&nbsp;说话</span>
+        </button>
+
+        <button type="button" className="vt-chip-btn" aria-label="相机">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="2.5" y="6.5" width="19" height="13" rx="2.5" stroke={stroke} strokeWidth="1.6"/>
+            <circle cx="12" cy="13" r="3.5" stroke={stroke} strokeWidth="1.6"/>
+            <path d="M8 6.5l1.2-2h5.6L16 6.5" stroke={stroke} strokeWidth="1.6"/>
+          </svg>
+        </button>
+      </div>
+    </>
+  );
+}
+
+function VoiceTranscribeAtmosphere({ active }) {
+  if(!active) return null;
+  return (
+    <div className="vt-atmosphere" aria-hidden="true">
+      <div className="vt-atmosphere-glow" />
+      <div className="vt-atmosphere-halo" />
+      {Array.from({ length: 12 }).map((_, i) => (
+        <span
+          key={i}
+          style={{
+            position: 'absolute',
+            left: `${10 + ((i * 73) % 78)}%`,
+            bottom: 70,
+            width: 4 + (i % 4) * 2,
+            height: 4 + (i % 4) * 2,
+            borderRadius: '50%',
+            background: i % 2
+              ? 'radial-gradient(circle, #ffd9e6 0%, rgba(255,217,230,0) 70%)'
+              : 'radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 70%)',
+            animation: `floatUp ${3.2 + (i % 4) * 0.4}s ease-out infinite`,
+            animationDelay: `${(i * 0.17) % 2.4}s`,
+            opacity: 0,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+Object.assign(window, { VoiceTranscribeBar, VoiceTranscribeAtmosphere });
+
+</script>
+
+<!-- voice-transcribe-interludes.jsx -->
+<script type="text/babel">
+// voice-transcribe-interludes.jsx — 场景五 · 实时转写浮层（气泡 / 顶起 / 悬浮）
+// Three variants of "where does the live text appear during press-and-hold":
+//   live-drop   — text streams directly into a timeline card (no overlay)
+//   live-bubble — speech bubble above the bar with live text + tail
+//   live-grow   — panel grows upward from the bar (no bubble shape)
+//   live-float  — bare floating text drifts above the bar, unboxed
+/* global React, VT_T */
+
+const { useState, useEffect, useRef } = React;
+
+if(!window.VT_T){
+  window.VT_T = {
+    ink: '#323232',
+    ink2: '#666666',
+    ink3: '#999999',
+    pink: '#ff4d88',
+    pinkDeep: '#e04378',
+    pinkBorder: 'rgba(255,77,136,0.28)',
+  };
+}
+const VT_T = window.VT_T;
+
+function Sparkle({ size = 12 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2L12 2z" fill={VT_T.pink} />
+    </svg>
+  );
+}
+
+function AIOrb({ size = 22 }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%",
+      background: "conic-gradient(from 0deg, #f43f7c, #ff8bb3, #ffd9e6, #f43f7c)",
+      animation: "orbSpin 3s linear infinite",
+      display: "grid", placeItems: "center", flexShrink: 0,
+    }}>
+      <span style={{
+        width: size - 8, height: size - 8, borderRadius: "50%",
+        background: "radial-gradient(circle at 35% 30%, #fff 0%, #ffd9e6 60%, #f43f7c 100%)",
+      }} />
+    </div>
+  );
+}
+
+function ThinkingDots() {
+  return (
+    <span style={{ display: "inline-flex", gap: 3, alignItems: "center", marginLeft: 4 }}>
+      {[0,1,2].map(i => (
+        <span key={i} style={{
+          width: 4, height: 4, borderRadius: 2, background: VT_T.pink, display: "inline-block",
+          animation: `aiThinkPulse 1.2s ease-in-out infinite`, animationDelay: `${i * 0.15}s`,
+        }} />
+      ))}
+    </span>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// V2 · LIVE-BUBBLE  — speech bubble above the bar
+// ─────────────────────────────────────────────────────────────
+function LiveBubble({ text, active, exiting = false }) {
+  const anim = active
+    ? 'bloomUp 0.32s cubic-bezier(.2,.7,.3,1)'
+    : exiting
+      ? 'bubbleFly 0.3s cubic-bezier(0.22,1,0.36,1) forwards'
+      : undefined;
+  return (
+    <div
+      className="vt-live-bubble"
+      style={{
+        animation: anim,
+        ['--fly-x']: '-20px',
+        ['--fly-y']: '-200px',
+      }}
+    >
+      <div style={{
+        maxWidth: "88%", minWidth: 120,
+        background: "linear-gradient(135deg, #fff 0%, #fff5f8 100%)",
+        border: `1px solid ${VT_T.pinkBorder}`,
+        borderRadius: 18, padding: "12px 14px 12px 40px",
+        position: "relative",
+        boxShadow: "0 16px 36px -10px rgba(244,63,124,0.32), 0 2px 8px rgba(0,0,0,0.06)",
+      }}>
+        <div style={{ position: "absolute", left: 10, top: 10 }}>
+          <AIOrb size={22} />
+        </div>
+        <div style={{ fontSize: 13.5, color: VT_T.ink, lineHeight: 1.65, minHeight: 22 }}>
+          {text ? (
+            <>{text}<span className="ai-caret" /></>
+          ) : (
+            <span style={{ color: VT_T.ink3, display: "inline-flex", alignItems: "center" }}>
+              正在听<ThinkingDots />
+            </span>
+          )}
+        </div>
+        <div style={{
+          position: "absolute", bottom: -7, left: 64,
+          width: 14, height: 14, transform: "rotate(45deg)",
+          background: "#fff",
+          borderRight: `1px solid ${VT_T.pinkBorder}`,
+          borderBottom: `1px solid ${VT_T.pinkBorder}`,
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// V3 · LIVE-GROW — docked panel growing upward from the bar
+// ─────────────────────────────────────────────────────────────
+function LiveGrowPanel({ text, active, exiting = false }) {
+  const anim = active
+    ? 'growUp 0.32s cubic-bezier(.2,.7,.3,1)'
+    : exiting
+      ? 'growUpExit 0.3s cubic-bezier(0.22,1,0.36,1) forwards'
+      : undefined;
+  return (
+    <div
+      className="vt-live-grow"
+      style={{ animation: anim }}
+    >
+      <div style={{
+        background: "rgba(255,255,255,0.96)",
+        backdropFilter: "blur(14px)",
+        border: `1px solid ${VT_T.pinkBorder}`,
+        borderRadius: 20, padding: "14px 16px",
+        boxShadow: "0 -10px 32px -10px rgba(244,63,124,0.35)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <AIOrb size={20} />
+          <span className="ai-text-shimmer" style={{ fontSize: 12, fontWeight: 700 }}>
+            AI 正在实时转写
+          </span>
+          <ThinkingDots />
+        </div>
+        <div style={{ fontSize: 14, color: VT_T.ink, lineHeight: 1.7, minHeight: 24 }}>
+          {text ? (
+            <>{text}<span className="ai-caret" /></>
+          ) : (
+            <span style={{ color: VT_T.ink3 }}>正在听…</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// V4 · LIVE-FLOAT — bare floating text above the bar, no chrome.
+// Text uses layered white-halo shadows for legibility on any bg.
+// The recorder bar hides its overlapping cancel-hint chip for this variant.
+// ─────────────────────────────────────────────────────────────
+function LiveFloat({ text, active, exiting = false }) {
+  const anim = active
+    ? 'bloomUp 0.32s cubic-bezier(.2,.7,.3,1)'
+    : exiting
+      ? 'floatAway 0.3s cubic-bezier(0.22,1,0.36,1) forwards'
+      : undefined;
+  return (
+    <div
+      className="vt-live-float"
+      style={{ animation: anim }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+        <div style={{
+          flexShrink: 0,
+          filter: "drop-shadow(0 2px 8px rgba(255,255,255,0.95)) drop-shadow(0 0 6px rgba(255,255,255,0.8))",
+        }}>
+          <AIOrb size={20} />
+        </div>
+        <div style={{ flex: 1, paddingTop: 0, minWidth: 0 }}>
+          <div style={{
+            fontSize: 13,
+            lineHeight: 1.7,
+            fontWeight: 500,
+            color: VT_T.pinkDeep,
+            letterSpacing: "0.01em",
+            // soft white halo for legibility, no hard shadow
+            textShadow: [
+              "0 0 6px rgba(255,255,255,0.95)",
+              "0 0 12px rgba(255,255,255,0.85)",
+              "0 0 20px rgba(255,255,255,0.6)",
+              "0 1px 0 rgba(255,255,255,0.9)",
+            ].join(", "),
+            minHeight: 22,
+          }}>
+            {text ? (
+              <>{text}<span className="ai-caret" /></>
+            ) : (
+              <span style={{ color: VT_T.pink, opacity: 0.65, fontSize: 12 }}>
+                正在听…
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { LiveBubble, LiveGrowPanel, LiveFloat });
+
+</script>
+
+<!-- voice-transcribe-demo.jsx -->
+<script type="text/babel">
+// voice-transcribe-demo.jsx — 场景五 · 语音转写输入层（时间轴沿用场景一）
+/* global React, VoiceTranscribeBar, VoiceTranscribeAtmosphere,
+   LiveBubble, LiveGrowPanel, LiveFloat */
+
+const { useState, useRef, useCallback, useEffect } = React;
+
+const VT_TRANSCRIPTS = [
+  {
+    text: '今天下午突然觉得有点累，可能是昨晚睡得不太好。胃里也有点闷闷的感觉，午饭只吃了一半。',
+    tags: [
+      { kind: 'category', category: '情绪', label: '疲惫' },
+      { kind: 'category', category: '饮食', label: '食欲下降' },
+    ],
+    aiTitle: '本周情绪走势',
+    chartType: 'moodWeek',
+    aiInsight: '今日 ▽ 低于上周均值 · 卵泡期 · 睡眠不足关联',
+  },
+  {
+    text: '刚刚跑完步整个人神清气爽，心情比早上好太多了。',
+    tags: [
+      { kind: 'category', category: '运动', label: '跑步' },
+      { kind: 'category', category: '心情', label: '放松' },
+    ],
+    aiTitle: '本周情绪走势',
+    chartType: 'moodWeek',
+    aiInsight: '今日 △ 高于上周均值 · 卵泡期 · 运动带来状态回升',
+  },
+  {
+    text: '今天小腹隐隐有点胀，下午两点左右开始的，喝了热水之后稍微好一些。',
+    tags: [{ kind: 'category', category: '症状', label: '腹胀' }],
+    aiTitle: '本周情绪走势',
+    chartType: 'moodWeek',
+    aiInsight: '今日 ▽ 低于上周均值 · 卵泡期 · 留意水分摄入',
+  },
+];
+
+const VT_CAT_ICON = {
+  心情: 'mood',
+  情绪: 'mood',
+  饮食: 'food',
+  运动: 'run',
+  体征: 'sym',
+  症状: 'sym',
+};
+
+let vtPromptIdx = 0;
+
+function mapVtTagsV3(tags){
+  return (tags || []).map((t) => ({
+    cat: t.category || t.cat,
+    val: t.label || t.val,
+    icon: VT_CAT_ICON[t.category || t.cat] || 'sym',
+  }));
+}
+
+function patchTimelineEntry(blocks, entryId, patch){
+  return blocks.map((b) => {
+    if(b.type !== 'day') return b;
+    const items = b.items || b.entries || [];
+    if(!items.some((it) => it.id === entryId)) return b;
+    return {
+      ...b,
+      items: items.map((it) => (it.id === entryId ? { ...it, ...patch } : it)),
+      entries: undefined,
+    };
+  });
+}
+
+function removeTimelineEntry(blocks, entryId){
+  return blocks.map((b) => {
+    if(b.type !== 'day') return b;
+    return {
+      ...b,
+      items: (b.items || b.entries || []).filter((it) => it.id !== entryId),
+      entries: undefined,
+    };
+  });
+}
+
+function replaceTimelineEntry(blocks, entryId, nextItem){
+  return blocks.map((b) => {
+    if(b.type !== 'day') return b;
+    const items = b.items || b.entries || [];
+    if(!items.some((it) => it.id === entryId)) return b;
+    return {
+      ...b,
+      items: items.map((it) => (it.id === entryId ? { ...nextItem, isNew: true } : it)),
+      entries: undefined,
+    };
+  });
+}
+
+function buildVtLiveEntry(id){
+  return {
+    id,
+    kind: 'voice-card',
+    time: window.formatNowTime(),
+    isNew: true,
+    vtLive: true,
+    liveText: '',
+    voiceText: '',
+    voice: { duration: '0:00' },
+    tagLayout: 't5',
+  };
+}
+
+function buildVtFinalGroup(tpl, finalText, durationSec, primaryId){
+  const pid = primaryId || ('vt-' + Date.now());
+  return {
+    kind: 'record-group',
+    id: pid + '-g',
+    isNew: true,
+    staggerReveal: true,
+    primary: {
+      id: pid,
+      time: window.formatNowTime(),
+      kind: 'voice',
+      duration: window.formatVoiceDur(durationSec),
+      text: finalText,
+      tags: mapVtTagsV3(tpl.tags),
+    },
+    ai: {
+      id: pid + '-ai',
+      time: window.formatNowTime(),
+      kind: 'chart',
+      chartType: tpl.chartType || 'moodWeek',
+      title: tpl.aiTitle || '本周情绪走势',
+      note: tpl.aiInsight,
+    },
+    aiDefaultOpen: true,
+  };
+}
+
+function resolveVoiceAppendDayId(timeline){
+  const days = (timeline || []).filter((b) => b.type === 'day');
+  const todayDays = days.filter((d) => d.isToday);
+  if(todayDays.length) return todayDays[todayDays.length - 1].id;
+  return days[days.length - 1]?.id || window.resolveEntryDayId('', timeline);
+}
+
+const VT_CHAR_MS = 34;
+const VT_CHAR_JITTER = 10;
+const VT_LIVE_EXIT_MS = 300;
+
+function VoiceTranscribeInputLayer({
+  variant = 'live-drop',
+  timeline,
+  setTimeline,
+  onScrollEnd,
+  onRecorded,
+}){
+  const [recording, setRecording] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [liveText, setLiveText] = useState('');
+  const [liveExiting, setLiveExiting] = useState(false);
+
+  const liveEntryIdRef = useRef(null);
+  const liveTplRef = useRef(null);
+  const streamRef = useRef(null);
+  const elapsedRef = useRef(null);
+  const startTsRef = useRef(0);
+  const variantRef = useRef(variant);
+
+  variantRef.current = variant;
+
+  useEffect(() => {
+    vtPromptIdx = 0;
+    liveEntryIdRef.current = null;
+    liveTplRef.current = null;
+    setLiveText('');
+    setLiveExiting(false);
+    setRecording(false);
+    setElapsed(0);
+    if(streamRef.current) clearTimeout(streamRef.current);
+    if(elapsedRef.current) clearInterval(elapsedRef.current);
+    streamRef.current = null;
+    elapsedRef.current = null;
+  }, [variant]);
+
+  const startStream = useCallback((tpl, variantAtStart) => {
+    const chars = Array.from(tpl.text);
+    let i = 0;
+    const tick = () => {
+      i += 1;
+      if(i > chars.length){
+        streamRef.current = null;
+        return;
+      }
+      const slice = chars.slice(0, i).join('');
+      setLiveText(slice);
+      if(variantAtStart === 'live-drop' && liveEntryIdRef.current){
+        const dur = (performance.now() - startTsRef.current) / 1000;
+        const id = liveEntryIdRef.current;
+        setTimeline((blocks) => patchTimelineEntry(blocks, id, {
+          liveText: slice,
+          voice: { duration: window.formatVoiceDur(Math.max(0, Math.ceil(dur))) },
+        }));
+        if(i === 1 || i % 2 === 0) onScrollEnd?.();
+      }
+      streamRef.current = setTimeout(
+        tick,
+        VT_CHAR_MS + Math.random() * VT_CHAR_JITTER,
+      );
+    };
+    streamRef.current = setTimeout(tick, 70);
+  }, [setTimeline, onScrollEnd]);
+
+  const stopStream = () => {
+    if(streamRef.current){
+      clearTimeout(streamRef.current);
+      streamRef.current = null;
+    }
+    if(elapsedRef.current){
+      clearInterval(elapsedRef.current);
+      elapsedRef.current = null;
+    }
+  };
+
+  const handleStart = useCallback(() => {
+    const v = variantRef.current;
+    const tpl = VT_TRANSCRIPTS[vtPromptIdx % VT_TRANSCRIPTS.length];
+    vtPromptIdx += 1;
+    liveTplRef.current = tpl;
+    setLiveText('');
+    setLiveExiting(false);
+    setRecording(true);
+    setElapsed(0);
+    startTsRef.current = performance.now();
+    elapsedRef.current = setInterval(() => {
+      setElapsed((performance.now() - startTsRef.current) / 1000);
+    }, 100);
+
+    if(v === 'live-drop'){
+      const id = 'vt-' + Date.now();
+      liveEntryIdRef.current = id;
+      setTimeline((blocks) => {
+        const dayId = resolveVoiceAppendDayId(blocks);
+        return window.appendTimelineEntry(blocks, buildVtLiveEntry(id), { dayId });
+      });
+      requestAnimationFrame(() => onScrollEnd?.());
+    }
+    startStream(tpl, v);
+  }, [setTimeline, onScrollEnd, startStream]);
+
+  const handleEnd = useCallback(() => {
+    const v = variantRef.current;
+    setRecording(false);
+    stopStream();
+    const tpl = liveTplRef.current;
+    if(!tpl) return;
+    const finalText = liveText || tpl.text;
+    const finalDuration = Math.max(2, Math.ceil(elapsed));
+    onRecorded?.();
+
+    if(v === 'live-drop' && liveEntryIdRef.current){
+      const id = liveEntryIdRef.current;
+      const finalized = buildVtFinalGroup(tpl, finalText, finalDuration, id);
+      setTimeline((blocks) => replaceTimelineEntry(blocks, id, finalized));
+      liveEntryIdRef.current = null;
+      setLiveText('');
+      liveTplRef.current = null;
+      requestAnimationFrame(() => onScrollEnd?.());
+      return;
+    }
+
+    setLiveExiting(true);
+    setTimeout(() => {
+      setTimeline((blocks) => {
+        const dayId = resolveVoiceAppendDayId(blocks);
+        const entry = buildVtFinalGroup(tpl, finalText, finalDuration);
+        return window.appendTimelineEntry(blocks, entry, { dayId });
+      });
+      setLiveExiting(false);
+      setLiveText('');
+      liveTplRef.current = null;
+      requestAnimationFrame(() => onScrollEnd?.());
+    }, VT_LIVE_EXIT_MS);
+  }, [liveText, elapsed, setTimeline, onScrollEnd, onRecorded]);
+
+  const handleCancel = useCallback(() => {
+    const v = variantRef.current;
+    setRecording(false);
+    stopStream();
+    if(v === 'live-drop' && liveEntryIdRef.current){
+      const id = liveEntryIdRef.current;
+      setTimeline((blocks) => removeTimelineEntry(blocks, id));
+      liveEntryIdRef.current = null;
+    }
+    setLiveText('');
+    setLiveExiting(false);
+    liveTplRef.current = null;
+  }, [setTimeline]);
+
+  const liveActive = recording && !liveExiting;
+  const showLiveBubble = (recording || liveExiting) && variant === 'live-bubble';
+  const showLiveGrow = (recording || liveExiting) && variant === 'live-grow';
+  const showLiveFloat = (recording || liveExiting) && variant === 'live-float';
+
+  return (
+    <>
+      <div className="vt-overlay-root" aria-hidden={false}>
+        <VoiceTranscribeAtmosphere active={recording} />
+        {showLiveBubble && <LiveBubble text={liveText} active={liveActive} exiting={liveExiting} />}
+        {showLiveGrow && <LiveGrowPanel text={liveText} active={liveActive} exiting={liveExiting} />}
+      </div>
+      <div className="vt-bar-wrap">
+        {showLiveFloat && (
+          <LiveFloat text={liveText} active={liveActive} exiting={liveExiting} />
+        )}
+        <VoiceTranscribeBar
+          recording={recording}
+          elapsed={elapsed}
+          variant={variant}
+          onStart={handleStart}
+          onEnd={handleEnd}
+          onCancel={handleCancel}
+        />
+      </div>
+    </>
+  );
+}
+
+Object.assign(window, {
+  VoiceTranscribeInputLayer,
+  patchTimelineEntry,
+  removeTimelineEntry,
+});
+
+</script>
+
 <!-- demo-scenes.jsx -->
 <script type="text/babel">
 // Demo 场景配置 — 控制默认 Tab、页面展示与交互流程
@@ -13691,7 +14802,54 @@ Object.assign(window, { DockPublisher, CloudPublisher: DockPublisher });
 // 场景二 record-direct：未记录 landing 引导（record-empty.jsx）
 // 场景三 record-blank-1/2/3：三套时间轴空态方案（record-blank.jsx）
 
-// 场景三拆为三套方案（record-blank.jsx）
+// 场景五 voice-transcribe-1/2/3/4：四套语音实时转写方案（voice-transcribe-demo.jsx）
+//   方案一 voice-transcribe-1：落入 — 字直接流入时间轴卡片
+//   方案二 voice-transcribe-2：气泡 — 输入条上方对话气泡
+//   方案三 voice-transcribe-3：顶起 — 从输入条向上撑面板
+//   方案四 voice-transcribe-4：悬浮 — 无边框悬浮文字
+
+const SCENE5_SCHEME_OPTIONS = [
+  { value: 'voice-transcribe-1', label: '方案一' },
+  { value: 'voice-transcribe-2', label: '方案二' },
+  { value: 'voice-transcribe-3', label: '方案三' },
+  { value: 'voice-transcribe-4', label: '方案四' },
+];
+
+const VOICE_TRANSCRIBE_BASE = {
+  mode: 'voice-transcribe',
+  defaultTab: 'note',
+  identity: 'period',
+  getTimeline: () => {
+    const blocks = JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS));
+    blocks.forEach((block) => {
+      if(block.type !== 'day') return;
+      block.items = (block.items || []).filter(
+        (it) => !(it.kind === 'guide' && it.id === 'g-518-post'),
+      );
+      (block.items || []).forEach((it) => {
+        if(it.kind === 'sync-card') it.instantAnalysis = true;
+      });
+    });
+    return blocks;
+  },
+  calendar: {
+    enabled: true,
+    periodFlow: false,
+  },
+  floatNotice: {
+    enabled: false,
+  },
+  record: {
+    showHealthCard: false,
+    voiceTranscribe: true,
+    sisterAnalysis: {
+      trigger: 'none',
+      initialDone: true,
+    },
+    todayGuide: false,
+  },
+};
+
 //   方案一 record-blank-1：时间轴空白
 //   方案二 record-blank-2：示例数据 + 蒙层
 //   方案三 record-blank-3：生长时间轴空态引导
@@ -13876,6 +15034,38 @@ const DEMO_SCENES = {
     },
   },
 
+  'voice-transcribe-1': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-1',
+    label: '场景五 · 方案一 · 落入',
+    description: '按住说话，字符直接流入时间轴底部实时转写卡，松手后追加标签与 AI 洞察',
+    voiceVariant: 'live-drop',
+  },
+
+  'voice-transcribe-2': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-2',
+    label: '场景五 · 方案二 · 气泡',
+    description: '输入条上方升起带尾巴的对话气泡，AI 把字打在气泡里，松手气泡飞入时间轴',
+    voiceVariant: 'live-bubble',
+  },
+
+  'voice-transcribe-3': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-3',
+    label: '场景五 · 方案三 · 顶起',
+    description: '从输入条顶部撑起转写面板，像把条本身拉高，松手面板退下、新卡片落入时间轴',
+    voiceVariant: 'live-grow',
+  },
+
+  'voice-transcribe-4': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-4',
+    label: '场景五 · 方案四 · 悬浮',
+    description: '屏幕上方无边框悬浮文字 + AI 锚点，多层光晕保证可读，「松开结束 · 上滑取消」做在条上',
+    voiceVariant: 'live-float',
+  },
+
 };
 
 const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
@@ -13884,8 +15074,15 @@ const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
 }));
 
 function getDemoScene(id){
-  const resolved = id === 'record-blank' ? 'record-blank-1' : id;
+  const resolved = id === 'record-blank' ? 'record-blank-1'
+    : id === 'voice-transcribe' ? 'voice-transcribe-1'
+    : id;
   return DEMO_SCENES[resolved] || DEMO_SCENES['period-calendar'];
+}
+
+function isVoiceTranscribeScene(id){
+  const scene = getDemoScene(id);
+  return scene.mode === 'voice-transcribe';
 }
 
 function getSceneInitialState(id){
@@ -13905,9 +15102,11 @@ Object.assign(window, {
   DEMO_SCENES,
   DEMO_SCENE_OPTIONS,
   SCENE3_SCHEME_OPTIONS,
+  SCENE5_SCHEME_OPTIONS,
   getDemoScene,
   getSceneInitialState,
   getBlankScheme2PreviewTimeline,
+  isVoiceTranscribeScene,
 });
 
 function DemoSceneBar({ value, onChange, description }) {
@@ -14555,6 +15754,7 @@ function buildTimelineEntry(text, hits, opts={}){
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const scene = window.getDemoScene(t.demoScene);
+  const voiceTranscribe = !!scene.record?.voiceTranscribe;
   const ctx = window.SCENE_CONTEXT[scene.identity] || window.SCENE_CONTEXT.period;
 
   const initial = window.getSceneInitialState(t.demoScene);
@@ -14669,8 +15869,21 @@ function App(){
     });
   };
 
+  const scrollTimelineToBottom = (behavior='auto')=>{
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        const el = streamRef.current;
+        if(!el) return;
+        const top = Math.max(0, el.scrollHeight - el.clientHeight);
+        if(behavior === 'auto') el.scrollTop = top;
+        else el.scrollTo({ top, behavior });
+      });
+    });
+  };
+
   const scrollTimelineToEnd = (behavior='smooth')=>{
-    scrollTimelineToLastItem(behavior);
+    if(voiceTranscribe) scrollTimelineToBottom(behavior === 'smooth' ? 'smooth' : 'auto');
+    else scrollTimelineToLastItem(behavior);
   };
 
   const handleTabChange = (tab)=>{
@@ -14690,6 +15903,10 @@ function App(){
   useEffect(()=>{
     if(activeTab !== 'note') return;
     if(showRecordEmpty || showBlankEmpty) return;
+    if(voiceTranscribe){
+      const tm = setTimeout(()=>scrollTimelineToBottom('auto'), 80);
+      return ()=>clearTimeout(tm);
+    }
     if(recordEnterModeRef.current === 'analysis'){
       recordEnterModeRef.current = 'idle';
       return;
@@ -14701,14 +15918,20 @@ function App(){
 
   useEffect(()=>{
     if(showRecordEmpty || showBlankEmpty) return;
+    if(voiceTranscribe){
+      const t1 = setTimeout(()=>scrollTimelineToBottom('auto'), 50);
+      const t2 = setTimeout(()=>scrollTimelineToBottom('auto'), 240);
+      return ()=>{ clearTimeout(t1); clearTimeout(t2); };
+    }
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, [t.demoScene, showRecordEmpty, showBlankEmpty]);
+  }, [t.demoScene, showRecordEmpty, showBlankEmpty, voiceTranscribe]);
 
   useEffect(()=>{
     if(showRecordEmpty || showBlankEmpty) return;
+    if(voiceTranscribe) return;
     scrollTimelineToEnd('smooth');
-  }, [timeline, showRecordEmpty, showBlankEmpty]);
+  }, [timeline, showRecordEmpty, showBlankEmpty, voiceTranscribe]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -14935,6 +16158,7 @@ function App(){
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
+  const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const openSearchPage = ()=>setShowSearchPage(true);
   const closeSearchPage = ()=>setShowSearchPage(false);
@@ -14966,7 +16190,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -15056,6 +16280,7 @@ function App(){
           />
         </div>
 
+        {!voiceTranscribe && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -15070,9 +16295,20 @@ function App(){
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
         />
+        )}
         </>
         )}
       </div>
+
+      {voiceTranscribe && showRecordShell && !showRecordEmpty && !showRecordBlank && VoiceTranscribeInputLayer && (
+        <VoiceTranscribeInputLayer
+          variant={scene.voiceVariant}
+          timeline={timeline}
+          setTimeline={setTimeline}
+          onScrollEnd={()=>scrollTimelineToBottom('smooth')}
+          onRecorded={markUserRecorded}
+        />
+      )}
 
       {showSearchPage && (
         <SearchPage timeline={timeline} onClose={closeSearchPage}/>

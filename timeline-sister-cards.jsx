@@ -429,18 +429,27 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   const hasAiNote = !!entry.aiNote;
   const hasAnalysis = !!analysisProps;
   const hasVoice = !!entry.voice;
-  const text = entry.voiceText || entry.body || '';
+  const isVtLive = !!entry.vtLive;
+  const text = isVtLive ? (entry.liveText || '') : (entry.voiceText || entry.body || '');
   const tagLayout = entry.tagLayout || 't5';
   const aiNoteTypewriter = !!(typewriterAiNote && hasAiNote);
-  const analysisAnimateText = hasAnalysis && (
+  const analysisAnimateText = hasAnalysis && !entry.instantAnalysis && (
     !!animateAnalysis || (analysisProps.playAnimation > 0)
   );
 
   return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')}>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')}>
       <TlRecCardHead time={entry.time}/>
       <section className="tl-t5-main">
-        {hasVoice ? (
+        {isVtLive ? (
+          <div className="tl-voice-block tl-vt-live-body">
+            {text ? (
+              <span className="tl-voice-text">{text}<span className="ai-caret" /></span>
+            ) : (
+              <span className="tl-vt-live-placeholder">正在听…</span>
+            )}
+          </div>
+        ) : hasVoice ? (
           <TlVoiceInline voice={entry.voice} text={text}/>
         ) : hideBodyUntilDrop ? (
           <div className="tl-t5-body tl-t5-body--pending" aria-hidden="true"/>

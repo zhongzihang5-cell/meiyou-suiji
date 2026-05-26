@@ -346,7 +346,8 @@ function V3v2Header({time, title}){
   );
 }
 
-function V3v2PrimaryBody({entry}){
+function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false}){
+  const tagRowStyle = { display: 'flex', gap: 6, flexWrap: 'wrap' };
   if(entry.kind === 'mood-face'){
     const MoodFace = window.MoodFace;
     const mood = entry.primaryMood;
@@ -370,9 +371,19 @@ function V3v2PrimaryBody({entry}){
     return (
       <div style={{display:'flex', flexDirection:'column', gap:8}}>
         <TlVoiceInline voice={voice} text={text}/>
-        <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
-          {(entry.tags || []).map((t, i)=><TLTag key={i} tag={t}/>)}
-        </div>
+        {showTags && (entry.tags || []).length > 0 && (
+          <div style={tagRowStyle}>
+            {(entry.tags || []).map((t, i)=>(
+              <span
+                key={i}
+                className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+                style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
+              >
+                <TLTag tag={t}/>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -411,9 +422,19 @@ function V3v2PrimaryBody({entry}){
   return (
     <div style={{display:'flex', flexDirection:'column', gap:8}}>
       <div style={{fontSize:14, color:TL_TEXT, lineHeight:1.5}}>{entry.text || entry.body}</div>
-      <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
-        {(entry.tags || []).map((t, i)=><TLTag key={i} tag={t}/>)}
-      </div>
+      {showTags && (entry.tags || []).length > 0 && (
+        <div style={tagRowStyle}>
+          {(entry.tags || []).map((t, i)=>(
+            <span
+              key={i}
+              className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+              style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
+            >
+              <TLTag tag={t}/>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -431,10 +452,34 @@ function normalizeV3Entry(raw){
   };
 }
 
-function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
-  const [open, setOpen] = React.useState(aiDefaultOpen);
+function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false}){
+  const cardRef = React.useRef(null);
+  const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
+  const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
+
+  React.useEffect(() => {
+    if(!staggerReveal || !isNew){
+      setRevealStep(2);
+      if(aiDefaultOpen) setOpen(true);
+      return;
+    }
+    setRevealStep(0);
+    setOpen(false);
+    const tTags = setTimeout(() => setRevealStep(1), 380);
+    const tAi = setTimeout(() => {
+      setRevealStep(2);
+      setOpen(true);
+      requestAnimationFrame(() => {
+        window.scrollFeedContentIntoView?.(cardRef.current, 148);
+      });
+    }, 980);
+    return () => {
+      clearTimeout(tTags);
+      clearTimeout(tAi);
+    };
+  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id]);
 
   if(!p && a){
     return (
@@ -451,17 +496,27 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
     );
   }
 
+  const shellClass = isNew
+    ? (staggerReveal ? 'v3-card-enter' : 'fade-in')
+    : undefined;
+  const showTags = revealStep >= 1;
+  const showAi = revealStep >= 2;
+
   return (
-    <div className={isNew ? 'fade-in' : undefined} style={{
-      background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
-      padding:'11px 12px 4px', overflow:'hidden',
-    }}>
+    <div
+      ref={cardRef}
+      className={shellClass}
+      style={{
+        background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
+        padding:'11px 12px 4px', overflow:'hidden',
+      }}
+    >
       <V3v2Header time={p.time}/>
-      <div style={{marginTop:8, paddingBottom:a ? 10 : 8}}>
-        <V3v2PrimaryBody entry={p}/>
+      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : 8}}>
+        <V3v2PrimaryBody entry={p} showTags={showTags} tagsAnimate={staggerReveal && showTags}/>
       </div>
-      {a && (
-        <>
+      {a && showAi && (
+        <div className="v3-ai-stagger-in">
           <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>
           <button
             type="button"
@@ -484,7 +539,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
             <V3Chevron open={open}/>
           </button>
           {open && (
-            <div style={{paddingBottom:12}}>
+            <div className="v3-ai-panel-in" style={{paddingBottom:12}}>
               {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
               {a.note && (
                 <div style={{
@@ -494,7 +549,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew}){
               )}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
@@ -507,6 +562,7 @@ function V3RecordGroupCard({group, isNew}){
       ai={group.ai}
       aiDefaultOpen={group.aiDefaultOpen}
       isNew={isNew}
+      staggerReveal={!!group.staggerReveal}
     />
   );
 }

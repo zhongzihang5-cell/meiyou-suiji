@@ -4,7 +4,54 @@
 // 场景二 record-direct：未记录 landing 引导（record-empty.jsx）
 // 场景三 record-blank-1/2/3：三套时间轴空态方案（record-blank.jsx）
 
-// 场景三拆为三套方案（record-blank.jsx）
+// 场景五 voice-transcribe-1/2/3/4：四套语音实时转写方案（voice-transcribe-demo.jsx）
+//   方案一 voice-transcribe-1：落入 — 字直接流入时间轴卡片
+//   方案二 voice-transcribe-2：气泡 — 输入条上方对话气泡
+//   方案三 voice-transcribe-3：顶起 — 从输入条向上撑面板
+//   方案四 voice-transcribe-4：悬浮 — 无边框悬浮文字
+
+const SCENE5_SCHEME_OPTIONS = [
+  { value: 'voice-transcribe-1', label: '方案一' },
+  { value: 'voice-transcribe-2', label: '方案二' },
+  { value: 'voice-transcribe-3', label: '方案三' },
+  { value: 'voice-transcribe-4', label: '方案四' },
+];
+
+const VOICE_TRANSCRIBE_BASE = {
+  mode: 'voice-transcribe',
+  defaultTab: 'note',
+  identity: 'period',
+  getTimeline: () => {
+    const blocks = JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS));
+    blocks.forEach((block) => {
+      if(block.type !== 'day') return;
+      block.items = (block.items || []).filter(
+        (it) => !(it.kind === 'guide' && it.id === 'g-518-post'),
+      );
+      (block.items || []).forEach((it) => {
+        if(it.kind === 'sync-card') it.instantAnalysis = true;
+      });
+    });
+    return blocks;
+  },
+  calendar: {
+    enabled: true,
+    periodFlow: false,
+  },
+  floatNotice: {
+    enabled: false,
+  },
+  record: {
+    showHealthCard: false,
+    voiceTranscribe: true,
+    sisterAnalysis: {
+      trigger: 'none',
+      initialDone: true,
+    },
+    todayGuide: false,
+  },
+};
+
 //   方案一 record-blank-1：时间轴空白
 //   方案二 record-blank-2：示例数据 + 蒙层
 //   方案三 record-blank-3：生长时间轴空态引导
@@ -189,6 +236,38 @@ const DEMO_SCENES = {
     },
   },
 
+  'voice-transcribe-1': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-1',
+    label: '场景五 · 方案一 · 落入',
+    description: '按住说话，字符直接流入时间轴底部实时转写卡，松手后追加标签与 AI 洞察',
+    voiceVariant: 'live-drop',
+  },
+
+  'voice-transcribe-2': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-2',
+    label: '场景五 · 方案二 · 气泡',
+    description: '输入条上方升起带尾巴的对话气泡，AI 把字打在气泡里，松手气泡飞入时间轴',
+    voiceVariant: 'live-bubble',
+  },
+
+  'voice-transcribe-3': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-3',
+    label: '场景五 · 方案三 · 顶起',
+    description: '从输入条顶部撑起转写面板，像把条本身拉高，松手面板退下、新卡片落入时间轴',
+    voiceVariant: 'live-grow',
+  },
+
+  'voice-transcribe-4': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-4',
+    label: '场景五 · 方案四 · 悬浮',
+    description: '屏幕上方无边框悬浮文字 + AI 锚点，多层光晕保证可读，「松开结束 · 上滑取消」做在条上',
+    voiceVariant: 'live-float',
+  },
+
 };
 
 const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
@@ -197,8 +276,15 @@ const DEMO_SCENE_OPTIONS = Object.values(DEMO_SCENES).map((s) => ({
 }));
 
 function getDemoScene(id){
-  const resolved = id === 'record-blank' ? 'record-blank-1' : id;
+  const resolved = id === 'record-blank' ? 'record-blank-1'
+    : id === 'voice-transcribe' ? 'voice-transcribe-1'
+    : id;
   return DEMO_SCENES[resolved] || DEMO_SCENES['period-calendar'];
+}
+
+function isVoiceTranscribeScene(id){
+  const scene = getDemoScene(id);
+  return scene.mode === 'voice-transcribe';
 }
 
 function getSceneInitialState(id){
@@ -218,9 +304,11 @@ Object.assign(window, {
   DEMO_SCENES,
   DEMO_SCENE_OPTIONS,
   SCENE3_SCHEME_OPTIONS,
+  SCENE5_SCHEME_OPTIONS,
   getDemoScene,
   getSceneInitialState,
   getBlankScheme2PreviewTimeline,
+  isVoiceTranscribeScene,
 });
 
 function DemoSceneBar({ value, onChange, description }) {

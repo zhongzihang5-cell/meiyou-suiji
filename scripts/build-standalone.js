@@ -11,6 +11,7 @@
  *   meiyou-scene3-scheme2.html  → 场景三 · 方案二
  *   meiyou-scene3-scheme3.html  → 场景三 · 方案三
  *   meiyou-scene4-note-quick-record.html → 场景四
+ *   meiyou-scene5-voice-1.html … voice-4.html → 场景五 · 语音转文字四方案
  *   meiyou-record-standalone.html
  *
  * Outputs (docs/ — for GitHub Pages):
@@ -21,6 +22,7 @@
  *   scene3-2.html 场景三 · 方案二
  *   scene3-3.html 场景三 · 方案三
  *   scene4.html   场景四
+ *   scene5-1.html … scene5-4.html  场景五 · 语音转文字
  */
 
 const fs = require('fs');
@@ -47,7 +49,7 @@ const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const inlineStyleMatch = indexHtml.match(/<style>([\s\S]*?)<\/style>/);
 const inlineStyles = inlineStyleMatch ? inlineStyleMatch[1] : '';
 
-const cssFiles = ['cloud.css', 'timeline.css', 'calendar.css', 'record-empty.css', 'record-blank.css', 'search.css'];
+const cssFiles = ['cloud.css', 'timeline.css', 'calendar.css', 'record-empty.css', 'record-blank.css', 'search.css', 'voice-transcribe.css'];
 const css = cssFiles
   .map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8'))
   .join('\n\n');
@@ -69,6 +71,9 @@ const scriptFiles = [
   'record-blank-scheme1-ceremony.jsx',
   'search-page.jsx',
   'cloud-publisher.jsx',
+  'voice-transcribe-recorder.jsx',
+  'voice-transcribe-interludes.jsx',
+  'voice-transcribe-demo.jsx',
   'demo-scenes.jsx',
   'tweaks-panel.jsx',
   'app.jsx',
@@ -135,6 +140,38 @@ const BUILDS = [
     demoScene: 'note-quick-record',
     locked: true,
     comment: '记录心情反馈：首次记录水滴动画 + 心情洞察卡',
+  },
+  {
+    outfile: 'meiyou-scene5-voice-1.html',
+    pagesName: 'scene5-1.html',
+    title: '美柚 · 场景五 · 方案一 · 落入',
+    demoScene: 'voice-transcribe-1',
+    locked: true,
+    comment: '语音转文字方案一：字符直接流入时间轴实时转写卡',
+  },
+  {
+    outfile: 'meiyou-scene5-voice-2.html',
+    pagesName: 'scene5-2.html',
+    title: '美柚 · 场景五 · 方案二 · 气泡',
+    demoScene: 'voice-transcribe-2',
+    locked: true,
+    comment: '语音转文字方案二：输入条上方对话气泡实时转写',
+  },
+  {
+    outfile: 'meiyou-scene5-voice-3.html',
+    pagesName: 'scene5-3.html',
+    title: '美柚 · 场景五 · 方案三 · 顶起',
+    demoScene: 'voice-transcribe-3',
+    locked: true,
+    comment: '语音转文字方案三：从输入条向上撑起转写面板',
+  },
+  {
+    outfile: 'meiyou-scene5-voice-4.html',
+    pagesName: 'scene5-4.html',
+    title: '美柚 · 场景五 · 方案四 · 悬浮',
+    demoScene: 'voice-transcribe-4',
+    locked: true,
+    comment: '语音转文字方案四：无边框悬浮文字 + AI 锚点',
   },
   {
     outfile: 'meiyou-record-standalone.html',
@@ -229,6 +266,27 @@ function buildLandingPage(builtAt) {
         <div class="card-desc">首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈。</div>
         <span class="go">进入场景四 →</span>
       </a>
+      <p class="section-label">场景五 · 语音转文字</p>
+      <a class="card" href="./scene5-1.html">
+        <div class="card-title">方案一 · 落入</div>
+        <div class="card-desc">按住说话，字符直接流入时间轴底部实时转写卡。</div>
+        <span class="go">进入方案一 →</span>
+      </a>
+      <a class="card" href="./scene5-2.html">
+        <div class="card-title">方案二 · 气泡</div>
+        <div class="card-desc">输入条上方对话气泡实时转写，松手飞入时间轴。</div>
+        <span class="go">进入方案二 →</span>
+      </a>
+      <a class="card" href="./scene5-3.html">
+        <div class="card-title">方案三 · 顶起</div>
+        <div class="card-desc">从输入条向上撑起转写面板，松手面板退下、卡片落入。</div>
+        <span class="go">进入方案三 →</span>
+      </a>
+      <a class="card" href="./scene5-4.html">
+        <div class="card-title">方案四 · 悬浮</div>
+        <div class="card-desc">无边框悬浮文字 + AI 锚点，多层光晕保证可读。</div>
+        <span class="go">进入方案四 →</span>
+      </a>
     </div>
     <footer>构建 ${builtAt}<br>微信内若无法加载，点右上角 ··· 用 Safari 打开</footer>
   </div>
@@ -267,6 +325,10 @@ function writeLegacyRedirects() {
     { file: 'scene3-2.html', target: '../scene3-2.html', label: '场景三 · 方案二' },
     { file: 'scene3-3.html', target: '../scene3-3.html', label: '场景三 · 方案三' },
     { file: 'scene4.html', target: '../scene4.html', label: '场景四 · 记录心情反馈' },
+    { file: 'scene5-1.html', target: '../scene5-1.html', label: '场景五 · 方案一 · 落入' },
+    { file: 'scene5-2.html', target: '../scene5-2.html', label: '场景五 · 方案二 · 气泡' },
+    { file: 'scene5-3.html', target: '../scene5-3.html', label: '场景五 · 方案三 · 顶起' },
+    { file: 'scene5-4.html', target: '../scene5-4.html', label: '场景五 · 方案四 · 悬浮' },
   ];
   redirects.forEach(({ file, target, label }) => {
     fs.writeFileSync(path.join(legacyDir, file), buildRedirectPage(target, label), 'utf8');

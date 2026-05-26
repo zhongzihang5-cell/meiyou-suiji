@@ -41,6 +41,7 @@ function buildTimelineEntry(text, hits, opts={}){
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const scene = window.getDemoScene(t.demoScene);
+  const voiceTranscribe = !!scene.record?.voiceTranscribe;
   const ctx = window.SCENE_CONTEXT[scene.identity] || window.SCENE_CONTEXT.period;
 
   const initial = window.getSceneInitialState(t.demoScene);
@@ -155,8 +156,21 @@ function App(){
     });
   };
 
+  const scrollTimelineToBottom = (behavior='auto')=>{
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        const el = streamRef.current;
+        if(!el) return;
+        const top = Math.max(0, el.scrollHeight - el.clientHeight);
+        if(behavior === 'auto') el.scrollTop = top;
+        else el.scrollTo({ top, behavior });
+      });
+    });
+  };
+
   const scrollTimelineToEnd = (behavior='smooth')=>{
-    scrollTimelineToLastItem(behavior);
+    if(voiceTranscribe) scrollTimelineToBottom(behavior === 'smooth' ? 'smooth' : 'auto');
+    else scrollTimelineToLastItem(behavior);
   };
 
   const handleTabChange = (tab)=>{
@@ -176,6 +190,10 @@ function App(){
   useEffect(()=>{
     if(activeTab !== 'note') return;
     if(showRecordEmpty || showBlankEmpty) return;
+    if(voiceTranscribe){
+      const tm = setTimeout(()=>scrollTimelineToBottom('auto'), 80);
+      return ()=>clearTimeout(tm);
+    }
     if(recordEnterModeRef.current === 'analysis'){
       recordEnterModeRef.current = 'idle';
       return;
@@ -187,14 +205,20 @@ function App(){
 
   useEffect(()=>{
     if(showRecordEmpty || showBlankEmpty) return;
+    if(voiceTranscribe){
+      const t1 = setTimeout(()=>scrollTimelineToBottom('auto'), 50);
+      const t2 = setTimeout(()=>scrollTimelineToBottom('auto'), 240);
+      return ()=>{ clearTimeout(t1); clearTimeout(t2); };
+    }
     const tm = setTimeout(()=>scrollTimelineToEnd('auto'), 120);
     return ()=>clearTimeout(tm);
-  }, [t.demoScene, showRecordEmpty, showBlankEmpty]);
+  }, [t.demoScene, showRecordEmpty, showBlankEmpty, voiceTranscribe]);
 
   useEffect(()=>{
     if(showRecordEmpty || showBlankEmpty) return;
+    if(voiceTranscribe) return;
     scrollTimelineToEnd('smooth');
-  }, [timeline, showRecordEmpty, showBlankEmpty]);
+  }, [timeline, showRecordEmpty, showBlankEmpty, voiceTranscribe]);
 
   const pushToast = (opts)=>{
     const id = Math.random().toString(36).slice(2);
@@ -421,6 +445,7 @@ function App(){
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
+  const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const openSearchPage = ()=>setShowSearchPage(true);
   const closeSearchPage = ()=>setShowSearchPage(false);
@@ -452,7 +477,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -542,6 +567,7 @@ function App(){
           />
         </div>
 
+        {!voiceTranscribe && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -556,9 +582,20 @@ function App(){
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
         />
+        )}
         </>
         )}
       </div>
+
+      {voiceTranscribe && showRecordShell && !showRecordEmpty && !showRecordBlank && VoiceTranscribeInputLayer && (
+        <VoiceTranscribeInputLayer
+          variant={scene.voiceVariant}
+          timeline={timeline}
+          setTimeline={setTimeline}
+          onScrollEnd={()=>scrollTimelineToBottom('smooth')}
+          onRecorded={markUserRecorded}
+        />
+      )}
 
       {showSearchPage && (
         <SearchPage timeline={timeline} onClose={closeSearchPage}/>
