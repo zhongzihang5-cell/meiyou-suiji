@@ -16,6 +16,7 @@ if(!window.VT_T){
     pink: '#ff4d88',
     pinkDeep: '#e04378',
     pinkBorder: 'rgba(255,77,136,0.28)',
+    pinkSoft: 'rgba(255,77,136,0.08)',
   };
 }
 const VT_T = window.VT_T;
@@ -200,4 +201,117 @@ function LiveFloat({ text, active, exiting = false }) {
   );
 }
 
-Object.assign(window, { LiveBubble, LiveGrowPanel, LiveFloat });
+// ── 异步方案 · 按住录音可视化（与松手后转写风格匹配）──
+const barFill = (cancel) => cancel ? '#cdc4c0' : 'linear-gradient(180deg, #ff8bb3 0%, #ff4d88 100%)';
+
+function WaveBars({ cancel, blur = false, profile }) {
+  return (
+    <div className="vt-recwave-field" style={{ filter: blur ? 'blur(2.4px)' : 'none' }}>
+      {profile.map((p, i) => (
+        <span key={i} className="recwave-bar" style={{
+          flex: 1, height: p.base, minWidth: 2, borderRadius: 2,
+          background: barFill(cancel), opacity: cancel ? 0.7 : 0.88,
+          animation: cancel ? 'none' : `liveBar ${p.dur}s ease-in-out ${p.delay}s infinite`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function CalmPulse({ cancel, profile }) {
+  return (
+    <div className="vt-recwave-field vt-recwave-field--calm">
+      {profile.slice(0, 22).map((p, i) => (
+        <span key={i} style={{
+          width: 3, height: 4 + (i % 3), borderRadius: 2,
+          background: cancel ? '#cdc4c0' : VT_T.pink, opacity: cancel ? 0.6 : 0.55,
+          animation: cancel ? 'none' : `aiThinkPulse ${1 + (i % 4) * 0.18}s ease-in-out ${(i % 6) * 0.1}s infinite`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function GlowOrb({ cancel }) {
+  return (
+    <div className="vt-rec-glow-orb">
+      {!cancel && [0, 1].map((i) => (
+        <span key={i} className="vt-rec-glow-ring" style={{ animationDelay: `${i * 0.9}s` }} />
+      ))}
+      <div className={'vt-rec-glow-core' + (cancel ? ' is-cancel' : '')} />
+    </div>
+  );
+}
+
+function InkStroke({ cancel }) {
+  return (
+    <div className="vt-rec-ink">
+      <div className={'vt-rec-ink-line' + (cancel ? ' is-cancel' : '')} />
+      {!cancel && <div className="vt-rec-ink-nib" />}
+    </div>
+  );
+}
+
+function ListenRings({ cancel }) {
+  return (
+    <div className="vt-rec-listen">
+      {!cancel && [0, 1, 2].map((i) => (
+        <span key={i} className="vt-rec-glow-ring" style={{ animationDelay: `${i * 0.7}s` }} />
+      ))}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <AIOrb size={24} />
+        {!cancel && <ThinkingDots />}
+      </div>
+    </div>
+  );
+}
+
+function RecordingWave({ active, elapsed = 0, cancel = false, variant = 'wave' }) {
+  const profileRef = useRef(null);
+  if(!profileRef.current){
+    profileRef.current = Array.from({ length: 34 }).map((_, i) => ({
+      base: 8 + ((i * 37) % 22),
+      dur: 0.55 + ((i * 13) % 9) * 0.06,
+      delay: ((i * 17) % 11) * 0.06,
+    }));
+  }
+  const profile = profileRef.current;
+
+  const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const ss = Math.floor(elapsed % 60).toString().padStart(2, '0');
+  const accent = cancel ? VT_T.ink2 : VT_T.pink;
+  const listening = variant === 'glow' || variant === 'stream';
+  const statusLabel = cancel ? '松开取消' : (listening ? '正在聆听' : '正在录音');
+
+  let visual;
+  if(variant === 'glow') visual = <GlowOrb cancel={cancel} />;
+  else if(variant === 'stream') visual = <ListenRings cancel={cancel} />;
+  else if(variant === 'calm' || variant === 'bar-transcribing') visual = <CalmPulse cancel={cancel} profile={profile} />;
+  else if(variant === 'focus') visual = (
+    <div className="vt-rec-focus-wrap">
+      <WaveBars cancel={cancel} blur profile={profile} />
+      {!cancel && <div className="vt-rec-frost-sweep" />}
+    </div>
+  );
+  else visual = <WaveBars cancel={cancel} profile={profile} />;
+
+  return (
+    <div
+      className={'vt-recording-wave' + (active ? ' is-active' : '') + (cancel ? ' is-cancel' : '')}
+      style={{ animation: active ? 'bloomUp 0.32s cubic-bezier(.2,.7,.3,1) both' : 'floatAway 0.4s forwards' }}
+    >
+      <div className="vt-recording-wave-card">
+        <div className="vt-recording-wave-head">
+          <div className="vt-recording-wave-status">
+            <span className="proc-dot" style={{ background: accent }} />
+            <span style={{ color: cancel ? VT_T.ink2 : VT_T.pinkDeep }}>{statusLabel}</span>
+          </div>
+          <span className="vt-recording-wave-time" style={{ color: accent }}>{mm}:{ss}</span>
+        </div>
+        {visual}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { LiveBubble, LiveGrowPanel, LiveFloat, RecordingWave });

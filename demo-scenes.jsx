@@ -11,10 +11,16 @@
 //   方案四 voice-transcribe-4：悬浮 — 无边框悬浮文字
 
 const SCENE5_SCHEME_OPTIONS = [
-  { value: 'voice-transcribe-1', label: '方案一' },
-  { value: 'voice-transcribe-2', label: '方案二' },
-  { value: 'voice-transcribe-3', label: '方案三' },
-  { value: 'voice-transcribe-4', label: '方案四' },
+  { value: 'voice-transcribe-1', label: '方案一 · 落入' },
+  { value: 'voice-transcribe-2', label: '方案二 · 气泡' },
+  { value: 'voice-transcribe-3', label: '方案三 · 顶起' },
+  { value: 'voice-transcribe-4', label: '方案四 · 悬浮' },
+  { value: 'voice-transcribe-5', label: '方案五 · 静默' },
+  { value: 'voice-transcribe-6', label: '方案六 · 声波' },
+  { value: 'voice-transcribe-7', label: '方案七 · 流光' },
+  { value: 'voice-transcribe-8', label: '方案八 · 显影' },
+  { value: 'voice-transcribe-9', label: '方案九 · 底栏转录' },
+  { value: 'voice-transcribe-10', label: '方案十 · 思考流' },
 ];
 
 const VOICE_TRANSCRIBE_BASE = {
@@ -266,6 +272,55 @@ const DEMO_SCENES = {
     label: '场景五 · 方案四 · 悬浮',
     description: '屏幕上方无边框悬浮文字 + AI 锚点，多层光晕保证可读，「松开结束 · 上滑取消」做在条上',
     voiceVariant: 'live-float',
+  },
+
+  'voice-transcribe-5': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-5',
+    label: '场景五 · 方案五 · 静默',
+    description: '按住：轻点脉冲；松手：稳定打字机 + 句尾语音跳动线',
+    voiceVariant: 'calm',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-6': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-6',
+    label: '场景五 · 方案六 · 声波成文',
+    description: '按住：钉钉式波形；松手：逐字落下 + 句尾语音跳动线',
+    voiceVariant: 'wave',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-7': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-7',
+    label: '场景五 · 方案七 · 流光',
+    description: '按住：呼吸光球；松手：流光点亮逐字 + 句尾语音跳动线',
+    voiceVariant: 'glow',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-8': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-8',
+    label: '场景五 · 方案八 · 聚焦显影',
+    description: '按住：磨砂波形扫光；松手：虚影逐字显影 + 句尾语音跳动线',
+    voiceVariant: 'focus',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-9': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-9',
+    label: '场景五 · 方案九 · 底栏转录',
+    description: '松手后底栏显示「正在转录」；时间轴先顶栏语音条再收拢为句尾胶囊',
+    voiceVariant: 'bar-transcribing',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-10': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-10',
+    label: '场景五 · 方案十 · 思考流',
+    description: '按住：聆听声波环；松手：快速流式吐字 + 句尾语音跳动线',
+    voiceVariant: 'stream',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
   },
 
 };

@@ -1,6 +1,7 @@
 // voice-transcribe-demo.jsx — 场景五 · 语音转写输入层（时间轴沿用场景一）
-/* global React, VoiceTranscribeBar, VoiceTranscribeAtmosphere,
-   LiveBubble, LiveGrowPanel, LiveFloat */
+/* global React, VoiceTranscribeBar, VoiceTranscribeAtmosphere, VoiceTranscribeDockBar,
+   LiveBubble, LiveGrowPanel, LiveFloat, RecordingWave, isAsyncVoiceVariant,
+   VT_DOCK_TRANSCRIBING, removeTimelineEntry */
 
 const { useState, useRef, useCallback, useEffect } = React;
 
@@ -131,6 +132,36 @@ function buildVtFinalGroup(tpl, finalText, durationSec, primaryId){
   };
 }
 
+function buildVtAsyncGroup(tpl, finalText, durationSec, variant){
+  const pid = 'vt-' + Date.now();
+  return {
+    kind: 'record-group',
+    id: pid + '-g',
+    isNew: true,
+    vtAsync: true,
+    vtVariant: variant,
+    primary: {
+      id: pid,
+      time: window.formatNowTime(),
+      kind: 'voice',
+      text: finalText,
+      chars: [...finalText],
+      durationSec,
+      vtVariant: variant,
+      tags: mapVtTagsV3(tpl.tags),
+    },
+    ai: {
+      id: pid + '-ai',
+      time: window.formatNowTime(),
+      kind: 'chart',
+      chartType: tpl.chartType || 'moodWeek',
+      title: tpl.aiTitle || '本周情绪走势',
+      note: tpl.aiInsight,
+    },
+    aiDefaultOpen: true,
+  };
+}
+
 function resolveVoiceAppendDayId(timeline){
   const days = (timeline || []).filter((b) => b.type === 'day');
   const todayDays = days.filter((d) => d.isToday);
@@ -150,11 +181,14 @@ function VoiceTranscribeInputLayer({
   onRecorded,
 }){
   const [recording, setRecording] = useState(false);
+  const [cancelHover, setCancelHover] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [liveText, setLiveText] = useState('');
   const [liveExiting, setLiveExiting] = useState(false);
+  const [dockTranscribing, setDockTranscribing] = useState(false);
 
   const liveEntryIdRef = useRef(null);
+  const lastAsyncGroupIdRef = useRef(null);
   const liveTplRef = useRef(null);
   const streamRef = useRef(null);
   const elapsedRef = useRef(null);
@@ -164,12 +198,25 @@ function VoiceTranscribeInputLayer({
   variantRef.current = variant;
 
   useEffect(() => {
+    window.__vtOnTranscribePhase = (phase) => {
+      /* 底栏保持「正在转录」，等时间轴打字完成后再恢复「按住说话」 */
+      if(phase === 'done'){
+        setDockTranscribing(false);
+      }
+    };
+    return () => { delete window.__vtOnTranscribePhase; };
+  }, []);
+
+  useEffect(() => {
     vtPromptIdx = 0;
     liveEntryIdRef.current = null;
+    lastAsyncGroupIdRef.current = null;
     liveTplRef.current = null;
     setLiveText('');
     setLiveExiting(false);
+    setDockTranscribing(false);
     setRecording(false);
+    setCancelHover(false);
     setElapsed(0);
     if(streamRef.current) clearTimeout(streamRef.current);
     if(elapsedRef.current) clearInterval(elapsedRef.current);
@@ -223,12 +270,17 @@ function VoiceTranscribeInputLayer({
     liveTplRef.current = tpl;
     setLiveText('');
     setLiveExiting(false);
+    setCancelHover(false);
     setRecording(true);
     setElapsed(0);
     startTsRef.current = performance.now();
     elapsedRef.current = setInterval(() => {
       setElapsed((performance.now() - startTsRef.current) / 1000);
     }, 100);
+
+    if(typeof isAsyncVoiceVariant === 'function' && isAsyncVoiceVariant(v)){
+      return;
+    }
 
     if(v === 'live-drop'){
       const id = 'vt-' + Date.now();
@@ -244,13 +296,29 @@ function VoiceTranscribeInputLayer({
 
   const handleEnd = useCallback(() => {
     const v = variantRef.current;
+    if(v === VT_DOCK_TRANSCRIBING){
+      setDockTranscribing(true);
+    }
     setRecording(false);
+    setCancelHover(false);
     stopStream();
     const tpl = liveTplRef.current;
     if(!tpl) return;
     const finalText = liveText || tpl.text;
     const finalDuration = Math.max(2, Math.ceil(elapsed));
     onRecorded?.();
+
+    if(typeof isAsyncVoiceVariant === 'function' && isAsyncVoiceVariant(v)){
+      const entry = buildVtAsyncGroup(tpl, finalText, finalDuration, v);
+      lastAsyncGroupIdRef.current = entry.id;
+      setTimeline((blocks) => {
+        const dayId = resolveVoiceAppendDayId(blocks);
+        return window.appendTimelineEntry(blocks, entry, { dayId });
+      });
+      liveTplRef.current = null;
+      requestAnimationFrame(() => onScrollEnd?.());
+      return;
+    }
 
     if(v === 'live-drop' && liveEntryIdRef.current){
       const id = liveEntryIdRef.current;
@@ -280,6 +348,7 @@ function VoiceTranscribeInputLayer({
   const handleCancel = useCallback(() => {
     const v = variantRef.current;
     setRecording(false);
+    setCancelHover(false);
     stopStream();
     if(v === 'live-drop' && liveEntryIdRef.current){
       const id = liveEntryIdRef.current;
@@ -292,14 +361,35 @@ function VoiceTranscribeInputLayer({
   }, [setTimeline]);
 
   const liveActive = recording && !liveExiting;
-  const showLiveBubble = (recording || liveExiting) && variant === 'live-bubble';
-  const showLiveGrow = (recording || liveExiting) && variant === 'live-grow';
-  const showLiveFloat = (recording || liveExiting) && variant === 'live-float';
+  const isAsync = typeof isAsyncVoiceVariant === 'function' && isAsyncVoiceVariant(variant);
+  const showLiveBubble = !isAsync && (recording || liveExiting) && variant === 'live-bubble';
+  const showLiveGrow = !isAsync && (recording || liveExiting) && variant === 'live-grow';
+  const showLiveFloat = !isAsync && (recording || liveExiting) && variant === 'live-float';
+  const showRecordingWave = isAsync && recording && variant !== VT_DOCK_TRANSCRIBING;
+  const showDockBar = dockTranscribing && variant === VT_DOCK_TRANSCRIBING;
+
+  const handleDockCancel = useCallback(() => {
+    setDockTranscribing(false);
+    const gid = lastAsyncGroupIdRef.current;
+    if(gid){
+      setTimeline((blocks) => removeTimelineEntry(blocks, gid));
+      lastAsyncGroupIdRef.current = null;
+    }
+    liveTplRef.current = null;
+  }, [setTimeline]);
 
   return (
     <>
       <div className="vt-overlay-root" aria-hidden={false}>
         <VoiceTranscribeAtmosphere active={recording} />
+        {showRecordingWave && RecordingWave && (
+          <RecordingWave
+            active={recording}
+            elapsed={elapsed}
+            cancel={cancelHover}
+            variant={variant}
+          />
+        )}
         {showLiveBubble && <LiveBubble text={liveText} active={liveActive} exiting={liveExiting} />}
         {showLiveGrow && <LiveGrowPanel text={liveText} active={liveActive} exiting={liveExiting} />}
       </div>
@@ -307,14 +397,20 @@ function VoiceTranscribeInputLayer({
         {showLiveFloat && (
           <LiveFloat text={liveText} active={liveActive} exiting={liveExiting} />
         )}
-        <VoiceTranscribeBar
-          recording={recording}
-          elapsed={elapsed}
-          variant={variant}
-          onStart={handleStart}
-          onEnd={handleEnd}
-          onCancel={handleCancel}
-        />
+        {showDockBar && VoiceTranscribeDockBar ? (
+          <VoiceTranscribeDockBar onCancel={handleDockCancel} />
+        ) : (
+          <VoiceTranscribeBar
+            recording={recording}
+            elapsed={elapsed}
+            variant={variant}
+            cancelHover={cancelHover}
+            onCancelHoverChange={setCancelHover}
+            onStart={handleStart}
+            onEnd={handleEnd}
+            onCancel={handleCancel}
+          />
+        )}
       </div>
     </>
   );

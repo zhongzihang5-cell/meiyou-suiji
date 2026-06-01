@@ -567,6 +567,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
 }
 
 function V3RecordGroupCard({group, isNew}){
+  if(group.vtAsync && window.VtAsyncRecordGroupCard){
+    return <VtAsyncRecordGroupCard group={group} isNew={isNew} />;
+  }
   return (
     <V3v2Card
       primary={group.primary}

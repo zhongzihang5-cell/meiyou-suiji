@@ -12,7 +12,7 @@
 <title>美柚 · 场景四 · 记录心情反馈</title>
 <!--
   记录心情反馈：首次记录水滴动画 + 心情洞察卡
-  生成日期: 2026-05-26
+  生成日期: 2026-06-01
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -7303,8 +7303,7 @@ html,body{
   font-weight:500;
   transition:background 0.2s, color 0.2s, transform 0.15s;
 }
-.vt-hold-btn.is-idle,
-.vt-hold-btn.is-recording{
+.vt-hold-btn.is-idle{
   background:linear-gradient(180deg, #f5f5f7 0%, #ececef 100%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.95),
@@ -7313,10 +7312,22 @@ html,body{
   transform:none;
   border:none;
 }
+.vt-hold-btn.is-recording{
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(255,77,136,0.28);
+  box-shadow:0 8px 22px -8px rgba(255,77,136,0.28);
+  color:#ff4d88;
+  transform:scale(1.002);
+}
 .vt-hold-label.is-recording{
-  letter-spacing:normal;
+  letter-spacing:0.02em;
   font-weight:500;
-  color:rgba(0,0,0,0.8);
+  color:#ff4d88;
+}
+.vt-hold-sub{
+  font-weight:400;
+  opacity:0.7;
+  margin-left:8px;
 }
 .vt-hold-label{
   font-size:15px;
@@ -7390,6 +7401,449 @@ html,body{
   right:14px;
   bottom:90px;
   transform-origin:50% 100%;
+}
+
+/* ── 异步转写 · 按住录音浮层 ── */
+.vt-recording-wave{
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:calc(100% + 72px);
+  z-index:38;
+  pointer-events:none;
+}
+.vt-recording-wave-card{
+  background:linear-gradient(135deg, #fff 0%, #fff5f8 100%);
+  border:1px solid rgba(255,77,136,0.28);
+  border-radius:16px;
+  padding:12px 14px;
+  box-shadow:0 12px 32px -12px rgba(255,77,136,0.28);
+}
+.vt-recording-wave.is-cancel .vt-recording-wave-card{
+  background:linear-gradient(135deg, rgba(255,255,255,0.96) 0%, #f4eeec 100%);
+  border-color:#e7ded9;
+}
+.vt-recording-wave-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.vt-recording-wave-status{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:12.5px;
+  font-weight:500;
+}
+.vt-recording-wave-time{
+  font-size:12.5px;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.vt-recwave-field{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:3px;
+  height:40px;
+}
+.vt-recwave-field--calm{
+  justify-content:center;
+  gap:5px;
+}
+.recwave-bar{ transform-origin:center; }
+.vt-rec-glow-orb,
+.vt-rec-listen,
+.vt-rec-ink{
+  position:relative;
+  height:40px;
+  display:grid;
+  place-items:center;
+}
+.vt-rec-glow-ring{
+  position:absolute;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:1.5px solid #ff4d88;
+  opacity:0;
+  animation:ringOut 1.8s ease-out infinite;
+}
+.vt-rec-glow-core{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff 0%, #ffd9e6 45%, #ff4d88 100%);
+  box-shadow:0 0 18px 2px rgba(255,77,136,0.45);
+  animation:haloBreathe 1.8s ease-in-out infinite;
+}
+.vt-rec-glow-core.is-cancel{ background:#d8d0cd; box-shadow:none; animation:none; }
+.vt-rec-ink-line{
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:2.5px;
+  border-radius:2px;
+  background:linear-gradient(90deg, rgba(255,77,136,0.15), rgba(255,77,136,0.55), rgba(255,77,136,0.15));
+}
+.vt-rec-ink-line.is-cancel{ background:#d8d0cd; }
+.vt-rec-ink-nib{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:26%;
+  animation:inkFlow 1.5s cubic-bezier(.45,.05,.55,.95) infinite;
+}
+.vt-rec-ink-nib::after{
+  content:'';
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#ff4d88;
+  box-shadow:0 0 10px 2px rgba(255,77,136,0.5);
+}
+.vt-rec-focus-wrap{
+  position:relative;
+  overflow:hidden;
+  border-radius:10px;
+}
+.vt-rec-frost-sweep{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:45%;
+  background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 100%);
+  animation:frostSweep 2s ease-in-out infinite;
+}
+@keyframes ringOut{
+  0%{ transform:scale(0.6); opacity:0.6; }
+  100%{ transform:scale(1.8); opacity:0; }
+}
+@keyframes inkFlow{
+  0%{ transform:translateX(-30%); }
+  100%{ transform:translateX(130%); }
+}
+@keyframes frostSweep{
+  0%{ transform:translateX(-60%); }
+  100%{ transform:translateX(160%); }
+}
+@keyframes wordBloom{
+  0%{ opacity:0; color:#ff4d88; text-shadow:0 0 14px rgba(255,77,136,0.8); transform:scale(0.55); }
+  45%{ opacity:1; color:#ff4d88; transform:scale(1.12); }
+  100%{ opacity:1; color:rgba(0,0,0,0.8); text-shadow:none; transform:scale(1); }
+}
+@keyframes inkWipe{
+  0%{ clip-path:inset(0 100% 0 0); opacity:0.25; }
+  100%{ clip-path:inset(0 0 0 0); opacity:1; }
+}
+@keyframes sharpenIn{
+  0%{ filter:blur(5px); opacity:0.3; color:#999; }
+  100%{ filter:blur(0); opacity:1; color:rgba(0,0,0,0.8); }
+}
+@keyframes pillIn{
+  0%{ opacity:0; transform:translateY(2px) scale(0.7); }
+  100%{ opacity:1; transform:translateY(0) scale(1); }
+}
+.proc-dot{
+  width:8px;
+  height:8px;
+  border-radius:4px;
+  background:#ff4d88;
+  animation:aiThinkPulse 1s ease-in-out infinite;
+  flex-shrink:0;
+}
+.tw-char{ display:inline-block; white-space:pre; }
+.tw-glow{ animation:wordBloom 0.5s cubic-bezier(.2,.7,.3,1) both; }
+.tw-stream{ animation:wordEmerge 0.42s ease-out both; }
+.tw-ink{ animation:inkWipe 0.34s ease both; }
+.tw-focus-on{ animation:sharpenIn 0.5s ease both; }
+.tw-focus-off{ color:#c8c8cc; filter:blur(3px); opacity:0.5; }
+.caret-bar{
+  display:inline-block;
+  width:2px;
+  height:1.05em;
+  margin-left:2px;
+  background:#ff4d88;
+  vertical-align:-2px;
+  border-radius:1px;
+  animation:caretBlink 0.85s steps(1) infinite;
+}
+.caret-dot{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#ff4d88;
+  margin-left:4px;
+  vertical-align:1px;
+  box-shadow:0 0 9px 1px rgba(255,77,136,0.75);
+  animation:aiThinkPulse 0.8s ease-in-out infinite;
+}
+.caret-stream{
+  display:inline-block;
+  width:7px;
+  height:1.05em;
+  margin-left:3px;
+  vertical-align:-2px;
+  border-radius:2px;
+  background:linear-gradient(180deg, #ff4d88, #ff8bb3);
+  animation:caretBlink 0.7s steps(1) infinite;
+}
+.caret-scan{
+  display:inline-block;
+  width:3px;
+  height:1.1em;
+  margin:0 1px;
+  vertical-align:-2px;
+  border-radius:2px;
+  background:linear-gradient(180deg, #ff8bb3, #ff4d88);
+  animation:aiThinkPulse 0.7s ease-in-out infinite;
+}
+@keyframes wordEmerge{
+  0%{ opacity:0; transform:translateY(6px); filter:blur(6px); }
+  60%{ opacity:1; filter:blur(0); }
+  100%{ opacity:1; transform:translateY(0); }
+}
+
+/* ── 异步转写卡 · 句尾语音条 ── */
+.vt-async-card{
+  position:relative;
+  border-radius:10px;
+  transition:border-color 0.4s;
+}
+.vt-async-card.is-working{
+  padding:2px 0;
+}
+.vt-async-orb{
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+.vt-async-orb-a{
+  top:-36px;
+  right:-36px;
+  width:120px;
+  height:120px;
+  background:radial-gradient(circle, rgba(255,77,136,0.14) 0%, rgba(255,77,136,0) 70%);
+  animation:orbA 3s ease-in-out infinite;
+}
+.vt-async-orb-b{
+  bottom:-44px;
+  left:-28px;
+  width:140px;
+  height:140px;
+  background:radial-gradient(circle, rgba(255,180,210,0.2) 0%, rgba(255,180,210,0) 70%);
+  animation:orbB 3.4s ease-in-out infinite;
+}
+@keyframes orbA{
+  0%, 100%{ transform:translate(-4px, -3px) scale(1); }
+  50%{ transform:translate(6px, 5px) scale(1.12); }
+}
+@keyframes orbB{
+  0%, 100%{ transform:translate(4px, 3px) scale(0.92); }
+  50%{ transform:translate(-6px, -4px) scale(1.08); }
+}
+.vt-async-text{
+  font-size:14px;
+  color:rgba(0,0,0,0.8);
+  line-height:1.78;
+  letter-spacing:0.01em;
+}
+.vt-async-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+}
+.vt-inline-voice-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  background:rgba(255,77,136,0.08);
+  border-radius:999px;
+  padding:2px 10px 2px 2px;
+  margin-left:6px;
+  vertical-align:middle;
+  animation:pillIn 0.5s cubic-bezier(.2,.7,.3,1.3) both;
+  animation-delay:0.1s;
+}
+.vt-inline-voice-play{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #ff7bac, #ff4d88);
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+}
+.vt-inline-voice-bars{
+  display:inline-flex;
+  align-items:center;
+  gap:1.5px;
+  height:14px;
+}
+.vt-inline-voice-dur{
+  font-size:11px;
+  color:#e04378;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  margin-left:2px;
+}
+
+/* ── 时间轴 · 顶栏语音条（转写中） ── */
+.vt-voice-msg-wrap{
+  margin-bottom:10px;
+  transition:opacity 0.28s ease, transform 0.28s ease, max-height 0.35s ease;
+}
+.vt-voice-msg-wrap .vt-voice-msg-bar.is-exiting{
+  opacity:0;
+  transform:scale(0.96) translateY(-4px);
+}
+.vt-voice-msg-bar{
+  background:rgba(255,77,136,0.08);
+  border:1px solid rgba(255,77,136,0.28);
+  border-radius:10px;
+  padding:9px 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  transition:padding 0.35s ease;
+}
+.vt-voice-msg-bar.is-compact{ padding:7px 12px; }
+.vt-voice-msg-waves{
+  display:flex;
+  align-items:center;
+  gap:2.5px;
+  height:26px;
+  flex:1;
+  transition:height 0.35s ease;
+}
+.vt-voice-msg-bar.is-compact .vt-voice-msg-waves{ height:20px; }
+.vt-voice-msg-play{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:none;
+  background:#ff4d88;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  cursor:pointer;
+  box-shadow:0 4px 10px -3px rgba(255,77,136,0.45);
+}
+.vt-voice-msg-dur{
+  font-size:11px;
+  color:#e04378;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  min-width:30px;
+  text-align:right;
+}
+.vt-thinking-halo{
+  position:relative;
+  width:26px;
+  height:26px;
+  flex-shrink:0;
+}
+.vt-thinking-halo-ring{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:conic-gradient(from 0deg, #ff4d88, #ff8bb3, #ff4d88);
+  animation:sparkleSpin 2.4s linear infinite;
+  -webkit-mask:radial-gradient(circle, transparent 50%, black 52%);
+  mask:radial-gradient(circle, transparent 50%, black 52%);
+}
+.vt-thinking-halo-core{
+  position:absolute;
+  inset:5px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff 0%, #ffd9e6 60%, #ffb3cd 100%);
+  animation:orbA 2.2s ease-in-out infinite;
+}
+@keyframes sparkleSpin{
+  0%{ transform:rotate(0deg); }
+  100%{ transform:rotate(360deg); }
+}
+
+/* ── 底栏 · 正在转录（与 vt-input-bar 同排：取消 | 胶囊 | 相机） ── */
+.vt-dock-transcribe{
+  background:transparent;
+}
+.vt-dock-transcribe-cancel{
+  width:40px;
+  height:40px;
+  border-radius:20px;
+  border:none;
+  background:#fff;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+.vt-dock-transcribe-pill{
+  flex:1;
+  height:44px;
+  border-radius:22px;
+  background:#fff;
+  border:0.5px solid rgba(0,0,0,0.08);
+  box-shadow:0 1px 6px rgba(0,0,0,0.05);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 16px;
+  gap:10px;
+}
+.vt-dock-transcribe-spinner{
+  width:22px;
+  height:22px;
+  position:relative;
+  flex-shrink:0;
+}
+.vt-dock-spinner-dot{
+  position:absolute;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:rgba(0,0,0,0.28);
+  top:50%;
+  left:50%;
+  margin:-1.5px 0 0 -1.5px;
+  animation:vtSpinnerOrbit 1s linear infinite;
+}
+.vt-dock-spinner-dot:nth-child(1){ transform:rotate(0deg) translateY(-9px); }
+.vt-dock-spinner-dot:nth-child(2){ transform:rotate(45deg) translateY(-9px); }
+.vt-dock-spinner-dot:nth-child(3){ transform:rotate(90deg) translateY(-9px); }
+.vt-dock-spinner-dot:nth-child(4){ transform:rotate(135deg) translateY(-9px); }
+.vt-dock-spinner-dot:nth-child(5){ transform:rotate(180deg) translateY(-9px); }
+.vt-dock-spinner-dot:nth-child(6){ transform:rotate(225deg) translateY(-9px); }
+.vt-dock-spinner-dot:nth-child(7){ transform:rotate(270deg) translateY(-9px); }
+.vt-dock-spinner-dot:nth-child(8){ transform:rotate(315deg) translateY(-9px); }
+@keyframes vtSpinnerOrbit{
+  0%, 100%{ opacity:0.35; }
+  50%{ opacity:1; }
+}
+.vt-dock-transcribe-label{
+  font-size:15px;
+  font-weight:400;
+  color:rgba(0,0,0,0.55);
+  flex-shrink:0;
+}
+
+/* 底栏转录：时间轴仅打字机，无顶栏语音条 */
+.vt-async-card.is-dock-typewriter{
+  border-color:rgba(0,0,0,0.08);
+  box-shadow:none;
+}
+.vt-async-card.is-dock-typewriter .vt-async-text{
+  margin-top:0;
 }
 
 /* GitHub Pages / 单场景 HTML — 还原 390px 手机框，Dock 与 Tab 对齐 */
@@ -7543,7 +7997,7 @@ const TWEAK_DEFAULTS = {
   "demoScene": "note-quick-record"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-window.__BUILD__ = "2026-05-26-nomask";
+window.__BUILD__ = "2026-06-01-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 </script>
 
@@ -10301,6 +10755,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
 }
 
 function V3RecordGroupCard({group, isNew}){
+  if(group.vtAsync && window.VtAsyncRecordGroupCard){
+    return <VtAsyncRecordGroupCard group={group} isNew={isNew} />;
+  }
   return (
     <V3v2Card
       primary={group.primary}
@@ -14154,9 +14611,17 @@ const VT_T = window.VT_T || {
 };
 window.VT_T = VT_T;
 
-function VoiceTranscribeBar({ onStart, onEnd, onCancel, recording, elapsed = 0, variant = 'live-drop' }) {
+function VoiceTranscribeBar({
+  onStart, onEnd, onCancel, recording, elapsed = 0, variant = 'live-drop',
+  cancelHover = false, onCancelHoverChange,
+}) {
   const startYRef = useRef(0);
-  const [cancelHover, setCancelHover] = useState(false);
+  const [localCancel, setLocalCancel] = useState(false);
+  const cancelHoverActive = onCancelHoverChange ? cancelHover : localCancel;
+  const setCancelHover = (v) => {
+    if(onCancelHoverChange) onCancelHoverChange(v);
+    else setLocalCancel(v);
+  };
 
   const handleDown = (e) => {
     e.preventDefault();
@@ -14170,7 +14635,7 @@ function VoiceTranscribeBar({ onStart, onEnd, onCancel, recording, elapsed = 0, 
   };
   const handleUp = () => {
     if(!recording) return;
-    if(cancelHover) onCancel && onCancel();
+    if(cancelHoverActive) onCancel && onCancel();
     else onEnd && onEnd();
     setCancelHover(false);
   };
@@ -14187,19 +14652,34 @@ function VoiceTranscribeBar({ onStart, onEnd, onCancel, recording, elapsed = 0, 
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('touchmove', handleMove);
     };
-  }, [recording, cancelHover]);
+  }, [recording, cancelHoverActive]);
+
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if(!recording) return;
+    let raf;
+    const loop = (t) => { setTick(t); raf = requestAnimationFrame(loop); };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [recording]);
+
+  const heights = Array.from({ length: 7 }).map((_, i) => {
+    const ph = tick / 220 + i * 0.55;
+    const v = Math.sin(ph) * 0.55 + Math.sin(ph * 1.7 + i) * 0.35;
+    return 5 + Math.abs(v) * 14;
+  });
 
   const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
   const ss = Math.floor(elapsed % 60).toString().padStart(2, '0');
   const stroke = 'rgba(0,0,0,0.55)';
 
-  const showRecHint = recording && (variant !== 'live-float' || cancelHover);
+  const showRecHint = recording && (variant === 'live-float' ? cancelHoverActive : true);
 
   return (
     <>
       {showRecHint && (
-        <div className={'vt-rec-hint' + (cancelHover ? ' is-cancel' : '')}>
-          {cancelHover ? '松开取消 ✕' : `↑ 上滑取消 · ${mm}:${ss}`}
+        <div className={'vt-rec-hint' + (cancelHoverActive ? ' is-cancel' : '')}>
+          {cancelHoverActive ? '松开取消 ✕' : `↑ 上滑取消 · ${mm}:${ss}`}
         </div>
       )}
 
@@ -14213,11 +14693,24 @@ function VoiceTranscribeBar({ onStart, onEnd, onCancel, recording, elapsed = 0, 
 
         <button
           type="button"
-          className="vt-hold-btn is-idle"
+          className={'vt-hold-btn' + (recording ? ' is-recording' : ' is-idle')}
           onMouseDown={handleDown}
           onTouchStart={handleDown}
         >
-          <span className="vt-hold-label">按住&nbsp;说话</span>
+          {recording ? (
+            <>
+              <span className="vt-hold-waves" aria-hidden="true">
+                {heights.map((h, i) => (
+                  <span key={i} className="vt-hold-wave" style={{ height: h }} />
+                ))}
+              </span>
+              <span className="vt-hold-label is-recording">
+                {cancelHoverActive ? '松开取消' : <>松开&nbsp;结束<span className="vt-hold-sub">· 上滑取消</span></>}
+              </span>
+            </>
+          ) : (
+            <span className="vt-hold-label">按住&nbsp;说话</span>
+          )}
         </button>
 
         <button type="button" className="vt-chip-btn" aria-label="相机">
@@ -14261,7 +14754,39 @@ function VoiceTranscribeAtmosphere({ active }) {
   );
 }
 
-Object.assign(window, { VoiceTranscribeBar, VoiceTranscribeAtmosphere });
+function VoiceTranscribeDockBar({ onCancel }){
+  const stroke = 'rgba(0,0,0,0.55)';
+  return (
+    <div className="vt-input-bar vt-dock-transcribe">
+      <button type="button" className="vt-dock-transcribe-cancel" onClick={onCancel} aria-label="取消">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="rgba(0,0,0,0.75)" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </button>
+      <div className="vt-dock-transcribe-pill">
+        <span className="vt-dock-transcribe-spinner" aria-hidden="true">
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <span key={i} className="vt-dock-spinner-dot" style={{ animationDelay: `${i * 0.08}s` }} />
+          ))}
+        </span>
+        <span className="vt-dock-transcribe-label">正在转录</span>
+      </div>
+      <button type="button" className="vt-chip-btn" aria-label="相机">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <rect x="2.5" y="6.5" width="19" height="13" rx="2.5" stroke={stroke} strokeWidth="1.6"/>
+          <circle cx="12" cy="13" r="3.5" stroke={stroke} strokeWidth="1.6"/>
+          <path d="M8 6.5l1.2-2h5.6L16 6.5" stroke={stroke} strokeWidth="1.6"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  VoiceTranscribeBar,
+  VoiceTranscribeAtmosphere,
+  VoiceTranscribeDockBar,
+});
 
 </script>
 
@@ -14285,6 +14810,7 @@ if(!window.VT_T){
     pink: '#ff4d88',
     pinkDeep: '#e04378',
     pinkBorder: 'rgba(255,77,136,0.28)',
+    pinkSoft: 'rgba(255,77,136,0.08)',
   };
 }
 const VT_T = window.VT_T;
@@ -14469,15 +14995,540 @@ function LiveFloat({ text, active, exiting = false }) {
   );
 }
 
-Object.assign(window, { LiveBubble, LiveGrowPanel, LiveFloat });
+// ── 异步方案 · 按住录音可视化（与松手后转写风格匹配）──
+const barFill = (cancel) => cancel ? '#cdc4c0' : 'linear-gradient(180deg, #ff8bb3 0%, #ff4d88 100%)';
+
+function WaveBars({ cancel, blur = false, profile }) {
+  return (
+    <div className="vt-recwave-field" style={{ filter: blur ? 'blur(2.4px)' : 'none' }}>
+      {profile.map((p, i) => (
+        <span key={i} className="recwave-bar" style={{
+          flex: 1, height: p.base, minWidth: 2, borderRadius: 2,
+          background: barFill(cancel), opacity: cancel ? 0.7 : 0.88,
+          animation: cancel ? 'none' : `liveBar ${p.dur}s ease-in-out ${p.delay}s infinite`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function CalmPulse({ cancel, profile }) {
+  return (
+    <div className="vt-recwave-field vt-recwave-field--calm">
+      {profile.slice(0, 22).map((p, i) => (
+        <span key={i} style={{
+          width: 3, height: 4 + (i % 3), borderRadius: 2,
+          background: cancel ? '#cdc4c0' : VT_T.pink, opacity: cancel ? 0.6 : 0.55,
+          animation: cancel ? 'none' : `aiThinkPulse ${1 + (i % 4) * 0.18}s ease-in-out ${(i % 6) * 0.1}s infinite`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function GlowOrb({ cancel }) {
+  return (
+    <div className="vt-rec-glow-orb">
+      {!cancel && [0, 1].map((i) => (
+        <span key={i} className="vt-rec-glow-ring" style={{ animationDelay: `${i * 0.9}s` }} />
+      ))}
+      <div className={'vt-rec-glow-core' + (cancel ? ' is-cancel' : '')} />
+    </div>
+  );
+}
+
+function InkStroke({ cancel }) {
+  return (
+    <div className="vt-rec-ink">
+      <div className={'vt-rec-ink-line' + (cancel ? ' is-cancel' : '')} />
+      {!cancel && <div className="vt-rec-ink-nib" />}
+    </div>
+  );
+}
+
+function ListenRings({ cancel }) {
+  return (
+    <div className="vt-rec-listen">
+      {!cancel && [0, 1, 2].map((i) => (
+        <span key={i} className="vt-rec-glow-ring" style={{ animationDelay: `${i * 0.7}s` }} />
+      ))}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <AIOrb size={24} />
+        {!cancel && <ThinkingDots />}
+      </div>
+    </div>
+  );
+}
+
+function RecordingWave({ active, elapsed = 0, cancel = false, variant = 'wave' }) {
+  const profileRef = useRef(null);
+  if(!profileRef.current){
+    profileRef.current = Array.from({ length: 34 }).map((_, i) => ({
+      base: 8 + ((i * 37) % 22),
+      dur: 0.55 + ((i * 13) % 9) * 0.06,
+      delay: ((i * 17) % 11) * 0.06,
+    }));
+  }
+  const profile = profileRef.current;
+
+  const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const ss = Math.floor(elapsed % 60).toString().padStart(2, '0');
+  const accent = cancel ? VT_T.ink2 : VT_T.pink;
+  const listening = variant === 'glow' || variant === 'stream';
+  const statusLabel = cancel ? '松开取消' : (listening ? '正在聆听' : '正在录音');
+
+  let visual;
+  if(variant === 'glow') visual = <GlowOrb cancel={cancel} />;
+  else if(variant === 'stream') visual = <ListenRings cancel={cancel} />;
+  else if(variant === 'calm' || variant === 'bar-transcribing') visual = <CalmPulse cancel={cancel} profile={profile} />;
+  else if(variant === 'focus') visual = (
+    <div className="vt-rec-focus-wrap">
+      <WaveBars cancel={cancel} blur profile={profile} />
+      {!cancel && <div className="vt-rec-frost-sweep" />}
+    </div>
+  );
+  else visual = <WaveBars cancel={cancel} profile={profile} />;
+
+  return (
+    <div
+      className={'vt-recording-wave' + (active ? ' is-active' : '') + (cancel ? ' is-cancel' : '')}
+      style={{ animation: active ? 'bloomUp 0.32s cubic-bezier(.2,.7,.3,1) both' : 'floatAway 0.4s forwards' }}
+    >
+      <div className="vt-recording-wave-card">
+        <div className="vt-recording-wave-head">
+          <div className="vt-recording-wave-status">
+            <span className="proc-dot" style={{ background: accent }} />
+            <span style={{ color: cancel ? VT_T.ink2 : VT_T.pinkDeep }}>{statusLabel}</span>
+          </div>
+          <span className="vt-recording-wave-time" style={{ color: accent }}>{mm}:{ss}</span>
+        </div>
+        {visual}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { LiveBubble, LiveGrowPanel, LiveFloat, RecordingWave });
+
+</script>
+
+<!-- voice-transcribe-async.jsx -->
+<script type="text/babel">
+// voice-transcribe-async.jsx — 场景五 · 异步转写（对齐点滴 v2：顶栏语音条 → 句尾胶囊）
+/* global React, VT_T, V3v2Header, TLChart, TLTag */
+
+const TL_PRIMARY = '#ff4d88';
+const TL_TEXT = 'rgba(0,0,0,0.8)';
+const TL_MUTED = 'rgba(0,0,0,0.6)';
+const TL_LINE = 'rgba(0,0,0,0.08)';
+const TL_HAIR = 'rgba(0,0,0,0.06)';
+const TL_SOFT = 'rgba(255,77,136,0.08)';
+const TL_PINK_SOFT = 'rgba(255,77,136,0.08)';
+const TL_PINK_BORDER = 'rgba(255,77,136,0.28)';
+
+const { useState, useEffect, useRef, useLayoutEffect } = React;
+
+/** 时间轴转写动效 variant（不含 bar-transcribing，该方案仅影响底栏） */
+const VT_ASYNC_VARIANTS = ['calm', 'wave', 'glow', 'focus', 'stream'];
+const VT_DOCK_TRANSCRIBING = 'bar-transcribing';
+
+const PROC_MS = { calm: 600, wave: 750, glow: 950, stream: 1300, focus: 820 };
+const PER_MS = { calm: 44, wave: 52, glow: 74, stream: 36, focus: 26 };
+
+function isAsyncVoiceVariant(v){
+  return VT_ASYNC_VARIANTS.includes(v) || v === VT_DOCK_TRANSCRIBING;
+}
+
+function timelineVariantFor(v){
+  return v === VT_DOCK_TRANSCRIBING ? 'calm' : v;
+}
+
+function VtThinkingDots(){
+  return (
+    <span style={{ display: 'inline-flex', gap: 3, alignItems: 'center', marginLeft: 4 }}>
+      {[0, 1, 2].map((i) => (
+        <span key={i} style={{
+          width: 4, height: 4, borderRadius: 2, background: VT_T.pink, display: 'inline-block',
+          animation: 'aiThinkPulse 1.2s ease-in-out infinite', animationDelay: `${i * 0.15}s`,
+        }} />
+      ))}
+    </span>
+  );
+}
+
+function VtThinkingHalo(){
+  return (
+    <div className="vt-thinking-halo">
+      <div className="vt-thinking-halo-ring" />
+      <div className="vt-thinking-halo-core" />
+    </div>
+  );
+}
+
+function VtProcessingHeader({ variant, duration }){
+  const v = timelineVariantFor(variant);
+  if(v === 'calm'){
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <span className="proc-dot" />
+        <span style={{ fontSize: 12.5, fontWeight: 500, color: TL_MUTED }}>转写中</span>
+        <VtThinkingDots />
+      </div>
+    );
+  }
+  const title = v === 'wave' ? '正在把声音转成文字'
+    : v === 'focus' ? 'AI 正在显影文字'
+    : v === 'stream' ? 'AI 正在理解你的语音'
+    : 'AI 正在转写';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+      {v === 'stream' ? (
+        <div style={{
+          width: 22, height: 22, borderRadius: '50%',
+          background: 'conic-gradient(from 0deg, #ff4d88, #ff8bb3, #ffd9e6, #ff4d88)',
+          animation: 'orbSpin 3s linear infinite',
+        }} />
+      ) : <VtThinkingHalo />}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12.5, fontWeight: 500, color: TL_TEXT, display: 'flex', alignItems: 'center' }}>
+          <span className="ai-text-shimmer">{title}</span><VtThinkingDots />
+        </div>
+        <div style={{ fontSize: 10.5, color: TL_MUTED, marginTop: 1 }}>
+          语音 {duration}″ · 提取要点 · 关联周期
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VtPlayBtn(){
+  return (
+    <button type="button" className="vt-voice-msg-play" aria-label="播放">
+      <svg width="9" height="9" viewBox="0 0 12 12"><path d="M3 1.5l7 4.5-7 4.5V1.5z" fill="#fff" /></svg>
+    </button>
+  );
+}
+
+function VtVoiceMessageBar({ duration, live = false, morph = null, compact = false, exiting = false }){
+  const N = 30;
+  const bars = Array.from({ length: N }).map((_, i) => 6 + ((i * 53) % 16) + (i % 4 === 0 ? 7 : 0));
+  return (
+    <div className={'vt-voice-msg-bar' + (exiting ? ' is-exiting' : '') + (compact ? ' is-compact' : '')}>
+      <VtPlayBtn />
+      <div className="vt-voice-msg-waves">
+        {bars.map((h, i) => {
+          const consumed = morph != null && i / N < morph;
+          return (
+            <span
+              key={i}
+              className={live ? 'live-bar' : ''}
+              style={{
+                flex: 1, minWidth: 2, height: h, borderRadius: 2,
+                background: consumed ? TL_PINK_BORDER : VT_T.pink,
+                opacity: consumed ? 0.5 : 0.78 + ((i % 4) * 0.06),
+                transform: consumed ? 'scaleY(0.45)' : undefined,
+                transition: 'background 0.3s, opacity 0.3s, transform 0.3s',
+                animationDelay: `${(i % 7) * 0.07}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+      <span className="vt-voice-msg-dur">0:{String(duration).padStart(2, '0')}</span>
+    </div>
+  );
+}
+
+function VtInlineVoicePill({ duration, innerRef }){
+  const bars = [6, 11, 7, 13, 8, 5];
+  return (
+    <span ref={innerRef} className="vt-inline-voice-pill">
+      <span className="vt-inline-voice-play" aria-hidden="true">
+        <svg width="8" height="8" viewBox="0 0 12 12"><path d="M3 1.5l7 4.5-7 4.5V1.5z" fill="#fff" /></svg>
+      </span>
+      <span className="vt-inline-voice-bars" aria-hidden="true">
+        {bars.map((h, i) => (
+          <span key={i} className="live-bar" style={{
+            width: 2, height: h, borderRadius: 1, background: VT_T.pink, opacity: 0.9,
+            animationDelay: `${(i % 5) * 0.08}s`,
+          }} />
+        ))}
+      </span>
+      <span className="vt-inline-voice-dur">0:{String(duration).padStart(2, '0')}</span>
+    </span>
+  );
+}
+
+function VtAsyncTranscriptionBody({ primary, variant, isNew, onDone, onPhaseChange }){
+  const chars = primary.chars || [...(primary.text || '')];
+  const duration = primary.durationSec || 2;
+  const rawVariant = variant || primary.vtVariant || 'calm';
+  const isDockMode = rawVariant === VT_DOCK_TRANSCRIBING;
+  const v = timelineVariantFor(rawVariant);
+  const motion = 'inline';
+
+  const [phase, setPhase] = useState(() => (isDockMode ? 'typing' : 'processing'));
+  const [n, setN] = useState(0);
+  const [barExiting, setBarExiting] = useState(false);
+  const doneRef = useRef(false);
+  const voiceBarRef = useRef(null);
+  const pillRef = useRef(null);
+  const flipFromRef = useRef(null);
+
+  useEffect(() => {
+    onPhaseChange?.(phase);
+    if(typeof window.__vtOnTranscribePhase === 'function'){
+      window.__vtOnTranscribePhase(phase);
+    }
+  }, [phase, onPhaseChange]);
+
+  useEffect(() => {
+    doneRef.current = false;
+    flipFromRef.current = null;
+    setBarExiting(false);
+    setN(0);
+    if(isDockMode){
+      setPhase('typing');
+      return undefined;
+    }
+    setPhase('processing');
+    const t = setTimeout(() => setPhase('typing'), PROC_MS[v] || 900);
+    return () => clearTimeout(t);
+  }, [primary.id, v, isDockMode]);
+
+  const goDone = () => {
+    if(isDockMode){
+      setPhase('done');
+      return;
+    }
+    if(voiceBarRef.current){
+      flipFromRef.current = voiceBarRef.current.getBoundingClientRect();
+    }
+    setBarExiting(true);
+    setTimeout(() => {
+      setPhase('done');
+    }, 180);
+  };
+
+  useEffect(() => {
+    if(phase !== 'typing') return;
+    if(n >= chars.length){
+      goDone();
+      return;
+    }
+    const base = PER_MS[v] || 50;
+    const last = chars[n - 1];
+    const punct = '，。、；！？…'.includes(last) ? 220 : 0;
+    const jitter = v === 'stream' ? Math.random() * 38 : 0;
+    const id = setTimeout(() => setN((k) => k + 1), base + punct + jitter);
+    return () => clearTimeout(id);
+  }, [phase, n, chars.length, v]);
+
+  useLayoutEffect(() => {
+    if(phase !== 'done' || isDockMode) return;
+    const from = flipFromRef.current;
+    const pill = pillRef.current;
+    flipFromRef.current = null;
+    if(!from || !pill) return;
+    const to = pill.getBoundingClientRect();
+    const dx = (from.left + from.width / 2) - (to.left + to.width / 2);
+    const dy = (from.top + from.height / 2) - (to.top + to.height / 2);
+    const sx = Math.min(2.6, Math.max(1, from.width / Math.max(to.width, 1)));
+    pill.style.transformOrigin = 'center';
+    pill.style.transition = 'none';
+    pill.style.transform = `translate(${dx}px, ${dy}px) scale(${sx})`;
+    pill.style.opacity = '0.45';
+    void pill.offsetWidth;
+    requestAnimationFrame(() => {
+      pill.style.transition = 'transform 0.55s cubic-bezier(.34,.86,.28,1), opacity 0.45s ease';
+      pill.style.transform = 'translate(0,0) scale(1)';
+      pill.style.opacity = '1';
+    });
+  }, [phase]);
+
+  useEffect(() => {
+    if(phase === 'done' && !doneRef.current){
+      doneRef.current = true;
+      onDone?.();
+    }
+  }, [phase, onDone]);
+
+  const working = phase !== 'done';
+  const typing = phase === 'typing';
+  const barAtTop = !isDockMode && working && !barExiting;
+  const morphProgress = !isDockMode && v === 'wave' && typing && chars.length ? n / chars.length : null;
+  const showProcessingChrome = !isDockMode && working;
+
+  const Caret = () => {
+    if(v === 'glow') return <span className="caret-dot" />;
+    if(v === 'stream') return <span className="caret-stream" />;
+    if(v === 'focus') return <span className="caret-scan" />;
+    return <span className="caret-bar" />;
+  };
+
+  const renderText = () => {
+    if(v === 'focus'){
+      return chars.map((c, i) => (
+        <React.Fragment key={i}>
+          {typing && i === n && <span className="caret-scan" />}
+          <span className={`tw-char ${i < n ? 'tw-focus-on' : 'tw-focus-off'}`}>{c}</span>
+        </React.Fragment>
+      ));
+    }
+    const charClass = v === 'glow' ? 'tw-glow'
+      : v === 'stream' ? 'tw-stream'
+      : 'tw-plain';
+    return (
+      <>
+        {chars.slice(0, n).map((c, i) => (
+          <span key={i} className={`tw-char ${charClass}`}>{c}</span>
+        ))}
+        {phase === 'done' && motion === 'inline' && (
+          <VtInlineVoicePill duration={duration} innerRef={pillRef} />
+        )}
+        {typing && <Caret />}
+      </>
+    );
+  };
+
+  return (
+    <div className={'vt-async-card' + (isNew ? ' v3-card-enter' : '') + (showProcessingChrome ? ' is-working' : '') + (isDockMode ? ' is-dock-typewriter' : '')}>
+      {showProcessingChrome && (
+        <>
+          <div className="vt-async-orb vt-async-orb-a" aria-hidden="true" />
+          <div className="vt-async-orb vt-async-orb-b" aria-hidden="true" />
+        </>
+      )}
+
+      {showProcessingChrome && (
+        <div style={{ marginBottom: 10, position: 'relative' }}>
+          <VtProcessingHeader variant={v} duration={duration} />
+        </div>
+      )}
+
+      {barAtTop && (
+        <div ref={voiceBarRef} className="vt-voice-msg-wrap">
+          <VtVoiceMessageBar
+            duration={duration}
+            live={phase === 'processing'}
+            morph={morphProgress}
+            compact={false}
+            exiting={barExiting}
+          />
+        </div>
+      )}
+
+      {(isDockMode || phase !== 'processing') && (
+        <div className="vt-async-text">
+          {renderText()}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VtAsyncRecordGroupCard({ group, isNew, onTranscribePhase }){
+  const [showTags, setShowTags] = useState(false);
+  const [showAi, setShowAi] = useState(false);
+  const [open, setOpen] = useState(false);
+  const p = group.primary || {};
+  const a = group.ai;
+  const variant = group.vtVariant || p.vtVariant || 'calm';
+  const tags = p.tags || [];
+
+  const handleDone = () => {
+    setShowTags(true);
+    setTimeout(() => {
+      setShowAi(true);
+      setOpen(!!group.aiDefaultOpen);
+      requestAnimationFrame(() => {
+        if(typeof window.scrollTimelineToBottom === 'function'){
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+    }, 120);
+  };
+
+  return (
+    <div style={{
+      background: '#fff', borderRadius: 14, border: `0.5px solid ${TL_LINE}`,
+      padding: '11px 12px 4px', overflow: 'hidden',
+    }}>
+      <V3v2Header time={p.time} />
+      <div style={{ marginTop: 8, paddingBottom: showAi ? 10 : 8 }}>
+        <VtAsyncTranscriptionBody
+          primary={p}
+          variant={variant}
+          isNew={isNew}
+          onDone={handleDone}
+          onPhaseChange={onTranscribePhase}
+        />
+        {showTags && tags.length > 0 && (
+          <div className="vt-async-tags v3-ai-stagger-in">
+            {tags.map((t, i) => (
+              <span key={i} className="tl-tags-reveal" style={{ animationDelay: `${i * 90}ms` }}>
+                <TLTag tag={t} />
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      {showAi && a && (
+        <div className="v3-ai-stagger-in">
+          <div style={{ borderTop: `0.5px dashed ${TL_HAIR}`, marginInline: -12 }} />
+          <button
+            type="button"
+            onClick={() => setOpen((x) => !x)}
+            style={{
+              width: '100%', background: 'transparent', border: 0,
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '10px 0', cursor: 'pointer', fontFamily: 'inherit',
+            }}
+            aria-expanded={open}
+          >
+            <div style={{
+              width: 18, height: 18, borderRadius: 9, background: TL_SOFT,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ fontSize: 10, color: TL_PRIMARY, fontWeight: 500 }}>AI</span>
+            </div>
+            <span style={{ fontSize: 12.5, color: TL_TEXT, fontWeight: 500, flex: 1, textAlign: 'left' }}>{a.title}</span>
+            <span style={{ fontSize: 11, color: TL_MUTED }}>{open ? '▲' : '▼'}</span>
+          </button>
+          {open && (
+            <div className="v3-ai-panel-in" style={{ paddingBottom: 12 }}>
+              {a.chartType && <TLChart type={a.chartType} data={a.chartData} />}
+              {a.note && (
+                <div style={{ fontSize: 13, color: TL_TEXT, lineHeight: 1.55, marginTop: a.chartType ? 8 : 0 }}>
+                  {a.note}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, {
+  VT_ASYNC_VARIANTS,
+  VT_DOCK_TRANSCRIBING,
+  timelineVariantFor,
+  isAsyncVoiceVariant,
+  VtAsyncRecordGroupCard,
+  VtAsyncTranscriptionBody,
+  VtInlineVoicePill,
+});
 
 </script>
 
 <!-- voice-transcribe-demo.jsx -->
 <script type="text/babel">
 // voice-transcribe-demo.jsx — 场景五 · 语音转写输入层（时间轴沿用场景一）
-/* global React, VoiceTranscribeBar, VoiceTranscribeAtmosphere,
-   LiveBubble, LiveGrowPanel, LiveFloat */
+/* global React, VoiceTranscribeBar, VoiceTranscribeAtmosphere, VoiceTranscribeDockBar,
+   LiveBubble, LiveGrowPanel, LiveFloat, RecordingWave, isAsyncVoiceVariant,
+   VT_DOCK_TRANSCRIBING, removeTimelineEntry */
 
 const { useState, useRef, useCallback, useEffect } = React;
 
@@ -14608,6 +15659,36 @@ function buildVtFinalGroup(tpl, finalText, durationSec, primaryId){
   };
 }
 
+function buildVtAsyncGroup(tpl, finalText, durationSec, variant){
+  const pid = 'vt-' + Date.now();
+  return {
+    kind: 'record-group',
+    id: pid + '-g',
+    isNew: true,
+    vtAsync: true,
+    vtVariant: variant,
+    primary: {
+      id: pid,
+      time: window.formatNowTime(),
+      kind: 'voice',
+      text: finalText,
+      chars: [...finalText],
+      durationSec,
+      vtVariant: variant,
+      tags: mapVtTagsV3(tpl.tags),
+    },
+    ai: {
+      id: pid + '-ai',
+      time: window.formatNowTime(),
+      kind: 'chart',
+      chartType: tpl.chartType || 'moodWeek',
+      title: tpl.aiTitle || '本周情绪走势',
+      note: tpl.aiInsight,
+    },
+    aiDefaultOpen: true,
+  };
+}
+
 function resolveVoiceAppendDayId(timeline){
   const days = (timeline || []).filter((b) => b.type === 'day');
   const todayDays = days.filter((d) => d.isToday);
@@ -14627,11 +15708,14 @@ function VoiceTranscribeInputLayer({
   onRecorded,
 }){
   const [recording, setRecording] = useState(false);
+  const [cancelHover, setCancelHover] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [liveText, setLiveText] = useState('');
   const [liveExiting, setLiveExiting] = useState(false);
+  const [dockTranscribing, setDockTranscribing] = useState(false);
 
   const liveEntryIdRef = useRef(null);
+  const lastAsyncGroupIdRef = useRef(null);
   const liveTplRef = useRef(null);
   const streamRef = useRef(null);
   const elapsedRef = useRef(null);
@@ -14641,12 +15725,25 @@ function VoiceTranscribeInputLayer({
   variantRef.current = variant;
 
   useEffect(() => {
+    window.__vtOnTranscribePhase = (phase) => {
+      /* 底栏保持「正在转录」，等时间轴打字完成后再恢复「按住说话」 */
+      if(phase === 'done'){
+        setDockTranscribing(false);
+      }
+    };
+    return () => { delete window.__vtOnTranscribePhase; };
+  }, []);
+
+  useEffect(() => {
     vtPromptIdx = 0;
     liveEntryIdRef.current = null;
+    lastAsyncGroupIdRef.current = null;
     liveTplRef.current = null;
     setLiveText('');
     setLiveExiting(false);
+    setDockTranscribing(false);
     setRecording(false);
+    setCancelHover(false);
     setElapsed(0);
     if(streamRef.current) clearTimeout(streamRef.current);
     if(elapsedRef.current) clearInterval(elapsedRef.current);
@@ -14700,12 +15797,17 @@ function VoiceTranscribeInputLayer({
     liveTplRef.current = tpl;
     setLiveText('');
     setLiveExiting(false);
+    setCancelHover(false);
     setRecording(true);
     setElapsed(0);
     startTsRef.current = performance.now();
     elapsedRef.current = setInterval(() => {
       setElapsed((performance.now() - startTsRef.current) / 1000);
     }, 100);
+
+    if(typeof isAsyncVoiceVariant === 'function' && isAsyncVoiceVariant(v)){
+      return;
+    }
 
     if(v === 'live-drop'){
       const id = 'vt-' + Date.now();
@@ -14721,13 +15823,29 @@ function VoiceTranscribeInputLayer({
 
   const handleEnd = useCallback(() => {
     const v = variantRef.current;
+    if(v === VT_DOCK_TRANSCRIBING){
+      setDockTranscribing(true);
+    }
     setRecording(false);
+    setCancelHover(false);
     stopStream();
     const tpl = liveTplRef.current;
     if(!tpl) return;
     const finalText = liveText || tpl.text;
     const finalDuration = Math.max(2, Math.ceil(elapsed));
     onRecorded?.();
+
+    if(typeof isAsyncVoiceVariant === 'function' && isAsyncVoiceVariant(v)){
+      const entry = buildVtAsyncGroup(tpl, finalText, finalDuration, v);
+      lastAsyncGroupIdRef.current = entry.id;
+      setTimeline((blocks) => {
+        const dayId = resolveVoiceAppendDayId(blocks);
+        return window.appendTimelineEntry(blocks, entry, { dayId });
+      });
+      liveTplRef.current = null;
+      requestAnimationFrame(() => onScrollEnd?.());
+      return;
+    }
 
     if(v === 'live-drop' && liveEntryIdRef.current){
       const id = liveEntryIdRef.current;
@@ -14757,6 +15875,7 @@ function VoiceTranscribeInputLayer({
   const handleCancel = useCallback(() => {
     const v = variantRef.current;
     setRecording(false);
+    setCancelHover(false);
     stopStream();
     if(v === 'live-drop' && liveEntryIdRef.current){
       const id = liveEntryIdRef.current;
@@ -14769,14 +15888,35 @@ function VoiceTranscribeInputLayer({
   }, [setTimeline]);
 
   const liveActive = recording && !liveExiting;
-  const showLiveBubble = (recording || liveExiting) && variant === 'live-bubble';
-  const showLiveGrow = (recording || liveExiting) && variant === 'live-grow';
-  const showLiveFloat = (recording || liveExiting) && variant === 'live-float';
+  const isAsync = typeof isAsyncVoiceVariant === 'function' && isAsyncVoiceVariant(variant);
+  const showLiveBubble = !isAsync && (recording || liveExiting) && variant === 'live-bubble';
+  const showLiveGrow = !isAsync && (recording || liveExiting) && variant === 'live-grow';
+  const showLiveFloat = !isAsync && (recording || liveExiting) && variant === 'live-float';
+  const showRecordingWave = isAsync && recording && variant !== VT_DOCK_TRANSCRIBING;
+  const showDockBar = dockTranscribing && variant === VT_DOCK_TRANSCRIBING;
+
+  const handleDockCancel = useCallback(() => {
+    setDockTranscribing(false);
+    const gid = lastAsyncGroupIdRef.current;
+    if(gid){
+      setTimeline((blocks) => removeTimelineEntry(blocks, gid));
+      lastAsyncGroupIdRef.current = null;
+    }
+    liveTplRef.current = null;
+  }, [setTimeline]);
 
   return (
     <>
       <div className="vt-overlay-root" aria-hidden={false}>
         <VoiceTranscribeAtmosphere active={recording} />
+        {showRecordingWave && RecordingWave && (
+          <RecordingWave
+            active={recording}
+            elapsed={elapsed}
+            cancel={cancelHover}
+            variant={variant}
+          />
+        )}
         {showLiveBubble && <LiveBubble text={liveText} active={liveActive} exiting={liveExiting} />}
         {showLiveGrow && <LiveGrowPanel text={liveText} active={liveActive} exiting={liveExiting} />}
       </div>
@@ -14784,14 +15924,20 @@ function VoiceTranscribeInputLayer({
         {showLiveFloat && (
           <LiveFloat text={liveText} active={liveActive} exiting={liveExiting} />
         )}
-        <VoiceTranscribeBar
-          recording={recording}
-          elapsed={elapsed}
-          variant={variant}
-          onStart={handleStart}
-          onEnd={handleEnd}
-          onCancel={handleCancel}
-        />
+        {showDockBar && VoiceTranscribeDockBar ? (
+          <VoiceTranscribeDockBar onCancel={handleDockCancel} />
+        ) : (
+          <VoiceTranscribeBar
+            recording={recording}
+            elapsed={elapsed}
+            variant={variant}
+            cancelHover={cancelHover}
+            onCancelHoverChange={setCancelHover}
+            onStart={handleStart}
+            onEnd={handleEnd}
+            onCancel={handleCancel}
+          />
+        )}
       </div>
     </>
   );
@@ -14820,10 +15966,16 @@ Object.assign(window, {
 //   方案四 voice-transcribe-4：悬浮 — 无边框悬浮文字
 
 const SCENE5_SCHEME_OPTIONS = [
-  { value: 'voice-transcribe-1', label: '方案一' },
-  { value: 'voice-transcribe-2', label: '方案二' },
-  { value: 'voice-transcribe-3', label: '方案三' },
-  { value: 'voice-transcribe-4', label: '方案四' },
+  { value: 'voice-transcribe-1', label: '方案一 · 落入' },
+  { value: 'voice-transcribe-2', label: '方案二 · 气泡' },
+  { value: 'voice-transcribe-3', label: '方案三 · 顶起' },
+  { value: 'voice-transcribe-4', label: '方案四 · 悬浮' },
+  { value: 'voice-transcribe-5', label: '方案五 · 静默' },
+  { value: 'voice-transcribe-6', label: '方案六 · 声波' },
+  { value: 'voice-transcribe-7', label: '方案七 · 流光' },
+  { value: 'voice-transcribe-8', label: '方案八 · 显影' },
+  { value: 'voice-transcribe-9', label: '方案九 · 底栏转录' },
+  { value: 'voice-transcribe-10', label: '方案十 · 思考流' },
 ];
 
 const VOICE_TRANSCRIBE_BASE = {
@@ -15075,6 +16227,55 @@ const DEMO_SCENES = {
     label: '场景五 · 方案四 · 悬浮',
     description: '屏幕上方无边框悬浮文字 + AI 锚点，多层光晕保证可读，「松开结束 · 上滑取消」做在条上',
     voiceVariant: 'live-float',
+  },
+
+  'voice-transcribe-5': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-5',
+    label: '场景五 · 方案五 · 静默',
+    description: '按住：轻点脉冲；松手：稳定打字机 + 句尾语音跳动线',
+    voiceVariant: 'calm',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-6': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-6',
+    label: '场景五 · 方案六 · 声波成文',
+    description: '按住：钉钉式波形；松手：逐字落下 + 句尾语音跳动线',
+    voiceVariant: 'wave',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-7': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-7',
+    label: '场景五 · 方案七 · 流光',
+    description: '按住：呼吸光球；松手：流光点亮逐字 + 句尾语音跳动线',
+    voiceVariant: 'glow',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-8': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-8',
+    label: '场景五 · 方案八 · 聚焦显影',
+    description: '按住：磨砂波形扫光；松手：虚影逐字显影 + 句尾语音跳动线',
+    voiceVariant: 'focus',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-9': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-9',
+    label: '场景五 · 方案九 · 底栏转录',
+    description: '松手后底栏显示「正在转录」；时间轴先顶栏语音条再收拢为句尾胶囊',
+    voiceVariant: 'bar-transcribing',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
+  },
+  'voice-transcribe-10': {
+    ...VOICE_TRANSCRIBE_BASE,
+    id: 'voice-transcribe-10',
+    label: '场景五 · 方案十 · 思考流',
+    description: '按住：聆听声波环；松手：快速流式吐字 + 句尾语音跳动线',
+    voiceVariant: 'stream',
+    record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
   },
 
 };
