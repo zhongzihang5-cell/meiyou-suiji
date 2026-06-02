@@ -310,7 +310,7 @@ const DEMO_SCENES = {
     ...VOICE_TRANSCRIBE_BASE,
     id: 'voice-transcribe-9',
     label: '场景五 · 方案九 · 底栏转录',
-    description: '松手后底栏显示「正在转录」；时间轴先顶栏语音条再收拢为句尾胶囊',
+    description: '松手后底栏显示「正在转录」，时间轴直接打字机；相机保留右下角',
     voiceVariant: 'bar-transcribing',
     record: { ...VOICE_TRANSCRIBE_BASE.record, todayGuide: false },
   },

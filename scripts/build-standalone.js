@@ -336,6 +336,37 @@ function buildLandingPage(builtAt) {
         <div class="card-desc">无边框悬浮文字 + AI 锚点，多层光晕保证可读。</div>
         <span class="go">进入方案四 →</span>
       </a>
+      <p class="section-label">场景五 · 异步转写（松手后）</p>
+      <a class="card" href="./scene5-5.html">
+        <div class="card-title">方案五 · 静默</div>
+        <div class="card-desc">按住：轻点脉冲；松手：稳定打字机 + 句尾语音跳动线。</div>
+        <span class="go">进入方案五 →</span>
+      </a>
+      <a class="card" href="./scene5-6.html">
+        <div class="card-title">方案六 · 声波成文</div>
+        <div class="card-desc">按住：钉钉式波形；松手：逐字落下 + 句尾语音跳动线。</div>
+        <span class="go">进入方案六 →</span>
+      </a>
+      <a class="card" href="./scene5-7.html">
+        <div class="card-title">方案七 · 流光</div>
+        <div class="card-desc">按住：呼吸光球；松手：流光点亮逐字 + 句尾语音跳动线。</div>
+        <span class="go">进入方案七 →</span>
+      </a>
+      <a class="card" href="./scene5-8.html">
+        <div class="card-title">方案八 · 聚焦显影</div>
+        <div class="card-desc">按住：磨砂波形扫光；松手：虚影逐字显影 + 句尾语音跳动线。</div>
+        <span class="go">进入方案八 →</span>
+      </a>
+      <a class="card" href="./scene5-9.html">
+        <div class="card-title">方案九 · 底栏转录</div>
+        <div class="card-desc">松手后底栏显示「正在转录」，时间轴直接打字机；相机保留右下角。</div>
+        <span class="go">进入方案九 →</span>
+      </a>
+      <a class="card" href="./scene5-10.html">
+        <div class="card-title">方案十 · 思考流</div>
+        <div class="card-desc">按住：聆听声波环；松手：快速流式吐字 + 句尾语音跳动线。</div>
+        <span class="go">进入方案十 →</span>
+      </a>
     </div>
     <footer>构建 ${builtAt}<br>微信内若无法加载，点右上角 ··· 用 Safari 打开</footer>
   </div>
@@ -378,6 +409,12 @@ function writeLegacyRedirects() {
     { file: 'scene5-2.html', target: '../scene5-2.html', label: '场景五 · 方案二 · 气泡' },
     { file: 'scene5-3.html', target: '../scene5-3.html', label: '场景五 · 方案三 · 顶起' },
     { file: 'scene5-4.html', target: '../scene5-4.html', label: '场景五 · 方案四 · 悬浮' },
+    { file: 'scene5-5.html', target: '../scene5-5.html', label: '场景五 · 方案五 · 静默' },
+    { file: 'scene5-6.html', target: '../scene5-6.html', label: '场景五 · 方案六 · 声波成文' },
+    { file: 'scene5-7.html', target: '../scene5-7.html', label: '场景五 · 方案七 · 流光' },
+    { file: 'scene5-8.html', target: '../scene5-8.html', label: '场景五 · 方案八 · 聚焦显影' },
+    { file: 'scene5-9.html', target: '../scene5-9.html', label: '场景五 · 方案九 · 底栏转录' },
+    { file: 'scene5-10.html', target: '../scene5-10.html', label: '场景五 · 方案十 · 思考流' },
   ];
   redirects.forEach(({ file, target, label }) => {
     fs.writeFileSync(path.join(legacyDir, file), buildRedirectPage(target, label), 'utf8');
