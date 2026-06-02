@@ -242,6 +242,14 @@ const QUICK_MOOD_LEVELS = [
   { id:'super-happy', label:'超开心', face:'super-happy', bg:'#FFE875' },
 ];
 
+const MOOD_QUICK_OPTIONS = [
+  { id:'super-happy', icon:'assets/mood-super-happy.png', label:'超开心', color:'#2fb344', mood: QUICK_MOOD_LEVELS[4] },
+  { id:'happy', icon:'assets/mood-happy.png', label:'挺开心', color:'#7cc34a', mood: QUICK_MOOD_LEVELS[3] },
+  { id:'normal', icon:'assets/mood-normal.png', label:'一般', color:'#f2b705', mood: QUICK_MOOD_LEVELS[2] },
+  { id:'unhappy', icon:'assets/mood-unhappy.png', label:'不开心', color:'#f08a3c', mood: QUICK_MOOD_LEVELS[1] },
+  { id:'very-sad', icon:'assets/mood-very-sad.png', label:'好伤心', color:'#5b8def', mood: QUICK_MOOD_LEVELS[0] },
+];
+
 function QuickMoodFace({ level, color, size = 28 }) {
   const sw = 1.6;
   const mouths = {
@@ -261,35 +269,25 @@ function QuickMoodFace({ level, color, size = 28 }) {
   );
 }
 
-function QuickCardIcon({ kind, color = 'var(--my-text-primary)', size = 24 }) {
-  const sw = 1.7;
-  if(kind === 'mood'){
-    return <QuickMoodFace level={4} color={color} size={size}/>;
-  }
-  if(kind === 'symptom'){
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 21s-7-4.5-7-10a4.5 4.5 0 018-2.8A4.5 4.5 0 0119 11c0 5.5-7 10-7 10z" stroke={color} strokeWidth={sw} strokeLinejoin="round"/>
-        <path d="M9 11h6M12 8v6" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
-      </svg>
-    );
-  }
-  if(kind === 'diet'){
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M5 5.5v6.3c0 1.3 1 2.3 2.3 2.3h1.2v4.8" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
-        <path d="M8.5 5.5v4.2M6.8 5.5v4.2" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
-        <path d="M14.6 5.8c2.2.1 3.9 1.9 3.9 4.1v9" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
-        <path d="M14.6 11h3.9" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
-      </svg>
-    );
-  }
+const QUICK_CARD_ICONS = {
+  mood: 'assets/quick-icon-mood.png',
+  symptom: 'assets/quick-icon-symptom.png',
+  weight: 'assets/quick-icon-weight.png',
+  diet: 'assets/quick-icon-diet.png',
+};
+
+function QuickCardIcon({ kind, size = 28 }) {
+  const src = QUICK_CARD_ICONS[kind];
+  if(!src) return null;
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3.5" y="5.5" width="17" height="14" rx="2.5" stroke={color} strokeWidth={sw}/>
-      <path d="M9 9c0 1.7 1.3 3 3 3s3-1.3 3-3" stroke={color} strokeWidth={sw} strokeLinecap="round"/>
-      <circle cx="12" cy="6.5" r="0.8" fill={color}/>
-    </svg>
+    <img
+      className="quick-card-fan-img"
+      src={src}
+      alt=""
+      width={size}
+      height={size}
+      draggable={false}
+    />
   );
 }
 
@@ -327,6 +325,62 @@ function QuickMoodPicker({ onSubmit }) {
         </button>
       ))}
     </div>
+  );
+}
+
+function MoodQuickOverlay({ open, onSubmit, onClose }) {
+  const [choosing, setChoosing] = React.useState(false);
+  const [selected, setSelected] = React.useState(null);
+  const [toastText, setToastText] = React.useState('');
+  const [toastShow, setToastShow] = React.useState(false);
+  const busyRef = React.useRef(false);
+
+  React.useEffect(()=>{
+    if(open) return;
+    setChoosing(false);
+    setSelected(null);
+    setToastShow(false);
+    busyRef.current = false;
+  }, [open]);
+
+  const pick = (opt)=>{
+    if(busyRef.current) return;
+    busyRef.current = true;
+    setChoosing(true);
+    setSelected(opt.id);
+    setToastText('心情已记录 · ' + opt.label);
+    setToastShow(true);
+    window.setTimeout(()=>{
+      onSubmit?.([opt.mood]);
+      setToastShow(false);
+    }, 600);
+  };
+
+  return (
+    <>
+      <div
+        className={'mood-quick'+(open ? ' show' : '')+(choosing ? ' choosing' : '')}
+        aria-hidden={!open}
+      >
+        <div className="mood-quick-card">
+          {MOOD_QUICK_OPTIONS.map((opt, i)=>(
+            <button
+              key={opt.id}
+              type="button"
+              className={'mood-quick-opt'+(selected === opt.id ? ' sel' : '')}
+              style={{'--mc': opt.color, '--d': (i * 0.035).toFixed(3) + 's'}}
+              onClick={()=>pick(opt)}
+            >
+              <span className="mood-quick-icon">
+                <img src={opt.icon} alt="" draggable={false}/>
+              </span>
+              <span className="mood-quick-lbl">{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className={'mood-quick-toast'+(toastShow ? ' show' : '')}>{toastText}</div>
+    </>
   );
 }
 
@@ -456,6 +510,8 @@ Object.assign(window, {
   QUICK_MOOD_LEVELS,
   QuickCardIcon,
   QuickMoodPicker,
+  MoodQuickOverlay,
+  MOOD_QUICK_OPTIONS,
   QuickSymptomPicker,
   QuickWeightPicker,
   QuickFoodPicker,
