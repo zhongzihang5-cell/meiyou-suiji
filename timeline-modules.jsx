@@ -25,7 +25,7 @@ function extractWeightFromItem(item){
 }
 
 function summarizeDayItems(items, day){
-  if(day?.summaryStats?.length) return { stats: day.summaryStats };
+  // 始终动态计算，不使用写死的 summaryStats
 
   let count = 0;
   let kcal = 0;

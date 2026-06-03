@@ -17,14 +17,7 @@ const DEMO_SCENES = {
           if(it?.kind === 'guide' && it.id === 'g-518-post') it.noAnimate = true;
         });
       });
-      // 在 today (5/18) 前插入「昨天 5/17」空 day block，供演示流程追加
-      const todayIdx = blocks.findIndex(b=>b.type==='day' && b.isToday);
-      if(todayIdx > 0){
-        blocks.splice(todayIdx, 0, {
-          type:'day', id:'d-5-17', date:'5/17', weekday:'周日',
-          summaryStats:[], items:[],
-        });
-      }
+      // d-5-17 不在初始 timeline 中，演示流程触发时由 app.jsx 动态插入
       return blocks;
     },
     calendar: {

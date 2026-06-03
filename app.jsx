@@ -337,11 +337,14 @@ function App(){
     });
     const oldIds = [...demoIdsRef.current];
     setTimeout(()=>{
-      setTimeline(blocks=>blocks.map(b=>{
-        if(b.type!=='day') return b;
-        const items = (b.items||[]).filter(it=>!oldIds.includes(it.id));
-        return {...b, items, entries:undefined};
-      }));
+      setTimeline(blocks=>blocks
+        .map(b=>{
+          if(b.type!=='day') return b;
+          const items = (b.items||[]).filter(it=>!oldIds.includes(it.id));
+          return {...b, items, entries:undefined};
+        })
+        .filter(b=>b.id!=='d-5-17' || (b.items||[]).length > 0) // 清空后移除空的 d-5-17
+      );
       demoIdsRef.current = [];
       cb?.();
     }, 220);
@@ -380,7 +383,15 @@ function App(){
           },
         };
         setTimeline(blocks=>{
-          let next = window.appendTimelineEntry(blocks, r1, {dayId:'d-5-17'});
+          // 动态插入 d-5-17 day block（如果不存在）
+          let next = blocks;
+          if(!next.find(b=>b.id==='d-5-17')){
+            const todayIdx = next.findIndex(b=>b.type==='day'&&b.isToday);
+            const ins = { type:'day', id:'d-5-17', date:'5/17', weekday:'周日', items:[] };
+            next = [...next];
+            next.splice(todayIdx >= 0 ? todayIdx : next.length, 0, ins);
+          }
+          next = window.appendTimelineEntry(next, r1, {dayId:'d-5-17'});
           next = window.appendTimelineEntry(next, r2, {dayId:'d-5-17'});
           return next;
         });
