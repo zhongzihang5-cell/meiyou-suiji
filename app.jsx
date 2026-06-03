@@ -526,32 +526,21 @@ function App(){
         </>
         ) : (
         <>
-        <div className="suiji-stream" ref={streamRef}>
-          <div className="stream-header">
-            <div>
-              <h1 className="stream-title">点滴</h1>
-            </div>
-            <div className="stream-actions">
-              {scene.calendar.enabled && (
-                <button
-                  className="stream-action"
-                  aria-label="日历"
-                  type="button"
-                  onClick={()=>setActiveTab('cal')}
-                >
-                  <I name="calendar" size={20} stroke={1.7}/>
-                </button>
-              )}
-              <button
-                className="stream-action"
-                aria-label="搜索"
-                type="button"
-                onClick={openSearchPage}
-              >
-                <I name="search" size={20} stroke={1.7}/>
-              </button>
-            </div>
+        <div className="stream-header">
+          <div className="stream-header-side"/>
+          <h1 className="stream-title">点滴</h1>
+          <div className="stream-actions">
+            <button
+              className="stream-action"
+              aria-label="搜索"
+              type="button"
+              onClick={openSearchPage}
+            >
+              <I name="search" size={20} stroke={1.7}/>
+            </button>
           </div>
+        </div>
+        <div className="suiji-stream" ref={streamRef}>
 
           {scene.record.showHealthCard && (
             <div className="stream-health">

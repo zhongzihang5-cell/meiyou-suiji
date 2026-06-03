@@ -1,5 +1,37 @@
 // ============ 底部 Dock — 输入栏 + 右下悬浮快捷发布 ============
 
+/** 圆形语音图标（含音波弧线 — 参考附件还原） */
+function DockVoiceCircleIco({size=22}){
+  /* 三段同心弧，从左侧发射点向右辐射，粗描边 */
+  const sw = 3.2;
+  return (
+    <svg viewBox="0 0 48 48" fill="none" width={size} height={size} aria-hidden="true">
+      <circle cx="24" cy="24" r="21" stroke="currentColor" strokeWidth="2.8"/>
+      {/* 最小弧 r=5 */}
+      <path d="M21.5 19.5 A6 6 0 0 1 21.5 28.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      {/* 中弧 r=9 */}
+      <path d="M24 15.5 A10 10 0 0 1 24 32.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      {/* 大弧 r=13 */}
+      <path d="M26.5 12 A14 14 0 0 1 26.5 36" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+/** 圆形键盘图标（含圆点键位 + 空格条） */
+function DockKbdCircleIco({size=22}){
+  const R = 2.3;
+  const row1 = [12,16.5,21,25.5,30,34.5];
+  const row2 = [14.5,19,23.5,28,32.5];
+  return (
+    <svg viewBox="0 0 48 48" fill="none" width={size} height={size} aria-hidden="true">
+      <circle cx="24" cy="24" r="21.5" stroke="currentColor" strokeWidth="2.6"/>
+      {row1.map(x=><circle key={x} cx={x} cy={18} r={R} fill="currentColor"/>)}
+      {row2.map(x=><circle key={x} cx={x} cy={24.5} r={R} fill="currentColor"/>)}
+      <rect x="15" y="29.5" width="18" height="3.5" rx="1.75" fill="currentColor"/>
+    </svg>
+  );
+}
+
 /** 方案 I · 卡片扇 — 4 项快捷发布（落点由放射菜单算法动态计算） */
 const QUICK_CARDS = [
   { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },
@@ -361,8 +393,8 @@ function DockPublisher({
                 aria-label={inputMode==='text'?'切换语音':'切换键盘'}
               >
                 {inputMode==='text'
-                  ? <I name="mic" size={22} stroke={1.6}/>
-                  : <span className="dock-kbd-ico">⌨</span>}
+                  ? <DockVoiceCircleIco size={26}/>
+                  : <DockKbdCircleIco size={26}/>}
               </button>
 
               {inputMode==='text' ? (
@@ -431,14 +463,6 @@ function DockPublisher({
               ) : null}
             </div>
 
-            <button
-              type="button"
-              className="dock-camera-btn"
-              onClick={onPhoto}
-              aria-label="拍照上传"
-            >
-              <I name="camera" size={22} stroke={1.6}/>
-            </button>
           </div>
           )}
         </div>

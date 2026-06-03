@@ -587,17 +587,31 @@
 
 /* 流头部 */
 .stream-header{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:20;
   display:flex;
-  align-items:flex-end;
+  align-items:center;
   justify-content:space-between;
-  padding:4px 2px 18px;
+  padding:8px 18px 14px;
+  background:rgba(250,247,244,0.92);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.stream-header-side{
+  width:28px;
+  flex-shrink:0;
 }
 .stream-title{
-  font-size:22px;
+  flex:1;
+  text-align:center;
+  font-size:17px;
   font-weight:500;
   color:var(--my-text-primary);
-  line-height:1.2;
-  letter-spacing:-0.2px;
+  line-height:1.4;
+  letter-spacing:0;
 }
 .stream-sub{
   font-size:12px;
