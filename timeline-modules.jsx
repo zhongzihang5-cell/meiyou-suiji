@@ -73,7 +73,7 @@ function resolveDayTitleLabel(day, allDays){
   if(todayIdx >= 0 && idx === todayIdx - 1) return '昨天';
   if(todayIdx >= 0 && idx === todayIdx - 2) return '前天';
   const { month, day: dayNum } = parseDayParts(day.date);
-  return `${month}/${dayNum}`;
+  return `${month}月${dayNum}日`;
 }
 
 function formatDayMeta(day, titleLabel){

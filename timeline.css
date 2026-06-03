@@ -552,6 +552,15 @@
 .tl-gap-divider.tl-rail-break::before{
   display:none;
 }
+.tl-pull-hint{
+  display:inline-block;
+  animation:pullDownHint 2s ease-in-out infinite;
+}
+@keyframes pullDownHint{
+  0%  {transform:translateY(0);opacity:.55}
+  50% {transform:translateY(4px);opacity:1}
+  100%{transform:translateY(0);opacity:.55}
+}
 
 /* 今日引导 */
 .tl-today-guide{

@@ -149,7 +149,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
             if(hideGapDivider) return null;
             return (
               <div key={block.id || ('gap-'+i)} className="tl-gap-divider tl-feed-more tl-rail-break">
-                上滑查看更多
+                <span className="tl-pull-hint">↓ 下拉查看更多</span>
               </div>
             );
           }

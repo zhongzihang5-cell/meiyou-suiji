@@ -436,7 +436,7 @@ function App(){
                 if(b.type!=='day') return b;
                 const items = (b.items||[]).map(it=>{
                   if(it.id===demoR1Id || it.id===demoR2Id){
-                    return {...it, primary:{...it.primary, sourceFrom:'🎤 来自 6-03 12:00 的语音'}, _sourceNew:true};
+                    return {...it, primary:{...it.primary, sourceFrom:'🎤 来自 6月3日 12:00 的语音'}, _sourceNew:true};
                   }
                   return it;
                 });
