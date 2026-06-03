@@ -50,6 +50,37 @@
     letter-spacing: 0;
   }
 
+  /* ==== 演示场景切换器 ==== */
+  .demo-controls {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 6px;
+    border-radius: 999px;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .demo-controls button {
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .demo-controls button.active {
+    background: #ff4d88;
+    color: #fff;
+  }
+
   /* ==== 手机外壳 ==== */
   .phone {
     position: relative;
@@ -640,6 +671,13 @@
 </head>
 <body>
 
+<div class="demo-controls">
+  <button data-scene="mixed">语音混合</button>
+  <button data-scene="text">文字记录</button>
+  <button data-scene="image">饮食图片</button>
+  <button data-scene="quick">快捷记录</button>
+</div>
+
 <div class="phone">
   <!-- 状态栏 -->
   <div class="status-bar">
@@ -967,7 +1005,24 @@
     document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
     const target = document.getElementById('scene-' + scene);
     if(target) target.classList.add('active');
+    // 同步切换器按钮 active 态
+    document.querySelectorAll('.demo-controls button').forEach(b => {
+      b.classList.toggle('active', b.dataset.scene === scene);
+    });
   })();
+
+  // ========== 演示场景切换器 ==========
+  const sceneButtons = document.querySelectorAll('.demo-controls button');
+  sceneButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sceneButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const scene = btn.dataset.scene;
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+      document.getElementById('scene-' + scene).classList.add('active');
+      resetDirty();
+    });
+  });
 
   const isEmbedded = window.parent !== window;
 
