@@ -327,7 +327,7 @@ function V3Chevron({open}){
   );
 }
 
-function V3v2Header({time, title, isNew}){
+function V3v2Header({time, title, isNew, entryId, entryKind}){
   const MoreMenu = window.CardMoreMenu;
   if(!time && !title) return null;
   return (
@@ -343,7 +343,7 @@ function V3v2Header({time, title, isNew}){
           flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
         }}>{title}</div>
       )}
-      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0}/>}
+      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} onEdit={window.openEditModal}/>}
     </div>
   );
 }
@@ -454,13 +454,15 @@ function normalizeV3Entry(raw){
   };
 }
 
-function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false}){
+function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId}){
   const cardRef = React.useRef(null);
   const aiPanelRef = React.useRef(null);
   const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
   const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
+  const derivedKind = primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
+  const derivedId = entryId || primary?.id;
 
   const scrollAfterAiChartReveal = React.useCallback(() => {
     const run = () => {
@@ -500,7 +502,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 12px',
       }}>
-        <V3v2Header time={a.time} title={a.title} isNew={isNew}/>
+        <V3v2Header time={a.time} title={a.title} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
         <div style={{marginTop:8}}>
           <TLChart type={a.chartType} data={a.chartData}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
@@ -524,7 +526,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         padding:'11px 12px 4px', overflow:'hidden',
       }}
     >
-      <V3v2Header time={p.time} isNew={isNew}/>
+      <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
       <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : 8}}>
         <V3v2PrimaryBody entry={p} showTags={showTags} tagsAnimate={staggerReveal && showTags}/>
       </div>
@@ -579,6 +581,7 @@ function V3RecordGroupCard({group, isNew}){
       aiDefaultOpen={group.aiDefaultOpen}
       isNew={isNew}
       staggerReveal={!!group.staggerReveal}
+      entryId={group.primary?.id || group.id}
     />
   );
 }

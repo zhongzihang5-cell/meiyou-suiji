@@ -63,7 +63,7 @@ function inferRecordKind(entry){
 }
 
 /** 卡片右上角 ··· 更多菜单 */
-function CardMoreMenu({delayMs = 0}){
+function CardMoreMenu({delayMs = 0, entryId, entryKind, onEdit}){
   const [open, setOpen] = React.useState(false);
   const [visible, setVisible] = React.useState(!delayMs);
   const wrapRef = React.useRef(null);
@@ -107,7 +107,7 @@ function CardMoreMenu({delayMs = 0}){
       </button>
       {open && (
         <div className="card-more-menu">
-          <button type="button" className="card-more-menu-item" onClick={()=>setOpen(false)}>
+          <button type="button" className="card-more-menu-item" onClick={()=>{ setOpen(false); onEdit?.(entryId, entryKind); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             <span>编辑</span>
           </button>
@@ -121,12 +121,12 @@ function CardMoreMenu({delayMs = 0}){
   );
 }
 
-function TlRecCardHead({time, isNew}){
+function TlRecCardHead({time, isNew, entryId, entryKind, onEdit}){
   if(!time) return null;
   return (
     <div className="tl-rec-card-hd">
       <span className="tl-rec-card-time">{time}</span>
-      <CardMoreMenu delayMs={isNew ? 600 : 0}/>
+      <CardMoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} onEdit={onEdit}/>
     </div>
   );
 }
@@ -498,8 +498,8 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   );
 
   return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')}>
-      <TlRecCardHead time={entry.time} isNew={isNew}/>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')} data-entry-id={entry.id}>
+      <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind={entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick'} onEdit={window.openEditModal}/>
       <section className="tl-t5-main">
         {isVtLive ? (
           <div className="tl-voice-block tl-vt-live-body">
