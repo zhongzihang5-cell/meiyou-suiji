@@ -327,7 +327,8 @@ function V3Chevron({open}){
   );
 }
 
-function V3v2Header({time, title}){
+function V3v2Header({time, title, isNew}){
+  const MoreMenu = window.CardMoreMenu;
   if(!time && !title) return null;
   return (
     <div style={{display:'flex', alignItems:'center', gap:6, minWidth:0}}>
@@ -342,6 +343,7 @@ function V3v2Header({time, title}){
           flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
         }}>{title}</div>
       )}
+      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0}/>}
     </div>
   );
 }
@@ -498,7 +500,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 12px',
       }}>
-        <V3v2Header time={a.time} title={a.title}/>
+        <V3v2Header time={a.time} title={a.title} isNew={isNew}/>
         <div style={{marginTop:8}}>
           <TLChart type={a.chartType} data={a.chartData}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
@@ -522,7 +524,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         padding:'11px 12px 4px', overflow:'hidden',
       }}
     >
-      <V3v2Header time={p.time}/>
+      <V3v2Header time={p.time} isNew={isNew}/>
       <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : 8}}>
         <V3v2PrimaryBody entry={p} showTags={showTags} tagsAnimate={staggerReveal && showTags}/>
       </div>
