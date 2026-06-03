@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
-<link rel="stylesheet" href="cloud.css?v=20260602-v102">
+<link rel="stylesheet" href="cloud.css?v=20260602-v103">
 <link rel="stylesheet" href="timeline.css?v=20260602-v103">
 <link rel="stylesheet" href="calendar.css?v=20260602-v102">
 <link rel="stylesheet" href="record-empty.css?v=20260602-v102">
@@ -909,8 +909,8 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="data.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="components.jsx?v=20260602-v103"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="timeline-sister-cards.jsx?v=20260602-v103"></script>
-<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260602-v103"></script>
+<script type="text/babel" src="timeline-sister-cards.jsx?v=20260602-v104"></script>
+<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260602-v104"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="quick-pickers.jsx?v=20260602-v103"></script>
 <script type="text/babel" src="timeline-modules.jsx?v=20260602-v102"></script>
@@ -920,14 +920,28 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="record-blank-scheme3.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank-scheme1-ceremony.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="search-page.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="cloud-publisher.jsx?v=20260602-v103"></script>
+<script type="text/babel" src="cloud-publisher.jsx?v=20260602-v104"></script>
 <script type="text/babel" src="voice-transcribe-recorder.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-interludes.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-async.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-demo.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="demo-scenes.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="demo-scenes.jsx?v=20260602-v103"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260602-v103"></script>
+<script type="text/babel" src="app.jsx?v=20260602-v104"></script>
+
+<!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
+<button id="resetDemo" style="
+  position:fixed;bottom:8px;right:8px;z-index:10001;
+  visibility:hidden;
+  padding:6px 12px;border-radius:6px;border:none;
+  background:rgba(0,0,0,0.6);color:#fff;font-size:11px;
+  cursor:pointer;font-family:inherit;
+" onclick="window.__resetDemo && window.__resetDemo()">重置演示</button>
+<script>
+if(new URLSearchParams(location.search).get('dev')==='1'){
+  document.getElementById('resetDemo').style.visibility='visible';
+}
+</script>
 
 <!-- ====== 编辑浮层 iframe ====== -->
 <div id="edit-modal-layer" style="

@@ -483,8 +483,72 @@ function TlVoiceInline({voice, text}){
   );
 }
 
+/** 演示专用：语音原文 + 流式打字 + 标签依次出现 */
+function DemoVoiceCard({entry, isNew}){
+  const TLTag = window.TLTag;
+  const [typedLen, setTypedLen] = React.useState(0);
+  const [typeDone, setTypeDone] = React.useState(false);
+  const [showTags, setShowTags] = React.useState([]);
+  const fullText = entry._demoFullText || '';
+  const demoTags = entry._demoTags || [];
+
+  React.useEffect(()=>{
+    if(!entry._demoTypewriter || !fullText) return;
+    let i = 0;
+    const iv = setInterval(()=>{
+      i++;
+      setTypedLen(i);
+      if(i >= fullText.length){
+        clearInterval(iv);
+        setTypeDone(true);
+        // 400ms 后开始显示标签
+        setTimeout(()=>{
+          demoTags.forEach((_,idx)=>{
+            setTimeout(()=>{
+              setShowTags(prev=>[...prev, idx]);
+              // 最后一个标签出现后通知阶段 6
+              if(idx === demoTags.length - 1){
+                setTimeout(()=>{
+                  window.dispatchEvent(new Event('demoTypewriterDone'));
+                }, 200);
+              }
+            }, idx * 120);
+          });
+        }, 400);
+      }
+    }, 60);
+    return ()=>clearInterval(iv);
+  }, [entry._demoTypewriter, fullText]);
+
+  return (
+    <div className={'tl-card tl-t5-card'+(isNew?' tl-demo-expand':'')} data-entry-id={entry.id}>
+      <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind="mixed" onEdit={window.openEditModal}/>
+      <section className="tl-t5-main">
+        <div className="tl-t5-body" style={{minHeight:24, lineHeight:'1.6', fontSize:15}}>
+          {fullText.substring(0, typedLen)}
+          {!typeDone && <span className="ai-caret"/>}
+        </div>
+        {showTags.length > 0 && (
+          <div className="tl-t5-tags" style={{display:'flex', gap:6, flexWrap:'wrap', marginTop:10}}>
+            {demoTags.map((tag, i)=>(
+              showTags.includes(i) ? (
+                <span key={i} className="tl-demo-tag-in" style={{animationDelay:(i * 0.12)+'s'}}>
+                  <TLTag tag={tag}/>
+                </span>
+              ) : null
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
 function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, typewriterBody, hideBodyUntilDrop, analysisProps}){
-  const tags = entry.tags || [];
+  // 演示专用语音卡片
+  if(entry._demoTypewriter) return <DemoVoiceCard entry={entry} isNew={isNew}/>;
+
+  const tags = entry.tags || []
   const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
   const hasAiNote = !!entry.aiNote;
   const hasAnalysis = !!analysisProps;
@@ -935,6 +999,6 @@ function SisterAnalysisCard({playAnimation, onCycleComplete, animateText}){
 
 Object.assign(window, {
   TlRecCardHead, TlRecKindIcon, inferRecordKind, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag, CardMoreMenu,
-  SegmentedRecordCard, VoiceRecordCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent,
+  SegmentedRecordCard, VoiceRecordCard, DemoVoiceCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent,
   scrollFeedContentIntoView,
 });

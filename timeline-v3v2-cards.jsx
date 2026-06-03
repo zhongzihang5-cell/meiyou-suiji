@@ -521,15 +521,23 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     <div
       ref={cardRef}
       className={shellClass}
+      data-entry-id={derivedId}
       style={{
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 4px', overflow:'hidden',
       }}
     >
       <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
-      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : 8}}>
+      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : (p.sourceFrom ? 0 : 8)}}>
         <V3v2PrimaryBody entry={p} showTags={showTags} tagsAnimate={staggerReveal && showTags}/>
       </div>
+      {p.sourceFrom && (
+        <div className={primary._sourceNew ? 'tl-demo-source-in' : ''} style={{
+          fontSize:11, color:TL_MUTED,
+          paddingTop:6, paddingBottom:8,
+          borderTop:'0.5px dashed '+TL_HAIR,
+        }}>{p.sourceFrom}</div>
+      )}
       {a && showAi && (
         <div className="v3-ai-stagger-in">
           <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>

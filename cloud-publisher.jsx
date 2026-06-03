@@ -69,7 +69,7 @@ function computeRadialCards(cards, config = RADIAL_MENU){
 
 const QUICK_CARDS_RADIAL = computeRadialCards(QUICK_CARDS);
 
-const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
+const DEMO_VOICE_LINE = '昨天下午来了姨妈，来之前，上午就开始头痛。';
 
 const DOCK_PLACEHOLDER = '记录生活点滴';
 
@@ -207,6 +207,7 @@ function DockPublisher({
   onFoodConfirm,
   onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
+  demoPhase, isDemoRunning,
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -432,13 +433,24 @@ function DockPublisher({
                 </div>
               ) : (
                 <div className={'dock-voice-wrap'+(recording?' is-recording':'')}>
+                  {/* 演示浮层指示器 */}
+                  {(recording || demoPhase === 'recognizing') && (
+                    <div className={'dock-voice-float'+(demoPhase === 'recognizing' ? ' is-recognizing' : '')}>
+                      <span className="dock-voice-float-text">
+                        {demoPhase === 'recognizing' ? '识别中...' : '正在听...'}
+                      </span>
+                      {demoPhase === 'recognizing' && (
+                        <span className="dock-voice-float-spinner"/>
+                      )}
+                    </div>
+                  )}
                   <div className="dock-voice-stage" aria-hidden="true">
                     <span className="dock-voice-shimmer"/>
                   </div>
                   <button
                     type="button"
                     className={'dock-voice-btn'+(recording?' recording':'')}
-                    onPointerDown={(e)=>{ e.preventDefault(); startRec(); }}
+                    onPointerDown={(e)=>{ e.preventDefault(); if(isDemoRunning) return; startRec(); }}
                     onPointerUp={stopRec}
                     onPointerLeave={recording ? stopRec : undefined}
                   >

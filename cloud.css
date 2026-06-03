@@ -1309,7 +1309,7 @@
   position:relative;
   min-height:40px;
   border-radius:10px;
-  overflow:hidden;
+  overflow:visible;
   background:linear-gradient(180deg, #f5f5f7 0%, #ececef 100%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.95),
@@ -1476,6 +1476,74 @@
 
 .fade-in{animation:fadeUp 0.28s cubic-bezier(0.2,0,0,1) both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ====== 演示浮层：正在听 / 识别中 ====== */
+.dock-voice-float{
+  position:absolute;
+  bottom:calc(100% + 10px);
+  left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.78);
+  color:#fff;
+  padding:8px 16px;
+  border-radius:999px;
+  font-size:13px;font-weight:500;
+  white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+  z-index:10;
+  animation:demoFloatIn .18s ease both;
+}
+@keyframes demoFloatIn{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.dock-voice-float-text{
+  animation:demoBreath 1s ease-in-out infinite;
+}
+.dock-voice-float.is-recognizing .dock-voice-float-text{
+  animation:none;
+}
+@keyframes demoBreath{0%,100%{opacity:1}50%{opacity:.7}}
+.dock-voice-float-spinner{
+  width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ====== 演示卡片入场 ====== */
+.tl-item-enter{
+  animation:tlItemEnter .2s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes tlItemEnter{
+  from{opacity:0;transform:translateY(-12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ====== 演示记录3占位展开 ====== */
+.tl-demo-expand{
+  animation:tlDemoExpand .28s cubic-bezier(0.2,0,0,1) both;
+  overflow:hidden;
+}
+@keyframes tlDemoExpand{
+  from{opacity:0;max-height:0}
+  to{opacity:1;max-height:600px}
+}
+
+/* ====== 演示标签淡入 ====== */
+.tl-demo-tag-in{
+  animation:tlDemoTagIn .15s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes tlDemoTagIn{
+  from{opacity:0;transform:scale(0.92)}
+  to{opacity:1;transform:scale(1)}
+}
+
+/* ====== 演示来源标签淡入 ====== */
+.tl-demo-source-in{
+  animation:tlDemoSourceIn .2s ease both;
+}
+@keyframes tlDemoSourceIn{
+  from{opacity:0}to{opacity:1}
+}
 
 /* ============ 心情快捷选项（加号 → 心情） ============ */
 .mood-quick{

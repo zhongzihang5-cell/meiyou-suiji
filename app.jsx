@@ -67,6 +67,26 @@ function App(){
 
   const recordFeedback = !!scene.record.recordFeedback;
 
+  // ====== 演示流程状态 ======
+  const [isDemoRunning, setIsDemoRunning] = useState(false);
+  const [demoPhase, setDemoPhase] = useState(null); // null | 'listening' | 'recognizing'
+  const demoIdsRef = useRef([]); // 追踪演示卡片 id
+
+  // 暴露重置函数给全局 resetDemo 按钮
+  React.useEffect(()=>{
+    window.__resetDemo = ()=>{
+      if(!demoIdsRef.current.length) return;
+      setTimeline(blocks=>blocks.map(b=>{
+        if(b.type!=='day') return b;
+        const items = (b.items||[]).filter(it=>!demoIdsRef.current.includes(it.id));
+        return {...b, items, entries:undefined};
+      }));
+      demoIdsRef.current = [];
+      setIsDemoRunning(false);
+      setDemoPhase(null);
+    };
+  }, []);
+
   React.useEffect(()=>{
     const handler = ()=>{
       const fn = moodGuideQueueRef.current;
@@ -307,21 +327,138 @@ function App(){
     pushToTimeline(entry, text);
   };
 
+  // ====== 清除上一轮演示卡片 ======
+  const clearDemoCards = (cb)=>{
+    if(!demoIdsRef.current.length){ cb?.(); return; }
+    // 淡出 DOM
+    demoIdsRef.current.forEach(id=>{
+      const el = document.querySelector('[data-entry-id="'+id+'"]');
+      if(el){ el.style.transition='opacity .2s'; el.style.opacity='0'; }
+    });
+    const oldIds = [...demoIdsRef.current];
+    setTimeout(()=>{
+      setTimeline(blocks=>blocks.map(b=>{
+        if(b.type!=='day') return b;
+        const items = (b.items||[]).filter(it=>!oldIds.includes(it.id));
+        return {...b, items, entries:undefined};
+      }));
+      demoIdsRef.current = [];
+      cb?.();
+    }, 220);
+  };
+
+  // ====== 6 阶段演示流程 ======
+  const runDemoFlow = ()=>{
+    setIsDemoRunning(true);
+    setDemoPhase('recognizing');
+
+    const demoR1Id = 'demo-r1-'+Date.now();
+    const demoR2Id = 'demo-r2-'+Date.now();
+    const demoR3Id = 'demo-r3-'+Date.now();
+    demoIdsRef.current = [demoR1Id, demoR2Id, demoR3Id];
+
+    const DEMO_TEXT = '昨天下午来了姨妈，来之前，上午就开始头痛。';
+
+    // 阶段 2：识别中 800ms → 浮层消失
+    setTimeout(()=>{
+      setDemoPhase(null);
+
+      // 阶段 3：插入记录 1、2 到 5-17 block（200ms 后）
+      setTimeout(()=>{
+        const r1 = {
+          kind:'record-group', id:demoR1Id, isNew:true, _demoCard:true,
+          primary:{ id:demoR1Id, time:'10:00', kind:'text',
+            text:'头痛',
+            tags:[{cat:'症状', val:'头痛', icon:'sym'}],
+          },
+        };
+        const r2 = {
+          kind:'record-group', id:demoR2Id, isNew:true, _demoCard:true,
+          primary:{ id:demoR2Id, time:'16:00', kind:'text',
+            text:'月经开始',
+            tags:[{cat:'月经', val:'', icon:'period'}],
+          },
+        };
+        setTimeline(blocks=>{
+          let next = window.appendTimelineEntry(blocks, r1, {dayId:'d-5-17'});
+          next = window.appendTimelineEntry(next, r2, {dayId:'d-5-17'});
+          return next;
+        });
+
+        // 阶段 4：停留 200ms，追加记录 3 占位
+        setTimeout(()=>{
+          const r3 = {
+            kind:'voice-card', id:demoR3Id, isNew:true, _demoCard:true,
+            time:'12:00',
+            body:'',
+            voiceText:'',
+            voice:{ duration:'0:05' },
+            tagLayout:'t5',
+            tags:[],
+            _demoTypewriter: true,
+            _demoFullText: DEMO_TEXT,
+            _demoTags:[
+              {cat:'月经', val:'开始', icon:'period'},
+              {cat:'症状', val:'头痛', icon:'sym'},
+            ],
+          };
+          setTimeline(blocks=>{
+            const todayId = blocks.find(b=>b.type==='day'&&b.isToday)?.id;
+            return window.appendTimelineEntry(blocks, r3, {dayId: todayId});
+          });
+
+          // 滚动到记录 3
+          setTimeout(()=>{
+            const el = document.querySelector('[data-entry-id="'+demoR3Id+'"]');
+            if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+          }, 80);
+
+          // 阶段 5 由 SegmentedRecordCard 的 TypewriterText 完成回调驱动
+          // 阶段 6：回填来源标签
+          // 通过 window event 监听 typewriter 完成
+          const onTypewriterDone = ()=>{
+            window.removeEventListener('demoTypewriterDone', onTypewriterDone);
+            // 等标签动画完成（400ms + 120ms*2 + 150ms = ~790ms）后回填来源
+            setTimeout(()=>{
+              // 回填记录 1、2 的 sourceFrom
+              setTimeline(blocks=>blocks.map(b=>{
+                if(b.type!=='day') return b;
+                const items = (b.items||[]).map(it=>{
+                  if(it.id===demoR1Id || it.id===demoR2Id){
+                    return {...it, primary:{...it.primary, sourceFrom:'🎤 来自 6-03 12:00 的语音'}, _sourceNew:true};
+                  }
+                  return it;
+                });
+                return {...b, items, entries:undefined};
+              }));
+              // 阶段 6 完成，解锁
+              setTimeout(()=>{
+                setIsDemoRunning(false);
+              }, 250);
+            }, 900);
+          };
+          window.addEventListener('demoTypewriterDone', onTypewriterDone);
+
+        }, 200); // 阶段 4 delay
+      }, 200); // 阶段 3 delay after float disappears
+    }, 800); // 阶段 2 ASR delay
+  };
+
   const submitVoice = (transcript, durSec)=>{
     markUserRecorded();
-    if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
-      const entry = window.buildScene2VoiceEntry(durSec);
-      pushToTimeline(entry, entry.voiceText);
-      return;
-    }
-    const text = transcript.trim();
-    if(!text) return;
-    const hits = window.extractKeywords(text);
-    const entry = buildTimelineEntry(text, hits, {
-      voice: { duration: window.formatVoiceDur(durSec) },
-    });
-    if(recordFeedback && tryStartFirstDrop(entry, text)) return;
-    pushToTimeline(entry, text);
+    setDemoPhase('listening');
+    // 清除上一轮演示卡片，然后启动新流程
+    clearDemoCards(()=> runDemoFlow());
+
+    // 真实 ASR 接入时启用以下逻辑：
+    // const text = transcript.trim();
+    // if(!text) return;
+    // const hits = window.extractKeywords(text);
+    // const entry = buildTimelineEntry(text, hits, {
+    //   voice: { duration: window.formatVoiceDur(durSec) },
+    // });
+    // if(recordFeedback && tryStartFirstDrop(entry, text)) return;
+    // pushToTimeline(entry, text);
   };
 
   const submitQuickMark = (mark)=>{
@@ -522,6 +659,8 @@ function App(){
           defaultInputMode={showScheme1Hints ? 'voice' : 'text'}
           showScheme3Bubble={showScheme3Bubble}
           highlightScheme3Input={highlightScheme3Input}
+          demoPhase={demoPhase}
+          isDemoRunning={isDemoRunning}
         />
         </>
         ) : (
@@ -575,6 +714,8 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
+          demoPhase={demoPhase}
+          isDemoRunning={isDemoRunning}
         />
         )}
         </>
