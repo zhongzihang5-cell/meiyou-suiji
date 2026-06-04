@@ -32,29 +32,32 @@ function DockKbdCircleIco({size=22}){
   );
 }
 
-/** 方案 I · 卡片扇 — 4 项快捷发布（落点由放射菜单算法动态计算） */
+/** 方案 I · 卡片扇 — 4 项快捷发布
+ *  布局：以加号为圆心，开口朝左上的 1/4 扇形，
+ *  4 项按数组顺序均匀落在 -180°(左) → -90°(上) 区间，间隔 30°。
+ *  角度约定：0° 朝右、逆时针为正（数学惯例），故 -180° 即 180°、-90° 即 90°。
+ */
 const QUICK_CARDS = [
-  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },
-  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状' },
-  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重' },
-  { id:'diet', label:'饮食', hint:'餐食速记', title:'今日饮食' },
+  { id:'diet', label:'饮食', hint:'餐食速记', title:'今日饮食' },    // -180° 正左
+  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },    // -150°
+  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重' },   // -120°
+  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状' },  // -90° 正上
 ];
 
 const RADIAL_MENU = {
-  radius: 124,
-  angle: 140,
-  center: 180,
+  radius: 140,        // 加大半径，避开 60px 按钮间距过近
+  startAngle: 180,    // 第一项：正左
+  endAngle: 90,       // 末项：正上
   stagger: 0.04,
   duration: 0.5,
 };
 
 function computeRadialCards(cards, config = RADIAL_MENU){
   const N = cards.length;
-  const { radius: R, angle: WHOLE, center: CENTER, stagger: STAG } = config;
-  const step = N > 1 ? WHOLE / (N - 1) : 0;
-  const start = CENTER - WHOLE / 2;
+  const { radius: R, startAngle, endAngle, stagger: STAG } = config;
+  const step = N > 1 ? (endAngle - startAngle) / (N - 1) : 0;
   return cards.map((card, i)=>{
-    const a = (start + step * i) * Math.PI / 180;
+    const a = (startAngle + step * i) * Math.PI / 180;
     const x = R * Math.cos(a);
     const y = -R * Math.sin(a);
     return {
@@ -164,8 +167,9 @@ function QuickCardFan({
               tabIndex={open && !selected ? 0 : -1}
             >
               <span className="quick-card-fan-ico">
-                <QuickCardIcon kind={card.id} size={32}/>
+                <QuickCardIcon kind={card.id} size={20}/>
               </span>
+              <span className="quick-card-fan-lbl">{card.label}</span>
             </button>
 
             <div className="quick-card-fan-panel" aria-hidden={!isSel}>
