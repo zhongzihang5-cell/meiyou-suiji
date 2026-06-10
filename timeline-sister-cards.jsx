@@ -62,11 +62,71 @@ function inferRecordKind(entry){
   return { kind:'text', label:'文字' };
 }
 
-function TlRecCardHead({time}){
+/** 卡片右上角 ··· 更多菜单 */
+function CardMoreMenu({delayMs = 0, entryId, entryKind, onEdit}){
+  const [open, setOpen] = React.useState(false);
+  const [visible, setVisible] = React.useState(!delayMs);
+  const wrapRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!delayMs){ setVisible(true); return; }
+    const tm = setTimeout(()=>setVisible(true), delayMs);
+    return ()=>clearTimeout(tm);
+  }, [delayMs]);
+
+  React.useEffect(()=>{
+    if(!open) return;
+    const handler = (e)=>{
+      if(wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    // 延一帧注册，避免当次 click 同步触发 capture 关闭
+    const raf = requestAnimationFrame(()=>{
+      document.addEventListener('pointerdown', handler);
+    });
+    return ()=>{
+      cancelAnimationFrame(raf);
+      document.removeEventListener('pointerdown', handler);
+    };
+  }, [open]);
+
+  return (
+    <div className={'card-more-wrap'+(visible ? ' is-visible' : '')} ref={wrapRef}>
+      <button
+        type="button"
+        className="card-more-btn"
+        onClick={()=>{ if(visible) setOpen(v=>!v); }}
+        aria-label="更多操作"
+        aria-expanded={open}
+        tabIndex={visible ? 0 : -1}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <circle cx="3" cy="8" r="1.4"/>
+          <circle cx="8" cy="8" r="1.4"/>
+          <circle cx="13" cy="8" r="1.4"/>
+        </svg>
+      </button>
+      {open && (
+        <div className="card-more-menu">
+          <button type="button" className="card-more-menu-item" onClick={()=>{ setOpen(false); onEdit?.(entryId, entryKind); }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span>编辑</span>
+          </button>
+          <button type="button" className="card-more-menu-item card-more-menu-item--danger" onClick={()=>setOpen(false)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span>删除</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TlRecCardHead({time, isNew, entryId, entryKind, onEdit}){
   if(!time) return null;
   return (
     <div className="tl-rec-card-hd">
       <span className="tl-rec-card-time">{time}</span>
+      <CardMoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} onEdit={onEdit}/>
     </div>
   );
 }
@@ -423,8 +483,72 @@ function TlVoiceInline({voice, text}){
   );
 }
 
+/** 演示专用：语音原文 + 流式打字 + 标签依次出现 */
+function DemoVoiceCard({entry, isNew}){
+  const TLTag = window.TLTag;
+  const [typedLen, setTypedLen] = React.useState(0);
+  const [typeDone, setTypeDone] = React.useState(false);
+  const [showTags, setShowTags] = React.useState([]);
+  const fullText = entry._demoFullText || '';
+  const demoTags = entry._demoTags || [];
+
+  React.useEffect(()=>{
+    if(!entry._demoTypewriter || !fullText) return;
+    let i = 0;
+    const iv = setInterval(()=>{
+      i++;
+      setTypedLen(i);
+      if(i >= fullText.length){
+        clearInterval(iv);
+        setTypeDone(true);
+        // 400ms 后开始显示标签
+        setTimeout(()=>{
+          demoTags.forEach((_,idx)=>{
+            setTimeout(()=>{
+              setShowTags(prev=>[...prev, idx]);
+              // 最后一个标签出现后通知阶段 6
+              if(idx === demoTags.length - 1){
+                setTimeout(()=>{
+                  window.dispatchEvent(new Event('demoTypewriterDone'));
+                }, 200);
+              }
+            }, idx * 120);
+          });
+        }, 400);
+      }
+    }, 60);
+    return ()=>clearInterval(iv);
+  }, [entry._demoTypewriter, fullText]);
+
+  return (
+    <div className={'tl-card tl-t5-card'+(isNew?' tl-demo-expand':'')} data-entry-id={entry.id}>
+      <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind="mixed" onEdit={window.openEditModal}/>
+      <section className="tl-t5-main">
+        <div className="tl-t5-body" style={{minHeight:24, lineHeight:'1.6', fontSize:15}}>
+          {fullText.substring(0, typedLen)}
+          {!typeDone && <span className="ai-caret"/>}
+        </div>
+        {showTags.length > 0 && (
+          <div className="tl-t5-tags" style={{display:'flex', gap:6, flexWrap:'wrap', marginTop:10}}>
+            {demoTags.map((tag, i)=>(
+              showTags.includes(i) ? (
+                <span key={i} className="tl-demo-tag-in" style={{animationDelay:(i * 0.12)+'s'}}>
+                  <TLTag tag={tag}/>
+                </span>
+              ) : null
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
 function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, typewriterBody, hideBodyUntilDrop, analysisProps}){
-  const tags = entry.tags || [];
+  // 演示专用语音卡片
+  if(entry._demoTypewriter) return <DemoVoiceCard entry={entry} isNew={isNew}/>;
+
+  const tags = entry.tags || []
   const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
   const hasAiNote = !!entry.aiNote;
   const hasAnalysis = !!analysisProps;
@@ -438,8 +562,8 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   );
 
   return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')}>
-      <TlRecCardHead time={entry.time}/>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')} data-entry-id={entry.id}>
+      <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind={entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick'} onEdit={window.openEditModal}/>
       <section className="tl-t5-main">
         {isVtLive ? (
           <div className="tl-voice-block tl-vt-live-body">
@@ -874,7 +998,7 @@ function SisterAnalysisCard({playAnimation, onCycleComplete, animateText}){
 }
 
 Object.assign(window, {
-  TlRecCardHead, TlRecKindIcon, inferRecordKind, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag,
-  SegmentedRecordCard, VoiceRecordCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent,
+  TlRecCardHead, TlRecKindIcon, inferRecordKind, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag, CardMoreMenu,
+  SegmentedRecordCard, VoiceRecordCard, DemoVoiceCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent,
   scrollFeedContentIntoView,
 });

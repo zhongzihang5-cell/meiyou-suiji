@@ -211,12 +211,23 @@ function TabBar({active='note', onChange}){
   const I = window.Icon;
   const tabs = [
     {id:'home', label:'美柚', custom:(
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M12 3.5a8.5 8.5 0 0 0-2 16.7c0 .4.2.8 1 .8s1-.5 1-1v-2.5a2.5 2.5 0 0 1 2 2.5c0 .5.2 1 1 1s1-.4 1-.8a8.5 8.5 0 0 0-4-16.7z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
-        <path d="M12 3.5c1.5-1.5 3-1.5 3 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+      <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.2"/>
+        <ellipse cx="24" cy="24" rx="3" ry="8" fill="currentColor"/>
+        <ellipse cx="24" cy="24" rx="3" ry="8" fill="currentColor" transform="rotate(60 24 24)"/>
+        <ellipse cx="24" cy="24" rx="3" ry="8" fill="currentColor" transform="rotate(120 24 24)"/>
+        <circle cx="24" cy="24" r="2.5" fill="currentColor"/>
       </svg>
     )},
-    {id:'cal', label:'记录', custom:<I name="calendar" size={22} stroke={1.6}/>},
+    {id:'cal', label:'记录', custom:(
+      <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+        <rect x="6" y="10" width="36" height="32" rx="5" stroke="currentColor" strokeWidth="3.2"/>
+        <line x1="15" y1="6" x2="15" y2="14" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round"/>
+        <line x1="33" y1="6" x2="33" y2="14" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round"/>
+        <line x1="6" y1="20" x2="42" y2="20" stroke="currentColor" strokeWidth="3.2"/>
+        <text x="24" y="37" textAnchor="middle" fill="currentColor" fontSize="18" fontWeight="700" fontFamily="PingFang SC, sans-serif">3</text>
+      </svg>
+    )},
     {id:'note', label:'点滴', custom:<I name="mic" size={22} stroke={1.6}/>},
     {id:'cash', label:'返现', custom:(
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">

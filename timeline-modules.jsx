@@ -25,7 +25,7 @@ function extractWeightFromItem(item){
 }
 
 function summarizeDayItems(items, day){
-  if(day?.summaryStats?.length) return { stats: day.summaryStats };
+  // 始终动态计算，不使用写死的 summaryStats
 
   let count = 0;
   let kcal = 0;
@@ -73,7 +73,7 @@ function resolveDayTitleLabel(day, allDays){
   if(todayIdx >= 0 && idx === todayIdx - 1) return '昨天';
   if(todayIdx >= 0 && idx === todayIdx - 2) return '前天';
   const { month, day: dayNum } = parseDayParts(day.date);
-  return `${month}/${dayNum}`;
+  return `${month}月${dayNum}日`;
 }
 
 function formatDayMeta(day, titleLabel){

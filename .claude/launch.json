@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "index",
-      "runtimeExecutable": "/usr/bin/python3",
-      "runtimeArgs": ["/Users/wangyingyue/Documents/diandi_record/serve.py"],
+      "runtimeExecutable": "/usr/bin/ruby",
+      "runtimeArgs": ["-e", "require 'webrick'; s=WEBrick::HTTPServer.new(:Port=>8765,:DocumentRoot=>'/Users/wangyingyue/Documents/diandi_record'); trap('INT'){s.shutdown}; s.start"],
       "port": 8765
     }
   ]

@@ -552,6 +552,15 @@
 .tl-gap-divider.tl-rail-break::before{
   display:none;
 }
+.tl-pull-hint{
+  display:inline-block;
+  animation:pullDownHint 2s ease-in-out infinite;
+}
+@keyframes pullDownHint{
+  0%  {transform:translateY(0);opacity:.55}
+  50% {transform:translateY(4px);opacity:1}
+  100%{transform:translateY(0);opacity:.55}
+}
 
 /* 今日引导 */
 .tl-today-guide{
@@ -587,17 +596,31 @@
 
 /* 流头部 */
 .stream-header{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:20;
   display:flex;
-  align-items:flex-end;
+  align-items:center;
   justify-content:space-between;
-  padding:4px 2px 18px;
+  padding:8px 18px 14px;
+  background:rgba(250,247,244,0.92);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.stream-header-side{
+  width:28px;
+  flex-shrink:0;
 }
 .stream-title{
-  font-size:22px;
+  flex:1;
+  text-align:center;
+  font-size:17px;
   font-weight:500;
   color:var(--my-text-primary);
-  line-height:1.2;
-  letter-spacing:-0.2px;
+  line-height:1.4;
+  letter-spacing:0;
 }
 .stream-sub{
   font-size:12px;
@@ -1031,6 +1054,56 @@
   gap:8px;
   margin-bottom:10px;
 }
+
+/* ---- 卡片 ··· 更多菜单 ---- */
+.card-more-wrap{
+  position:relative;
+  margin-left:auto;
+  flex-shrink:0;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease;
+}
+.card-more-wrap.is-visible{
+  opacity:1;
+  pointer-events:auto;
+}
+.card-more-btn{
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;
+  color:var(--my-text-tertiary);
+  cursor:pointer;border-radius:6px;
+  transition:background .15s;
+}
+.card-more-btn:active{background:var(--my-bg)}
+.card-more-menu{
+  position:absolute;
+  right:0;top:calc(100% + 4px);
+  z-index:50;
+  min-width:110px;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.13);
+  padding:4px 0;
+  animation:cardMenuIn .16s cubic-bezier(.2,0,0,1) both;
+}
+@keyframes cardMenuIn{
+  from{opacity:0;transform:scale(.92) translateY(-4px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+.card-more-menu-item{
+  display:flex;align-items:center;gap:8px;
+  width:100%;padding:10px 14px;
+  border:none;background:transparent;
+  font:inherit;font-size:14px;
+  color:var(--my-text-primary);
+  cursor:pointer;
+  transition:background .12s;
+}
+.card-more-menu-item:active{background:var(--my-bg)}
+.card-more-menu-item--danger{color:var(--my-danger)}
+.card-more-menu-item svg{flex-shrink:0}
 .tl-rec-card-time{
   font-size:11.5px;
   font-weight:400;

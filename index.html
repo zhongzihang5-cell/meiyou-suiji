@@ -7,8 +7,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
-<link rel="stylesheet" href="cloud.css?v=20260602-v102">
-<link rel="stylesheet" href="timeline.css?v=20260602-v102">
+<link rel="stylesheet" href="cloud.css?v=20260604-v107">
+<link rel="stylesheet" href="timeline.css?v=20260602-v104">
 <link rel="stylesheet" href="calendar.css?v=20260602-v102">
 <link rel="stylesheet" href="record-empty.css?v=20260602-v102">
 <link rel="stylesheet" href="record-blank.css?v=20260602-v102">
@@ -906,28 +906,114 @@ window.__BUILD__ = '20260522-v101-dev';
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
 <script type="text/babel" src="icons.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="data.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="components.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="data.jsx?v=20260602-v103"></script>
+<script type="text/babel" src="components.jsx?v=20260602-v103"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="timeline-sister-cards.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="timeline-sister-cards.jsx?v=20260602-v104"></script>
+<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260602-v104"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="quick-pickers.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="timeline-modules.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="timeline.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="quick-pickers.jsx?v=20260602-v103"></script>
+<script type="text/babel" src="timeline-modules.jsx?v=20260602-v104"></script>
+<script type="text/babel" src="timeline.jsx?v=20260602-v103"></script>
 <script type="text/babel" src="record-empty.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank-scheme3.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank-scheme1-ceremony.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="search-page.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="cloud-publisher.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="cloud-publisher.jsx?v=20260604-v107"></script>
 <script type="text/babel" src="voice-transcribe-recorder.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-interludes.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-async.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-demo.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="demo-scenes.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="demo-scenes.jsx?v=20260602-v103"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="app.jsx?v=20260602-v104"></script>
+
+<!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
+<button id="resetDemo" style="
+  position:fixed;bottom:8px;right:8px;z-index:10001;
+  visibility:hidden;
+  padding:6px 12px;border-radius:6px;border:none;
+  background:rgba(0,0,0,0.6);color:#fff;font-size:11px;
+  cursor:pointer;font-family:inherit;
+" onclick="window.__resetDemo && window.__resetDemo()">重置演示</button>
+<script>
+if(new URLSearchParams(location.search).get('dev')==='1'){
+  document.getElementById('resetDemo').style.visibility='visible';
+}
+</script>
+
+<!-- ====== 编辑浮层 iframe ====== -->
+<div id="edit-modal-layer" style="
+  position:fixed;inset:0;z-index:9999;display:none;
+  background:transparent;
+">
+  <iframe id="edit-iframe" style="
+    width:100%;height:100%;border:none;background:#fff;
+    transform:translateY(100%);
+    transition:transform 280ms cubic-bezier(0.2,0,0,1);
+  " src="about:blank"></iframe>
+</div>
+<script>
+(function(){
+  var layer = document.getElementById('edit-modal-layer');
+  var iframe = document.getElementById('edit-iframe');
+  var editingEntryId = null;
+
+  window.openEditModal = function(entryId, entryKind){
+    editingEntryId = entryId;
+    var scene = (['mixed','text','image','quick'].indexOf(entryKind) >= 0) ? entryKind : 'text';
+    iframe.src = 'diandi_edit.html?scene=' + scene;
+    layer.style.display = 'block';
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        iframe.style.transform = 'translateY(0)';
+      });
+    });
+  };
+
+  function closeEditModal(cb){
+    iframe.style.transform = 'translateY(100%)';
+    setTimeout(function(){
+      layer.style.display = 'none';
+      iframe.src = 'about:blank';
+      if(cb) cb();
+    }, 260);
+  }
+
+  window.addEventListener('message', function(e){
+    if(!e.data || e.data.type !== 'edit-close') return;
+    var action = e.data.action;
+    closeEditModal(function(){
+      if(action === 'save'){
+        window.__showEditToast && window.__showEditToast('已保存');
+      } else if(action === 'delete'){
+        // 从 timeline DOM 移除对应卡片
+        if(editingEntryId){
+          var card = document.querySelector('[data-entry-id="'+editingEntryId+'"]');
+          if(card){
+            var rail = card.closest('.tl-rail-node');
+            if(rail) rail.style.display = 'none';
+            else card.style.display = 'none';
+          }
+        }
+        window.__showEditToast && window.__showEditToast('记录已删除');
+      }
+      editingEntryId = null;
+    });
+  });
+
+  // Toast helper — 借用已有 Toast 系统或简单实现
+  window.__showEditToast = function(msg){
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.78);color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:10000;opacity:1;transition:opacity .3s;pointer-events:none;font-family:PingFang SC,sans-serif;';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity='0'; }, 1500);
+    setTimeout(function(){ t.remove(); }, 1800);
+  };
+})();
+</script>
 
 </body>
 </html>

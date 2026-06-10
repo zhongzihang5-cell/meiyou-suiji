@@ -534,7 +534,8 @@
   transform:translateX(-50%);
   width:100%;
   max-width:390px;
-  bottom:var(--my-dock-float-b);
+  /* 紧贴底部 dock-bar 上方 8px：tabbar 高 + dock-bar 高 68px + gap 8px */
+  bottom:calc(var(--my-tabbar-h) + 76px);
   height:0;
   z-index:91;
   pointer-events:none;
@@ -602,20 +603,42 @@
   top:auto;
 }
 .quick-float-wrap.is-quick-active .quick-card-fan{
-  bottom:var(--my-dock-float-b);
+  bottom:calc(var(--my-tabbar-h) + 76px);
 }
 
-@keyframes qcf-fly-out{
-  0%{transform:translate(0,0) scale(.4) rotate(var(--rm-spin));opacity:0}
-  18%{opacity:1}
-  55%{transform:translate(calc(var(--x) * var(--rm-far)), calc(var(--y) * var(--rm-far))) scale(1) rotate(0deg)}
-  78%{transform:translate(calc(var(--x) * var(--rm-near)), calc(var(--y) * var(--rm-near))) scale(1) rotate(0deg)}
-  100%{transform:translate(var(--x), var(--y)) scale(1) rotate(0deg);opacity:1}
+/* Path-style 弧形展开：0→过冲(far)→回落(near)→稳定(shift) */
+@keyframes qcf-expand{
+  0%{transform:translate(0,0);opacity:0}
+  50%{transform:translate(calc(var(--x) * var(--rm-far)), calc(var(--y) * var(--rm-far)));opacity:1}
+  70%{transform:translate(calc(var(--x) * var(--rm-near)), calc(var(--y) * var(--rm-near)));opacity:1}
+  100%{transform:translate(var(--x), var(--y));opacity:1}
 }
-@keyframes qcf-fly-in{
-  0%{transform:translate(var(--x), var(--y)) scale(1) rotate(0deg);opacity:1}
-  100%{transform:translate(0,0) scale(.2) rotate(calc(var(--rm-spin) * -1));opacity:0}
+/* Path-style 收起：稳定→回落→过冲→原点（更脆，时长更短） */
+@keyframes qcf-contract{
+  0%{transform:translate(var(--x), var(--y));opacity:1}
+  30%{transform:translate(calc(var(--x) * var(--rm-near)), calc(var(--y) * var(--rm-near)));opacity:1}
+  50%{transform:translate(calc(var(--x) * var(--rm-far)), calc(var(--y) * var(--rm-far)));opacity:1}
+  100%{transform:translate(0,0);opacity:0}
 }
+/* 子按钮图标：展开时逆时针 1/4 圈到位；收起时反向旋转 */
+@keyframes qcf-icon-expand{
+  0%{transform:rotate(-90deg)}
+  70%,100%{transform:rotate(0deg)}
+}
+@keyframes qcf-icon-contract{
+  0%{transform:rotate(0deg);opacity:1}
+  100%{transform:rotate(-180deg);opacity:1}
+}
+/* label 淡入淡出 */
+@keyframes qcf-lbl-show{
+  0%{opacity:0}
+  100%{opacity:1}
+}
+@keyframes qcf-lbl-hide{
+  0%{opacity:1}
+  100%{opacity:0}
+}
+/* mood 分支：原 soft-in 复用 */
 @keyframes qcf-soft-in{
   0%{transform:translate(var(--x), var(--y)) scale(1);opacity:1}
   100%{transform:translate(0,0) scale(.55);opacity:0}
@@ -625,15 +648,15 @@
   position:absolute;
   left:50%;
   top:50%;
-  width:50px;
-  height:50px;
-  margin-left:-25px;
-  margin-top:-25px;
+  width:60px;
+  height:60px;
+  margin-left:-30px;
+  margin-top:-30px;
   border-radius:50%;
   background:transparent;
   overflow:visible;
   box-shadow:none;
-  transform:translate(0,0) scale(.3) rotate(var(--rm-spin));
+  transform:translate(0,0);
   opacity:0;
   transform-origin:center center;
   pointer-events:none;
@@ -645,15 +668,33 @@
 .quick-card-fan-item::after{
   content:none;
 }
+/* Path expand：曲线 ease，时长 0.5s，错峰由 --d-out 控制 */
 .quick-card-fan.is-open:not(.has-selected) .quick-card-fan-item{
   pointer-events:auto;
-  transform:translate(var(--x), var(--y)) scale(1) rotate(0deg);
+  transform:translate(var(--x), var(--y));
   opacity:1;
-  animation:qcf-fly-out var(--rm-duration) cubic-bezier(.2,.7,.3,1) both;
+  animation:qcf-expand var(--rm-duration) ease backwards;
   animation-delay:var(--d-out);
 }
+.quick-card-fan.is-open:not(.has-selected) .quick-card-fan-ico{
+  animation:qcf-icon-expand calc(var(--rm-duration) * 1.2) ease-out both;
+  animation-delay:var(--d-out);
+}
+.quick-card-fan.is-open:not(.has-selected) .quick-card-fan-lbl{
+  animation:qcf-lbl-show var(--rm-duration) ease both;
+  animation-delay:var(--d-out);
+}
+/* Path contract：更脆，0.35s + 不对称曲线 */
 .quick-card-fan.is-closing:not(.has-selected) .quick-card-fan-item{
-  animation:qcf-fly-in calc(var(--rm-duration) * .8) cubic-bezier(.5,0,.6,1) forwards;
+  animation:qcf-contract calc(var(--rm-duration) * .7) ease both;
+  animation-delay:var(--d-in);
+}
+.quick-card-fan.is-closing:not(.has-selected) .quick-card-fan-ico{
+  animation:qcf-icon-contract calc(var(--rm-duration) * .7) ease both;
+  animation-delay:var(--d-in);
+}
+.quick-card-fan.is-closing:not(.has-selected) .quick-card-fan-lbl{
+  animation:qcf-lbl-hide calc(var(--rm-duration) * .5) ease both;
   animation-delay:var(--d-in);
 }
 .quick-card-fan.to-mood.is-closing:not(.has-selected) .quick-card-fan-item{
@@ -714,19 +755,36 @@
   inset:0;
   border:0;
   background:#fff;
-  border:1px solid rgba(0,0,0,0.08);
+  border:0.5px solid rgba(0,0,0,0.08);
   border-radius:50%;
-  box-shadow:0 8px 20px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow:var(--my-shadow-1, 0 4px 12px rgba(0,0,0,0.10));
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:2px;
+  gap:4px;
   cursor:pointer;
   padding:0;
   touch-action:manipulation;
   transition:opacity 200ms ease, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
   z-index:1;
+  color:#323232;
+}
+/* 子按钮文字 label（饮食 / 心情 / 体重 / 症状）— 包进圆形按钮内 */
+.quick-card-fan-lbl{
+  position:static;
+  transform:none;
+  font-size:11px;
+  line-height:1;
+  white-space:nowrap;
+  color:rgba(0,0,0,0.8);
+  font-family:'PingFang SC','SF Pro Text','Helvetica Neue',Arial,sans-serif;
+  font-weight:400;
+  pointer-events:none;
+  opacity:0;
+}
+.quick-card-fan-item.is-selected .quick-card-fan-lbl{
+  display:none;
 }
 .quick-card-fan-item.is-selected .quick-card-fan-face{
   opacity:0;
@@ -735,8 +793,8 @@
   transition:opacity 180ms ease 60ms, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
 }
 .quick-card-fan-ico{
-  width:32px;
-  height:32px;
+  width:20px;
+  height:20px;
   border-radius:50%;
   background:transparent;
   display:flex;
@@ -760,18 +818,7 @@
   gap:0;
   text-align:center;
 }
-.quick-card-fan-lbl{
-  font-size:9px;
-  font-weight:500;
-  color:var(--my-text-primary);
-  line-height:1.1;
-  white-space:nowrap;
-  background:transparent;
-  border:none;
-  border-radius:0;
-  padding:0;
-  box-shadow:none;
-}
+/* 旧 .quick-card-fan-lbl 9px 已被下方 12px 定义取代 */
 .quick-card-fan-hint{
   display:none;
 }
@@ -845,10 +892,30 @@
   z-index:5;
   touch-action:manipulation;
   transform-origin:center center;
-  transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .25s;
+  transition:transform .4s ease, background .25s;
+  overflow:hidden;
+}
+/* Path-style 置灰层：展开态盖在按钮上方变灰 */
+.quick-card-fab::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:#cccccc;
+  opacity:0;
+  transition:opacity .4s ease;
+  pointer-events:none;
+  z-index:0;
+}
+.quick-card-fab.is-open::before{
+  opacity:1;
+}
+.quick-card-fab > *{
+  position:relative;
+  z-index:1;
 }
 .quick-card-fab.is-open{
-  transform:rotate(45deg);
+  transform:rotate(-135deg);
 }
 .quick-card-fab.is-covered{
   z-index:3;
@@ -857,7 +924,7 @@
   transform:scale(0.92);
 }
 .quick-card-fab.is-open:active{
-  transform:rotate(45deg) scale(0.92);
+  transform:rotate(-135deg) scale(0.92);
 }
 
 /* 卡片内紧凑选择器 */
@@ -1309,7 +1376,7 @@
   position:relative;
   min-height:40px;
   border-radius:10px;
-  overflow:hidden;
+  overflow:visible;
   background:linear-gradient(180deg, #f5f5f7 0%, #ececef 100%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.95),
@@ -1476,6 +1543,74 @@
 
 .fade-in{animation:fadeUp 0.28s cubic-bezier(0.2,0,0,1) both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ====== 演示浮层：正在听 / 识别中 ====== */
+.dock-voice-float{
+  position:absolute;
+  bottom:calc(100% + 10px);
+  left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.78);
+  color:#fff;
+  padding:8px 16px;
+  border-radius:999px;
+  font-size:13px;font-weight:500;
+  white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+  z-index:10;
+  animation:demoFloatIn .18s ease both;
+}
+@keyframes demoFloatIn{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.dock-voice-float-text{
+  animation:demoBreath 1s ease-in-out infinite;
+}
+.dock-voice-float.is-recognizing .dock-voice-float-text{
+  animation:none;
+}
+@keyframes demoBreath{0%,100%{opacity:1}50%{opacity:.7}}
+.dock-voice-float-spinner{
+  width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ====== 演示卡片入场 ====== */
+.tl-item-enter{
+  animation:tlItemEnter .2s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes tlItemEnter{
+  from{opacity:0;transform:translateY(-12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ====== 演示记录3占位展开 ====== */
+.tl-demo-expand{
+  animation:tlDemoExpand .28s cubic-bezier(0.2,0,0,1) both;
+  overflow:hidden;
+}
+@keyframes tlDemoExpand{
+  from{opacity:0;max-height:0}
+  to{opacity:1;max-height:600px}
+}
+
+/* ====== 演示标签淡入 ====== */
+.tl-demo-tag-in{
+  animation:tlDemoTagIn .15s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes tlDemoTagIn{
+  from{opacity:0;transform:scale(0.92)}
+  to{opacity:1;transform:scale(1)}
+}
+
+/* ====== 演示来源标签淡入 ====== */
+.tl-demo-source-in{
+  animation:tlDemoSourceIn .2s ease both;
+}
+@keyframes tlDemoSourceIn{
+  from{opacity:0}to{opacity:1}
+}
 
 /* ============ 心情快捷选项（加号 → 心情） ============ */
 .mood-quick{

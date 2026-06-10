@@ -333,14 +333,20 @@ function MoodQuickOverlay({ open, onSubmit, onClose }) {
   const [selected, setSelected] = React.useState(null);
   const [toastText, setToastText] = React.useState('');
   const [toastShow, setToastShow] = React.useState(false);
+  const [ready, setReady] = React.useState(false);
   const busyRef = React.useRef(false);
 
   React.useEffect(()=>{
-    if(open) return;
-    setChoosing(false);
-    setSelected(null);
-    setToastShow(false);
-    busyRef.current = false;
+    if(!open){
+      setChoosing(false);
+      setSelected(null);
+      setToastShow(false);
+      busyRef.current = false;
+      setReady(false);
+      return;
+    }
+    const tm = window.setTimeout(()=>setReady(true), 150);
+    return ()=>window.clearTimeout(tm);
   }, [open]);
 
   const pick = (opt)=>{
@@ -362,7 +368,7 @@ function MoodQuickOverlay({ open, onSubmit, onClose }) {
         className={'mood-quick'+(open ? ' show' : '')+(choosing ? ' choosing' : '')}
         aria-hidden={!open}
       >
-        <div className="mood-quick-card">
+        <div className="mood-quick-card" style={{pointerEvents: ready ? 'auto' : 'none'}}>
           {MOOD_QUICK_OPTIONS.map((opt, i)=>(
             <button
               key={opt.id}
