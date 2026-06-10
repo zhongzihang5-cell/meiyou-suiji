@@ -1,0 +1,259 @@
+/* ============ 日历 Tab（经期记录页） ============ */
+.cal-page{
+  position:absolute;
+  top:44px;
+  left:0;
+  right:0;
+  bottom:0;
+  background:#fff;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:80px;
+}
+
+.cal-top-nav{
+  display:flex;
+  align-items:center;
+  padding:8px 16px 12px;
+}
+.cal-back{
+  display:flex;
+  align-items:center;
+  font-size:17px;
+  color:#333;
+  font-weight:500;
+  width:60px;
+}
+.cal-back svg{width:18px;height:18px;margin-right:2px}
+.cal-tabs{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  gap:26px;
+}
+.cal-tab{
+  font-size:17px;
+  color:#333;
+  position:relative;
+  padding-bottom:4px;
+}
+.cal-tab.active{color:#ff4d88;font-weight:500}
+.cal-tab.active::after{
+  content:"";
+  position:absolute;
+  bottom:-2px;
+  left:50%;
+  transform:translateX(-50%);
+  width:18px;height:3px;
+  background:#ff4d88;border-radius:2px;
+}
+.cal-analysis{
+  width:50px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  color:#333;
+  font-size:12px;
+}
+.cal-analysis svg{width:22px;height:22px;margin-bottom:2px}
+
+.cal-calendar{padding:0 6px 10px}
+.cal-week-header,.cal-week-row{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  text-align:center;
+}
+.cal-week-header{padding:6px 0 10px}
+.cal-week-header div{font-size:13px;color:#999}
+.cal-week-row{margin-bottom:6px}
+.cal-day{
+  height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:17px;
+  color:#6dc66d;
+  position:relative;
+}
+.cal-day .cell{
+  width:38px;height:38px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+  transition:all .3s ease;
+}
+.cal-day.today .cell{
+  background:#fde0ea;
+  color:#ff4d88;
+  border:1.5px solid #ff4d88;
+  font-size:15px;
+}
+.cal-day.today .cell .today-label{font-size:9px;line-height:1;margin-top:1px}
+.cal-day.ovulation{color:#b388e8}
+.cal-day.ovulation-day{color:#9b6fdb;position:relative}
+.cal-day.ovulation-day::before{
+  content:"";
+  position:absolute;top:2px;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-bottom:7px solid #b388e8;
+}
+.cal-day.green{color:#6dc66d}
+.cal-day.empty{visibility:hidden}
+.cal-day.period-lit .cell{
+  background:#ff3d6e !important;
+  color:#fff !important;
+  border:none !important;
+  transform:scale(1.1);
+  box-shadow:0 2px 8px rgba(255,61,110,.5);
+}
+.cal-day.period-lit .cell .today-label{color:#fff !important}
+
+.cal-legend{
+  display:flex;align-items:center;
+  padding:10px 16px 14px;
+  font-size:12px;color:#555;gap:14px;
+}
+.cal-legend-item{display:flex;align-items:center;gap:4px}
+.cal-legend-item .sq{width:10px;height:10px;border-radius:2px;display:inline-block}
+.cal-legend .arrow{margin-left:auto;color:#bbb;font-size:16px}
+
+.cal-records{
+  background:#f7f7f9;
+  border-radius:14px 14px 0 0;
+  margin:0 6px;
+  padding:6px 0 16px;
+}
+.cal-row{
+  display:flex;align-items:center;
+  padding:14px 16px;
+  background:#fff;
+  margin:0 8px 6px;
+  border-radius:10px;
+}
+.cal-row .icon{
+  width:30px;height:30px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin-right:12px;flex-shrink:0;
+}
+.cal-row .label{flex:1;font-size:16px;color:#333}
+.cal-row .right{display:flex;align-items:center;gap:6px}
+.cal-plus{
+  width:22px;height:22px;
+  border:1.5px solid #ff7da3;
+  border-radius:50%;
+  color:#ff7da3;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;line-height:1;
+}
+.cal-toggle{
+  display:inline-flex;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid #e5e5e5;
+  cursor:pointer;
+}
+.cal-toggle span{
+  padding:4px 14px;
+  font-size:13px;
+  background:#f0f0f0;
+  color:#888;
+}
+.cal-toggle span.active{background:#ff4d88;color:#fff}
+.cal-moods{display:flex;gap:6px}
+.cal-mood{
+  width:22px;height:22px;
+  border-radius:50%;
+  background:#d8d8d8;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:#fff;
+}
+.ic-period{background:#ffe6ee}
+.ic-love{background:#ffe6ee}
+.ic-symptom{background:#e3f2ff}
+.ic-mood{background:#fff4d6}
+.ic-discharge{background:#ece1ff}
+.ic-temp{background:#ffe1e1}
+.ic-weight{background:#ffe6f3}
+.ic-diary{background:#fff3d6}
+.ic-habit{background:#e1f0ff}
+.cal-row.diary .right{color:#bbb}
+.cal-habit-icons{display:flex;gap:8px}
+.cal-habit-icons div{
+  width:22px;height:22px;border-radius:50%;
+  background:#ededed;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;
+}
+
+/* 浮动 AI 分析通知 */
+.float-notice{
+  position:absolute;
+  top:52px;
+  left:50%;
+  transform:translateX(-50%) translateY(-20px);
+  width:92%;
+  max-width:380px;
+  background:#fff;
+  border:0.5px solid #ffe1ea;
+  border-radius:14px;
+  padding:12px 34px 12px 12px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 4px 16px rgba(255,93,138,.18);
+  opacity:0;
+  pointer-events:none;
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+  z-index:120;
+  cursor:pointer;
+}
+.float-notice.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+  pointer-events:auto;
+}
+.float-notice .fn-close{
+  position:absolute;top:8px;right:10px;
+  width:auto;height:auto;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(0,0,0,0.35);
+  font-size:16px;line-height:1;
+  cursor:pointer;
+  border:none;
+  background:transparent;
+  padding:0;
+  appearance:none;
+  -webkit-appearance:none;
+  box-shadow:none;
+  outline:none;
+}
+.float-notice .fn-close:focus-visible{
+  outline:none;
+}
+.float-notice .fn-avatar{
+  width:36px;
+  height:36px;
+  flex-shrink:0;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M4 20L13 11' stroke='%23ff4d88' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M14.2 2.8l1.6 3.7 3.7 1.6-3.7 1.6-1.6 3.7-1.6-3.7-3.7-1.6 3.7-1.6z' fill='%23ff4d88'/%3E%3C/svg%3E") center/20px no-repeat,
+    linear-gradient(145deg, rgba(79,124,174,0.16) 0%, rgba(255,77,136,0.10) 100%);
+  box-shadow:inset 0 0 0 0.5px rgba(255,77,136,0.16);
+}
+.float-notice .fn-message{
+  flex:1;
+  min-width:0;
+  margin:0;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.75);
+  line-height:1.47;
+}
+
+.app-view-hidden{display:none !important}

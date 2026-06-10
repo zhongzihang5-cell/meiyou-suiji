@@ -1,0 +1,1510 @@
+/* ============ 场景三 · 记录页空置 — 对齐 meiyou-diandi-empty-state ============ */
+
+.record-blank-stream{
+  position:relative;
+}
+
+.record-blank-plain{
+  min-height:360px;
+}
+
+/* 方案一 · 空态 + 首条记录（连续过渡） */
+.record-blank-stream.is-scheme1 .rb-s1-flow{
+  --rb-s1-top:max(8px, calc(10dvh - 4px));
+  min-height:calc(100dvh - 44px - var(--my-dock-float-b, 180px) - 76px);
+  box-sizing:border-box;
+}
+
+.rb-s1-flow{
+  position:relative;
+}
+
+.rb-s1-axis{
+  position:absolute;
+  left:16px;
+  top:var(--rb-s1-top);
+  bottom:56px;
+  width:14px;
+  pointer-events:none;
+  z-index:2;
+}
+
+.rb-s1-axis-rail{
+  position:absolute;
+  left:6px;
+  top:10px;
+  bottom:0;
+  width:2px;
+  border-radius:1px;
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.52) 0%,
+    rgba(255,77,136,0.28) 16%,
+    rgba(255,77,136,0.16) 32%,
+    rgba(255,77,136,0.1) 50%,
+    rgba(255,77,136,0.06) 72%,
+    rgba(255,77,136,0.03) 100%
+  );
+  transition:background 0.85s cubic-bezier(0.4,0,0.2,1);
+}
+
+.rb-s1-flow.is-ceremony .rb-s1-axis-rail{
+  top:0;
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.48) 0%,
+    rgba(255,77,136,0.22) 6%,
+    rgba(0,0,0,0.07) 14%,
+    rgba(0,0,0,0.06) 100%
+  );
+}
+
+.rb-s1-axis-dot{
+  position:absolute;
+  left:50%;
+  top:0;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  box-sizing:border-box;
+  background:#ff4d88;
+  border:2px solid #fff;
+  box-shadow:
+    0 0 0 2px var(--my-bg),
+    0 0 0 5px rgba(255,77,136,0.14);
+  transform:translateX(-50%) scale(1);
+  transform-origin:center center;
+  transition:
+    box-shadow 0.55s cubic-bezier(0.4,0,0.2,1),
+    transform 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+
+.rb-s1-axis-dot.is-settling{
+  animation:rbS1DotSettle 0.72s cubic-bezier(0.34,1.15,0.64,1) forwards;
+}
+
+.rb-s1-axis-dot.is-settled{
+  width:6px;
+  height:6px;
+  border-width:1.5px;
+  box-shadow:0 0 0 2px var(--my-bg);
+  transform:translateX(-50%) scale(1);
+}
+
+@keyframes rbS1DotSettle{
+  0%{
+    transform:translateX(-50%) scale(1);
+    box-shadow:
+      0 0 0 2px var(--my-bg),
+      0 0 0 5px rgba(255,77,136,0.14);
+  }
+  38%{
+    transform:translateX(-50%) scale(1.34);
+    box-shadow:
+      0 0 0 2px var(--my-bg),
+      0 0 0 9px rgba(255,77,136,0.2);
+  }
+  62%{
+    transform:translateX(-50%) scale(0.88);
+  }
+  82%{
+    transform:translateX(-50%) scale(1.06);
+  }
+  100%{
+    transform:translateX(-50%) scale(1);
+    width:6px;
+    height:6px;
+    border-width:1.5px;
+    box-shadow:0 0 0 2px var(--my-bg);
+  }
+}
+
+.rb-s1-main{
+  position:relative;
+  z-index:1;
+}
+
+.rb-s1-hero{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:var(--rb-s1-top, max(8px, calc(10dvh - 4px))) 28px 24px;
+  transition:opacity 0.45s ease, transform 0.45s ease;
+}
+
+.rb-s1-hero.is-exiting{
+  opacity:0;
+  transform:translateY(-10px);
+  pointer-events:none;
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+}
+
+.rb-s1-timeline{
+  position:relative;
+  padding-top:var(--rb-s1-top, max(8px, calc(10dvh - 4px)));
+}
+
+.rb-s1-flow.is-ceremony .tl-rail-dot.is-axis-sync{
+  opacity:0;
+  width:6px;
+  height:6px;
+}
+
+.rb-s1-hero-title{
+  margin:0;
+  font-size:21px;
+  font-weight:500;
+  color:rgba(0,0,0,0.6);
+  line-height:1.47;
+  letter-spacing:0;
+  opacity:0;
+  transform:translateY(10px);
+  animation:rbS1FadeUp 0.6s ease forwards;
+}
+
+.rb-s1-hero-hint{
+  margin:10px 0 0;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.35);
+  line-height:1.47;
+  opacity:0;
+  transform:translateY(10px);
+  animation:rbS1FadeUp 0.6s ease 0.2s forwards;
+}
+
+.rb-s1-curly-arrow{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  top:0;
+  bottom:0;
+  pointer-events:none;
+  z-index:90;
+}
+
+.rb-s1-curly-arrow img{
+  position:absolute;
+  right:76px;
+  bottom:calc(var(--my-dock-float-b, 180px) + 28px);
+  width:92px;
+  height:auto;
+  opacity:0;
+  transform:translate(-6px,-6px) scale(0.96);
+  transform-origin:100% 100%;
+  animation:rbS1CurlyArrowIn 0.55s ease 0.55s forwards;
+}
+
+.phone:has(.quick-float-wrap.is-quick-active) .rb-s1-curly-arrow,
+.suiji-shell.is-mood-expanded .rb-s1-curly-arrow{
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.2s ease, visibility 0.2s ease;
+}
+
+@keyframes rbS1CurlyArrowIn{
+  from{
+    opacity:0;
+    transform:translate(-6px,-6px) scale(0.96);
+  }
+  to{
+    opacity:0.88;
+    transform:none;
+  }
+}
+
+@keyframes rbS1FadeUp{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* 方案一 · 首条记录仪式（并入 rb-s1-flow） */
+.rb-s1-record-slot{
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.rb-s1-record-slot.is-visible{
+  animation:rbS1RecordIn 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+@keyframes rbS1RecordIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s1-summary-head{
+  opacity:0;
+  transform:translateY(-10px);
+}
+
+.rb-s1-summary-head.is-visible{
+  animation:rbS1SummaryIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+@keyframes rbS1SummaryIn{
+  from{opacity:0;transform:translateY(-10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.dock-text-field.is-scheme1-highlight{
+  background:#fff;
+  border:1.5px solid #ff4d88;
+  box-shadow:0 0 0 3px rgba(255,77,136,0.1);
+}
+
+.dock-text-field.is-scheme1-highlight:focus-within,
+.dock-text-field.is-scheme1-highlight.is-focused{
+  border-color:#ff4d88;
+  box-shadow:0 0 0 4px rgba(255,77,136,0.14);
+}
+
+.dock-voice-wrap.is-scheme1-highlight{
+  background:#fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 0 0 0.5px rgba(0,0,0,0.04),
+    0 0 0 1.5px #ff4d88,
+    0 0 0 4px rgba(255,77,136,0.1);
+}
+
+.dock-voice-wrap.is-scheme1-highlight.is-recording{
+  background:linear-gradient(180deg, #fff5f8 0%, #fff 100%);
+  box-shadow:
+    0 0 0 1.5px #ff4d88,
+    0 0 0 4px rgba(255,77,136,0.14);
+}
+
+.dock-text-field.is-scheme3-highlight{
+  background:#fff;
+  border:1.5px solid #ff4d88;
+  box-shadow:0 0 0 4px rgba(255,77,136,0.08);
+}
+
+.dock-text-field.is-scheme3-highlight:focus-within,
+.dock-text-field.is-scheme3-highlight.is-focused{
+  border-color:#ff4d88;
+  box-shadow:0 0 0 4px rgba(255,77,136,0.08);
+}
+
+/* 方案二 · 示例数据 + 蒙层 */
+.record-blank-scheme2-stack{
+  position:relative;
+  min-height:360px;
+  padding-top:4px;
+}
+
+.record-blank-scheme2-preview{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  overflow:hidden;
+  pointer-events:none;
+  opacity:1;
+  mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.35) 90%, transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.35) 90%, transparent 100%);
+}
+
+.record-blank-scheme2-preview .tl-feed{
+  pointer-events:none;
+}
+
+.record-blank-scheme2-preview .tl-rail-continuous{
+  padding-top:0;
+}
+
+.record-blank-scheme2-mask{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:linear-gradient(
+    180deg,
+    rgba(242,242,245,0.22) 0%,
+    rgba(242,242,245,0.38) 38%,
+    rgba(242,242,245,0.52) 68%,
+    rgba(242,242,245,0.66) 100%
+  );
+  pointer-events:none;
+}
+
+/* ============ 方案三 · 生长时间轴空态引导 ============ */
+
+.rb-s3-guide{
+  position:relative;
+  min-height:480px;
+  padding-top:40px;
+}
+
+.rb-s3-guide.is-exiting{
+  animation:rbS3GuideExit 0.28s ease forwards;
+  pointer-events:none;
+}
+
+@keyframes rbS3GuideExit{
+  from{opacity:1;transform:translateY(0)}
+  to{opacity:0;transform:translateY(-8px)}
+}
+
+.rb-s3-axis-wrap{
+  position:absolute;
+  left:16px;
+  top:40px;
+  width:14px;
+  height:340px;
+  pointer-events:none;
+}
+
+.rb-s3-axis{
+  position:absolute;
+  left:50%;
+  top:0;
+  width:1.5px;
+  height:0;
+  margin-left:-0.75px;
+  border-radius:1px;
+  overflow:visible;
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.15) 0%,
+    rgba(255,77,136,0.55) 72%,
+    rgba(255,77,136,0) 100%
+  );
+  transition:height 0.9s linear;
+}
+
+.rb-s3-axis.is-phase-1{height:48px}
+.rb-s3-axis.is-phase-2{height:85px}
+.rb-s3-axis.is-phase-3{height:170px}
+.rb-s3-axis.is-phase-4{height:255px}
+.rb-s3-axis.is-phase-5{height:340px}
+
+.rb-s3-axis.is-flowing{
+  background:linear-gradient(
+    180deg,
+    rgba(255,77,136,0.1) 0%,
+    rgba(255,77,136,0.35) 28%,
+    rgba(255,77,136,0.62) 58%,
+    rgba(255,77,136,0.28) 82%,
+    rgba(255,77,136,0) 100%
+  );
+  background-size:100% 240%;
+  animation:rbS3AxisDrift 2.6s ease-in-out infinite;
+}
+
+.rb-s3-axis-tip{
+  position:absolute;
+  left:50%;
+  bottom:-2px;
+  width:6px;
+  height:6px;
+  margin-left:-3px;
+  border-radius:50%;
+  background:#ff4d88;
+  box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 0 8px rgba(255,77,136,0.35);
+  opacity:0;
+  transform:scale(0.6);
+  transition:opacity 0.4s ease, transform 0.4s ease;
+}
+
+.rb-s3-axis.is-phase-1 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-2 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-3 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-4 .rb-s3-axis-tip,
+.rb-s3-axis.is-phase-5 .rb-s3-axis-tip{
+  opacity:1;
+  transform:scale(1);
+  animation:rbS3AxisTipPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes rbS3AxisDrift{
+  0%,100%{background-position:0 0}
+  50%{background-position:0 28%}
+}
+
+@keyframes rbS3AxisTipPulse{
+  0%,100%{
+    opacity:0.55;
+    transform:scale(0.92);
+    box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 0 6px rgba(255,77,136,0.22);
+  }
+  50%{
+    opacity:1;
+    transform:scale(1.08);
+    box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 0 10px rgba(255,77,136,0.42);
+  }
+}
+
+.rb-s3-copy{
+  position:relative;
+  padding-left:40px;
+  padding-right:4px;
+}
+
+.rb-s3-headline{
+  margin:0 0 10px;
+  font-size:22px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+  opacity:0;
+  transform:translateY(8px);
+  max-height:40px;
+  overflow:hidden;
+  transition:max-height 0.35s ease, margin 0.35s ease;
+}
+
+.rb-s3-headline.is-visible{
+  animation:rbS3GuideFadeUp 0.5s ease forwards;
+}
+
+.rb-s3-headline.is-visible.is-exiting{
+  animation:rbS3HeadlineOut 0.45s ease forwards;
+}
+
+.rb-s3-headline.is-gone{
+  opacity:0;
+  max-height:0;
+  margin:0;
+  pointer-events:none;
+}
+
+@keyframes rbS3HeadlineOut{
+  from{
+    opacity:1;
+    transform:translateY(0);
+  }
+  to{
+    opacity:0;
+    transform:translateY(-6px);
+  }
+}
+
+.rb-s3-subcopy{
+  margin:0 0 16px;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.35);
+  line-height:1.47;
+  opacity:0;
+  transform:translateY(8px);
+}
+
+.rb-s3-subcopy.is-visible{
+  animation:rbS3GuideFadeUp 0.5s ease forwards;
+}
+
+.rb-s3-cards{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.rb-s3-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:60px;
+  padding:12px 14px;
+  background:#fff;
+  border-radius:12px;
+  opacity:0;
+  transform:translateY(12px);
+}
+
+.rb-s3-card.is-visible{
+  animation:rbS3CardIn 0.75s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+@keyframes rbS3CardIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s3-card-icon{
+  flex-shrink:0;
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  background:rgba(255,77,136,0.07);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  line-height:1;
+}
+
+.rb-s3-card-text{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.rb-s3-card-title{
+  font-size:15px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+
+.rb-s3-card-desc{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+
+@keyframes rbS3GuideFadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* —— 首条记录仪式 —— */
+.rb-s3-ceremony{
+  padding-top:4px;
+}
+
+.rb-s3-date-head{
+  opacity:0;
+  transform:translateY(-12px);
+}
+
+.rb-s3-date-head.is-visible{
+  animation:rbS3DateIn 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+@keyframes rbS3DateIn{
+  from{opacity:0;transform:translateY(-12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s3-node-dot{
+  display:block;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#ff4d88;
+  border:2px solid #fff;
+  box-shadow:0 0 0 3px rgba(255,77,136,0.15);
+  opacity:0;
+  transform:scale(0);
+}
+
+.rb-s3-node-dot.is-pop{
+  animation:rbS3DotPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+@keyframes rbS3DotPop{
+  0%{transform:scale(0);opacity:0}
+  60%{transform:scale(1.3);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+
+.rb-s3-record-slot{
+  opacity:0;
+  transform:translateY(12px);
+}
+
+.rb-s3-record-slot.is-visible{
+  animation:rbS3FadeUp 0.45s ease forwards;
+}
+
+@keyframes rbS3FadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rb-s3-ai-card{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  margin-top:10px;
+  padding:14px;
+  border-radius:12px;
+  background:linear-gradient(135deg, #fff 0%, #fff5f8 100%);
+  border:0.5px solid rgba(255,77,136,0.12);
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.rb-s3-ai-card.is-visible{
+  animation:rbS3FadeUp 0.45s ease forwards;
+}
+
+.rb-s3-ai-avatar{
+  flex-shrink:0;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #ffb8d0 0%, #ff4d88 100%);
+  color:#fff;
+  font-size:11px;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+}
+
+.rb-s3-ai-body{
+  flex:1;
+  min-width:0;
+}
+
+.rb-s3-ai-title{
+  margin:0 0 4px;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+
+.rb-s3-ai-text{
+  margin:0;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.55);
+  line-height:1.47;
+}
+
+.rb-s3-sync-line{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding-left:2px;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.35);
+  line-height:1.29;
+  opacity:0;
+  transform:translateY(8px);
+}
+
+.rb-s3-sync-line.is-visible{
+  animation:rbS3FadeUp 0.4s ease forwards;
+}
+
+.rb-s3-celebrate{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:28px;
+  padding:0 12px 24px;
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.rb-s3-celebrate.is-visible{
+  animation:rbS3FadeUp 0.5s ease forwards;
+}
+
+.rb-s3-celebrate-ripple{
+  position:relative;
+  width:60px;
+  height:60px;
+  margin-bottom:10px;
+}
+
+.rb-s3-celeb-ring.is-outer{
+  transform-origin:30px 30px;
+  animation:rbS3CelebRingOuter 0.9s 0.15s ease-out forwards;
+}
+
+.rb-s3-celeb-ring.is-inner{
+  transform-origin:30px 30px;
+  animation:rbS3CelebRingInner 0.75s 0.25s ease-out forwards;
+}
+
+@keyframes rbS3CelebRingOuter{
+  from{transform:scale(1);opacity:0.18}
+  to{transform:scale(3);opacity:0}
+}
+
+@keyframes rbS3CelebRingInner{
+  from{transform:scale(1);opacity:0.24}
+  to{transform:scale(4.2);opacity:0}
+}
+
+.rb-s3-splash-drop{
+  transform-origin:30px 30px;
+  opacity:0;
+  animation:rbS3SplashDrop 0.55s calc(0.12s * var(--rb-s3-drop-i, 0)) ease-out forwards;
+}
+
+@keyframes rbS3SplashDrop{
+  0%{
+    opacity:0.55;
+    transform:rotate(var(--rb-s3-angle)) translateY(0);
+  }
+  100%{
+    opacity:0;
+    transform:rotate(var(--rb-s3-angle)) translateY(-18px);
+  }
+}
+
+.rb-s3-celebrate-title{
+  margin:0 0 4px;
+  font-size:15px;
+  font-weight:500;
+  color:#ff4d88;
+  text-align:center;
+  line-height:1.47;
+}
+
+.rb-s3-celebrate-sub{
+  margin:0;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.4);
+  text-align:center;
+  line-height:1.47;
+}
+
+.dock-text-field .dock-scheme3-bubble{
+  position:absolute;
+  left:12px;
+  bottom:calc(100% + 8px);
+  background:#ff4d88;
+  color:#fff;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.29;
+  padding:8px 14px;
+  border-radius:10px;
+  white-space:nowrap;
+  pointer-events:none;
+  box-shadow:0 2px 12px rgba(255,77,136,0.25);
+  animation:rbS3BubbleIn 0.45s ease 3.6s both;
+  z-index:2;
+}
+
+.dock-text-field .dock-scheme3-bubble::after{
+  content:'';
+  position:absolute;
+  left:24px;
+  bottom:-6px;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:6px solid #ff4d88;
+}
+
+@keyframes rbS3BubbleIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.record-blank-stream.is-scheme3 .record-blank-plain{
+  min-height:0;
+}
+
+.record-blank-stream.is-ceremony{
+  overflow:hidden;
+}
+
+/* —— 空态：绝对定位时间轴 + 内容区 —— */
+.record-blank-empty{
+  position:relative;
+  padding-top:40px;
+  min-height:480px;
+}
+
+.record-blank-empty--exit{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  z-index:2;
+  animation:rbEmptyFadeOut 0.28s ease forwards;
+  pointer-events:none;
+}
+
+@keyframes rbEmptyFadeOut{
+  from{opacity:1}
+  to{opacity:0}
+}
+
+.record-blank-axis-line{
+  position:absolute;
+  left:16px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(0,0,0,0.06);
+  pointer-events:none;
+}
+
+/* 水滴 — left 22px ≈ 轴线上方 */
+.record-blank-droplet-hanger{
+  position:absolute;
+  left:6px;
+  top:80px;
+  opacity:0;
+  transform:translateY(-20px);
+  transition:opacity 0.8s cubic-bezier(0.34,1.56,0.64,1),
+             transform 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:2;
+}
+
+.record-blank-droplet-hanger.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* 水滴 */
+.record-blank-droplet{
+  display:block;
+  filter:drop-shadow(0 2px 4px rgba(255,77,136,0.12));
+}
+
+.record-blank-droplet-shape.is-floating{
+  animation:rbDropletFloat 2.5s ease-in-out infinite;
+  transform-origin:center center;
+  transform-box:fill-box;
+}
+
+@keyframes rbDropletFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-2px)}
+}
+
+/* 等待涟漪 — 内核脉冲 + 多层圆环 */
+.record-blank-ripple-field{
+  position:absolute;
+  left:17px;
+  top:112px;
+  width:0;
+  height:0;
+  opacity:0;
+  transition:opacity 1s ease;
+  pointer-events:none;
+  z-index:1;
+}
+
+.record-blank-ripple-field.is-visible{
+  opacity:1;
+}
+
+.record-blank-ripple-core{
+  position:absolute;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+}
+
+.record-blank-ripple-pulse{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:6px;
+  height:6px;
+  margin:-3px 0 0 -3px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.35);
+  animation:rbRipplePulse 2.4s calc(var(--rb-pulse-i, 0) * 0.55s) ease-out infinite;
+}
+
+@keyframes rbRipplePulse{
+  0%{
+    transform:scale(0.6);
+    opacity:0.45;
+  }
+  70%{
+    transform:scale(2.2);
+    opacity:0;
+  }
+  100%{
+    transform:scale(2.2);
+    opacity:0;
+  }
+}
+
+.record-blank-ripple-ring{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:calc(28px + var(--rb-ring-i, 0) * 18px);
+  height:calc(28px + var(--rb-ring-i, 0) * 18px);
+  margin:calc(-14px - var(--rb-ring-i, 0) * 9px) 0 0 calc(-14px - var(--rb-ring-i, 0) * 9px);
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,calc(0.24 - var(--rb-ring-i, 0) * 0.04));
+  box-shadow:0 0 0 0 rgba(255,143,180,0.08);
+  animation:rbRippleExpand 2.8s calc(var(--rb-ring-i, 0) * 0.55s) ease-out infinite;
+}
+
+@keyframes rbRippleExpand{
+  0%{
+    transform:scale(0.35);
+    opacity:0.55;
+    box-shadow:0 0 0 0 rgba(255,143,180,0.16);
+  }
+  55%{
+    opacity:0.22;
+    box-shadow:0 0 6px 1px rgba(255,143,180,0.08);
+  }
+  100%{
+    transform:scale(1.65);
+    opacity:0;
+    box-shadow:0 0 0 0 rgba(255,143,180,0);
+  }
+}
+
+/* 内容区 — marginLeft 48px（相对页面），stream padding 16 → 32px */
+.record-blank-content{
+  margin-left:32px;
+  margin-right:4px;
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.record-blank-content.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* 引导卡片 */
+.record-blank-guide-card{
+  background:#fff;
+  border-radius:12px;
+  padding:28px 24px 24px;
+  margin-top:60px;
+  position:relative;
+}
+
+.record-blank-guide-title{
+  font-size:21px;
+  font-weight:400;
+  color:rgba(0,0,0,0.75);
+  line-height:1.5;
+  margin:0 0 8px;
+}
+
+.record-blank-guide-sub{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.3);
+  line-height:1.6;
+  margin:0 0 20px;
+}
+
+.record-blank-guide-arrow-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+
+.record-blank-guide-arrow-row.is-visible{
+  opacity:1;
+}
+
+.record-blank-guide-arrow-btn{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.08);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  animation:rbBounceDown 1.5s ease-in-out infinite;
+}
+
+@keyframes rbBounceDown{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(4px)}
+}
+
+.record-blank-guide-arrow-text{
+  font-size:13px;
+  font-weight:400;
+  color:#ff4d88;
+  opacity:0.7;
+  line-height:1.29;
+}
+
+/* 虚位占位卡片 */
+.record-blank-ghost-stack{
+  margin-top:20px;
+  opacity:0;
+  transition:opacity 0.8s ease;
+}
+
+.record-blank-ghost-stack.is-visible{
+  opacity:1;
+}
+
+.record-blank-ghost{
+  position:relative;
+  margin-bottom:12px;
+}
+
+.record-blank-ghost-dot{
+  position:absolute;
+  left:-26px;
+  top:18px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.1);
+}
+
+.record-blank-ghost-body{
+  border-radius:10px;
+  background:rgba(255,255,255,0.38);
+}
+
+.record-blank-ghost-body.is-tall{height:48px}
+.record-blank-ghost-body.is-short{height:36px}
+
+.record-blank-guide-card.is-first-record{
+  padding:16px 18px 18px;
+  margin-top:60px;
+  animation:rbRecordCardIn 0.22s ease-out both;
+}
+
+@keyframes rbRecordCardIn{
+  from{opacity:0.92}
+  to{opacity:1}
+}
+
+.record-blank-guide-inner{
+  transition:opacity 280ms ease, transform 280ms ease;
+}
+
+.record-blank-record-inner{
+  margin-top:-4px;
+}
+
+.record-blank-record-time{
+  display:block;
+  font-size:12px;
+  font-weight:500;
+  color:rgba(0,0,0,0.35);
+  margin-bottom:8px;
+  font-variant-numeric:tabular-nums;
+}
+
+.record-blank-record-body{
+  font-size:17px;
+  font-weight:400;
+  color:rgba(0,0,0,0.8);
+  line-height:1.47;
+  margin:0;
+  min-height:1.47em;
+}
+
+.record-blank-record-body .tl-typewriter-cursor{
+  background:rgba(255,77,136,0.55);
+}
+
+/* —— 第一滴仪式 —— */
+.record-blank-ceremony{
+  position:relative;
+  min-height:360px;
+}
+
+.record-blank-ceremony-stage{
+  position:relative;
+  padding-top:40px;
+  min-height:360px;
+}
+
+.record-blank-date-in-stage{
+  margin:0 0 12px;
+  will-change:transform,opacity;
+}
+
+.record-blank-droplet-fall{
+  display:none;
+}
+
+.record-blank-axis-land{
+  position:absolute;
+  left:-7px;
+  top:76px;
+  width:48px;
+  height:48px;
+  z-index:4;
+  pointer-events:none;
+}
+
+.record-blank-axis-land-inner{
+  position:relative;
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  will-change:transform;
+  transform-origin:center bottom;
+}
+
+.record-blank-droplet.is-axis-fall{
+  display:block;
+  filter:drop-shadow(0 2px 5px rgba(255,77,136,0.18));
+  transform-origin:center bottom;
+}
+
+.record-blank-axis-splash-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.record-blank-axis-splash{
+  position:relative;
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.record-blank-axis-settle-dot{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:10px;
+  height:10px;
+  margin:-5px 0 0 -5px;
+  border-radius:50%;
+  background:rgba(255,77,136,0.32);
+  border:1.5px solid rgba(255,77,136,0.48);
+  box-shadow:0 0 0 2px var(--my-bg);
+  pointer-events:none;
+  transform-origin:center center;
+}
+
+.record-blank-axis-splash-ring{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:34px;
+  height:34px;
+  margin:-17px 0 0 -17px;
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,0.22);
+  pointer-events:none;
+}
+
+.record-blank-axis-splash-ring.is-inner{
+  width:22px;
+  height:22px;
+  margin:-11px 0 0 -11px;
+  border-color:rgba(255,77,136,0.16);
+}
+
+.record-blank-axis-splash-svg{
+  position:relative;
+  z-index:1;
+  transform-origin:center center;
+  will-change:transform;
+}
+
+.record-blank-axis-land .record-blank-node-dot{
+  position:relative;
+  left:auto;
+  top:auto;
+  margin:0;
+}
+
+.record-blank-ceremony-row{
+  display:flex;
+  gap:6px;
+  position:relative;
+  margin-top:0;
+}
+
+.record-blank-ceremony-row .record-blank-content{
+  opacity:1;
+  transform:none;
+  flex:1;
+  min-width:0;
+}
+
+.record-blank-ceremony-row .record-blank-ghost-stack{
+  opacity:1;
+  transition:opacity 200ms ease;
+}
+
+.record-blank-date-card{
+  background:rgba(255,77,136,0.06);
+  border-radius:12px;
+  padding:12px 16px;
+  margin-bottom:16px;
+}
+
+.record-blank-date-card-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.record-blank-date-card-left{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+
+.record-blank-date-num{
+  font-size:21px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+}
+
+.record-blank-date-week{
+  font-size:14px;
+  font-weight:400;
+  color:#ff4d88;
+}
+
+.record-blank-date-count{
+  font-size:14px;
+  font-weight:500;
+  color:#ff4d88;
+}
+
+.record-blank-ceremony-node-row{
+  display:flex;
+  gap:6px;
+  position:relative;
+  padding-left:0;
+}
+
+.record-blank-ceremony-marker{
+  width:22px;
+  flex-shrink:0;
+  position:relative;
+  min-height:140px;
+}
+
+.record-blank-falling-node{
+  position:absolute;
+  left:50%;
+  top:0;
+  transform:translateX(-50%);
+  margin-left:-4px;
+  animation:rbDropFall 0.6s ease-in forwards;
+}
+
+@keyframes rbDropFall{
+  0%{transform:translateX(-50%) translateY(-30px);opacity:0}
+  60%{transform:translateX(-50%) translateY(2px);opacity:1}
+  80%{transform:translateX(-50%) translateY(-3px)}
+  100%{transform:translateX(-50%) translateY(0);opacity:1}
+}
+
+.record-blank-node-dot{
+  display:block;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#ff4d88;
+  box-shadow:0 0 0 3px rgba(255,77,136,0.15);
+  position:absolute;
+  left:50%;
+  top:76px;
+  margin-left:-6px;
+  z-index:2;
+}
+
+.record-blank-node-dot.is-landed{
+  animation:rbNodePop 0.32s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes rbNodePop{
+  from{transform:scale(0.4);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+.record-blank-land-ripple{
+  position:absolute;
+  top:72px;
+  left:50%;
+  margin-left:-10px;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:1.5px solid rgba(255,77,136,0.3);
+  animation:rbLandRipple 0.8s 0.5s ease-out forwards;
+  opacity:0;
+  pointer-events:none;
+}
+
+@keyframes rbLandRipple{
+  0%{transform:scale(0.5);opacity:0}
+  30%{opacity:0.6}
+  100%{transform:scale(2.5);opacity:0}
+}
+
+.record-blank-ceremony-card-slot{
+  flex:1;
+  min-width:0;
+}
+
+.record-blank-first-card{
+  will-change:transform,opacity;
+}
+
+/* 节点溅射涟漪（仪式内复用） */
+.record-blank-ripples{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:0;
+  height:0;
+  pointer-events:none;
+}
+
+.record-blank-ripple{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:10px;
+  height:10px;
+  margin:-5px 0 0 -5px;
+  border-radius:50%;
+  border:1px solid rgba(255,77,136,0.2);
+  opacity:0;
+}
+
+/* 庆祝层 */
+.record-blank-celebrate{
+  text-align:center;
+  margin-top:48px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  pointer-events:none;
+  padding:0 20px;
+}
+
+.record-blank-celebrate-icon{
+  position:relative;
+  display:inline-block;
+  margin-bottom:12px;
+  width:60px;
+  height:60px;
+}
+
+.record-blank-splash-drops{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.record-blank-splash-drop{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:4px;
+  height:4px;
+  margin:-2px 0 0 -2px;
+  border-radius:50%;
+  background:#ff4d88;
+  opacity:0;
+  animation:rbSplashDrop 0.5s ease-out forwards;
+}
+
+@keyframes rbSplashDrop{
+  0%{
+    opacity:0.5;
+    transform:rotate(var(--rb-angle)) translateY(0);
+  }
+  100%{
+    opacity:0;
+    transform:rotate(var(--rb-angle)) translateY(-20px);
+  }
+}
+
+.record-blank-celeb-drop{
+  opacity:0;
+  animation:rbCelebDropIn 0.3s 1s ease-out forwards;
+}
+
+@keyframes rbCelebDropIn{
+  from{opacity:0}
+  to{opacity:0.9}
+}
+
+.record-blank-celeb-ring.is-outer{
+  transform-origin:30px 30px;
+  animation:rbCelebRingOuter 1s 1.2s ease-out forwards;
+}
+
+.record-blank-celeb-ring.is-inner{
+  transform-origin:30px 30px;
+  animation:rbCelebRingInner 0.8s 1.3s ease-out forwards;
+}
+
+@keyframes rbCelebRingOuter{
+  from{transform:scale(1);opacity:0.15}
+  to{transform:scale(3.1);opacity:0}
+}
+
+@keyframes rbCelebRingInner{
+  from{transform:scale(1);opacity:0.2}
+  to{transform:scale(4.5);opacity:0}
+}
+
+.record-blank-celebrate-title{
+  font-size:15px;
+  font-weight:500;
+  color:#ff4d88;
+  margin:0 0 4px;
+  text-align:center;
+}
+
+.record-blank-celebrate-sub{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.3);
+  margin:0;
+  text-align:center;
+  line-height:1.47;
+}
+
+.record-blank-post-hint{
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.2);
+  text-align:center;
+  line-height:1.47;
+  margin:40px 0 12px;
+  padding:0 40px;
+}
+
+.record-blank-post-hint.is-static{
+  animation:rbFadeSlideIn 0.36s ease both;
+}
+
+@keyframes rbFadeSlideIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.record-blank-stream.is-post-ceremony .tl-day-section-head{
+  padding-top:0;
+}

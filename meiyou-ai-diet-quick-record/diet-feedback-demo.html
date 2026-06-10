@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>饮食反馈卡片 · 3种用户示例</title>
+<link rel="stylesheet" href="diet-feedback.css">
+<style>
+:root {
+  --pink: #ff4d88;
+  --pink-06: rgba(255,77,136,0.06);
+  --pink-10: rgba(255,77,136,0.10);
+  --green: #00cc99;
+  --green-bg: rgba(0,204,153,0.08);
+  --orange: #ff8c42;
+  --orange-bg: rgba(255,140,66,0.08);
+  --bg: #f2f2f5;
+  --card: #ffffff;
+  --t1: rgba(0,0,0,0.8);
+  --t2: rgba(0,0,0,0.6);
+  --t3: rgba(0,0,0,0.4);
+  --t4: rgba(0,0,0,0.25);
+  --div: rgba(0,0,0,0.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC',-apple-system,sans-serif;background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased}
+.page{max-width:420px;margin:0 auto;padding-bottom:40px;background:var(--bg);min-height:100vh}
+
+.sh{padding:48px 16px 14px;display:flex;align-items:center;gap:8px}
+.sh-dot{width:8px;height:8px;border-radius:50%;background:var(--pink);flex-shrink:0}
+.sh-title{font-size:15px;font-weight:500;color:var(--t1)}
+.sh-desc{font-size:12px;color:var(--t3);margin-left:auto}
+
+.tags{padding:0 16px 8px;display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11px;color:var(--t3);background:rgba(0,0,0,0.03);padding:3px 8px;border-radius:100px;line-height:1.33}
+.tag.on{color:var(--pink);background:var(--pink-06)}
+
+.demo-card-wrap{margin:6px 12px 0}
+.gap{height:20px}
+</style>
+</head>
+<body>
+<div class="page" id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="diet-feedback.jsx"></script>
+
+<script type="text/babel">
+function DietFeedbackDemoPage(){
+  const mature = createDietFeedbackDemo('mature');
+  const medium = createDietFeedbackDemo('medium');
+  const newUser = createDietFeedbackDemo('new');
+  
+  return (
+    <>
+      {/* 示例1：成熟用户 */}
+      <div className="sh">
+        <div className="sh-dot"></div>
+        <div className="sh-title">示例 1 · 成熟用户</div>
+        <div className="sh-desc">展示 A + B + D</div>
+      </div>
+      <div className="tags">
+        <span className="tag on">记录15天</span>
+        <span className="tag on">今天第2餐</span>
+        <span className="tag on">经期第2天</span>
+        <span className="tag on">近7天5天有记录</span>
+      </div>
+      <div className="demo-card-wrap">
+        <DietFeedbackCard data={mature.data} userContext={mature.userContext} isNew={false}/>
+      </div>
+      
+      <div className="gap"></div>
+      
+      {/* 示例2：中等用户 */}
+      <div className="sh">
+        <div className="sh-dot"></div>
+        <div className="sh-title">示例 2 · 中等用户</div>
+        <div className="sh-desc">展示 A + B + C</div>
+      </div>
+      <div className="tags">
+        <span className="tag on">记录8天</span>
+        <span className="tag on">今天第1餐</span>
+        <span className="tag on">近7天3天有记录</span>
+        <span className="tag">无经期数据</span>
+      </div>
+      <div className="demo-card-wrap">
+        <DietFeedbackCard data={medium.data} userContext={medium.userContext} isNew={false}/>
+      </div>
+      
+      <div className="gap"></div>
+      
+      {/* 示例3：新用户 */}
+      <div className="sh">
+        <div className="sh-dot"></div>
+        <div className="sh-title">示例 3 · 新用户</div>
+        <div className="sh-desc">展示 A + B(引导)</div>
+      </div>
+      <div className="tags">
+        <span className="tag on">首次拍照记录</span>
+        <span className="tag">无任何历史数据</span>
+      </div>
+      <div className="demo-card-wrap">
+        <DietFeedbackCard data={newUser.data} userContext={newUser.userContext} isNew={false}/>
+      </div>
+      
+      <div className="gap"></div>
+      <div className="gap"></div>
+    </>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<DietFeedbackDemoPage/>);
+</script>
+</body>
+</html>
