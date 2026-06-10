@@ -1,0 +1,18 @@
+[
+  {
+    "id": "main-app",
+    "name": "随记 · 主线",
+    "desc": "完整的记录流程主应用",
+    "emoji": "📔",
+    "url": "./",
+    "tag": "主线"
+  },
+  {
+    "id": "diet-quick-record",
+    "name": "AI 饮食快速记录",
+    "desc": "饮食场景独立 demo",
+    "emoji": "🍱",
+    "url": "./scenes/diet-quick-record/",
+    "tag": "新"
+  }
+]
