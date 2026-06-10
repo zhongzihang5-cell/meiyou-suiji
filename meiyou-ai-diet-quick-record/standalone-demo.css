@@ -1,0 +1,257 @@
+/* 真机演示 — IOSDevice 402×874 + 内容区 742px 可滚动 */
+
+body.standalone-demo{
+  background:#f5f5f7;
+  margin:0;
+  font-family:'PingFang SC',-apple-system,sans-serif;
+}
+body.standalone-demo .demo-scene-dock{
+  display:none!important;
+}
+
+body.standalone-demo #root{
+  width:100vw;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  box-sizing:border-box;
+}
+
+/* 布局常量 */
+body.standalone-demo{
+  --shell-safe-top:52px;
+  --shell-tab-h:80px;
+  --shell-home-h:34px;
+  --my-safe-bottom:22px;
+  --my-tabbar-h:80px;
+  --my-dock-h:58px;
+}
+
+/* ========== 内容列：中间 flex:1 + 底 Tab ========== */
+body.standalone-demo .phone{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  background:var(--my-bg);
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  box-shadow:none;
+}
+
+body.standalone-demo .phone-body{
+  flex:1;
+  min-height:0;
+  position:relative;
+  overflow:hidden;
+  padding-top:var(--shell-safe-top);
+}
+
+body.standalone-demo .phone-body .suiji-shell{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
+body.standalone-demo .phone-body .suiji-shell--scene{
+  flex:1;
+  min-height:0;
+}
+
+body.standalone-demo .phone-body .suiji-stream{
+  flex:1;
+  min-height:0;
+  height:auto;
+  max-height:none;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-top:0;
+  padding-bottom:calc(var(--my-dock-h) + 32px);
+  box-sizing:border-box;
+  background:transparent;
+}
+
+body.standalone-demo .phone-body .tl-rail-node.is-feed-last{
+  padding-bottom:8px;
+}
+
+body.standalone-demo .phone .toast-stack{
+  top:12px;
+}
+
+body.standalone-demo .phone .quick-menu-vertical,
+body.standalone-demo .phone .quick-menu-backdrop{
+  position:absolute;
+}
+body.standalone-demo .phone .tabbar{
+  position:relative;
+  flex-shrink:0;
+  width:100%;
+  max-width:none;
+  left:auto;
+  transform:none;
+  padding:6px 4px 22px;
+  bottom:auto;
+  z-index:90;
+}
+
+/* ========== 绝对定位元素收进 .phone ========== */
+body.standalone-demo .phone .dock-wrap,
+body.standalone-demo .phone .vt-overlay-root,
+body.standalone-demo .phone .vt-bar-wrap,
+body.standalone-demo .phone .quick-float-wrap,
+body.standalone-demo .phone .toast-stack,
+body.standalone-demo .phone .sheet-mask,
+body.standalone-demo .phone .search-page{
+  position:absolute;
+  left:0;
+  right:0;
+  width:100%;
+  max-width:none;
+  transform:none;
+}
+
+body.standalone-demo .phone .dock-wrap{
+  bottom:0;
+}
+
+body.standalone-demo .phone .vt-overlay-root{
+  top:0;
+  bottom:0;
+}
+
+body.standalone-demo .phone .vt-bar-wrap{
+  bottom:0;
+}
+
+body.standalone-demo .phone .quick-float-wrap{
+  bottom:calc(var(--my-dock-h, 66px) + 8px);
+}
+
+body.standalone-demo .phone .quick-menu-backdrop{
+  top:0;
+  bottom:0;
+  inset:auto;
+  left:0;
+  right:0;
+  width:100%;
+}
+
+body.standalone-demo .phone .quick-float-wrap.is-quick-active{
+  top:0;
+  bottom:0;
+  height:auto;
+}
+
+body.standalone-demo .phone .quick-card-fan-scrim{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  width:100%;
+  transform:none;
+  max-width:none;
+}
+
+body.standalone-demo .phone .record-empty-voice-wrap{
+  bottom:0;
+  padding-bottom:10px;
+}
+
+body.standalone-demo .phone .suiji-shell--empty{
+  height:100%;
+  max-height:100%;
+}
+
+body.standalone-demo .phone .sheet-mask{
+  top:0;
+  bottom:0;
+  inset:auto;
+  left:0;
+  right:0;
+  width:100%;
+}
+
+body.standalone-demo .phone .sheet{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  width:100%;
+  max-width:none;
+  transform:none;
+  animation:sheetUpStandalone 0.28s cubic-bezier(0.2,0,0,1);
+}
+@keyframes sheetUpStandalone{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+
+body.standalone-demo .phone .suiji-shell--scene::before{
+  position:absolute;
+  left:0;
+  transform:none;
+  width:100%;
+}
+
+body.standalone-demo .phone .dock-bar.is-path-dock{
+  overflow:visible;
+}
+
+body.standalone-demo .phone .dock-input-pill{
+  overflow:visible;
+}
+
+body.standalone-demo .phone .path-flyout-wrap{
+  right:-6px;
+  bottom:50%;
+  margin-bottom:-28px;
+}
+
+body.standalone-demo .phone .dock-wrap::before{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:-48px;
+  height:48px;
+  pointer-events:none;
+  background:linear-gradient(
+    to bottom,
+    rgba(242,242,245,0) 0%,
+    rgba(242,242,245,0.55) 50%,
+    rgba(255,255,255,0.92) 100%
+  );
+}
+
+/* ========== 相机全屏（盖在 Tab 之上） ========== */
+body.standalone-demo .phone .camera-transition-wrapper{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  width:100%;
+  height:100%;
+  z-index:9999;
+}
+body.standalone-demo .phone .camera-bottom-bar{
+  padding-bottom:28px;
+}
+
+body.standalone-demo .ios-device-shell.is-dark{
+  background:#000;
+}
+
+body.standalone-demo .ios-device-shell.is-dark .ios-home-indicator{
+  background:rgba(255,255,255,0.7)!important;
+}
+
+body.standalone-demo .phone .tab-lbl{
+  font-size:11px;
+}

@@ -1,0 +1,847 @@
+/* ============ 相机转场动效 ============ */
+.camera-transition-wrapper{
+  position:absolute;
+  overflow:hidden;
+  z-index:200;
+  background:#000;
+  will-change:left, top, width, height, border-radius;
+}
+.camera-transition-inner{
+  position:absolute;
+  top:0;
+  left:0;
+  will-change:transform;
+}
+.camera-transition-overlay{
+  position:absolute;
+  inset:0;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  padding:12px 20px 12px 16px;
+  gap:10px;
+  pointer-events:none;
+  will-change:opacity;
+}
+.camera-transition-overlay .quick-menu-item-icon{
+  width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:6px;
+  background:rgba(255,153,102,0.15);
+  color:#ff9966;
+}
+.camera-transition-overlay .quick-menu-item-label{
+  font-size:15px;
+  font-weight:500;
+  color:var(--my-text-primary);
+}
+
+/* ============ 相机界面 ============ */
+.camera-view{
+  width:100%;
+  height:100%;
+  background:#1a1a1a;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+}
+.camera-view .camera-close-btn,
+.camera-view .camera-bottom-bar,
+.camera-view .camera-main{
+  opacity:1;
+}
+.camera-view:not(.is-visible) .camera-close-btn,
+.camera-view:not(.is-visible) .camera-bottom-bar,
+.camera-view:not(.is-visible) .camera-main{
+  opacity:0;
+  transition:opacity 0.25s ease-out;
+}
+.camera-view.is-visible .camera-close-btn,
+.camera-view.is-visible .camera-bottom-bar,
+.camera-view.is-visible .camera-main{
+  opacity:1;
+}
+
+.camera-view.is-perm-pending .camera-bottom-bar{
+  pointer-events:none;
+  opacity:0.45;
+}
+
+.camera-view.is-perm-denied .camera-controls{
+  justify-content:flex-start;
+}
+.camera-view.is-gallery-open:not(.is-perm-denied) .camera-controls{
+  justify-content:center;
+  gap:48px;
+}
+
+.camera-close-btn{
+  position:absolute;
+  top:10px;
+  left:12px;
+  width:40px;height:40px;
+  border:none;
+  background:transparent;
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  z-index:100;
+  border-radius:8px;
+}
+.camera-close-btn:active{ opacity:0.65; }
+
+.camera-main{
+  flex:1;
+  position:relative;
+  min-height:0;
+  overflow:hidden;
+}
+
+.camera-frame{
+  width:300px;
+  height:300px;
+  position:absolute;
+  left:50%;
+  top:calc(50% - 32px);
+  transform:translate(-50%, -50%);
+  flex-shrink:0;
+}
+
+.camera-main .camera-hint{
+  position:absolute;
+  left:50%;
+  top:calc(50% + 138px);
+  transform:translateX(-50%);
+  margin-top:0;
+  margin-bottom:0;
+  padding:0 24px;
+  text-align:center;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,0.55);
+  background:transparent;
+  max-width:300px;
+  width:max-content;
+}
+
+.camera-frame-corner{
+  position:absolute;
+  width:50px;
+  height:50px;
+  pointer-events:none;
+  z-index:160;
+}
+.camera-frame-corner::before,
+.camera-frame-corner::after{
+  content:'';
+  position:absolute;
+  background:#fff;
+  border-radius:2px;
+  box-shadow:0 0 12px rgba(255,255,255,0.5);
+}
+.camera-frame-corner.tl{ top:0; left:0; }
+.camera-frame-corner.tr{ top:0; right:0; }
+.camera-frame-corner.bl{ bottom:0; left:0; }
+.camera-frame-corner.br{ bottom:0; right:0; }
+.camera-frame-corner.tl::before{ width:4px; height:40px; top:0; left:0; }
+.camera-frame-corner.tl::after{ width:40px; height:4px; top:0; left:0; }
+.camera-frame-corner.tr::before{ width:4px; height:40px; top:0; right:0; }
+.camera-frame-corner.tr::after{ width:40px; height:4px; top:0; right:0; }
+.camera-frame-corner.bl::before{ width:4px; height:40px; bottom:0; left:0; }
+.camera-frame-corner.bl::after{ width:40px; height:4px; bottom:0; left:0; }
+.camera-frame-corner.br::before{ width:4px; height:40px; bottom:0; right:0; }
+.camera-frame-corner.br::after{ width:40px; height:4px; bottom:0; right:0; }
+
+.camera-flash{
+  position:absolute;
+  inset:0;
+  background:#fff;
+  animation:cameraFlash 0.15s ease-out forwards;
+  z-index:30;
+}
+@keyframes cameraFlash{
+  0%{opacity:1}
+  100%{opacity:0}
+}
+
+.camera-bottom-bar{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:0 24px 36px;
+  z-index:20;
+}
+.camera-controls{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.camera-gallery-btn{
+  width:48px;height:48px;
+  border:none;
+  background:rgba(255,255,255,0.2);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border-radius:50%;
+}
+.camera-gallery-btn:active{ background:rgba(255,255,255,0.3); }
+.camera-shutter{
+  width:72px;height:72px;
+  border:none;
+  background:linear-gradient(135deg, #ff6b9d 0%, #ff4d88 100%);
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  box-shadow:
+    0 4px 16px rgba(255,77,136,0.4),
+    inset 0 2px 4px rgba(255,255,255,0.2);
+}
+.camera-shutter-ring{
+  position:absolute;
+  inset:-4px;
+  border:4px solid rgba(255,255,255,0.9);
+  border-radius:50%;
+}
+.camera-shutter-inner{
+  width:20px;
+  height:20px;
+  background:rgba(255,255,255,0.3);
+  border-radius:50%;
+  transition:transform 0.1s ease;
+}
+.camera-shutter:active{ transform:scale(0.95); }
+.camera-shutter:active .camera-shutter-inner{ transform:scale(0.7); }
+.camera-shutter.is-disabled,
+.camera-shutter.is-disabled:active{
+  opacity:0.35;
+  pointer-events:none;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+.camera-shutter.is-disabled .camera-shutter-inner,
+.camera-shutter.is-disabled:active .camera-shutter-inner{
+  transform:none;
+}
+.camera-help-btn{
+  width:48px;height:48px;
+  border:none;
+  background:rgba(255,255,255,0.2);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  border-radius:50%;
+}
+.camera-help-btn:active{ background:rgba(255,255,255,0.35); }
+
+/* ============ 拍摄示例弹窗 ============ */
+.camera-guide-sheet{
+  position:absolute;
+  inset:0;
+  z-index:130;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  pointer-events:none;
+}
+.camera-guide-sheet.is-open{
+  pointer-events:auto;
+}
+.camera-guide-sheet-backdrop{
+  position:absolute;
+  inset:0;
+  border:none;
+  padding:0;
+  margin:0;
+  background:rgba(0,0,0,0.45);
+  opacity:0;
+  transition:opacity 0.28s ease;
+  cursor:pointer;
+}
+.camera-guide-sheet.is-open .camera-guide-sheet-backdrop{
+  opacity:1;
+}
+.camera-guide-sheet-panel{
+  position:relative;
+  background:#fff;
+  border-radius:16px 16px 0 0;
+  padding:24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  text-align:center;
+  transform:translateY(100%);
+  transition:transform 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events:auto;
+  box-shadow:0 -4px 24px rgba(0,0,0,0.10);
+}
+.camera-guide-sheet.is-open .camera-guide-sheet-panel{
+  transform:translateY(0);
+}
+.camera-guide-title{
+  margin:0 0 8px;
+  font-size:17px;
+  font-weight:500;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.camera-guide-subtitle{
+  margin:0 0 20px;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+}
+.camera-guide-examples{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  gap:12px;
+}
+.camera-guide-example{
+  flex:1;
+  max-width:148px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+.camera-guide-example-photo{
+  width:100%;
+  aspect-ratio:1 / 1;
+  border-radius:8px;
+  overflow:hidden;
+  background:#f2f2f5;
+}
+.camera-guide-example-photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+.camera-guide-badge{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.camera-guide-badge.is-good{
+  background:#00cc99;
+}
+.camera-guide-badge.is-bad{
+  background:#ff4d4d;
+}
+.camera-guide-confirm{
+  margin-top:24px;
+  width:100%;
+  height:40px;
+  border:none;
+  border-radius:80px;
+  background:#ff4d88;
+  color:#fff;
+  font-family:inherit;
+  font-size:17px;
+  font-weight:500;
+  line-height:1;
+  cursor:pointer;
+}
+.camera-guide-confirm:active{
+  opacity:0.5;
+}
+
+/* ============ 相机权限弹窗 ============ */
+.camera-perm-overlay{
+  position:absolute;
+  inset:0;
+  z-index:150;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:auto;
+}
+.camera-perm-dialog{
+  width:248px;
+  max-width:calc(100% - 32px);
+  max-height:calc(100% - 32px);
+  padding:16px 14px 12px;
+  border-radius:14px;
+  background:rgba(245,245,247,0.82);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+}
+.camera-perm-icon{
+  position:relative;
+  width:52px;
+  height:52px;
+  margin:0 0 12px 2px;
+}
+.camera-perm-icon-main{
+  width:52px;
+  height:52px;
+  border-radius:12px;
+  background:linear-gradient(180deg, #b8bcc4 0%, #8e9199 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.camera-perm-icon-badge{
+  position:absolute;
+  right:-2px;
+  bottom:-2px;
+  width:22px;
+  height:22px;
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,0.18);
+}
+.camera-perm-title{
+  margin:0 0 8px;
+  font-size:17px;
+  line-height:1.3;
+  font-weight:500;
+  color:#000;
+  letter-spacing:-0.2px;
+}
+.camera-perm-subtitle{
+  margin:0 0 14px;
+  font-size:13px;
+  line-height:1.45;
+  color:#000;
+  opacity:0.92;
+}
+.camera-perm-actions{
+  display:flex;
+  gap:10px;
+}
+.camera-perm-btn{
+  flex:1;
+  height:44px;
+  border:none;
+  border-radius:22px;
+  background:rgba(120,120,128,0.16);
+  color:#000;
+  font-size:17px;
+  font-weight:400;
+  font-family:inherit;
+  cursor:pointer;
+}
+.camera-perm-btn:active{
+  background:rgba(120,120,128,0.24);
+}
+
+/* ============ 权限拒绝引导页 ============ */
+.camera-perm-blocked{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 28px 96px;
+  box-sizing:border-box;
+}
+.camera-perm-blocked-body{
+  width:100%;
+  max-width:320px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.camera-perm-blocked-title{
+  margin:0 0 12px;
+  font-size:17px;
+  line-height:1.47;
+  font-weight:400;
+  color:rgba(255,255,255,0.92);
+  width:100%;
+  text-align:center;
+}
+.camera-perm-blocked-col{
+  width:100%;
+  max-width:276px;
+  align-self:center;
+}
+.camera-perm-blocked-privacy{
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:6px;
+  margin:0 0 28px;
+  font-size:13px;
+  line-height:1.45;
+  color:rgba(255,255,255,0.45);
+  text-align:left;
+}
+.camera-perm-blocked-shield{
+  flex-shrink:0;
+  width:16px;
+  height:16px;
+  margin-top:1px;
+  color:rgba(255,255,255,0.45);
+}
+.camera-perm-blocked-list{
+  width:100%;
+}
+.camera-perm-blocked-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-align:left;
+}
+.camera-perm-blocked-item-ico{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.88);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.camera-perm-blocked-item-text{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+.camera-perm-blocked-item-title{
+  font-size:15px;
+  line-height:1.47;
+  font-weight:400;
+  color:rgba(255,255,255,0.88);
+}
+.camera-perm-blocked-item-desc{
+  font-size:12px;
+  line-height:1.29;
+  color:rgba(255,255,255,0.45);
+}
+.camera-perm-blocked-enable{
+  width:100%;
+  height:40px;
+  margin-top:36px;
+  border:none;
+  border-radius:80px;
+  background:#ff4d88;
+  color:#fff;
+  font-size:17px;
+  font-weight:500;
+  font-family:inherit;
+  cursor:pointer;
+  align-self:stretch;
+}
+.camera-perm-blocked-enable:active{
+  opacity:0.85;
+}
+
+/* ============ 相册权限弹窗 ============ */
+.photo-lib-perm-overlay{
+  position:absolute;
+  inset:0;
+  z-index:180;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px 20px;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-sizing:border-box;
+}
+.photo-lib-perm-dialog{
+  width:100%;
+  max-width:320px;
+  max-height:calc(100% - 16px);
+  overflow-y:auto;
+  padding:18px 16px 14px;
+  border-radius:14px;
+  background:rgba(245,245,247,0.96);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  box-shadow:0 8px 32px rgba(0,0,0,0.22);
+}
+.photo-lib-perm-icon{
+  position:relative;
+  width:56px;
+  height:56px;
+  margin:0 0 12px;
+}
+.photo-lib-perm-icon-badge{
+  position:absolute;
+  right:-2px;
+  bottom:-2px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,0.18);
+}
+.photo-lib-perm-title{
+  margin:0 0 8px;
+  font-size:17px;
+  line-height:1.35;
+  font-weight:500;
+  color:#000;
+  letter-spacing:-0.2px;
+}
+.photo-lib-perm-subtitle{
+  margin:0 0 14px;
+  font-size:13px;
+  line-height:1.45;
+  color:#000;
+  opacity:0.88;
+}
+.photo-lib-perm-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:2px;
+  margin:0 0 10px;
+  border-radius:8px;
+  overflow:hidden;
+}
+.photo-lib-perm-grid-item{
+  aspect-ratio:1;
+  background:#ddd;
+  overflow:hidden;
+}
+.photo-lib-perm-grid-item img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.photo-lib-perm-stats{
+  margin:0 0 8px;
+  font-size:13px;
+  line-height:1.35;
+  font-weight:500;
+  color:#000;
+}
+.photo-lib-perm-note{
+  margin:0 0 14px;
+  font-size:11px;
+  line-height:1.35;
+  color:rgba(0,0,0,0.55);
+}
+.photo-lib-perm-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.photo-lib-perm-btn{
+  width:100%;
+  height:44px;
+  border:none;
+  border-radius:22px;
+  background:rgba(120,120,128,0.16);
+  color:#000;
+  font-size:17px;
+  font-weight:400;
+  font-family:inherit;
+  cursor:pointer;
+}
+.photo-lib-perm-btn:active{
+  background:rgba(120,120,128,0.24);
+}
+
+/* ============ 相册选择弹窗 ============ */
+.photo-picker-sheet{
+  position:absolute;
+  inset:0;
+  z-index:190;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  pointer-events:none;
+}
+.photo-picker-sheet.is-open{
+  pointer-events:auto;
+}
+.photo-picker-sheet-backdrop{
+  position:absolute;
+  inset:0;
+  border:none;
+  padding:0;
+  margin:0;
+  background:rgba(0,0,0,0.45);
+  opacity:0;
+  transition:opacity 0.32s ease;
+  cursor:pointer;
+}
+.photo-picker-sheet.is-open .photo-picker-sheet-backdrop{
+  opacity:1;
+}
+.photo-picker-sheet-panel{
+  position:relative;
+  height:92%;
+  max-height:calc(100% - 12px);
+  display:flex;
+  flex-direction:column;
+  background:#fff;
+  border-radius:16px 16px 0 0;
+  overflow:hidden;
+  transform:translateY(100%);
+  transition:transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events:auto;
+  box-shadow:0 -4px 24px rgba(0,0,0,0.12);
+}
+.photo-picker-sheet.is-open .photo-picker-sheet-panel{
+  transform:translateY(0);
+}
+
+/* ============ 相册选择页 ============ */
+.photo-picker{
+  position:relative;
+  flex:1;
+  min-height:0;
+  width:100%;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.photo-picker-header{
+  display:grid;
+  grid-template-columns:44px 1fr 44px;
+  align-items:center;
+  padding:8px 12px 10px;
+  background:#fff;
+  flex-shrink:0;
+}
+.photo-picker-close{
+  width:36px;
+  height:36px;
+  border:none;
+  border-radius:50%;
+  background:rgba(0,0,0,0.06);
+  color:var(--my-text-primary);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.photo-picker-close:active{
+  background:rgba(0,0,0,0.1);
+}
+.photo-picker-tabs{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  border-radius:80px;
+  background:rgba(0,0,0,0.06);
+}
+.photo-picker-tab{
+  min-width:72px;
+  height:32px;
+  padding:0 16px;
+  border:none;
+  border-radius:80px;
+  background:transparent;
+  font-size:15px;
+  line-height:1.2;
+  font-weight:400;
+  font-family:inherit;
+  color:rgba(0,0,0,0.55);
+  cursor:pointer;
+}
+.photo-picker-tab.is-active{
+  background:#fff;
+  color:rgba(0,0,0,0.85);
+  font-weight:500;
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+}
+.photo-picker-header-spacer{
+  width:36px;
+  height:36px;
+}
+.photo-picker-content{
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:88px;
+}
+.photo-picker-empty{
+  padding:48px 24px;
+  text-align:center;
+  font-size:15px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+}
+.photo-picker .photo-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:1px;
+  background:#fff;
+}
+.photo-picker .photo-item{
+  aspect-ratio:1;
+  border:none;
+  background:#f0f0f0;
+  padding:0;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.photo-picker .photo-item:active{
+  opacity:0.88;
+}
+.photo-picker .photo-item.is-placeholder{
+  cursor:default;
+  background:#ebebef;
+  pointer-events:none;
+}
+.photo-picker .photo-item.is-placeholder:active{
+  opacity:1;
+}
+.photo-picker .photo-item img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.photo-picker .photo-item.is-placeholder img{
+  opacity:0.35;
+  filter:saturate(0.6);
+}
+.photo-picker-floats{
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:none;
+  z-index:2;
+}
+.photo-picker-float-btn{
+  width:44px;
+  height:44px;
+  border:none;
+  border-radius:50%;
+  background:#fff;
+  color:rgba(0,0,0,0.8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  pointer-events:auto;
+  box-shadow:0 2px 12px rgba(0,0,0,0.12);
+}
+.photo-picker-float-btn:active{
+  opacity:0.85;
+}
