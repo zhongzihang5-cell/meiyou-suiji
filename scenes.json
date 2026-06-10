@@ -8,11 +8,11 @@
     "tag": "主线"
   },
   {
-    "id": "diet-quick-record",
-    "name": "AI 饮食快速记录",
-    "desc": "饮食场景独立 demo",
-    "emoji": "🍱",
-    "url": "./scenes/diet-quick-record/",
-    "tag": "新"
-  }
+  "id": "diet-quick-record",
+  "name": "AI 饮食快速记录",
+  "desc": "饮食场景独立 demo",
+  "emoji": "🍱",
+  "url": "./meiyou-ai-diet-quick-record/",
+  "tag": "新"
+ }
 ]
