@@ -603,7 +603,8 @@
   top:auto;
 }
 .quick-float-wrap.is-quick-active .quick-card-fan{
-  bottom:calc(var(--my-tabbar-h) + 76px);
+  /* 展开后整体上移：饮食在最下方(y≈+116px)，避免被底栏/Tab 挡住 */
+  bottom:calc(var(--my-dock-float-b, 180px) + 16px);
 }
 
 /* Path-style 弧形展开：0→过冲(far)→回落(near)→稳定(shift) */
