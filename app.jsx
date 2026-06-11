@@ -67,6 +67,26 @@ function App(){
 
   const recordFeedback = !!scene.record.recordFeedback;
 
+  // ====== 演示流程状态 ======
+  const [isDemoRunning, setIsDemoRunning] = useState(false);
+  const [demoPhase, setDemoPhase] = useState(null); // null | 'listening' | 'recognizing'
+  const demoIdsRef = useRef([]); // 追踪演示卡片 id
+
+  // 暴露重置函数给全局 resetDemo 按钮
+  React.useEffect(()=>{
+    window.__resetDemo = ()=>{
+      if(!demoIdsRef.current.length) return;
+      setTimeline(blocks=>blocks.map(b=>{
+        if(b.type!=='day') return b;
+        const items = (b.items||[]).filter(it=>!demoIdsRef.current.includes(it.id));
+        return {...b, items, entries:undefined};
+      }));
+      demoIdsRef.current = [];
+      setIsDemoRunning(false);
+      setDemoPhase(null);
+    };
+  }, []);
+
   React.useEffect(()=>{
     const handler = ()=>{
       const fn = moodGuideQueueRef.current;
@@ -76,6 +96,63 @@ function App(){
     window.addEventListener('moodCardStreamDone', handler);
     return ()=>window.removeEventListener('moodCardStreamDone', handler);
   }, []);
+
+  React.useEffect(()=>{
+    const onInsert = (event)=>{
+      const kind = event?.detail?.kind;
+      const entry = kind === 'exhausted'
+        ? window.createDietTimeoutExhaustedDemoEntry?.()
+        : window.createDietTimeoutDemoEntry?.();
+      if(!entry) return;
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId?.('', timeline);
+      if(!dayId) return;
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      requestAnimationFrame(()=>{
+        if(typeof window.scrollTimelineToBottom === 'function'){
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+    };
+    window.addEventListener('dietRecognitionDemoInsert', onInsert);
+    return ()=>window.removeEventListener('dietRecognitionDemoInsert', onInsert);
+  }, [timeline]);
+
+  React.useEffect(()=>{
+    const onDisplayInsert = (event)=>{
+      const entry = window.createDietFeedbackDisplayDemoEntry?.(event?.detail?.scenario);
+      if(!entry) return;
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId?.('', timeline);
+      if(!dayId) return;
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      requestAnimationFrame(()=>{
+        if(typeof window.scrollTimelineToBottom === 'function'){
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+    };
+    window.addEventListener('dietFeedbackDisplayDemoInsert', onDisplayInsert);
+    return ()=>window.removeEventListener('dietFeedbackDisplayDemoInsert', onDisplayInsert);
+  }, [timeline]);
+
+  React.useEffect(()=>{
+    const onComboInsert = (event)=>{
+      const entry = window.createDietFeedbackComboDemoEntry?.(event?.detail?.scenario || 'combo-ab');
+      if(!entry) return;
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId?.('', timeline);
+      if(!dayId) return;
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      requestAnimationFrame(()=>{
+        if(typeof window.scrollTimelineToBottom === 'function'){
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+    };
+    window.addEventListener('dietFeedbackComboDemoInsert', onComboInsert);
+    return ()=>window.removeEventListener('dietFeedbackComboDemoInsert', onComboInsert);
+  }, [timeline]);
 
   const resetSceneState = (demoSceneId)=>{
     const next = window.getSceneInitialState(demoSceneId);
@@ -100,24 +177,42 @@ function App(){
   }, [t.demoScene]);
 
   const scrollToSisterAnalysis = ()=>{
-    requestAnimationFrame(()=>{
-      setTimeout(()=>{
-        const stream = streamRef.current;
-        const el = document.getElementById('sister-analysis-anchor');
-        if(stream && el){
-          const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - 32;
-          stream.scrollTo({ top: Math.max(0, top), behavior:'smooth' });
-        } else if(el){
-          el.scrollIntoView({ behavior:'smooth', block:'center' });
-        }
-      }, 180);
-    });
+    const tryScroll = (attempt)=>{
+      const stream = streamRef.current;
+      const el = document.getElementById('sister-analysis-anchor');
+      if(stream && el){
+        const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - 32;
+        stream.scrollTo({ top: Math.max(0, top), behavior:'smooth' });
+      } else if(el){
+        el.scrollIntoView({ behavior:'smooth', block:'center' });
+      } else if(attempt < 3){
+        setTimeout(()=>tryScroll(attempt + 1), 300);
+      }
+    };
+    requestAnimationFrame(()=>setTimeout(()=>tryScroll(0), 350));
   };
 
   const openSisterAnalysis = ()=>{
     if(scene.record.sisterAnalysis.trigger !== 'float-notice') return;
     recordEnterModeRef.current = 'analysis';
     setShowAnalysisNotice(false);
+
+    const syncEntry = {
+      kind:'sync-card', id:'e-period-'+Date.now(), time: window.formatNowTime(),
+      cardLabel:'自动同步', cardLabelKind:'sync',
+      body:'今天月经来了。', tagLayout:'v3', isNew: true,
+      tags:[{ cat:'月经', val:'', icon:'period' }],
+    };
+    const sisterEntry = {
+      kind:'sister-card', id:'e-sister-'+Date.now(), time: window.formatNowTime(), railDot:'ai',
+    };
+    const todayId = timeline.find(b=>b.type==='day' && b.isToday)?.id;
+    setTimeline(blocks => {
+      let result = window.appendTimelineEntry(blocks, syncEntry, { dayId: todayId });
+      result = window.appendTimelineEntry(result, sisterEntry, { dayId: todayId });
+      return result;
+    });
+
     setSisterCycleDone(false);
     setSisterPlayAnimation(n=>n + 1);
     setActiveTab('note');
@@ -260,7 +355,7 @@ function App(){
         const next = { ...it };
         delete next.hideBodyUntilDrop;
         delete next.pendingDrop;
-        if(it.kind === 'mood-insight' || it.kind === 'record-group') next.isNew = true;
+        if(it.kind === 'mood-insight' || it.kind === 'record-group' || it.kind === 'diet-photo-feedback') next.isNew = true;
         return next;
       });
       return { ...b, items, entries: undefined };
@@ -286,7 +381,7 @@ function App(){
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId(text || entry.body || '', timeline);
 
-    const pending = (entry.kind === 'mood-insight' || entry.kind === 'record-group')
+    const pending = (entry.kind === 'mood-insight' || entry.kind === 'record-group' || entry.kind === 'diet-photo-feedback')
       ? { ...entry, pendingDrop: true, isNew: false }
       : { ...entry, hideBodyUntilDrop: true, isNew: true };
 
@@ -299,6 +394,22 @@ function App(){
     const text = (textOverride || draft).trim();
     if(!text) return;
 
+    const recordScenario = window.readCameraPermissionScenario?.() || 'unauthorized';
+    const dietEntry = window.tryCreateDietTextFeedbackEntry?.(text, recordScenario, opts.voice);
+    if (dietEntry) {
+      setDraft('');
+      markUserRecorded();
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId('', timeline);
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, dietEntry, { dayId }));
+      requestAnimationFrame(()=>{
+        if (typeof window.scrollTimelineToBottom === 'function') {
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+      return;
+    }
+
     const hits = window.extractKeywords(text);
     setDraft('');
     markUserRecorded();
@@ -307,21 +418,161 @@ function App(){
     pushToTimeline(entry, text);
   };
 
-  const submitVoice = (transcript, durSec)=>{
-    markUserRecorded();
-    if(scene.id === 'record-direct' && window.buildScene2VoiceEntry){
-      const entry = window.buildScene2VoiceEntry(durSec);
-      pushToTimeline(entry, entry.voiceText);
-      return;
-    }
-    const text = transcript.trim();
-    if(!text) return;
-    const hits = window.extractKeywords(text);
-    const entry = buildTimelineEntry(text, hits, {
-      voice: { duration: window.formatVoiceDur(durSec) },
+  // ====== 清除上一轮演示卡片 ======
+  const clearDemoCards = (cb)=>{
+    if(!demoIdsRef.current.length){ cb?.(); return; }
+    // 淡出 DOM
+    demoIdsRef.current.forEach(id=>{
+      const el = document.querySelector('[data-entry-id="'+id+'"]');
+      if(el){ el.style.transition='opacity .2s'; el.style.opacity='0'; }
     });
-    if(recordFeedback && tryStartFirstDrop(entry, text)) return;
-    pushToTimeline(entry, text);
+    const oldIds = [...demoIdsRef.current];
+    setTimeout(()=>{
+      setTimeline(blocks=>blocks
+        .map(b=>{
+          if(b.type!=='day') return b;
+          const items = (b.items||[]).filter(it=>!oldIds.includes(it.id));
+          return {...b, items, entries:undefined};
+        })
+        .filter(b=>b.id!=='d-5-17' || (b.items||[]).length > 0) // 清空后移除空的 d-5-17
+      );
+      demoIdsRef.current = [];
+      cb?.();
+    }, 220);
+  };
+
+  // ====== 6 阶段演示流程 ======
+  const runDemoFlow = ()=>{
+    setIsDemoRunning(true);
+    setDemoPhase('recognizing');
+
+    const demoR1Id = 'demo-r1-'+Date.now();
+    const demoR2Id = 'demo-r2-'+Date.now();
+    const demoR3Id = 'demo-r3-'+Date.now();
+    demoIdsRef.current = [demoR1Id, demoR2Id, demoR3Id];
+
+    const DEMO_TEXT = '昨天下午来了姨妈，来之前，上午就开始头痛。';
+
+    // 阶段 2：识别中 800ms → 浮层消失
+    setTimeout(()=>{
+      setDemoPhase(null);
+
+      // 阶段 3：插入记录 1、2 到 5-17 block（200ms 后）
+      setTimeout(()=>{
+        const r1 = {
+          kind:'record-group', id:demoR1Id, isNew:true, _demoCard:true,
+          primary:{ id:demoR1Id, time:'10:00', kind:'text',
+            text:'头痛',
+            tags:[{cat:'症状', val:'头痛', icon:'sym'}],
+          },
+        };
+        const r2 = {
+          kind:'record-group', id:demoR2Id, isNew:true, _demoCard:true,
+          primary:{ id:demoR2Id, time:'16:00', kind:'text',
+            text:'月经开始',
+            tags:[{cat:'月经', val:'', icon:'period'}],
+          },
+        };
+        setTimeline(blocks=>{
+          // 动态插入 d-5-17 day block（如果不存在）
+          let next = blocks;
+          if(!next.find(b=>b.id==='d-5-17')){
+            const todayIdx = next.findIndex(b=>b.type==='day'&&b.isToday);
+            const ins = { type:'day', id:'d-5-17', date:'5/17', weekday:'周日', items:[] };
+            next = [...next];
+            next.splice(todayIdx >= 0 ? todayIdx : next.length, 0, ins);
+          }
+          next = window.appendTimelineEntry(next, r1, {dayId:'d-5-17'});
+          next = window.appendTimelineEntry(next, r2, {dayId:'d-5-17'});
+          return next;
+        });
+
+        // 阶段 4：停留 200ms，追加记录 3 占位
+        setTimeout(()=>{
+          const r3 = {
+            kind:'voice-card', id:demoR3Id, isNew:true, _demoCard:true,
+            time:'12:00',
+            body:'',
+            voiceText:'',
+            voice:{ duration:'0:05' },
+            tagLayout:'t5',
+            tags:[],
+            _demoTypewriter: true,
+            _demoFullText: DEMO_TEXT,
+            _demoTags:[
+              {cat:'月经', val:'开始', icon:'period'},
+              {cat:'症状', val:'头痛', icon:'sym'},
+            ],
+          };
+          setTimeline(blocks=>{
+            const todayId = blocks.find(b=>b.type==='day'&&b.isToday)?.id;
+            return window.appendTimelineEntry(blocks, r3, {dayId: todayId});
+          });
+
+          // 滚动到记录 3
+          setTimeout(()=>{
+            const el = document.querySelector('[data-entry-id="'+demoR3Id+'"]');
+            if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+          }, 80);
+
+          // 阶段 5 由 SegmentedRecordCard 的 TypewriterText 完成回调驱动
+          // 阶段 6：回填来源标签
+          // 通过 window event 监听 typewriter 完成
+          const onTypewriterDone = ()=>{
+            window.removeEventListener('demoTypewriterDone', onTypewriterDone);
+            // 等标签动画完成（400ms + 120ms*2 + 150ms = ~790ms）后回填来源
+            setTimeout(()=>{
+              // 回填记录 1、2 的 sourceFrom
+              setTimeline(blocks=>blocks.map(b=>{
+                if(b.type!=='day') return b;
+                const items = (b.items||[]).map(it=>{
+                  if(it.id===demoR1Id || it.id===demoR2Id){
+                    return {...it, primary:{...it.primary, sourceFrom:'🎤 来自 6月3日 12:00 的语音'}, _sourceNew:true};
+                  }
+                  return it;
+                });
+                return {...b, items, entries:undefined};
+              }));
+              // 阶段 6 完成，解锁
+              setTimeout(()=>{
+                setIsDemoRunning(false);
+              }, 250);
+            }, 900);
+          };
+          window.addEventListener('demoTypewriterDone', onTypewriterDone);
+
+        }, 200); // 阶段 4 delay
+      }, 200); // 阶段 3 delay after float disappears
+    }, 800); // 阶段 2 ASR delay
+  };
+
+  const submitVoice = (transcript, durSec)=>{
+    const recordScenario = window.readCameraPermissionScenario?.() || 'unauthorized';
+    if (window.isDietTextRecordScenario?.(recordScenario)) {
+      markUserRecorded();
+      const text = (transcript || '').trim();
+      if (text) {
+        submitText(text, {
+          voice: { duration: window.formatVoiceDur?.(durSec) || '0:03' },
+        });
+        return;
+      }
+    }
+
+    markUserRecorded();
+    setDemoPhase('listening');
+    // 清除上一轮演示卡片，然后启动新流程
+    clearDemoCards(()=> runDemoFlow());
+
+    // 真实 ASR 接入时启用以下逻辑：
+    // const text = transcript.trim();
+    // if(!text) return;
+    // const hits = window.extractKeywords(text);
+    // const entry = buildTimelineEntry(text, hits, {
+    //   voice: { duration: window.formatVoiceDur(durSec) },
+    // });
+    // if(recordFeedback && tryStartFirstDrop(entry, text)) return;
+    // pushToTimeline(entry, text);
   };
 
   const submitQuickMark = (mark)=>{
@@ -416,6 +667,18 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const submitDietCapture = (payload)=>{
+    markUserRecorded();
+    const entry = window.createDietCaptureGroup?.({
+      photoUrl: payload?.photoUrl || payload?.photo?.thumb || null,
+    });
+    if(!entry) return;
+    entry.isNew = true;
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
@@ -447,6 +710,10 @@ function App(){
 
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
+  const CameraPermissionScenarioBar = window.CameraPermissionScenarioBar;
+  const DietRecognitionScenarioBar = window.DietRecognitionScenarioBar;
+  const DietFeedbackDisplayScenarioBar = window.DietFeedbackDisplayScenarioBar;
+  const DietFeedbackComboScenarioBar = window.DietFeedbackComboScenarioBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
@@ -515,6 +782,7 @@ function App(){
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
           onFoodConfirm={submitFoodRecord}
+          onDietCapture={submitDietCapture}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
@@ -522,36 +790,27 @@ function App(){
           defaultInputMode={showScheme1Hints ? 'voice' : 'text'}
           showScheme3Bubble={showScheme3Bubble}
           highlightScheme3Input={highlightScheme3Input}
+          demoPhase={demoPhase}
+          isDemoRunning={isDemoRunning}
         />
         </>
         ) : (
         <>
-        <div className="suiji-stream" ref={streamRef}>
-          <div className="stream-header">
-            <div>
-              <h1 className="stream-title">点滴</h1>
-            </div>
-            <div className="stream-actions">
-              {scene.calendar.enabled && (
-                <button
-                  className="stream-action"
-                  aria-label="日历"
-                  type="button"
-                  onClick={()=>setActiveTab('cal')}
-                >
-                  <I name="calendar" size={20} stroke={1.7}/>
-                </button>
-              )}
-              <button
-                className="stream-action"
-                aria-label="搜索"
-                type="button"
-                onClick={openSearchPage}
-              >
-                <I name="search" size={20} stroke={1.7}/>
-              </button>
-            </div>
+        <div className="stream-header">
+          <div className="stream-header-side"/>
+          <h1 className="stream-title">点滴</h1>
+          <div className="stream-actions">
+            <button
+              className="stream-action"
+              aria-label="搜索"
+              type="button"
+              onClick={openSearchPage}
+            >
+              <I name="search" size={20} stroke={1.7}/>
+            </button>
           </div>
+        </div>
+        <div className="suiji-stream" ref={streamRef}>
 
           {scene.record.showHealthCard && (
             <div className="stream-health">
@@ -582,10 +841,13 @@ function App(){
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
           onFoodConfirm={submitFoodRecord}
+          onDietCapture={submitDietCapture}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
+          demoPhase={demoPhase}
+          isDemoRunning={isDemoRunning}
         />
         )}
         </>
@@ -613,11 +875,13 @@ function App(){
       </div>
 
       {!window.__STANDALONE_LOCKED_SCENE && (
-        <DemoSceneBar
-          value={t.demoScene}
-          onChange={(v)=>setTweak('demoScene', v)}
-          description={scene.description}
-        />
+        <div className="demo-controls-stack">
+          <DemoSceneBar
+            value={t.demoScene}
+            onChange={(v)=>setTweak('demoScene', v)}
+            description={scene.description}
+          />
+        </div>
       )}
     </>
   );

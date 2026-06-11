@@ -25,7 +25,7 @@ function extractWeightFromItem(item){
 }
 
 function summarizeDayItems(items, day){
-  if(day?.summaryStats?.length) return { stats: day.summaryStats };
+  // 始终动态计算，不使用写死的 summaryStats
 
   let count = 0;
   let kcal = 0;
@@ -73,7 +73,7 @@ function resolveDayTitleLabel(day, allDays){
   if(todayIdx >= 0 && idx === todayIdx - 1) return '昨天';
   if(todayIdx >= 0 && idx === todayIdx - 2) return '前天';
   const { month, day: dayNum } = parseDayParts(day.date);
-  return `${month}/${dayNum}`;
+  return `${month}月${dayNum}日`;
 }
 
 function formatDayMeta(day, titleLabel){
@@ -727,7 +727,37 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   );
 
   let body = null;
-  if(item.kind === 'record-group'){
+  if(item.kind === 'diet-photo-feedback'){
+    const DietPhotoFeedbackCard = window.DietPhotoFeedbackCard;
+    body = item.pendingDrop ? null : (
+      DietPhotoFeedbackCard
+        ? <DietPhotoFeedbackCard
+            photoUrl={item.photoUrl}
+            data={item.dietData}
+            userContext={item.userContext}
+            isNew={isNew}
+            recognitionScenario={item.recognitionScenario}
+            recognitionState={item.recognitionState}
+            failureCount={item.failureCount}
+            displayScenario={item.displayScenario}
+          />
+        : null
+    );
+  } else if(item.kind === 'diet-text-feedback'){
+    const DietTextFeedbackCard = window.DietTextFeedbackCard;
+    body = item.pendingDrop ? null : (
+      DietTextFeedbackCard
+        ? <DietTextFeedbackCard
+            sourceText={item.sourceText}
+            sourceVoice={item.sourceVoice}
+            data={item.dietData}
+            userContext={item.userContext}
+            isNew={isNew}
+            displayScenario={item.displayScenario}
+          />
+        : null
+    );
+  } else if(item.kind === 'record-group'){
     body = item.pendingDrop ? null : <V3RecordGroupCard group={item} isNew={isNew}/>;
   } else if(item.kind === 'guide'){
     body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;

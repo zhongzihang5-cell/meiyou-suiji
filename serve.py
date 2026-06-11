@@ -1,6 +1,3 @@
-import http.server
-import os
-os.chdir("/Users/wangyingyue/Documents/diandi_record")
-handler = http.server.SimpleHTTPRequestHandler
-server = http.server.HTTPServer(("", 8765), handler)
-server.serve_forever()
+import http.server, os
+os.chdir('/Users/wangyingyue/Documents/diandi_record')
+http.server.test(HandlerClass=http.server.SimpleHTTPRequestHandler, port=8765, bind='127.0.0.1')

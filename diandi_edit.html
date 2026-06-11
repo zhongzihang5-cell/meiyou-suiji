@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>点滴 · 编辑记录</title>
+<style>
+  :root {
+    --my-brand-red: #ff4d88;
+    --my-brand-soft: rgba(255, 77, 136, 0.08);
+    --my-brand-soft-2: rgba(255, 77, 136, 0.14);
+    --my-bg: #f2f2f5;
+    --my-surface: #ffffff;
+    --my-text-primary: #323232;
+    --my-text-secondary: #666666;
+    --my-text-tertiary: #999999;
+    --my-text-quaternary: #c4c4c8;
+    --my-line: rgba(0, 0, 0, 0.06);
+    --my-line-strong: rgba(0, 0, 0, 0.08);
+    --my-success: #00cc99;
+    --my-warning: #ff9500;
+    --my-danger: #ff4d4d;
+    --my-link: #4f7cae;
+    --my-radius-xs: 4px;
+    --my-radius-sm: 8px;
+    --my-radius-md: 12px;
+    --my-radius-lg: 16px;
+    --my-space-1: 4px;
+    --my-space-2: 8px;
+    --my-space-3: 12px;
+    --my-space-4: 16px;
+    --my-space-6: 24px;
+    --my-shadow-1: 0 2px 10px rgba(50, 50, 50, 0.08);
+    --my-shadow-2: 0 8px 24px rgba(0, 0, 0, 0.14);
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "PingFang SC", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    color: var(--my-text-primary);
+    background: #d8d8de;
+    overflow: hidden;
+    height: 100vh;
+    letter-spacing: 0;
+  }
+
+  /* ==== 演示场景切换器 ==== */
+  .demo-controls {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 6px;
+    border-radius: 999px;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .demo-controls button {
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .demo-controls button.active {
+    background: #ff4d88;
+    color: #fff;
+  }
+
+  /* ==== 手机外壳 ==== */
+  .phone {
+    position: relative;
+    width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    background: var(--my-bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 状态栏 */
+  .status-bar {
+    height: 44px;
+    background: var(--my-surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--my-text-primary);
+    flex-shrink: 0;
+  }
+  .status-bar .right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  /* 顶部导航 */
+  .nav-bar {
+    height: 44px;
+    background: var(--my-surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    border-bottom: 0.5px solid var(--my-line-strong);
+    flex-shrink: 0;
+  }
+  .nav-bar .nav-title {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--my-text-primary);
+  }
+  .nav-btn {
+    height: 44px;
+    min-width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--my-text-primary);
+  }
+  .nav-btn.close-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+  .nav-btn.save-btn {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--my-text-quaternary);
+    transition: color 0.2s;
+  }
+  .nav-btn.save-btn.active {
+    color: var(--my-brand-red);
+  }
+
+  /* 主内容滚动区 */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 0 24px;
+  }
+
+  /* 通用 section */
+  .section {
+    background: var(--my-surface);
+    margin: 0 12px 12px;
+    border-radius: var(--my-radius-md);
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 14px 16px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .section-title {
+    font-size: 13px;
+    color: var(--my-text-tertiary);
+    font-weight: 400;
+  }
+  .section-meta {
+    font-size: 12px;
+    color: var(--my-text-tertiary);
+  }
+
+  /* 记录时间行 */
+  .time-row {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .time-row:active {
+    background: rgba(0, 0, 0, 0.03);
+  }
+  .time-row .time-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--my-text-primary);
+  }
+  .time-row .time-value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 15px;
+    color: var(--my-text-secondary);
+  }
+  .time-row .chevron {
+    color: var(--my-text-quaternary);
+    font-size: 14px;
+  }
+  .icon-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--my-brand-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--my-brand-red);
+    font-size: 14px;
+  }
+
+  /* 输入源 - 文字/语音 */
+  .source-block {
+    padding: 14px 16px 16px;
+  }
+  .source-quote {
+    background: rgba(0, 0, 0, 0.03);
+    border-left: 3px solid var(--my-brand-soft-2);
+    padding: 12px 14px;
+    border-radius: var(--my-radius-sm);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--my-text-primary);
+    word-break: break-word;
+    outline: none;
+    min-height: 24px;
+    position: relative;
+  }
+  .source-quote[contenteditable="true"] {
+    background: var(--my-brand-soft);
+    border-left-color: var(--my-brand-red);
+    box-shadow: 0 0 0 2px var(--my-brand-soft-2);
+  }
+  .source-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .source-tip {
+    font-size: 12px;
+    color: var(--my-text-tertiary);
+    line-height: 1.5;
+    flex: 1;
+    padding-right: 8px;
+  }
+  .source-edit-btn {
+    background: transparent;
+    border: none;
+    color: var(--my-brand-red);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--my-radius-xs);
+    flex-shrink: 0;
+  }
+  .source-edit-btn:active {
+    background: var(--my-brand-soft);
+  }
+  .source-type-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--my-text-tertiary);
+    margin-bottom: 8px;
+  }
+
+  /* 输入源 - 图片 */
+  .source-image-wrap {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: var(--my-radius-sm);
+    overflow: hidden;
+    background: #f0f0f0;
+  }
+  .source-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .source-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ffd4a3 0%, #ffb380 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+  .image-delete-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* 删除整条按钮（语音/图片右上角） */
+  .source-header-with-delete {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px 8px;
+  }
+  .source-delete-link {
+    background: transparent;
+    border: none;
+    color: var(--my-danger);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+
+  /* 记录项列表 */
+  .records-list {
+    padding: 0;
+  }
+  .record-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-top: 0.5px solid var(--my-line);
+    position: relative;
+  }
+  .record-item:first-child {
+    border-top: none;
+  }
+  .record-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--my-radius-sm);
+    background: var(--my-brand-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+  .record-icon.symptom { background: rgba(255, 149, 0, 0.1); }
+  .record-icon.emotion { background: rgba(0, 204, 153, 0.1); }
+  .record-icon.diet { background: rgba(79, 124, 174, 0.1); }
+  .record-icon.menstruation { background: var(--my-brand-soft); }
+  .record-icon.intimacy { background: rgba(141, 84, 255, 0.1); }
+  .record-icon.weight { background: rgba(79, 124, 174, 0.1); }
+
+  .record-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .record-type {
+    font-size: 15px;
+    color: var(--my-text-primary);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .record-value {
+    font-size: 13px;
+    color: var(--my-text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .record-time {
+    font-size: 12px;
+    color: var(--my-text-tertiary);
+    margin-top: 4px;
+  }
+  .record-delete {
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: var(--my-text-quaternary);
+    transition: background 0.15s, color 0.15s;
+  }
+  .record-delete:active {
+    background: rgba(255, 77, 77, 0.08);
+    color: var(--my-danger);
+  }
+  .record-delete svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* MVP 不可编辑提示 */
+  .records-mvp-tip {
+    padding: 8px 16px 14px;
+    font-size: 12px;
+    color: var(--my-text-tertiary);
+    line-height: 1.5;
+    border-top: 0.5px solid var(--my-line);
+    background: rgba(0, 0, 0, 0.015);
+  }
+
+  /* 底部删除整条 */
+  .danger-zone {
+    margin: 16px 12px 24px;
+    background: var(--my-surface);
+    border-radius: var(--my-radius-md);
+    overflow: hidden;
+  }
+  .danger-btn {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: none;
+    color: var(--my-danger);
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+  }
+  .danger-btn:active {
+    background: rgba(255, 77, 77, 0.04);
+  }
+
+  /* ==== 底部时间选择器弹窗 ==== */
+  .sheet-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s;
+  }
+  .sheet-mask.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--my-surface);
+    border-radius: 16px 16px 0 0;
+    z-index: 101;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .sheet.show {
+    transform: translateY(0);
+  }
+  .sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--my-line-strong);
+  }
+  .sheet-header button {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 6px 8px;
+  }
+  .sheet-header .cancel { color: var(--my-text-secondary); }
+  .sheet-header .confirm { color: var(--my-brand-red); font-weight: 500; }
+  .sheet-header .sheet-title {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .sheet-body {
+    padding: 16px;
+    padding-bottom: 32px;
+  }
+
+  /* 时间选择器（简化版） */
+  .picker-wrap {
+    display: flex;
+    height: 200px;
+    position: relative;
+  }
+  .picker-col {
+    flex: 1;
+    overflow-y: scroll;
+    text-align: center;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 80px 0;
+  }
+  .picker-col::-webkit-scrollbar {
+    display: none;
+  }
+  .picker-item {
+    height: 40px;
+    line-height: 40px;
+    font-size: 17px;
+    color: var(--my-text-secondary);
+    scroll-snap-align: center;
+    transition: color 0.15s, font-weight 0.15s;
+  }
+  .picker-item.selected {
+    color: var(--my-text-primary);
+    font-weight: 500;
+  }
+  .picker-indicator {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 80px;
+    height: 40px;
+    border-top: 0.5px solid var(--my-line-strong);
+    border-bottom: 0.5px solid var(--my-line-strong);
+    pointer-events: none;
+    background: rgba(255, 77, 136, 0.03);
+  }
+
+  /* ==== 二次确认对话框 ==== */
+  .dialog-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dialog-mask.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dialog {
+    width: 280px;
+    background: var(--my-surface);
+    border-radius: 14px;
+    overflow: hidden;
+    transform: scale(0.92);
+    transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .dialog-mask.show .dialog {
+    transform: scale(1);
+  }
+  .dialog-content {
+    padding: 22px 20px 16px;
+    text-align: center;
+  }
+  .dialog-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--my-text-primary);
+    margin-bottom: 10px;
+  }
+  .dialog-desc {
+    font-size: 13px;
+    color: var(--my-text-secondary);
+    line-height: 1.55;
+    text-align: left;
+  }
+  .dialog-desc .item-list {
+    margin: 10px 0 4px;
+    padding-left: 4px;
+  }
+  .dialog-desc .item-list li {
+    list-style: none;
+    padding: 3px 0;
+    font-size: 13px;
+    color: var(--my-text-primary);
+  }
+  .dialog-desc .item-list li::before {
+    content: "•";
+    color: var(--my-brand-red);
+    margin-right: 8px;
+  }
+  .dialog-actions {
+    display: flex;
+    border-top: 0.5px solid var(--my-line-strong);
+  }
+  .dialog-actions button {
+    flex: 1;
+    padding: 14px 0;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .dialog-actions button + button {
+    border-left: 0.5px solid var(--my-line-strong);
+  }
+  .dialog-actions .cancel { color: var(--my-text-secondary); }
+  .dialog-actions .confirm-danger { color: var(--my-danger); font-weight: 500; }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.78);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: var(--my-radius-sm);
+    font-size: 14px;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .toast.show {
+    opacity: 1;
+  }
+
+  /* 场景隐藏 */
+  .scene { display: none; }
+  .scene.active { display: block; }
+
+  /* 改动指示器（小红点表示有未保存） */
+  .unsaved-indicator {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--my-brand-red);
+    margin-left: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    vertical-align: middle;
+  }
+  .unsaved-indicator.show {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-controls">
+  <button data-scene="mixed">语音混合</button>
+  <button data-scene="text">文字记录</button>
+  <button data-scene="image">饮食图片</button>
+  <button data-scene="quick">快捷记录</button>
+</div>
+
+<div class="phone">
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span class="right">●●● 5G ▮</span>
+  </div>
+
+  <!-- 顶部导航 -->
+  <div class="nav-bar">
+    <button class="nav-btn close-btn" onclick="handleClose()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <div class="nav-title">编辑记录<span class="unsaved-indicator" id="unsavedDot"></span></div>
+    <button class="nav-btn save-btn" id="saveBtn" onclick="handleSave()">保存</button>
+  </div>
+
+  <!-- 主内容滚动区 -->
+  <div class="scroll-area">
+
+    <!-- ============ 场景1：语音混合 ============ -->
+    <div class="scene active" id="scene-mixed">
+      <!-- 记录时间 -->
+      <div class="section">
+        <div class="time-row" onclick="openTimePicker()">
+          <div class="time-label">
+            <span class="icon-circle">🕐</span>
+            <span>记录时间</span>
+          </div>
+          <div class="time-value">
+            <span id="recordTime-mixed">今天 12:00</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 语音输入源 -->
+      <div class="section">
+        <div class="source-header-with-delete">
+          <span class="section-title">📣 语音转写</span>
+          <button class="source-delete-link" onclick="confirmDeleteVoice()">删除语音</button>
+        </div>
+        <div class="source-block" style="padding-top: 0;">
+          <div class="source-quote" id="voiceQuote">昨天下午来了姨妈，来之前，上午就开始头痛。</div>
+          <div class="source-meta-row">
+            <div class="source-tip">修改转写文字不会重新识别下方记录项</div>
+            <button class="source-edit-btn" onclick="enableEdit('voiceQuote', this)">修改</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 记录项列表 -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">识别到 2 条记录</span>
+          <span class="section-meta">MVP 仅支持删除</span>
+        </div>
+        <div class="records-list">
+          <div class="record-item" data-record-id="r1">
+            <div class="record-icon menstruation">🩸</div>
+            <div class="record-main">
+              <div class="record-type">月经开始</div>
+              <div class="record-time">昨天 下午</div>
+            </div>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '月经开始')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+              </svg>
+            </button>
+          </div>
+          <div class="record-item" data-record-id="r2">
+            <div class="record-icon symptom">🤕</div>
+            <div class="record-main">
+              <div class="record-type">症状 · 头痛</div>
+              <div class="record-time">昨天 上午</div>
+            </div>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '症状 · 头痛')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="records-mvp-tip">如需修改记录项内容（值、时间等），请先删除再重新记录</div>
+      </div>
+
+      <!-- 删除整条 -->
+      <div class="danger-zone">
+        <button class="danger-btn" onclick="confirmDeleteEntry('mixed')">删除这条记录</button>
+      </div>
+    </div>
+
+    <!-- ============ 场景2：文字记录 ============ -->
+    <div class="scene" id="scene-text">
+      <div class="section">
+        <div class="time-row" onclick="openTimePicker()">
+          <div class="time-label">
+            <span class="icon-circle">🕐</span>
+            <span>记录时间</span>
+          </div>
+          <div class="time-value">
+            <span id="recordTime-text">今天 14:30</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="source-header-with-delete">
+          <span class="section-title">✏️ 文字记录</span>
+        </div>
+        <div class="source-block" style="padding-top: 0;">
+          <div class="source-quote" id="textQuote">今天心情有点烦躁，吃了一碗番茄牛腩面，体重 52kg。</div>
+          <div class="source-meta-row">
+            <div class="source-tip">修改文字不会重新识别下方记录项</div>
+            <button class="source-edit-btn" onclick="enableEdit('textQuote', this)">修改</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">识别到 3 条记录</span>
+          <span class="section-meta">MVP 仅支持删除</span>
+        </div>
+        <div class="records-list">
+          <div class="record-item">
+            <div class="record-icon emotion">😣</div>
+            <div class="record-main">
+              <div class="record-type">情绪 · 烦躁</div>
+              <div class="record-time">今天 14:30</div>
+            </div>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '情绪 · 烦躁')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+              </svg>
+            </button>
+          </div>
+          <div class="record-item">
+            <div class="record-icon diet">🍜</div>
+            <div class="record-main">
+              <div class="record-type">饮食 · 番茄牛腩面</div>
+              <div class="record-time">今天 14:30</div>
+            </div>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '饮食 · 番茄牛腩面')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+              </svg>
+            </button>
+          </div>
+          <div class="record-item">
+            <div class="record-icon weight">⚖️</div>
+            <div class="record-main">
+              <div class="record-type">体重 · 52kg</div>
+              <div class="record-time">今天 14:30</div>
+            </div>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '体重 · 52kg')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="records-mvp-tip">如需修改记录项内容（值、时间等），请先删除再重新记录</div>
+      </div>
+
+      <div class="danger-zone">
+        <button class="danger-btn" onclick="confirmDeleteEntry('text')">删除这条记录</button>
+      </div>
+    </div>
+
+    <!-- ============ 场景3：饮食图片 ============ -->
+    <div class="scene" id="scene-image">
+      <div class="section">
+        <div class="time-row" onclick="openTimePicker()">
+          <div class="time-label">
+            <span class="icon-circle">🕐</span>
+            <span>记录时间</span>
+          </div>
+          <div class="time-value">
+            <span id="recordTime-image">今天 12:30</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="source-header-with-delete">
+          <span class="section-title">📷 饮食照片</span>
+          <button class="source-delete-link" onclick="confirmDeleteImage()">删除照片</button>
+        </div>
+        <div class="source-block" style="padding-top: 0;">
+          <div class="source-image-wrap" id="foodImage">
+            <div class="source-image-placeholder">🍱</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">识别到 1 条记录</span>
+          <span class="section-meta">MVP 仅支持删除</span>
+        </div>
+        <div class="records-list">
+          <div class="record-item">
+            <div class="record-icon diet">🍱</div>
+            <div class="record-main">
+              <div class="record-type">饮食 · 日式便当</div>
+              <div class="record-value">饭团、玉子烧、炸鸡、西兰花</div>
+              <div class="record-time">今天 12:30</div>
+            </div>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '饮食 · 日式便当')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="records-mvp-tip">如需修改记录项内容，请先删除再重新记录</div>
+      </div>
+
+      <div class="danger-zone">
+        <button class="danger-btn" onclick="confirmDeleteEntry('image')">删除这条记录</button>
+      </div>
+    </div>
+
+    <!-- ============ 场景4：快捷记录（无输入源）============ -->
+    <div class="scene" id="scene-quick">
+      <div class="section">
+        <div class="time-row" onclick="openTimePicker()">
+          <div class="time-label">
+            <span class="icon-circle">🕐</span>
+            <span>记录时间</span>
+          </div>
+          <div class="time-value">
+            <span id="recordTime-quick">今天 09:15</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">识别到 1 条记录</span>
+          <span class="section-meta">MVP 仅支持删除</span>
+        </div>
+        <div class="records-list">
+          <div class="record-item">
+            <div class="record-icon emotion">😊</div>
+            <div class="record-main">
+              <div class="record-type">情绪 · 开心</div>
+              <div class="record-time">今天 09:15</div>
+            </div>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '情绪 · 开心')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="records-mvp-tip">如需修改记录项内容，请先删除再重新记录</div>
+      </div>
+
+      <div class="danger-zone">
+        <button class="danger-btn" onclick="confirmDeleteEntry('quick')">删除这条记录</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==== 底部时间选择器 ==== -->
+  <div class="sheet-mask" id="timeSheetMask" onclick="closeTimePicker()"></div>
+  <div class="sheet" id="timeSheet">
+    <div class="sheet-header">
+      <button class="cancel" onclick="closeTimePicker()">取消</button>
+      <span class="sheet-title">修改记录时间</span>
+      <button class="confirm" onclick="confirmTimePicker()">完成</button>
+    </div>
+    <div class="sheet-body">
+      <div class="picker-wrap">
+        <div class="picker-indicator"></div>
+        <div class="picker-col" id="dayCol"></div>
+        <div class="picker-col" id="hourCol"></div>
+        <div class="picker-col" id="minCol"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==== 二次确认对话框 ==== -->
+  <div class="dialog-mask" id="dialogMask">
+    <div class="dialog">
+      <div class="dialog-content">
+        <div class="dialog-title" id="dialogTitle">确认删除？</div>
+        <div class="dialog-desc" id="dialogDesc"></div>
+      </div>
+      <div class="dialog-actions">
+        <button class="cancel" onclick="closeDialog()">取消</button>
+        <button class="confirm-danger" id="dialogConfirmBtn">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  // ========== URL 参数读取 & 场景初始化 ==========
+  (function(){
+    const params = new URLSearchParams(window.location.search);
+    const valid = ['mixed','text','image','quick'];
+    let scene = params.get('scene') || 'mixed';
+    if(valid.indexOf(scene) < 0) scene = 'mixed';
+    document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('scene-' + scene);
+    if(target) target.classList.add('active');
+    // 同步切换器按钮 active 态
+    document.querySelectorAll('.demo-controls button').forEach(b => {
+      b.classList.toggle('active', b.dataset.scene === scene);
+    });
+  })();
+
+  // ========== 演示场景切换器 ==========
+  const sceneButtons = document.querySelectorAll('.demo-controls button');
+  sceneButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sceneButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const scene = btn.dataset.scene;
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+      document.getElementById('scene-' + scene).classList.add('active');
+      resetDirty();
+    });
+  });
+
+  const isEmbedded = window.parent !== window;
+
+  // ========== 改动状态 ==========
+  let dirty = false;
+  function markDirty() {
+    dirty = true;
+    document.getElementById('saveBtn').classList.add('active');
+    document.getElementById('unsavedDot').classList.add('show');
+  }
+  function resetDirty() {
+    dirty = false;
+    document.getElementById('saveBtn').classList.remove('active');
+    document.getElementById('unsavedDot').classList.remove('show');
+  }
+
+  // ========== 关闭与保存 ==========
+  function notifyParent(action) {
+    if(isEmbedded) window.parent.postMessage({type:'edit-close', action: action}, '*');
+  }
+  function handleClose() {
+    if (dirty) {
+      showDialog({
+        title: '放弃修改？',
+        desc: '<div style="text-align:center;color:var(--my-text-secondary)">当前修改尚未保存，是否放弃？</div>',
+        confirmText: '放弃',
+        onConfirm: () => {
+          resetDirty();
+          notifyParent('cancel');
+        }
+      });
+    } else {
+      notifyParent('cancel');
+    }
+  }
+  function handleSave() {
+    if (!dirty) return;
+    resetDirty();
+    setTimeout(() => notifyParent('save'), 200);
+  }
+
+  // ========== 原文编辑 ==========
+  function enableEdit(id, btn) {
+    const el = document.getElementById(id);
+    if (el.getAttribute('contenteditable') === 'true') {
+      el.setAttribute('contenteditable', 'false');
+      el.blur();
+      btn.textContent = '修改';
+    } else {
+      el.setAttribute('contenteditable', 'true');
+      el.focus();
+      btn.textContent = '完成';
+      // 光标移到末尾
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      // 监听变更
+      el.addEventListener('input', markDirty, { once: true });
+    }
+  }
+
+  // ========== 时间选择器 ==========
+  let currentTimeTarget = null;
+  function openTimePicker() {
+    // 找到当前 active 场景里的时间元素
+    const activeScene = document.querySelector('.scene.active');
+    currentTimeTarget = activeScene.querySelector('[id^="recordTime-"]');
+    buildPicker();
+    document.getElementById('timeSheetMask').classList.add('show');
+    document.getElementById('timeSheet').classList.add('show');
+  }
+  function closeTimePicker() {
+    document.getElementById('timeSheetMask').classList.remove('show');
+    document.getElementById('timeSheet').classList.remove('show');
+  }
+  function confirmTimePicker() {
+    const day = getPickerSelected('dayCol');
+    const hour = getPickerSelected('hourCol');
+    const min = getPickerSelected('minCol');
+    if (currentTimeTarget) {
+      currentTimeTarget.textContent = `${day} ${hour}:${min}`;
+      markDirty();
+    }
+    closeTimePicker();
+  }
+
+  function buildPicker() {
+    const days = ['前天', '昨天', '今天'];
+    const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0'));
+    const mins = Array.from({length: 60}, (_, i) => String(i).padStart(2, '0'));
+    fillCol('dayCol', days, 2);
+    fillCol('hourCol', hours, 12);
+    fillCol('minCol', mins, 0);
+  }
+  function fillCol(colId, items, defaultIdx) {
+    const col = document.getElementById(colId);
+    col.innerHTML = items.map((v, i) =>
+      `<div class="picker-item ${i === defaultIdx ? 'selected' : ''}" data-value="${v}">${v}</div>`
+    ).join('');
+    // 滚动到默认值
+    setTimeout(() => {
+      col.scrollTop = defaultIdx * 40;
+      attachPickerScroll(col);
+    }, 0);
+  }
+  function attachPickerScroll(col) {
+    let timer;
+    col.addEventListener('scroll', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const idx = Math.round(col.scrollTop / 40);
+        col.scrollTo({ top: idx * 40, behavior: 'smooth' });
+        [...col.children].forEach((c, i) => c.classList.toggle('selected', i === idx));
+      }, 100);
+    });
+  }
+  function getPickerSelected(colId) {
+    const col = document.getElementById(colId);
+    const sel = col.querySelector('.picker-item.selected');
+    return sel ? sel.dataset.value : '';
+  }
+
+  // ========== 对话框 ==========
+  function showDialog({ title, desc, confirmText, onConfirm }) {
+    document.getElementById('dialogTitle').textContent = title;
+    document.getElementById('dialogDesc').innerHTML = desc;
+    const btn = document.getElementById('dialogConfirmBtn');
+    btn.textContent = confirmText || '删除';
+    btn.onclick = () => {
+      onConfirm && onConfirm();
+      closeDialog();
+    };
+    document.getElementById('dialogMask').classList.add('show');
+  }
+  function closeDialog() {
+    document.getElementById('dialogMask').classList.remove('show');
+  }
+
+  // ========== 删除单条记录项 ==========
+  function confirmDeleteRecord(btn, name) {
+    showDialog({
+      title: '删除这条记录项？',
+      desc: `<div style="text-align:center;color:var(--my-text-secondary)">将移除 <strong style="color:var(--my-text-primary)">${name}</strong></div>`,
+      confirmText: '删除',
+      onConfirm: () => {
+        const item = btn.closest('.record-item');
+        item.style.transition = 'all 0.24s';
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+          item.remove();
+          markDirty();
+          showToast('已删除');
+        }, 240);
+      }
+    });
+  }
+
+  // ========== 删除语音/图片输入源 ==========
+  function confirmDeleteVoice() {
+    showDialog({
+      title: '删除语音原文？',
+      desc: '<div style="text-align:center;color:var(--my-text-secondary)">删除后保留已识别的记录项，<br>语音原文将无法恢复</div>',
+      confirmText: '删除',
+      onConfirm: () => {
+        markDirty();
+        showToast('语音已删除');
+      }
+    });
+  }
+  function confirmDeleteImage() {
+    showDialog({
+      title: '删除饮食照片？',
+      desc: '<div style="text-align:center;color:var(--my-text-secondary)">删除后保留已识别的饮食记录，<br>照片将无法恢复</div>',
+      confirmText: '删除',
+      onConfirm: () => {
+        markDirty();
+        showToast('照片已删除');
+      }
+    });
+  }
+
+  // ========== 删除整条记录（级联）==========
+  function confirmDeleteEntry(sceneType) {
+    const scene = document.getElementById('scene-' + sceneType);
+    const items = scene.querySelectorAll('.record-item');
+    const itemsHtml = [...items].map(i =>
+      `<li>${i.querySelector('.record-type').textContent}</li>`
+    ).join('');
+
+    showDialog({
+      title: '删除这条记录？',
+      desc: `
+        <div>删除后将同时移除：</div>
+        <ul class="item-list">${itemsHtml}</ul>
+        <div style="color:var(--my-text-tertiary);font-size:12px;margin-top:8px">此操作无法撤销</div>
+      `,
+      confirmText: '删除',
+      onConfirm: () => {
+        setTimeout(() => notifyParent('delete'), 200);
+      }
+    });
+  }
+
+  // ========== Toast ==========
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+</script>
+</body>
+</html>

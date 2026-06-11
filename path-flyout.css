@@ -1,0 +1,406 @@
+/* Path App scheme-3 — 弧形快捷菜单 + FAB 动效 */
+
+.path-flyout-wrap{
+  position:absolute;
+  right:-6px;
+  bottom:50%;
+  margin-bottom:-28px;
+  width:220px;
+  height:220px;
+  z-index:95;
+  pointer-events:none;
+}
+
+.path-flyout{
+  position:relative;
+  margin:0;
+  padding:0;
+  list-style:none;
+  line-height:0;
+}
+
+.path-flyout > li{
+  position:absolute;
+  inset:0;
+  display:block;
+}
+
+.path-flyout > li button{
+  --shift-x:0px;
+  --shift-y:0px;
+  --overshoot-x:0px;
+  --overshoot-y:0px;
+  --settle-x:0px;
+  --settle-y:0px;
+  position:absolute;
+  left:160px;
+  top:160px;
+  display:block;
+  width:64px;
+  height:64px;
+  padding:0;
+  border:0.5px solid rgba(0,0,0,0.06);
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  cursor:pointer;
+  transform:translate(0,0);
+  pointer-events:none;
+  font:inherit;
+}
+
+.path-flyout > li button:active{
+  opacity:0.92;
+}
+
+.path-flyout-init li{
+  display:none;
+}
+
+.path-flyout-init li button{
+  display:none;
+}
+
+.path-flyout-expand li button{
+  pointer-events:auto;
+  transform:translate(var(--shift-x), var(--shift-y));
+  animation:pathFlyoutExpand 0.5s ease 1 backwards;
+}
+
+.path-flyout-contract li button{
+  pointer-events:none;
+  transform:translate(0,0);
+  animation:pathFlyoutContract 0.5s ease 1 both;
+}
+
+.path-flyout-fade li button.is-clicked{
+  pointer-events:none;
+  transform:translate(var(--shift-x), var(--shift-y));
+  animation:pathFlyoutClicked 0.5s ease-out 1 forwards;
+}
+
+.path-flyout-fade li button:not(.is-clicked){
+  pointer-events:none;
+  transform:translate(var(--shift-x), var(--shift-y));
+  animation:pathFlyoutFade 0.5s ease-out 1 forwards;
+}
+
+.path-flyout-fade li button:not(.is-clicked) .path-flyout-item-icon{
+  opacity:0.1;
+  transition:opacity 0.5s ease;
+}
+
+/* scheme-3 弧形坐标 */
+.path-flyout li:nth-of-type(1) button{
+  --shift-x:-5px;
+  --shift-y:-158px;
+  --overshoot-x:-5.9px;
+  --overshoot-y:-187px;
+  --settle-x:-4.8px;
+  --settle-y:-151.5px;
+  animation-delay:0.12s;
+}
+.path-flyout-expand li:nth-of-type(1) button{ animation-delay:0s; }
+
+.path-flyout li:nth-of-type(2) button{
+  --shift-x:-79.5px;
+  --shift-y:-136px;
+  --overshoot-x:-94px;
+  --overshoot-y:-160.8px;
+  --settle-x:-76.2px;
+  --settle-y:-130.4px;
+  animation-delay:0.08s;
+}
+.path-flyout-expand li:nth-of-type(2) button{ animation-delay:0.04s; }
+
+.path-flyout li:nth-of-type(3) button{
+  --shift-x:-137px;
+  --shift-y:-79px;
+  --overshoot-x:-161.9px;
+  --overshoot-y:-93.4px;
+  --settle-x:-131.4px;
+  --settle-y:-75.8px;
+  animation-delay:0.04s;
+}
+.path-flyout-expand li:nth-of-type(3) button{ animation-delay:0.08s; }
+
+.path-flyout li:nth-of-type(4) button{
+  --shift-x:-159px;
+  --shift-y:-4px;
+  --overshoot-x:-187.9px;
+  --overshoot-y:-4.7px;
+  --settle-x:-152.5px;
+  --settle-y:-3.8px;
+  animation-delay:0s;
+}
+.path-flyout-expand li:nth-of-type(4) button{ animation-delay:0.12s; }
+
+.path-flyout-item-icon{
+  position:absolute;
+  left:50%;
+  top:8px;
+  width:28px;
+  height:28px;
+  margin-left:-14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.path-flyout-expand li:nth-of-type(1) .path-flyout-item-icon{
+  animation:pathFlyoutIconExpand 0.6s ease-out 0s 1 both;
+}
+.path-flyout-contract li:nth-of-type(1) .path-flyout-item-icon{
+  animation:pathFlyoutIconContract 0.6s ease 0.27s 1 both;
+}
+.path-flyout-expand li:nth-of-type(2) .path-flyout-item-icon{
+  animation:pathFlyoutIconExpand 0.6s ease-out 0.04s 1 both;
+}
+.path-flyout-contract li:nth-of-type(2) .path-flyout-item-icon{
+  animation:pathFlyoutIconContract 0.6s ease 0.23s 1 both;
+}
+.path-flyout-expand li:nth-of-type(3) .path-flyout-item-icon{
+  animation:pathFlyoutIconExpand 0.6s ease-out 0.08s 1 both;
+}
+.path-flyout-contract li:nth-of-type(3) .path-flyout-item-icon{
+  animation:pathFlyoutIconContract 0.6s ease 0.19s 1 both;
+}
+.path-flyout-expand li:nth-of-type(4) .path-flyout-item-icon{
+  animation:pathFlyoutIconExpand 0.6s ease-out 0.12s 1 both;
+}
+.path-flyout-contract li:nth-of-type(4) .path-flyout-item-icon{
+  animation:pathFlyoutIconContract 0.6s ease 0.15s 1 both;
+}
+
+.path-flyout-item-label{
+  position:absolute;
+  left:50%;
+  top:41px;
+  display:block;
+  color:#333;
+  font-size:11px;
+  line-height:11px;
+  white-space:nowrap;
+  transform:translateX(-50%);
+  opacity:0;
+}
+
+.path-flyout-expand li:nth-of-type(1) .path-flyout-item-label{
+  animation:pathFlyoutLabelShow 0.5s ease 0s 1 both;
+}
+.path-flyout-contract li:nth-of-type(1) .path-flyout-item-label{
+  animation:pathFlyoutLabelHide 0.5s ease 0.12s 1 both;
+}
+.path-flyout-expand li:nth-of-type(2) .path-flyout-item-label{
+  animation:pathFlyoutLabelShow 0.5s ease 0.04s 1 both;
+}
+.path-flyout-contract li:nth-of-type(2) .path-flyout-item-label{
+  animation:pathFlyoutLabelHide 0.5s ease 0.08s 1 both;
+}
+.path-flyout-expand li:nth-of-type(3) .path-flyout-item-label{
+  animation:pathFlyoutLabelShow 0.5s ease 0.08s 1 both;
+}
+.path-flyout-contract li:nth-of-type(3) .path-flyout-item-label{
+  animation:pathFlyoutLabelHide 0.5s ease 0.04s 1 both;
+}
+.path-flyout-expand li:nth-of-type(4) .path-flyout-item-label{
+  animation:pathFlyoutLabelShow 0.5s ease 0.12s 1 both;
+}
+.path-flyout-contract li:nth-of-type(4) .path-flyout-item-label{
+  animation:pathFlyoutLabelHide 0.5s ease 0s 1 both;
+}
+
+.path-flyout-btn{
+  position:absolute;
+  right:0;
+  bottom:0;
+  z-index:9999;
+  width:56px;
+  height:56px;
+  padding:0;
+  overflow:hidden;
+  border:0;
+  border-radius:50%;
+  outline:0;
+  background:radial-gradient(circle at 30% 25%, #ff7aa8 0%, var(--my-brand-red) 60%, var(--my-brand-red) 100%);
+  box-shadow:0 5px 15px rgba(255,77,136,0.35);
+  cursor:pointer;
+  pointer-events:auto;
+  touch-action:manipulation;
+}
+
+.path-flyout-gray-layer{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  display:block;
+  border-radius:50%;
+  background:#ccc;
+  opacity:0;
+  transition:opacity 0.4s ease;
+}
+
+.path-flyout-plus-icon{
+  position:relative;
+  z-index:1;
+  display:block;
+  width:56px;
+  height:56px;
+  transition:transform 0.4s ease;
+}
+
+.path-flyout-plus-icon::before,
+.path-flyout-plus-icon::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:16px;
+  height:3px;
+  border-radius:999px;
+  background:#fff;
+  transform:translate(-50%, -50%);
+}
+
+.path-flyout-plus-icon::after{
+  transform:translate(-50%, -50%) rotate(90deg);
+}
+
+.path-flyout-btn.is-open .path-flyout-plus-icon{
+  transform:rotate(-135deg);
+}
+
+.path-flyout-btn.is-open .path-flyout-gray-layer{
+  opacity:1;
+}
+
+.path-flyout-btn:active{
+  transform:scale(0.94);
+}
+
+.phone:has(.path-flyout-expand) .suiji-stream,
+.phone:has(.path-flyout-expand) .dock-wrap .dock-input-pill,
+.phone:has(.path-flyout-fade) .suiji-stream{
+  pointer-events:none;
+}
+
+@keyframes pathFlyoutExpand{
+  0%{ transform:translate(0,0); opacity:0; }
+  50%{ transform:translate(var(--overshoot-x), var(--overshoot-y)); opacity:1; }
+  70%{ transform:translate(var(--settle-x), var(--settle-y)); opacity:1; }
+  100%{ transform:translate(var(--shift-x), var(--shift-y)); opacity:1; }
+}
+
+@keyframes pathFlyoutContract{
+  0%{ transform:translate(var(--shift-x), var(--shift-y)); opacity:1; }
+  30%{ transform:translate(var(--settle-x), var(--settle-y)); opacity:1; }
+  50%{ transform:translate(var(--overshoot-x), var(--overshoot-y)); opacity:1; }
+  100%{ transform:translate(0,0); opacity:0; }
+}
+
+@keyframes pathFlyoutClicked{
+  0%{ transform:translate(var(--shift-x), var(--shift-y)) scale(1); opacity:1; }
+  90%{ transform:translate(var(--shift-x), var(--shift-y)) scale(1); }
+  99%{ transform:translate(0,0) scale(6); opacity:0; }
+  100%{ transform:translate(0,0) scale(0); }
+}
+
+@keyframes pathFlyoutFade{
+  0%{ transform:translate(var(--shift-x), var(--shift-y)) scale(1); opacity:1; }
+  90%{ transform:translate(var(--shift-x), var(--shift-y)) scale(1); opacity:0; }
+  99%{ transform:translate(0,0) scale(0); }
+  100%{ transform:translate(0,0) scale(0); }
+}
+
+@keyframes pathFlyoutIconExpand{
+  0%{ transform:rotate(-90deg); }
+  70%, 100%{ transform:rotate(0deg); }
+}
+
+@keyframes pathFlyoutIconContract{
+  0%{ transform:rotate(0deg); opacity:1; }
+  100%{ transform:rotate(-180deg); opacity:1; }
+}
+
+@keyframes pathFlyoutLabelShow{
+  0%{ opacity:0; }
+  100%{ opacity:1; }
+}
+
+@keyframes pathFlyoutLabelHide{
+  0%{ opacity:1; }
+  100%{ opacity:0; }
+}
+
+/* ============ Path 风格胶囊输入框 ============ */
+.dock-panel.is-path-dock{
+  background:transparent;
+  border-top:none;
+  box-shadow:none;
+  overflow:visible;
+}
+
+.dock-wrap:has(.dock-panel.is-path-dock){
+  overflow:visible;
+}
+
+.dock-bar.is-path-dock{
+  padding:8px 12px 10px;
+  position:relative;
+  align-items:center;
+}
+
+.dock-input-pill{
+  flex:1;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-height:44px;
+  padding:4px 56px 4px 6px;
+  background:#fff;
+  border-radius:80px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+  position:relative;
+  overflow:visible;
+}
+
+.dock-input-pill .dock-mode-btn{
+  width:36px;
+  height:36px;
+  flex-shrink:0;
+  border-radius:50%;
+  color:rgba(0,0,0,0.55);
+}
+
+.dock-input-pill .dock-text-field{
+  flex:1;
+  min-height:36px;
+  background:transparent;
+  border-radius:0;
+  border:none;
+  padding:0 8px 0 0;
+}
+
+.dock-input-pill .dock-text-field:focus-within,
+.dock-input-pill .dock-text-field.is-focused{
+  background:transparent;
+  border-color:transparent;
+}
+
+.dock-input-pill .dock-voice-wrap{
+  flex:1;
+  min-height:36px;
+  border-radius:80px;
+}
+
+.dock-input-pill .dock-voice-btn{
+  border-radius:80px;
+  background:transparent;
+  color:rgba(0,0,0,0.45);
+  font-size:15px;
+}
+
+.dock-input-pill .dock-send-btn{
+  margin-right:4px;
+}

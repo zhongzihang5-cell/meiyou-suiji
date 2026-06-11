@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "index",
-      "runtimeExecutable": "/usr/bin/python3",
-      "runtimeArgs": ["/Users/wangyingyue/Documents/diandi_record/serve.py"],
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/zhongzihang/Projects/meiyou-suiji"],
       "port": 8765
     }
   ]

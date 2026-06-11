@@ -17,20 +17,21 @@ const DEMO_SCENES = {
           if(it?.kind === 'guide' && it.id === 'g-518-post') it.noAnimate = true;
         });
       });
+      // d-5-17 不在初始 timeline 中，演示流程触发时由 app.jsx 动态插入
       return blocks;
     },
     calendar: {
       enabled: true,
-      periodFlow: false,
+      periodFlow: true,
     },
     floatNotice: {
-      enabled: false,
+      enabled: true,
     },
     record: {
       showHealthCard: false,
       sisterAnalysis: {
-        trigger: 'none',
-        initialDone: true,
+        trigger: 'float-notice',
+        initialDone: false,
       },
       todayGuide: true,
       recordFeedback: true,

@@ -327,7 +327,8 @@ function V3Chevron({open}){
   );
 }
 
-function V3v2Header({time, title}){
+function V3v2Header({time, title, isNew, entryId, entryKind}){
+  const MoreMenu = window.CardMoreMenu;
   if(!time && !title) return null;
   return (
     <div style={{display:'flex', alignItems:'center', gap:6, minWidth:0}}>
@@ -342,11 +343,142 @@ function V3v2Header({time, title}){
           flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
         }}>{title}</div>
       )}
+      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} onEdit={window.openEditModal}/>}
     </div>
   );
 }
 
-function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false}){
+function V3FoodListStatic({ items, totalKcal, revealStep = 3 }) {
+  const DietFoodResultSummary = window.DietFoodResultSummary;
+  if (DietFoodResultSummary) {
+    return <DietFoodResultSummary items={items} totalKcal={totalKcal} revealStep={revealStep}/>;
+  }
+  const listStyle = { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 };
+  const rowStyle = { fontSize: 13, color: TL_TEXT, lineHeight: 1.45, display: 'flex', alignItems: 'baseline', gap: 6 };
+  const dotStyle = { width: 3, height: 3, borderRadius: 1.5, background: TL_PRIMARY, flexShrink: 0, alignSelf: 'center' };
+  return (
+    <ul style={listStyle}>
+      {items.map((it, i) => (
+        <li key={i} style={rowStyle}>
+          <span style={dotStyle}/>
+          <span>{it}</span>
+        </li>
+      ))}
+      {totalKcal != null && (
+        <li style={{
+          ...rowStyle, marginTop: 4, paddingTop: 6,
+          borderTop: `0.5px solid ${TL_HAIR}`, fontWeight: 500,
+        }}>
+          <span style={{ color: TL_MUTED, fontWeight: 500 }}>总卡路里</span>
+          <span style={{ marginLeft: 'auto', color: TL_PRIMARY, fontVariantNumeric: 'tabular-nums' }}>{totalKcal} kcal</span>
+        </li>
+      )}
+    </ul>
+  );
+}
+
+function V3PhotoFoodAnalysis({ items, totalKcal, isNew, onComplete }) {
+  const TypewriterText = window.TypewriterText;
+  const loadingMs = window.PHOTO_ANALYZE_LOADING_MS || 5000;
+  const animate = !!isNew;
+  const [loading, setLoading] = React.useState(animate);
+  const [activeLine, setActiveLine] = React.useState(0);
+  const [typingTotal, setTypingTotal] = React.useState(false);
+  const [finished, setFinished] = React.useState(!animate);
+  const lineGapRef = React.useRef(null);
+
+  const foodItems = items || [];
+  const listStyle = { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 };
+  const rowStyle = { fontSize: 13, color: TL_TEXT, lineHeight: 1.45, display: 'flex', alignItems: 'baseline', gap: 6 };
+  const dotStyle = { width: 3, height: 3, borderRadius: 1.5, background: TL_PRIMARY, flexShrink: 0, alignSelf: 'center' };
+
+  React.useEffect(() => {
+    if (!animate) return;
+    const tm = setTimeout(() => setLoading(false), loadingMs);
+    return () => clearTimeout(tm);
+  }, [animate, loadingMs]);
+
+  React.useEffect(() => () => {
+    if (lineGapRef.current) clearTimeout(lineGapRef.current);
+  }, []);
+
+  const finishAnalysis = React.useCallback(() => {
+    setFinished(true);
+    onComplete?.();
+  }, [onComplete]);
+
+  const handleFoodLineComplete = React.useCallback(() => {
+    if (activeLine >= foodItems.length - 1) {
+      if (totalKcal != null) {
+        lineGapRef.current = setTimeout(() => setTypingTotal(true), 180);
+      } else {
+        finishAnalysis();
+      }
+    } else {
+      lineGapRef.current = setTimeout(() => setActiveLine(v => v + 1), 180);
+    }
+  }, [activeLine, foodItems.length, totalKcal, finishAnalysis]);
+
+  if (!animate || finished) {
+    return <V3FoodListStatic items={foodItems} totalKcal={totalKcal}/>;
+  }
+
+  if (loading) {
+    return (
+      <div className="v3-photo-analyze-loading" aria-live="polite">
+        <span className="v3-photo-analyze-dot"/>
+        <span className="v3-photo-analyze-dot"/>
+        <span className="v3-photo-analyze-dot"/>
+        <span className="v3-photo-analyze-text">识别中...</span>
+      </div>
+    );
+  }
+
+  if (!TypewriterText) {
+    return <V3FoodListStatic items={foodItems} totalKcal={totalKcal}/>;
+  }
+
+  return (
+    <ul style={listStyle}>
+      {foodItems.slice(0, activeLine).map((it, i) => (
+        <li key={i} style={rowStyle}>
+          <span style={dotStyle}/>
+          <span>{it}</span>
+        </li>
+      ))}
+      {!typingTotal && activeLine < foodItems.length && (
+        <li style={rowStyle}>
+          <span style={dotStyle}/>
+          <TypewriterText
+            text={foodItems[activeLine]}
+            active
+            charMs={42}
+            followScroll
+            onComplete={handleFoodLineComplete}
+          />
+        </li>
+      )}
+      {typingTotal && totalKcal != null && (
+        <li style={{
+          ...rowStyle, marginTop: 4, paddingTop: 6,
+          borderTop: `0.5px solid ${TL_HAIR}`, fontWeight: 500,
+        }}>
+          <span style={{ color: TL_MUTED, fontWeight: 500 }}>总卡路里</span>
+          <TypewriterText
+            text={`${totalKcal} kcal`}
+            active
+            charMs={48}
+            followScroll
+            onComplete={finishAnalysis}
+            style={{ marginLeft: 'auto', color: TL_PRIMARY, fontVariantNumeric: 'tabular-nums' }}
+          />
+        </li>
+      )}
+    </ul>
+  );
+}
+
+function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnalysis = false, isNew = false, onPhotoAnalysisComplete}){
   const tagRowStyle = { display: 'flex', gap: 6, flexWrap: 'wrap' };
   if(entry.kind === 'mood-face'){
     const MoodFace = window.MoodFace;
@@ -388,7 +520,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false}){
     );
   }
   if(entry.kind === 'image'){
-    const items = (entry.text || entry.body || '').split(/[；;]\s*/).filter(Boolean);
+    const items = entry.foodItems || (entry.text || entry.body || '').split(/[；;]\s*/).filter(Boolean);
     const imgSrc = entry.useRealImage ? (entry.photo?.src || entry.imageSrc) : null;
     return (
       <div style={{display:'flex', flexDirection:'column', gap:10}}>
@@ -399,23 +531,16 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false}){
             <TLImageThumb size="100%" radius={10}/>
           )}
         </div>
-        <ul style={{margin:0, padding:0, listStyle:'none', display:'flex', flexDirection:'column', gap:4}}>
-          {items.map((it, i)=>(
-            <li key={i} style={{fontSize:13, color:TL_TEXT, lineHeight:1.45, display:'flex', alignItems:'baseline', gap:6}}>
-              <span style={{width:3, height:3, borderRadius:1.5, background:TL_PRIMARY, flexShrink:0, alignSelf:'center'}}/>
-              <span>{it}</span>
-            </li>
-          ))}
-          {entry.totalKcal != null && (
-            <li style={{
-              fontSize:13, color:TL_TEXT, lineHeight:1.45, display:'flex', alignItems:'baseline', gap:6,
-              marginTop:4, paddingTop:6, borderTop:`0.5px solid ${TL_HAIR}`, fontWeight:500,
-            }}>
-              <span style={{color:TL_MUTED, fontWeight:500}}>总卡路里</span>
-              <span style={{marginLeft:'auto', color:TL_PRIMARY, fontVariantNumeric:'tabular-nums'}}>{entry.totalKcal} kcal</span>
-            </li>
-          )}
-        </ul>
+        {photoAnalysis ? (
+          <V3PhotoFoodAnalysis
+            items={items}
+            totalKcal={entry.totalKcal}
+            isNew={isNew}
+            onComplete={onPhotoAnalysisComplete}
+          />
+        ) : (
+          <V3FoodListStatic items={items} totalKcal={entry.totalKcal}/>
+        )}
       </div>
     );
   }
@@ -452,13 +577,17 @@ function normalizeV3Entry(raw){
   };
 }
 
-function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false}){
+function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId}){
   const cardRef = React.useRef(null);
   const aiPanelRef = React.useRef(null);
   const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
   const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
+  const derivedKind = primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
+  const derivedId = entryId || primary?.id;
+  const [photoAnalysis, setPhotoAnalysis] = React.useState(()=> !!(isNew && p?.kind === 'image'));
+  const handlePhotoAnalysisComplete = React.useCallback(()=> setPhotoAnalysis(false), []);
 
   const scrollAfterAiChartReveal = React.useCallback(() => {
     const run = () => {
@@ -498,7 +627,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 12px',
       }}>
-        <V3v2Header time={a.time} title={a.title}/>
+        <V3v2Header time={a.time} title={a.title} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
         <div style={{marginTop:8}}>
           <TLChart type={a.chartType} data={a.chartData}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
@@ -517,51 +646,84 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     <div
       ref={cardRef}
       className={shellClass}
+      data-entry-id={derivedId}
       style={{
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 4px', overflow:'hidden',
       }}
     >
-      <V3v2Header time={p.time}/>
-      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : 8}}>
-        <V3v2PrimaryBody entry={p} showTags={showTags} tagsAnimate={staggerReveal && showTags}/>
+      <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
+      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : (p.sourceFrom ? 0 : 8)}}>
+        <V3v2PrimaryBody
+          entry={p}
+          showTags={showTags}
+          tagsAnimate={staggerReveal && showTags}
+          photoAnalysis={photoAnalysis}
+          isNew={isNew}
+          onPhotoAnalysisComplete={handlePhotoAnalysisComplete}
+        />
       </div>
-      {a && showAi && (
-        <div className="v3-ai-stagger-in">
-          <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>
-          <button
-            type="button"
-            onClick={()=>setOpen(v=>!v)}
-            style={{
-              width:'100%', background:'transparent', border:0,
-              display:'flex', alignItems:'center', gap:6,
-              padding:'10px 0', cursor:'pointer', fontFamily:'inherit',
-            }}
-            aria-expanded={open}
-          >
-            <div style={{
-              width:18, height:18, borderRadius:9, background:TL_SOFT,
-              display:'flex', alignItems:'center', justifyContent:'center',
-            }}>
-              <TLKindIcon kind="chart" color={TL_PRIMARY} size={10}/>
-            </div>
-            <span style={{fontSize:11, color:TL_PRIMARY, fontWeight:500}}>AI</span>
-            <span style={{fontSize:12.5, color:TL_TEXT, fontWeight:500, flex:1, textAlign:'left'}}>{a.title}</span>
-            <V3Chevron open={open}/>
-          </button>
-          {open && (
-            <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
-              {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
-              {a.note && (
-                <div style={{
-                  fontSize:13, color:TL_TEXT, lineHeight:1.55,
-                  marginTop:a.chartType ? 8 : 0,
-                }}>{a.note}</div>
-              )}
-            </div>
-          )}
-        </div>
+      {p.sourceFrom && (
+        <div className={primary._sourceNew ? 'tl-demo-source-in' : ''} style={{
+          fontSize:11, color:TL_MUTED,
+          paddingTop:6, paddingBottom:8,
+          borderTop:'0.5px dashed '+TL_HAIR,
+        }}>{p.sourceFrom}</div>
       )}
+      {a && showAi && (() => {
+        const DietAiCollapsibleSection = window.DietAiCollapsibleSection;
+        if (DietAiCollapsibleSection) {
+          return (
+            <div ref={aiPanelRef}>
+              <DietAiCollapsibleSection
+                title={a.title || 'AI 分析'}
+                defaultOpen={aiDefaultOpen}
+                embedded
+                animateIn={isNew}
+              >
+                {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
+                {a.note && <div className="diet-fb-b-stats">{a.note}</div>}
+              </DietAiCollapsibleSection>
+            </div>
+          );
+        }
+        return (
+          <div className="v3-ai-stagger-in">
+            <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>
+            <button
+              type="button"
+              onClick={()=>setOpen(v=>!v)}
+              style={{
+                width:'100%', background:'transparent', border:0,
+                display:'flex', alignItems:'center', gap:6,
+                padding:'10px 0', cursor:'pointer', fontFamily:'inherit',
+              }}
+              aria-expanded={open}
+            >
+              <div style={{
+                width:18, height:18, borderRadius:9, background:TL_SOFT,
+                display:'flex', alignItems:'center', justifyContent:'center',
+              }}>
+                <TLKindIcon kind="chart" color={TL_PRIMARY} size={10}/>
+              </div>
+              <span style={{fontSize:11, color:TL_PRIMARY, fontWeight:500}}>AI</span>
+              <span style={{fontSize:12.5, color:TL_TEXT, fontWeight:500, flex:1, textAlign:'left'}}>{a.title}</span>
+              <V3Chevron open={open}/>
+            </button>
+            {open && (
+              <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
+                {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
+                {a.note && (
+                  <div style={{
+                    fontSize:13, color:TL_TEXT, lineHeight:1.55,
+                    marginTop:a.chartType ? 8 : 0,
+                  }}>{a.note}</div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -577,6 +739,7 @@ function V3RecordGroupCard({group, isNew}){
       aiDefaultOpen={group.aiDefaultOpen}
       isNew={isNew}
       staggerReveal={!!group.staggerReveal}
+      entryId={group.primary?.id || group.id}
     />
   );
 }

@@ -1,0 +1,862 @@
+/* ============ 饮食反馈卡片 — 基于规则表的多维度反馈 ============ */
+
+/* 反馈卡片容器 */
+.diet-fb-card{
+  background:#ffffff;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 2px 12px rgba(255,93,138,.06);
+  border:0.5px solid rgba(0,0,0,0.03);
+}
+
+/* 时间戳 */
+.diet-fb-ts{
+  padding:14px 16px 0;
+  font-size:12px;
+  color:rgba(0,0,0,0.25);
+  font-variant-numeric:tabular-nums;
+}
+
+/* === 维度A：识别结果 === */
+.diet-fb-sec-a{
+  padding:8px 16px 14px;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-foods{
+  font-size:inherit;
+  font-weight:400;
+  line-height:inherit;
+  color:inherit;
+}
+.diet-fb-kcal{
+  font-size:14px;
+  color:rgba(0,0,0,0.6);
+  margin-top:4px;
+}
+.diet-fb-kcal b{
+  color:rgba(0,0,0,0.8);
+  font-weight:500;
+}
+.diet-fb-kcal-primary{
+  font-size:inherit;
+  line-height:inherit;
+  color:inherit;
+  font-weight:400;
+}
+.diet-fb-kcal-primary b{
+  font-weight:500;
+}
+.diet-fb-total-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+}
+.diet-fb-food-list{
+  margin:0;
+  font-size:inherit;
+  line-height:inherit;
+  color:inherit;
+  font-weight:400;
+}
+.diet-fb-total-line{
+  margin:8px 0 0;
+  font-size:inherit;
+  line-height:inherit;
+}
+.diet-fb-total-line .diet-fb-total-label{
+  color:rgba(0,0,0,0.6);
+  font-weight:400;
+}
+.diet-fb-total-line .diet-fb-total-value{
+  color:#ff4d88;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.diet-fb-sec-a .diet-fb-food-list + .diet-fb-total-line{
+  margin-top:8px;
+}
+.diet-fb-sec-a .diet-fb-total-line + .diet-fb-meal-insight,
+.diet-fb-sec-a .diet-fb-food-list + .diet-fb-meal-insight{
+  margin-top:8px;
+}
+.diet-fb-total-label{
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.6);
+  font-weight:500;
+}
+.diet-fb-total-value{
+  font-size:14px;
+  line-height:1.47;
+  color:#ff4d88;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+}
+.diet-fb-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+}
+.diet-fb-sec-a .diet-fb-total-row + .diet-fb-tags{
+  margin-top:10px;
+}
+.diet-fb-sec-a.is-compact{
+  padding:6px 16px 10px;
+}
+.diet-fb-sec-a.is-compact .diet-fb-total-line{
+  margin-top:8px;
+}
+.diet-fb-sec-a.is-compact .diet-fb-meal-insight{
+  margin-top:8px;
+}
+.diet-fb-sec-a.is-compact .diet-fb-diversity-tip--meal{
+  margin-top:8px;
+}
+.diet-fb-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:4px 10px;
+  border-radius:4px;
+  font-size:12px;
+  font-weight:500;
+}
+.diet-fb-tag.food{
+  background:rgba(255,77,136,0.06);
+  color:#ff4d88;
+}
+.diet-fb-tag.gray{
+  background:rgba(0,0,0,0.03);
+  color:rgba(0,0,0,0.4);
+}
+
+/* 食物明细行 */
+.diet-fb-detail{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+}
+.diet-fb-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:3px 0;
+  font-size:13px;
+}
+.diet-fb-item .name{
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-item .kcal{
+  color:rgba(0,0,0,0.4);
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+}
+.diet-fb-item .name.unmatch{
+  color:rgba(0,0,0,0.25);
+}
+
+/* 当日汇总 */
+.diet-fb-day-total{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:0.5px solid rgba(0,0,0,0.05);
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+}
+.diet-fb-day-total-in-ai{
+  margin:0 0 12px;
+  padding-top:0;
+  border-top:none;
+}
+.diet-fb-day-total b{
+  color:rgba(0,0,0,0.8);
+  font-weight:500;
+}
+
+/* 本餐热量解读（总卡路里下方） */
+.diet-fb-meal-insight{
+  margin-top:10px;
+}
+.diet-fb-meal-insight-inner{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:rgba(255,77,136,0.05);
+}
+.diet-fb-meal-insight-icon{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  flex-shrink:0;
+  background:rgba(255,77,136,0.08);
+}
+.diet-fb-meal-insight-text{
+  margin:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-meal-insight-text strong{
+  color:#ff4d88;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.diet-fb-meal-insight-soft{
+  color:rgba(0,0,0,0.55);
+}
+
+/* 周期饮食关联提示（趋势图下方） */
+.diet-fb-cycle-tip{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:rgba(0,0,0,0.03);
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+.diet-fb-cycle-tip-icon{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  flex-shrink:0;
+  background:rgba(255,77,136,0.06);
+}
+.diet-fb-cycle-tip-body{
+  flex:1;
+  min-width:0;
+}
+.diet-fb-cycle-tip-text{
+  margin:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-cycle-tip-sub{
+  margin:4px 0 0;
+  font-size:11px;
+  line-height:1.29;
+  color:rgba(0,0,0,0.4);
+}
+
+/* 饮食多样性提示 */
+.diet-fb-diversity-tip{
+  margin-top:12px;
+}
+.diet-fb-sec-a .diet-fb-diversity-tip--meal{
+  margin-top:8px;
+}
+.diet-fb-sec-a .diet-fb-diversity-tip--meal + .diet-fb-meal-insight{
+  margin-top:10px;
+}
+.diet-fb-diversity-tip-inner{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:rgba(0,204,153,0.06);
+}
+.diet-fb-diversity-tip-icon{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  flex-shrink:0;
+  background:rgba(0,204,153,0.1);
+}
+.diet-fb-diversity-tip-text{
+  margin:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-diversity-tip-text strong{
+  color:#00cc99;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.diet-fb-diversity-tip-emoji{
+  margin-left:2px;
+}
+
+/* 记录里程碑提示 */
+.diet-fb-milestone-tip{
+  margin-top:12px;
+}
+.diet-fb-milestone-tip-inner{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:rgba(255,77,136,0.05);
+}
+.diet-fb-milestone-tip-icon{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  flex-shrink:0;
+  background:rgba(255,77,136,0.08);
+}
+.diet-fb-milestone-tip-text{
+  margin:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-milestone-tip--surprise{
+  overflow:visible;
+}
+.diet-fb-milestone-tip--surprise .diet-fb-milestone-tip-inner{
+  animation:dietFbMilestoneSurprise 0.85s cubic-bezier(0.34,1.35,0.64,1) both;
+  animation-delay:0.7s;
+}
+@keyframes dietFbMilestoneSurprise{
+  0%{
+    opacity:0;
+    transform:scale(0.82) translateY(12px);
+  }
+  50%{
+    opacity:1;
+    transform:scale(1.05) translateY(-3px);
+  }
+  72%{
+    transform:scale(0.98) translateY(1px);
+  }
+  100%{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
+}
+.diet-fb-milestone-tip--surprise .diet-fb-milestone-tip-icon{
+  animation:dietFbMilestoneIconPop 0.5s cubic-bezier(0.34,1.4,0.64,1) both;
+  animation-delay:0.95s;
+}
+@keyframes dietFbMilestoneIconPop{
+  0%{transform:scale(0.5);opacity:0}
+  70%{transform:scale(1.15);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+
+.diet-fb-sec-b-plain .diet-fb-diversity-tip,
+.diet-fb-sec-b-plain .diet-fb-milestone-tip{
+  margin-top:12px;
+}
+.diet-fb-sec-b-content .diet-fb-milestone-tip{
+  margin-top:12px;
+}
+
+/* 分隔线 */
+.diet-fb-divider{
+  height:0.5px;
+  background:rgba(0,0,0,0.05);
+  margin:0 16px;
+}
+
+/* === 维度B：7日趋势图 === */
+.diet-fb-sec-b{
+  padding:14px 16px;
+}
+.diet-fb-b-header{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-bottom:10px;
+}
+
+/* AI 可折叠分析区 */
+.diet-fb-ai-collapsible{
+  overflow:hidden;
+}
+.diet-fb-ai-toggle{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:14px 16px;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+  text-align:left;
+}
+.diet-fb-ai-toggle .diet-fb-b-title{
+  flex:1;
+  min-width:0;
+}
+.diet-fb-ai-chevron{
+  flex-shrink:0;
+  color:rgba(0,0,0,0.25);
+  transition:transform 0.28s cubic-bezier(0.2,0,0,1);
+}
+.diet-fb-ai-chevron.is-open{
+  transform:rotate(180deg);
+}
+.diet-fb-ai-panel{
+  display:grid;
+  grid-template-rows:0fr;
+  transition:grid-template-rows 0.32s cubic-bezier(0.2,0,0,1);
+}
+.diet-fb-ai-panel.is-open{
+  grid-template-rows:1fr;
+}
+.diet-fb-ai-panel-inner{
+  overflow:hidden;
+}
+.diet-fb-sec-b-content{
+  padding:0 16px 14px;
+}
+.diet-fb-divider-bleed{
+  margin:0 -12px;
+}
+.diet-fb-ai-collapsible.is-embedded .diet-fb-ai-toggle{
+  padding:14px 0;
+}
+.diet-fb-ai-collapsible.is-embedded .diet-fb-sec-b-content{
+  padding:0 0 12px;
+}
+
+.diet-fb-ai-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  font-size:12px;
+  color:#ff4d88;
+  font-weight:500;
+}
+.diet-fb-ai-badge svg{
+  width:13px;
+  height:13px;
+}
+.diet-fb-b-title{
+  font-size:14px;
+  color:rgba(0,0,0,0.6);
+  font-weight:400;
+}
+
+/* 柱状图容器 */
+.diet-fb-chart-box{
+  height:120px;
+  position:relative;
+  background:rgba(0,0,0,0.02);
+  border-radius:8px;
+  overflow:hidden;
+}
+.diet-fb-chart-box svg{
+  width:100%;
+  height:100%;
+}
+.diet-fb-sec-b-content .diet-fb-chart-box + .diet-fb-day-total-in-ai,
+.diet-fb-sec-b-plain .diet-fb-chart-box + .diet-fb-day-total-in-ai{
+  margin-top:8px;
+}
+
+/* 统计摘要 */
+.diet-fb-sec-a .diet-fb-total-line + .diet-fb-guide-below-total{
+  margin-top:6px;
+}
+.diet-fb-guide-below-total{
+  margin:0;
+  font-size:12px;
+  line-height:1.29;
+  color:rgba(0,0,0,0.45);
+}
+.diet-fb-stat-accent{
+  color:#ff4d88;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.diet-fb-b-stats{
+  margin:8px 0 0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+}
+.diet-fb-b-stats strong{
+  font-weight:500;
+  color:#ff4d88;
+  font-variant-numeric:tabular-nums;
+}
+.diet-fb-b-stats.hint{
+  color:rgba(0,0,0,0.45);
+}
+.diet-fb-b-stats-followup{
+  margin:8px 0 0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+}
+
+/* === 维度C：热量解读（卡片外文案） === */
+.diet-fb-outer-text{
+  margin:8px 16px 0;
+  font-size:13px;
+  line-height:1.6;
+  color:rgba(0,0,0,0.6);
+}
+
+/* === 维度D：周期关联 === */
+.diet-fb-sec-insight{
+  padding:12px 16px 14px;
+}
+.diet-fb-insight-line{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+}
+.diet-fb-ins-icon{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.diet-fb-ins-icon.cycle{
+  background:rgba(255,77,136,0.06);
+}
+.diet-fb-ins-icon.tip{
+  background:rgba(255,200,60,0.12);
+}
+.diet-fb-ins-icon.good{
+  background:rgba(0,204,153,0.08);
+}
+.diet-fb-ins-text{
+  font-size:14px;
+  line-height:1.5;
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-ins-sub{
+  font-size:11px;
+  color:rgba(0,0,0,0.4);
+  margin-top:2px;
+  display:block;
+}
+
+/* === 维度E：饮食多样性 === */
+.diet-fb-diversity{
+  padding:12px 16px 14px;
+}
+.diet-fb-diversity-text{
+  font-size:13px;
+  color:rgba(0,0,0,0.6);
+  line-height:1.5;
+}
+
+/* === 维度F：里程碑 === */
+.diet-fb-milestone{
+  padding:12px 16px 14px;
+  background:linear-gradient(135deg, rgba(255,77,136,0.04) 0%, rgba(255,77,136,0.01) 100%);
+}
+.diet-fb-milestone-text{
+  font-size:14px;
+  color:rgba(0,0,0,0.8);
+  line-height:1.5;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* 引导文案 & AI 区灰色说明 — 统一 14px */
+.diet-fb-guide-text{
+  padding:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+}
+.diet-fb-sec-b-content .diet-fb-guide-text,
+.diet-fb-sec-b-content .diet-fb-day-total-in-ai,
+.diet-fb-sec-b-content .diet-fb-b-stats,
+.diet-fb-sec-b-plain .diet-fb-guide-text,
+.diet-fb-sec-b-plain .diet-fb-day-total-in-ai,
+.diet-fb-sec-b-plain .diet-fb-b-stats,
+.diet-fb-sec-b-content .diet-fb-b-stats-followup,
+.diet-fb-sec-b-plain .diet-fb-b-stats-followup{
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+}
+.diet-fb-sec-b-content .diet-fb-stat-accent,
+.diet-fb-sec-b-plain .diet-fb-stat-accent{
+  color:#ff4d88;
+  font-weight:500;
+}
+
+/* 识别失败状态 */
+.diet-fb-fail{
+  padding:20px 16px;
+  text-align:center;
+}
+.diet-fb-fail-text{
+  font-size:14px;
+  color:rgba(0,0,0,0.6);
+  line-height:1.5;
+}
+.diet-fb-fail-hint{
+  font-size:12px;
+  color:rgba(0,0,0,0.4);
+  margin-top:8px;
+}
+
+/* 动画效果 */
+.diet-fb-card.is-new{
+  animation:dietFbCardIn 0.32s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes dietFbCardIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.diet-fb-stagger-in{
+  animation:dietFbSecReveal 0.36s cubic-bezier(0.2,0,0,1) both;
+}
+.diet-fb-stagger-in-delay{
+  animation-delay:0.12s;
+}
+@keyframes dietFbSecReveal{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* 柱状图动画 */
+.diet-fb-bar-anim{
+  animation:dietFbBarGrow 0.6s cubic-bezier(0.22,0.61,0.36,1) both;
+}
+@keyframes dietFbBarGrow{
+  from{transform:scaleY(0);transform-origin:bottom}
+  to{transform:scaleY(1);transform-origin:bottom}
+}
+
+/* 新记录入场动画序列 */
+.diet-fb-card.is-stream .diet-fb-sec-a{
+  opacity:0;
+  animation:dietFbSecReveal 0.38s cubic-bezier(0.2,0,0,1) 0.1s forwards;
+}
+.diet-fb-card.is-stream .diet-fb-sec-b{
+  opacity:0;
+  animation:dietFbSecReveal 0.38s cubic-bezier(0.2,0,0,1) 0.3s forwards;
+}
+.diet-fb-card.is-stream .diet-fb-sec-insight{
+  opacity:0;
+  animation:dietFbSecReveal 0.38s cubic-bezier(0.2,0,0,1) 0.5s forwards;
+}
+.diet-fb-card.is-stream .diet-fb-outer-text{
+  opacity:0;
+  animation:dietFbSecReveal 0.38s cubic-bezier(0.2,0,0,1) 0.4s forwards;
+}
+
+/* === 拍照饮食 · 等待态卡片 === */
+.diet-fb-photo-card .diet-fb-ts{
+  padding-bottom:4px;
+}
+.diet-fb-photo-wrap{
+  padding:0 16px 12px;
+}
+.diet-fb-photo{
+  width:100%;
+  aspect-ratio:1 / 1;
+  border-radius:8px;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  background:#f2f2f5;
+}
+.diet-fb-photo-card.is-new .diet-fb-photo{
+  animation:dietFbPhotoEnter 0.52s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes dietFbPhotoEnter{
+  from{
+    opacity:0;
+    transform:scale(0.94) translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
+}
+
+.diet-fb-skeleton-line{
+  height:14px;
+  border-radius:4px;
+  background:linear-gradient(90deg, #f0f0f3 0%, #e6e6eb 50%, #f0f0f3 100%);
+  background-size:200% 100%;
+  animation:dietFbSkeletonShimmer 1.35s ease-in-out infinite;
+}
+.diet-fb-skeleton-food-list{
+  margin-bottom:10px;
+}
+.diet-fb-skeleton-total{
+  margin-top:0;
+  padding-bottom:0;
+  border-bottom:0;
+}
+.diet-fb-skeleton-line.md{
+  width:38%;
+  margin-bottom:0;
+}
+.diet-fb-skeleton-line.xs{
+  width:22%;
+  margin-bottom:0;
+}
+.diet-fb-skeleton-line.lg{
+  width:72%;
+  margin-bottom:10px;
+}
+.diet-fb-skeleton-line.sm{
+  width:42%;
+  margin-bottom:12px;
+}
+.diet-fb-skeleton-tags{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.diet-fb-skeleton-tag{
+  width:72px;
+  height:24px;
+  border-radius:4px;
+  background:linear-gradient(90deg, rgba(255,77,136,0.05) 0%, rgba(255,77,136,0.10) 50%, rgba(255,77,136,0.05) 100%);
+  background-size:200% 100%;
+  animation:dietFbSkeletonShimmer 1.35s ease-in-out infinite;
+}
+.diet-fb-skeleton-tag.wide{
+  width:96px;
+}
+@keyframes dietFbSkeletonShimmer{
+  0%{ background-position:100% 0; }
+  100%{ background-position:-100% 0; }
+}
+
+.diet-fb-sec-b.diet-fb-sec-loading{
+  padding-bottom:12px;
+}
+.diet-fb-sec-b-plain{
+  padding:0 16px 12px;
+}
+.diet-fb-sec-b-plain .diet-fb-guide-text,
+.diet-fb-sec-b-plain .diet-fb-day-total-in-ai{
+  margin-bottom:0;
+}
+.diet-fb-ai-loading-line{
+  margin-bottom:8px;
+}
+.diet-fb-recog{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0;
+}
+.diet-fb-recog-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#ff4d88;
+  opacity:0.35;
+  animation:dietFbRecogDot 1.2s ease-in-out infinite;
+}
+.diet-fb-recog-dot:nth-child(2){ animation-delay:0.15s; }
+.diet-fb-recog-dot:nth-child(3){ animation-delay:0.3s; }
+@keyframes dietFbRecogDot{
+  0%,80%,100%{ opacity:0.35; transform:translateY(0); }
+  40%{ opacity:1; transform:translateY(-3px); }
+}
+.diet-fb-recog-text{
+  font-size:14px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.47;
+}
+
+.diet-fb-photo-card.is-ready .diet-fb-ai-collapsible.diet-fb-stagger-in{
+  animation:dietFbSecReveal 0.36s cubic-bezier(0.2,0,0,1) both;
+}
+
+/* === 识别超时 / 失败态 === */
+.diet-fb-sec-error{
+  padding-bottom:12px;
+}
+.diet-fb-error-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.diet-fb-error-text{
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.45);
+  flex:1;
+  min-width:0;
+}
+.diet-fb-retry-btn{
+  flex-shrink:0;
+  height:24px;
+  padding:0 12px;
+  border:none;
+  border-radius:8px;
+  background:rgba(255,77,136,0.08);
+  color:#ff4d88;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:500;
+  line-height:1;
+  cursor:pointer;
+}
+.diet-fb-retry-btn:active:not(:disabled){
+  opacity:0.7;
+}
+.diet-fb-retry-btn:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+.diet-fb-photo-card.is-error .diet-fb-photo-wrap{
+  opacity:1;
+}
+.diet-fb-photo-card.is-exhausted .diet-fb-photo-wrap{
+  padding-bottom:16px;
+}
+
+/* === 文字/语音饮食反馈 === */
+.diet-fb-text-card .diet-fb-ts{
+  padding-bottom:4px;
+}
+.diet-fb-source-text{
+  margin:0 16px 12px;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.6);
+}
+.diet-fb-source-voice{
+  padding:0 16px 12px;
+}
+.diet-fb-text-card.is-names-only .diet-fb-sec-a{
+  padding-top:0;
+}

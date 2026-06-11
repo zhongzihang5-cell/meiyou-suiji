@@ -1,6 +1,42 @@
 // ============ 底部 Dock — 输入栏 + 右下悬浮快捷发布 ============
 
-/** 方案 I · 卡片扇 — 4 项快捷发布（落点由放射菜单算法动态计算） */
+/** 圆形语音图标（含音波弧线 — 参考附件还原） */
+function DockVoiceCircleIco({size=22}){
+  /* 三段同心弧，从左侧发射点向右辐射，粗描边 */
+  const sw = 3.2;
+  return (
+    <svg viewBox="0 0 48 48" fill="none" width={size} height={size} aria-hidden="true">
+      <circle cx="24" cy="24" r="21" stroke="currentColor" strokeWidth="2.8"/>
+      {/* 最小弧 r=5 */}
+      <path d="M21.5 19.5 A6 6 0 0 1 21.5 28.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      {/* 中弧 r=9 */}
+      <path d="M24 15.5 A10 10 0 0 1 24 32.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      {/* 大弧 r=13 */}
+      <path d="M26.5 12 A14 14 0 0 1 26.5 36" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+/** 圆形键盘图标（含圆点键位 + 空格条） */
+function DockKbdCircleIco({size=22}){
+  const R = 2.3;
+  const row1 = [12,16.5,21,25.5,30,34.5];
+  const row2 = [14.5,19,23.5,28,32.5];
+  return (
+    <svg viewBox="0 0 48 48" fill="none" width={size} height={size} aria-hidden="true">
+      <circle cx="24" cy="24" r="21.5" stroke="currentColor" strokeWidth="2.6"/>
+      {row1.map(x=><circle key={x} cx={x} cy={18} r={R} fill="currentColor"/>)}
+      {row2.map(x=><circle key={x} cx={x} cy={24.5} r={R} fill="currentColor"/>)}
+      <rect x="15" y="29.5" width="18" height="3.5" rx="1.75" fill="currentColor"/>
+    </svg>
+  );
+}
+
+/** 方案 I · 卡片扇 — 4 项快捷发布
+ *  布局：以加号为圆心，开口朝左上的 1/4 扇形，
+ *  4 项按数组顺序均匀落在 -180°(左) → -90°(上) 区间，间隔 30°。
+ *  角度约定：0° 朝右、逆时针为正（数学惯例），故 -180° 即 180°、-90° 即 90°。
+ */
 const QUICK_CARDS = [
   { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },
   { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状' },
@@ -37,7 +73,7 @@ function computeRadialCards(cards, config = RADIAL_MENU){
 
 const QUICK_CARDS_RADIAL = computeRadialCards(QUICK_CARDS);
 
-const DEMO_VOICE_LINE = '哎，昨天月经来了，昨天肚子不太舒服';
+const DEMO_VOICE_LINE = '昨天下午来了姨妈，来之前，上午就开始头痛。';
 
 const DOCK_PLACEHOLDER = '记录生活点滴';
 
@@ -55,7 +91,7 @@ function DockWavePlaceholder({show, focused}){
 }
 
 function QuickCardFan({
-  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onClose,
+  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onDietPick, onClose,
   onSymptomSubmit, onWeightSubmit, onFoodSubmit,
 }){
   const I = window.Icon;
@@ -118,7 +154,11 @@ function QuickCardFan({
               className="quick-card-fan-face"
               onPointerDown={(e)=>{
                 if(!open || selected) return;
-                if(card.id === 'mood'){
+                if(card.id === 'diet'){
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDietPick?.(e.currentTarget);
+                } else if(card.id === 'mood'){
                   e.preventDefault();
                   e.stopPropagation();
                   onMoodPick?.();
@@ -126,7 +166,7 @@ function QuickCardFan({
               }}
               onClick={()=>{
                 if(!open || selected) return;
-                if(card.id !== 'mood') onSelectCard(card.id);
+                if(card.id !== 'mood' && card.id !== 'diet') onSelectCard(card.id);
               }}
               aria-label={card.label}
               tabIndex={open && !selected ? 0 : -1}
@@ -172,14 +212,18 @@ function QuickCardFan({
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
-  onFoodConfirm,
-  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
+  onFoodConfirm, onDietCapture,
+  onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
+  demoPhase, isDemoRunning,
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
   const DockSymptomPicker = window.DockSymptomPicker;
   const DockWeightPicker = window.DockWeightPicker;
+  const CameraTransition = window.CameraTransition;
+  const QuickCardIcon = window.QuickCardIcon;
+  const measureElementRect = window.measureElementRect;
   const [inputMode, setInputMode] = React.useState(defaultInputMode);
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickSelected, setQuickSelected] = React.useState(null);
@@ -189,8 +233,18 @@ function DockPublisher({
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
   const [inputFocused, setInputFocused] = React.useState(false);
+  const [cameraOpen, setCameraOpen] = React.useState(false);
+  const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
   const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
+  const containerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(containerRef.current){
+      const phone = containerRef.current.closest('.phone');
+      if(phone) containerRef.current = phone;
+    }
+  }, []);
 
   React.useEffect(()=>{
     setInputMode(defaultInputMode);
@@ -299,6 +353,32 @@ function DockPublisher({
     onWeightConfirm?.(payload);
   };
 
+  const handleDietFanTap = (buttonEl)=>{
+    if(!buttonEl) return;
+    const phone = buttonEl.closest('.phone');
+    if(!phone) return;
+    containerRef.current = phone;
+    const rect = measureElementRect?.(buttonEl, phone);
+    setCameraSourceRect(rect);
+    setQuickOpen(false);
+    setQuickSelected(null);
+    setCameraOpen(true);
+  };
+
+  const handleCameraCapture = ()=>{
+    setCameraOpen(false);
+    onDietCapture?.({ type: 'capture', photoUrl: window.pickFallbackPhoto?.() || null });
+  };
+
+  const handleSelectPhoto = (photo)=>{
+    setCameraOpen(false);
+    onDietCapture?.({ type: 'select', photo });
+  };
+
+  const handleCameraClose = ()=>{
+    setCameraOpen(false);
+  };
+
   React.useEffect(()=>{
     onDockExpandedChange?.(!!dockSheet || !!quickSelected);
   }, [dockSheet, quickSelected, onDockExpandedChange]);
@@ -318,12 +398,33 @@ function DockPublisher({
           onFabTap={handleFabTap}
           onSelectCard={setQuickSelected}
           onMoodPick={handleMoodFanTap}
+          onDietPick={handleDietFanTap}
           onClose={closeQuick}
           onSymptomSubmit={handleQuickSymptomSubmit}
           onWeightSubmit={handleQuickWeightSubmit}
           onFoodSubmit={handleQuickFoodSubmit}
         />
       </div>
+
+      {CameraTransition && (
+        <CameraTransition
+          active={cameraOpen}
+          sourceRect={cameraSourceRect}
+          containerRef={containerRef}
+          cardContent={
+            <>
+              <span className="quick-menu-item-icon">
+                <QuickCardIcon kind="diet" color="currentColor" size={22}/>
+              </span>
+              <span className="quick-menu-item-label">记录饮食</span>
+            </>
+          }
+          onCapture={handleCameraCapture}
+          onClose={handleCameraClose}
+          onSelectPhoto={handleSelectPhoto}
+          onActiveChange={onCameraActiveChange}
+        />
+      )}
 
       {ReactDOM.createPortal(
         <MoodOverlay
@@ -361,8 +462,8 @@ function DockPublisher({
                 aria-label={inputMode==='text'?'切换语音':'切换键盘'}
               >
                 {inputMode==='text'
-                  ? <I name="mic" size={22} stroke={1.6}/>
-                  : <span className="dock-kbd-ico">⌨</span>}
+                  ? <DockVoiceCircleIco size={26}/>
+                  : <DockKbdCircleIco size={26}/>}
               </button>
 
               {inputMode==='text' ? (
@@ -400,13 +501,24 @@ function DockPublisher({
                 </div>
               ) : (
                 <div className={'dock-voice-wrap'+(recording?' is-recording':'')}>
+                  {/* 演示浮层指示器 */}
+                  {(recording || demoPhase === 'recognizing') && (
+                    <div className={'dock-voice-float'+(demoPhase === 'recognizing' ? ' is-recognizing' : '')}>
+                      <span className="dock-voice-float-text">
+                        {demoPhase === 'recognizing' ? '识别中...' : '正在听...'}
+                      </span>
+                      {demoPhase === 'recognizing' && (
+                        <span className="dock-voice-float-spinner"/>
+                      )}
+                    </div>
+                  )}
                   <div className="dock-voice-stage" aria-hidden="true">
                     <span className="dock-voice-shimmer"/>
                   </div>
                   <button
                     type="button"
                     className={'dock-voice-btn'+(recording?' recording':'')}
-                    onPointerDown={(e)=>{ e.preventDefault(); startRec(); }}
+                    onPointerDown={(e)=>{ e.preventDefault(); if(isDemoRunning) return; startRec(); }}
                     onPointerUp={stopRec}
                     onPointerLeave={recording ? stopRec : undefined}
                   >
@@ -431,14 +543,6 @@ function DockPublisher({
               ) : null}
             </div>
 
-            <button
-              type="button"
-              className="dock-camera-btn"
-              onClick={onPhoto}
-              aria-label="拍照上传"
-            >
-              <I name="camera" size={22} stroke={1.6}/>
-            </button>
           </div>
           )}
         </div>

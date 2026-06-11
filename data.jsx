@@ -240,7 +240,6 @@ const TIMELINE_BLOCKS = [
   { type:'gap', id:'gap-top' },
   {
     type:'day', id:'d-5-14', date:'5/14', weekday:'周四',
-    summaryStats:[{ v:'3', l:'条' }, { v:'52.3', l:'kg' }],
     items:[
       {
         kind:'record-group', id:'e-514-1-g',
@@ -269,8 +268,7 @@ const TIMELINE_BLOCKS = [
     ],
   },
   {
-    type:'day', id:'d-5-19', date:'5/19', weekday:'周一',
-    summaryStats:[{ v:'3', l:'条' }, { v:'320', l:'kcal' }],
+    type:'day', id:'d-5-15', date:'5/15', weekday:'周五',
     items:[
       {
         kind:'record-group', id:'y1-g',
@@ -303,8 +301,7 @@ const TIMELINE_BLOCKS = [
     ],
   },
   {
-    type:'day', id:'d-5-20', date:'5/20', weekday:'周二',
-    summaryStats:[{ v:'4', l:'条' }, { v:'1126', l:'kcal' }],
+    type:'day', id:'d-5-16', date:'5/16', weekday:'周六',
     items:[
       {
         kind:'record-group', id:'t3-g',
@@ -345,19 +342,6 @@ const TIMELINE_BLOCKS = [
     type:'day', id:'d-5-18', date:'5/18', weekday:'周一', isToday:true,
     phaseTag:'经期第 1 天', phaseKind:'period', cycleDay:1, periodLen:5,
     items:[
-      {
-        kind:'sync-card', id:'e-518-1a', time:'16:00',
-        cardLabel:'自动同步',
-        cardLabelKind:'sync',
-        body:'今天月经来了。',
-        tagLayout:'v3',
-        tags:[
-          { cat:'月经', val:'', icon:'period' },
-        ],
-      },
-      {
-        kind:'sister-card', id:'e-518-1b', time:'16:00', railDot:'ai',
-      },
       {
         kind:'guide', id:'g-518-post',
         hiddenUntilSisterDone:true,
