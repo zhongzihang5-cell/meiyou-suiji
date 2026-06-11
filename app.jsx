@@ -97,6 +97,63 @@ function App(){
     return ()=>window.removeEventListener('moodCardStreamDone', handler);
   }, []);
 
+  React.useEffect(()=>{
+    const onInsert = (event)=>{
+      const kind = event?.detail?.kind;
+      const entry = kind === 'exhausted'
+        ? window.createDietTimeoutExhaustedDemoEntry?.()
+        : window.createDietTimeoutDemoEntry?.();
+      if(!entry) return;
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId?.('', timeline);
+      if(!dayId) return;
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      requestAnimationFrame(()=>{
+        if(typeof window.scrollTimelineToBottom === 'function'){
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+    };
+    window.addEventListener('dietRecognitionDemoInsert', onInsert);
+    return ()=>window.removeEventListener('dietRecognitionDemoInsert', onInsert);
+  }, [timeline]);
+
+  React.useEffect(()=>{
+    const onDisplayInsert = (event)=>{
+      const entry = window.createDietFeedbackDisplayDemoEntry?.(event?.detail?.scenario);
+      if(!entry) return;
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId?.('', timeline);
+      if(!dayId) return;
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      requestAnimationFrame(()=>{
+        if(typeof window.scrollTimelineToBottom === 'function'){
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+    };
+    window.addEventListener('dietFeedbackDisplayDemoInsert', onDisplayInsert);
+    return ()=>window.removeEventListener('dietFeedbackDisplayDemoInsert', onDisplayInsert);
+  }, [timeline]);
+
+  React.useEffect(()=>{
+    const onComboInsert = (event)=>{
+      const entry = window.createDietFeedbackComboDemoEntry?.(event?.detail?.scenario || 'combo-ab');
+      if(!entry) return;
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId?.('', timeline);
+      if(!dayId) return;
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      requestAnimationFrame(()=>{
+        if(typeof window.scrollTimelineToBottom === 'function'){
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+    };
+    window.addEventListener('dietFeedbackComboDemoInsert', onComboInsert);
+    return ()=>window.removeEventListener('dietFeedbackComboDemoInsert', onComboInsert);
+  }, [timeline]);
+
   const resetSceneState = (demoSceneId)=>{
     const next = window.getSceneInitialState(demoSceneId);
     setDraft(next.draft);
@@ -120,24 +177,42 @@ function App(){
   }, [t.demoScene]);
 
   const scrollToSisterAnalysis = ()=>{
-    requestAnimationFrame(()=>{
-      setTimeout(()=>{
-        const stream = streamRef.current;
-        const el = document.getElementById('sister-analysis-anchor');
-        if(stream && el){
-          const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - 32;
-          stream.scrollTo({ top: Math.max(0, top), behavior:'smooth' });
-        } else if(el){
-          el.scrollIntoView({ behavior:'smooth', block:'center' });
-        }
-      }, 180);
-    });
+    const tryScroll = (attempt)=>{
+      const stream = streamRef.current;
+      const el = document.getElementById('sister-analysis-anchor');
+      if(stream && el){
+        const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - 32;
+        stream.scrollTo({ top: Math.max(0, top), behavior:'smooth' });
+      } else if(el){
+        el.scrollIntoView({ behavior:'smooth', block:'center' });
+      } else if(attempt < 3){
+        setTimeout(()=>tryScroll(attempt + 1), 300);
+      }
+    };
+    requestAnimationFrame(()=>setTimeout(()=>tryScroll(0), 350));
   };
 
   const openSisterAnalysis = ()=>{
     if(scene.record.sisterAnalysis.trigger !== 'float-notice') return;
     recordEnterModeRef.current = 'analysis';
     setShowAnalysisNotice(false);
+
+    const syncEntry = {
+      kind:'sync-card', id:'e-period-'+Date.now(), time: window.formatNowTime(),
+      cardLabel:'自动同步', cardLabelKind:'sync',
+      body:'今天月经来了。', tagLayout:'v3', isNew: true,
+      tags:[{ cat:'月经', val:'', icon:'period' }],
+    };
+    const sisterEntry = {
+      kind:'sister-card', id:'e-sister-'+Date.now(), time: window.formatNowTime(), railDot:'ai',
+    };
+    const todayId = timeline.find(b=>b.type==='day' && b.isToday)?.id;
+    setTimeline(blocks => {
+      let result = window.appendTimelineEntry(blocks, syncEntry, { dayId: todayId });
+      result = window.appendTimelineEntry(result, sisterEntry, { dayId: todayId });
+      return result;
+    });
+
     setSisterCycleDone(false);
     setSisterPlayAnimation(n=>n + 1);
     setActiveTab('note');
@@ -280,7 +355,7 @@ function App(){
         const next = { ...it };
         delete next.hideBodyUntilDrop;
         delete next.pendingDrop;
-        if(it.kind === 'mood-insight' || it.kind === 'record-group') next.isNew = true;
+        if(it.kind === 'mood-insight' || it.kind === 'record-group' || it.kind === 'diet-photo-feedback') next.isNew = true;
         return next;
       });
       return { ...b, items, entries: undefined };
@@ -306,7 +381,7 @@ function App(){
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId(text || entry.body || '', timeline);
 
-    const pending = (entry.kind === 'mood-insight' || entry.kind === 'record-group')
+    const pending = (entry.kind === 'mood-insight' || entry.kind === 'record-group' || entry.kind === 'diet-photo-feedback')
       ? { ...entry, pendingDrop: true, isNew: false }
       : { ...entry, hideBodyUntilDrop: true, isNew: true };
 
@@ -318,6 +393,22 @@ function App(){
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
+
+    const recordScenario = window.readCameraPermissionScenario?.() || 'unauthorized';
+    const dietEntry = window.tryCreateDietTextFeedbackEntry?.(text, recordScenario, opts.voice);
+    if (dietEntry) {
+      setDraft('');
+      markUserRecorded();
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId('', timeline);
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, dietEntry, { dayId }));
+      requestAnimationFrame(()=>{
+        if (typeof window.scrollTimelineToBottom === 'function') {
+          window.scrollTimelineToBottom('smooth');
+        }
+      });
+      return;
+    }
 
     const hits = window.extractKeywords(text);
     setDraft('');
@@ -456,6 +547,18 @@ function App(){
   };
 
   const submitVoice = (transcript, durSec)=>{
+    const recordScenario = window.readCameraPermissionScenario?.() || 'unauthorized';
+    if (window.isDietTextRecordScenario?.(recordScenario)) {
+      markUserRecorded();
+      const text = (transcript || '').trim();
+      if (text) {
+        submitText(text, {
+          voice: { duration: window.formatVoiceDur?.(durSec) || '0:03' },
+        });
+        return;
+      }
+    }
+
     markUserRecorded();
     setDemoPhase('listening');
     // 清除上一轮演示卡片，然后启动新流程
@@ -564,6 +667,18 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const submitDietCapture = (payload)=>{
+    markUserRecorded();
+    const entry = window.createDietCaptureGroup?.({
+      photoUrl: payload?.photoUrl || payload?.photo?.thumb || null,
+    });
+    if(!entry) return;
+    entry.isNew = true;
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
@@ -595,6 +710,10 @@ function App(){
 
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
+  const CameraPermissionScenarioBar = window.CameraPermissionScenarioBar;
+  const DietRecognitionScenarioBar = window.DietRecognitionScenarioBar;
+  const DietFeedbackDisplayScenarioBar = window.DietFeedbackDisplayScenarioBar;
+  const DietFeedbackComboScenarioBar = window.DietFeedbackComboScenarioBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
@@ -663,6 +782,7 @@ function App(){
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
           onFoodConfirm={submitFoodRecord}
+          onDietCapture={submitDietCapture}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
@@ -721,6 +841,7 @@ function App(){
           onSymptomConfirm={submitSymptomRecord}
           onWeightConfirm={submitWeightRecord}
           onFoodConfirm={submitFoodRecord}
+          onDietCapture={submitDietCapture}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
@@ -754,11 +875,13 @@ function App(){
       </div>
 
       {!window.__STANDALONE_LOCKED_SCENE && (
-        <DemoSceneBar
-          value={t.demoScene}
-          onChange={(v)=>setTweak('demoScene', v)}
-          description={scene.description}
-        />
+        <div className="demo-controls-stack">
+          <DemoSceneBar
+            value={t.demoScene}
+            onChange={(v)=>setTweak('demoScene', v)}
+            description={scene.description}
+          />
+        </div>
       )}
     </>
   );

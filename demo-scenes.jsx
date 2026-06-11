@@ -22,16 +22,16 @@ const DEMO_SCENES = {
     },
     calendar: {
       enabled: true,
-      periodFlow: false,
+      periodFlow: true,
     },
     floatNotice: {
-      enabled: false,
+      enabled: true,
     },
     record: {
       showHealthCard: false,
       sisterAnalysis: {
-        trigger: 'none',
-        initialDone: true,
+        trigger: 'float-notice',
+        initialDone: false,
       },
       todayGuide: true,
       recordFeedback: true,

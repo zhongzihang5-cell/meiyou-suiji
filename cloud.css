@@ -534,8 +534,8 @@
   transform:translateX(-50%);
   width:100%;
   max-width:390px;
-  /* 紧贴底部 dock-bar 上方 8px：tabbar 高 + dock-bar 高 68px + gap 8px */
-  bottom:calc(var(--my-tabbar-h) + 76px);
+  /* 紧贴底部 dock-bar 上方：tabbar 高 + dock-bar 高 68px + gap */
+  bottom:calc(var(--my-tabbar-h) + 160px);
   height:0;
   z-index:91;
   pointer-events:none;

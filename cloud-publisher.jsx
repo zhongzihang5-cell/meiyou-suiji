@@ -38,26 +38,27 @@ function DockKbdCircleIco({size=22}){
  *  角度约定：0° 朝右、逆时针为正（数学惯例），故 -180° 即 180°、-90° 即 90°。
  */
 const QUICK_CARDS = [
-  { id:'diet', label:'饮食', hint:'餐食速记', title:'今日饮食' },    // -180° 正左
-  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },    // -150°
-  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重' },   // -120°
-  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状' },  // -90° 正上
+  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },
+  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状' },
+  { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重' },
+  { id:'diet', label:'饮食', hint:'餐食速记', title:'今日饮食' },
 ];
 
 const RADIAL_MENU = {
-  radius: 140,        // 加大半径，避开 60px 按钮间距过近
-  startAngle: 180,    // 第一项：正左
-  endAngle: 90,       // 末项：正上
+  radius: 124,
+  angle: 140,
+  center: 180,
   stagger: 0.04,
   duration: 0.5,
 };
 
 function computeRadialCards(cards, config = RADIAL_MENU){
   const N = cards.length;
-  const { radius: R, startAngle, endAngle, stagger: STAG } = config;
-  const step = N > 1 ? (endAngle - startAngle) / (N - 1) : 0;
+  const { radius: R, angle: WHOLE, center: CENTER, stagger: STAG } = config;
+  const step = N > 1 ? WHOLE / (N - 1) : 0;
+  const start = CENTER - WHOLE / 2;
   return cards.map((card, i)=>{
-    const a = (startAngle + step * i) * Math.PI / 180;
+    const a = (start + step * i) * Math.PI / 180;
     const x = R * Math.cos(a);
     const y = -R * Math.sin(a);
     return {
@@ -90,7 +91,7 @@ function DockWavePlaceholder({show, focused}){
 }
 
 function QuickCardFan({
-  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onClose,
+  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onDietPick, onClose,
   onSymptomSubmit, onWeightSubmit, onFoodSubmit,
 }){
   const I = window.Icon;
@@ -153,7 +154,11 @@ function QuickCardFan({
               className="quick-card-fan-face"
               onPointerDown={(e)=>{
                 if(!open || selected) return;
-                if(card.id === 'mood'){
+                if(card.id === 'diet'){
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDietPick?.(e.currentTarget);
+                } else if(card.id === 'mood'){
                   e.preventDefault();
                   e.stopPropagation();
                   onMoodPick?.();
@@ -161,15 +166,14 @@ function QuickCardFan({
               }}
               onClick={()=>{
                 if(!open || selected) return;
-                if(card.id !== 'mood') onSelectCard(card.id);
+                if(card.id !== 'mood' && card.id !== 'diet') onSelectCard(card.id);
               }}
               aria-label={card.label}
               tabIndex={open && !selected ? 0 : -1}
             >
               <span className="quick-card-fan-ico">
-                <QuickCardIcon kind={card.id} size={20}/>
+                <QuickCardIcon kind={card.id} size={32}/>
               </span>
-              <span className="quick-card-fan-lbl">{card.label}</span>
             </button>
 
             <div className="quick-card-fan-panel" aria-hidden={!isSel}>
@@ -208,8 +212,8 @@ function QuickCardFan({
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
-  onFoodConfirm,
-  onVoiceDone, onPhoto, onDockExpandedChange, activeTab, showScheme3Bubble,
+  onFoodConfirm, onDietCapture,
+  onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
   demoPhase, isDemoRunning,
 }){
@@ -217,6 +221,9 @@ function DockPublisher({
   const DockMoodPicker = window.DockMoodPicker;
   const DockSymptomPicker = window.DockSymptomPicker;
   const DockWeightPicker = window.DockWeightPicker;
+  const CameraTransition = window.CameraTransition;
+  const QuickCardIcon = window.QuickCardIcon;
+  const measureElementRect = window.measureElementRect;
   const [inputMode, setInputMode] = React.useState(defaultInputMode);
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickSelected, setQuickSelected] = React.useState(null);
@@ -226,8 +233,18 @@ function DockPublisher({
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
   const [inputFocused, setInputFocused] = React.useState(false);
+  const [cameraOpen, setCameraOpen] = React.useState(false);
+  const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
   const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
+  const containerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(containerRef.current){
+      const phone = containerRef.current.closest('.phone');
+      if(phone) containerRef.current = phone;
+    }
+  }, []);
 
   React.useEffect(()=>{
     setInputMode(defaultInputMode);
@@ -336,6 +353,32 @@ function DockPublisher({
     onWeightConfirm?.(payload);
   };
 
+  const handleDietFanTap = (buttonEl)=>{
+    if(!buttonEl) return;
+    const phone = buttonEl.closest('.phone');
+    if(!phone) return;
+    containerRef.current = phone;
+    const rect = measureElementRect?.(buttonEl, phone);
+    setCameraSourceRect(rect);
+    setQuickOpen(false);
+    setQuickSelected(null);
+    setCameraOpen(true);
+  };
+
+  const handleCameraCapture = ()=>{
+    setCameraOpen(false);
+    onDietCapture?.({ type: 'capture', photoUrl: window.pickFallbackPhoto?.() || null });
+  };
+
+  const handleSelectPhoto = (photo)=>{
+    setCameraOpen(false);
+    onDietCapture?.({ type: 'select', photo });
+  };
+
+  const handleCameraClose = ()=>{
+    setCameraOpen(false);
+  };
+
   React.useEffect(()=>{
     onDockExpandedChange?.(!!dockSheet || !!quickSelected);
   }, [dockSheet, quickSelected, onDockExpandedChange]);
@@ -355,12 +398,33 @@ function DockPublisher({
           onFabTap={handleFabTap}
           onSelectCard={setQuickSelected}
           onMoodPick={handleMoodFanTap}
+          onDietPick={handleDietFanTap}
           onClose={closeQuick}
           onSymptomSubmit={handleQuickSymptomSubmit}
           onWeightSubmit={handleQuickWeightSubmit}
           onFoodSubmit={handleQuickFoodSubmit}
         />
       </div>
+
+      {CameraTransition && (
+        <CameraTransition
+          active={cameraOpen}
+          sourceRect={cameraSourceRect}
+          containerRef={containerRef}
+          cardContent={
+            <>
+              <span className="quick-menu-item-icon">
+                <QuickCardIcon kind="diet" color="currentColor" size={22}/>
+              </span>
+              <span className="quick-menu-item-label">记录饮食</span>
+            </>
+          }
+          onCapture={handleCameraCapture}
+          onClose={handleCameraClose}
+          onSelectPhoto={handleSelectPhoto}
+          onActiveChange={onCameraActiveChange}
+        />
+      )}
 
       {ReactDOM.createPortal(
         <MoodOverlay

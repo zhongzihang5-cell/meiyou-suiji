@@ -237,24 +237,6 @@ const SCENE_CONTEXT = {
 
 // ---------- 场景时间轴 — V3v2 日章节 Demo（1:1 record-tab-v3plus） ----------
 const TIMELINE_BLOCKS = [
-  {
-    type:'day', id:'d-4-18', date:'4/18', weekday:'周五',
-    items:[
-      {
-        kind:'sync-card', id:'e-518-1a', time:'16:00',
-        cardLabel:'自动同步',
-        cardLabelKind:'sync',
-        body:'今天月经来了。',
-        tagLayout:'v3',
-        tags:[
-          { cat:'月经', val:'', icon:'period' },
-        ],
-      },
-      {
-        kind:'sister-card', id:'e-518-1b', time:'16:00', railDot:'ai',
-      },
-    ],
-  },
   { type:'gap', id:'gap-top' },
   {
     type:'day', id:'d-5-14', date:'5/14', weekday:'周四',
