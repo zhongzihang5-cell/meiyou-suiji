@@ -534,8 +534,7 @@
   transform:translateX(-50%);
   width:100%;
   max-width:390px;
-  /* 紧贴底部 dock-bar 上方：tabbar 高 + dock-bar 高 68px + gap */
-  bottom:calc(var(--my-tabbar-h) + 160px);
+  bottom:calc(var(--my-tabbar-h) + 67px);
   height:0;
   z-index:91;
   pointer-events:none;
@@ -593,7 +592,6 @@
   --rm-near:0.9167;
   --rm-stagger:0.04s;
   --rm-duration:0.5s;
-  --rm-spin:180deg;
 }
 .quick-card-fan.has-selected{
   right:0;
@@ -603,8 +601,7 @@
   top:auto;
 }
 .quick-float-wrap.is-quick-active .quick-card-fan{
-  /* 展开后整体上移：饮食在最下方(y≈+116px)，避免被底栏/Tab 挡住 */
-  bottom:calc(var(--my-dock-float-b, 180px) + 16px);
+  bottom:calc(var(--my-tabbar-h) + 67px);
 }
 
 /* Path-style 弧形展开：0→过冲(far)→回落(near)→稳定(shift) */
@@ -649,10 +646,10 @@
   position:absolute;
   left:50%;
   top:50%;
-  width:60px;
-  height:60px;
-  margin-left:-30px;
-  margin-top:-30px;
+  width:64px;
+  height:64px;
+  margin-left:-32px;
+  margin-top:-32px;
   border-radius:50%;
   background:transparent;
   overflow:visible;
@@ -687,15 +684,15 @@
 }
 /* Path contract：更脆，0.35s + 不对称曲线 */
 .quick-card-fan.is-closing:not(.has-selected) .quick-card-fan-item{
-  animation:qcf-contract calc(var(--rm-duration) * .7) ease both;
+  animation:qcf-contract 0.35s ease both;
   animation-delay:var(--d-in);
 }
 .quick-card-fan.is-closing:not(.has-selected) .quick-card-fan-ico{
-  animation:qcf-icon-contract calc(var(--rm-duration) * .7) ease both;
+  animation:qcf-icon-contract 0.35s ease both;
   animation-delay:var(--d-in);
 }
 .quick-card-fan.is-closing:not(.has-selected) .quick-card-fan-lbl{
-  animation:qcf-lbl-hide calc(var(--rm-duration) * .5) ease both;
+  animation:qcf-lbl-hide 0.25s ease both;
   animation-delay:var(--d-in);
 }
 .quick-card-fan.to-mood.is-closing:not(.has-selected) .quick-card-fan-item{
@@ -754,33 +751,30 @@
 .quick-card-fan-face{
   position:absolute;
   inset:0;
-  border:0;
   background:#fff;
-  border:0.5px solid rgba(0,0,0,0.08);
+  border:0.5px solid #e8e8e8;
   border-radius:50%;
-  box-shadow:var(--my-shadow-1, 0 4px 12px rgba(0,0,0,0.10));
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.10);
+  display:block;
   cursor:pointer;
   padding:0;
   touch-action:manipulation;
   transition:opacity 200ms ease, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
   z-index:1;
-  color:#323232;
+  color:#333;
 }
 /* 子按钮文字 label（饮食 / 心情 / 体重 / 症状）— 包进圆形按钮内 */
 .quick-card-fan-lbl{
-  position:static;
-  transform:none;
+  position:absolute;
+  left:50%;
+  top:41px;
+  transform:translateX(-50%);
+  display:block;
   font-size:11px;
-  line-height:1;
+  line-height:11px;
   white-space:nowrap;
-  color:rgba(0,0,0,0.8);
+  color:#333;
   font-family:'PingFang SC','SF Pro Text','Helvetica Neue',Arial,sans-serif;
-  font-weight:400;
   pointer-events:none;
   opacity:0;
 }
@@ -794,14 +788,17 @@
   transition:opacity 180ms ease 60ms, transform 360ms cubic-bezier(0.32,0.94,0.38,1);
 }
 .quick-card-fan-ico{
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  background:transparent;
+  position:absolute;
+  left:50%;
+  top:8px;
+  width:28px;
+  height:28px;
+  margin-left:-14px;
   display:flex;
   align-items:center;
   justify-content:center;
-  flex-shrink:0;
+  border-radius:50%;
+  background:transparent;
 }
 .quick-card-fan-img{
   width:100%;
@@ -882,10 +879,10 @@
   width:56px;
   height:56px;
   border-radius:28px;
-  border:none;
+  border:0;
   background:radial-gradient(circle at 30% 25%, #ff7aa8 0%, var(--my-brand-red) 60%, var(--my-brand-red) 100%);
   color:#fff;
-  box-shadow:0 8px 20px rgba(255,77,136,0.4), 0 2px 4px rgba(255,77,136,0.2);
+  box-shadow:0 5px 15px rgba(255,77,136,0.35);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -893,12 +890,13 @@
   z-index:5;
   touch-action:manipulation;
   transform-origin:center center;
-  transition:transform .4s ease, background .25s;
+  transition:transform .4s ease;
   overflow:hidden;
 }
-/* Path-style 置灰层：展开态盖在按钮上方变灰 */
 .quick-card-fab::before{
-  content:'';
+  content:none;
+}
+.quick-card-fab-gray{
   position:absolute;
   inset:0;
   border-radius:50%;
@@ -908,14 +906,33 @@
   pointer-events:none;
   z-index:0;
 }
-.quick-card-fab.is-open::before{
+.quick-card-fab.is-open .quick-card-fab-gray{
   opacity:1;
 }
-.quick-card-fab > *{
+.quick-card-fab-plus{
   position:relative;
+  display:block;
+  width:56px;
+  height:56px;
   z-index:1;
+  transition:transform .4s ease;
 }
-.quick-card-fab.is-open{
+.quick-card-fab-plus::before,
+.quick-card-fab-plus::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:16px;
+  height:3px;
+  border-radius:999px;
+  background:#fff;
+  transform:translate(-50%, -50%);
+}
+.quick-card-fab-plus::after{
+  transform:translate(-50%, -50%) rotate(90deg);
+}
+.quick-card-fab.is-open .quick-card-fab-plus{
   transform:rotate(-135deg);
 }
 .quick-card-fab.is-covered{
@@ -924,8 +941,8 @@
 .quick-card-fab:active{
   transform:scale(0.92);
 }
-.quick-card-fab.is-open:active{
-  transform:rotate(-135deg) scale(0.92);
+.quick-card-fab.is-open:active .quick-card-fab-plus{
+  transform:rotate(-135deg);
 }
 
 /* 卡片内紧凑选择器 */

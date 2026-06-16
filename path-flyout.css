@@ -355,31 +355,33 @@
   min-width:0;
   display:flex;
   align-items:center;
-  gap:4px;
-  min-height:44px;
-  padding:4px 56px 4px 6px;
+  gap:8px;
+  min-height:48px;
+  padding:5px 14px 5px 8px;
   background:#fff;
   border-radius:80px;
-  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+  border:0.5px solid rgba(0,0,0,0.04);
+  box-shadow:0 4px 18px rgba(0,0,0,0.10);
   position:relative;
   overflow:visible;
 }
 
 .dock-input-pill .dock-mode-btn{
-  width:36px;
-  height:36px;
+  width:38px;
+  height:38px;
   flex-shrink:0;
   border-radius:50%;
-  color:rgba(0,0,0,0.55);
+  background:#f7f7f9;
+  color:rgba(0,0,0,0.58);
 }
 
 .dock-input-pill .dock-text-field{
   flex:1;
-  min-height:36px;
+  min-height:38px;
   background:transparent;
   border-radius:0;
   border:none;
-  padding:0 8px 0 0;
+  padding:0;
 }
 
 .dock-input-pill .dock-text-field:focus-within,
@@ -390,17 +392,33 @@
 
 .dock-input-pill .dock-voice-wrap{
   flex:1;
-  min-height:36px;
+  min-height:38px;
   border-radius:80px;
+  background:transparent;
+  box-shadow:none;
 }
 
 .dock-input-pill .dock-voice-btn{
   border-radius:80px;
   background:transparent;
-  color:rgba(0,0,0,0.45);
+  color:rgba(0,0,0,0.48);
   font-size:15px;
+  height:38px;
 }
 
 .dock-input-pill .dock-send-btn{
-  margin-right:4px;
+  width:34px;
+  height:34px;
+  margin-right:0;
+  border-radius:50%;
+}
+
+.dock-input-pill .dock-float-ph{
+  left:4px;
+  right:4px;
+  color:rgba(0,0,0,0.28);
+}
+
+.dock-input-pill .dock-text-field textarea{
+  padding:8px 4px;
 }

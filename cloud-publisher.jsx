@@ -45,28 +45,26 @@ const QUICK_CARDS = [
 ];
 
 const RADIAL_MENU = {
-  radius: 124,
-  angle: 140,
-  center: 180,
   stagger: 0.04,
   duration: 0.5,
+  positions: [
+    { x: -5, y: -158 },
+    { x: -79.5, y: -136 },
+    { x: -137, y: -79 },
+    { x: -159, y: -4 },
+  ],
 };
 
 function computeRadialCards(cards, config = RADIAL_MENU){
-  const N = cards.length;
-  const { radius: R, angle: WHOLE, center: CENTER, stagger: STAG } = config;
-  const step = N > 1 ? WHOLE / (N - 1) : 0;
-  const start = CENTER - WHOLE / 2;
+  const { positions = [], stagger: STAG } = config;
   return cards.map((card, i)=>{
-    const a = (start + step * i) * Math.PI / 180;
-    const x = R * Math.cos(a);
-    const y = -R * Math.sin(a);
+    const pos = positions[i] || { x: 0, y: 0 };
     return {
       ...card,
-      x: x.toFixed(1),
-      y: y.toFixed(1),
+      x: pos.x.toFixed(1),
+      y: pos.y.toFixed(1),
       dOut: (i * STAG).toFixed(3) + 's',
-      dIn: ((N - 1 - i) * STAG).toFixed(3) + 's',
+      dIn: ((cards.length - 1 - i) * STAG).toFixed(3) + 's',
     };
   });
 }
@@ -94,7 +92,6 @@ function QuickCardFan({
   open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onDietPick, onClose,
   onSymptomSubmit, onWeightSubmit, onFoodSubmit,
 }){
-  const I = window.Icon;
   const QuickCardIcon = window.QuickCardIcon;
   const QuickSymptomPicker = window.QuickSymptomPicker;
   const QuickWeightPicker = window.QuickWeightPicker;
@@ -172,8 +169,9 @@ function QuickCardFan({
               tabIndex={open && !selected ? 0 : -1}
             >
               <span className="quick-card-fan-ico">
-                <QuickCardIcon kind={card.id} size={32}/>
+                <QuickCardIcon kind={card.id} size={24}/>
               </span>
+              <span className="quick-card-fan-lbl">{card.label}</span>
             </button>
 
             <div className="quick-card-fan-panel" aria-hidden={!isSel}>
@@ -204,7 +202,8 @@ function QuickCardFan({
         aria-expanded={open}
         aria-label={open ? '收起快捷记录' : '快捷记录'}
       >
-        <I name="plus" size={24} stroke={2.2}/>
+        <span className="quick-card-fab-gray" aria-hidden="true"/>
+        <span className="quick-card-fab-plus" aria-hidden="true"/>
       </button>
     </div>
   );
@@ -436,7 +435,7 @@ function DockPublisher({
       )}
 
       <div className={'dock-wrap'+(isDockExpanded?' is-mood-expanded':'')}>
-        <div className={'dock-panel'+(isDockExpanded?' is-mood-expanded':'')}>
+        <div className={'dock-panel'+(!dockSheet ? ' is-path-dock' : '')+(isDockExpanded?' is-mood-expanded':'')}>
           {dockSheet === 'mood' ? (
             <DockMoodPicker
               onConfirm={handleMoodConfirm}
@@ -453,8 +452,8 @@ function DockPublisher({
               onCancel={closeDockSheet}
             />
           ) : (
-          <div className="dock-bar">
-            <div className="dock-input-row">
+          <div className="dock-bar is-path-dock">
+            <div className="dock-input-row dock-input-pill">
               <button
                 type="button"
                 className="dock-mode-btn"

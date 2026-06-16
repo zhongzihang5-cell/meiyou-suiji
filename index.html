@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
-<link rel="stylesheet" href="cloud.css?v=20260604-v108">
+<link rel="stylesheet" href="cloud.css?v=20260616-v105">
 <link rel="stylesheet" href="timeline.css?v=20260602-v104">
 <link rel="stylesheet" href="calendar.css?v=20260602-v102">
 <link rel="stylesheet" href="record-empty.css?v=20260602-v102">
@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="voice-transcribe.css?v=20260602-v102">
 <link rel="stylesheet" href="camera-diet.css?v=20260611">
 <link rel="stylesheet" href="diet-feedback.css?v=20260611">
-<link rel="stylesheet" href="path-flyout.css?v=20260611">
+<link rel="stylesheet" href="path-flyout.css?v=20260616-v105">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;letter-spacing:0}
@@ -753,26 +753,48 @@ html,body{
 
 /* ============ TAB BAR ============ */
 .tabbar{
-  position:fixed;bottom:0;
-  left:50%;transform:translateX(-50%);
-  width:100%;max-width:390px;
-  background:var(--my-surface);
-  border-top:0.5px solid var(--my-line);
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:393px;
+  background:#fff;
+  border-top:0.5px solid #e8e8e8;
   display:flex;
-  padding:6px 0 calc(env(safe-area-inset-bottom,8px) + 6px);
+  justify-content:space-around;
+  align-items:center;
+  padding:5px 0 14px;
   z-index:100;
 }
 .tab{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  gap:2px;padding:4px 0;cursor:pointer;position:relative;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  padding:0;
+  cursor:pointer;
+  position:relative;
+  font-size:11px;
+  color:#999;
+  font-family:-apple-system,"PingFang SC",sans-serif;
+  line-height:1.05;
 }
 .tab-ico{
   width:26px;height:26px;
   display:flex;align-items:center;justify-content:center;
-  color:var(--my-text-tertiary);margin-bottom:1px;
+  color:#999;
 }
+.tab-ico svg{width:26px;height:26px;display:block}
+.tab-icon-img{width:26px;height:26px;display:block;object-fit:contain}
+.tab-ico .mascot{width:26px;height:26px}
 .tab.active .tab-ico{color:var(--my-brand-red)}
-.tab-lbl{font-size:10px;color:var(--my-text-tertiary)}
+.tab.active .tab-icon-img{
+  filter:brightness(0) saturate(100%) invert(45%) sepia(95%) saturate(2476%) hue-rotate(315deg) brightness(102%) contrast(101%);
+}
+.tab-lbl{font-size:11px;color:inherit}
 .tab.active .tab-lbl{color:var(--my-brand-red);font-weight:500}
 .tile{
   width:24px;height:24px;border-radius:5px;
@@ -910,7 +932,8 @@ window.__BUILD__ = '20260522-v101-dev';
 
 <script type="text/babel" src="icons.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="data.jsx?v=20260602-v103"></script>
-<script type="text/babel" src="components.jsx?v=20260602-v103"></script>
+<script src="tabbar-icons.js?v=20260616-v101"></script>
+<script type="text/babel" src="components.jsx?v=20260616-v101"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="timeline-sister-cards.jsx?v=20260602-v104"></script>
 <script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260602-v104"></script>
@@ -923,7 +946,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="record-blank-scheme3.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank-scheme1-ceremony.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="search-page.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="cloud-publisher.jsx?v=20260604-v107"></script>
+<script type="text/babel" src="cloud-publisher.jsx?v=20260616-v104"></script>
 <script type="text/babel" src="voice-transcribe-recorder.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-interludes.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-async.jsx?v=20260602-v102"></script>

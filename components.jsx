@@ -209,38 +209,16 @@ function CycleReport({item}){
 // Order: 美柚 / 记录 / 点滴(center) / 返现 / 我
 function TabBar({active='note', onChange}){
   const I = window.Icon;
+  const tabIcons = window.TABBAR_ICONS || {};
+  const icon = (id) => (
+    <img className="tab-icon-img" src={tabIcons[id]} alt="" aria-hidden="true" />
+  );
   const tabs = [
-    {id:'home', label:'美柚', custom:(
-      <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
-        <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.2"/>
-        <ellipse cx="24" cy="24" rx="3" ry="8" fill="currentColor"/>
-        <ellipse cx="24" cy="24" rx="3" ry="8" fill="currentColor" transform="rotate(60 24 24)"/>
-        <ellipse cx="24" cy="24" rx="3" ry="8" fill="currentColor" transform="rotate(120 24 24)"/>
-        <circle cx="24" cy="24" r="2.5" fill="currentColor"/>
-      </svg>
-    )},
-    {id:'cal', label:'记录', custom:(
-      <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
-        <rect x="6" y="10" width="36" height="32" rx="5" stroke="currentColor" strokeWidth="3.2"/>
-        <line x1="15" y1="6" x2="15" y2="14" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round"/>
-        <line x1="33" y1="6" x2="33" y2="14" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round"/>
-        <line x1="6" y1="20" x2="42" y2="20" stroke="currentColor" strokeWidth="3.2"/>
-        <text x="24" y="37" textAnchor="middle" fill="currentColor" fontSize="18" fontWeight="700" fontFamily="PingFang SC, sans-serif">3</text>
-      </svg>
-    )},
-    {id:'note', label:'点滴', custom:<I name="mic" size={22} stroke={1.6}/>},
-    {id:'cash', label:'返现', custom:(
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6"/>
-        <path d="M9 8l3 4 3-4M12 12v6M9 14h6M9 17h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-      </svg>
-    )},
-    {id:'me', label:'我', custom:(
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.6"/>
-        <path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-      </svg>
-    ), notif:true},
+    {id:'home', label:'美柚', custom:icon('home')},
+    {id:'cal', label:'记录', custom:icon('cal')},
+    {id:'note', label:'点滴', custom:<I name="mic" size={26} stroke={1.7}/>},
+    {id:'cash', label:'返现', custom:icon('cash')},
+    {id:'me', label:'我', custom:icon('me')},
   ];
   return (
     <div className="tabbar">
