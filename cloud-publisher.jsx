@@ -38,9 +38,9 @@ function DockKbdCircleIco({size=22}){
  *  角度约定：0° 朝右、逆时针为正（数学惯例），故 -180° 即 180°、-90° 即 90°。
  */
 const QUICK_CARDS = [
-  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },
-  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状' },
   { id:'weight', label:'体重', hint:'±0.1 kg', title:'今日体重' },
+  { id:'symptom', label:'症状', hint:'快速多选', title:'今日症状' },
+  { id:'mood', label:'心情', hint:'5 档表情', title:'记录心情' },
   { id:'diet', label:'饮食', hint:'餐食速记', title:'今日饮食' },
 ];
 

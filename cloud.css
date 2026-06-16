@@ -889,9 +889,16 @@
   cursor:pointer;
   z-index:5;
   touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  outline:none;
   transform-origin:center center;
   transition:transform .4s ease;
   overflow:hidden;
+}
+.quick-card-fab:focus,
+.quick-card-fab:focus-visible{
+  outline:none;
+  box-shadow:0 5px 15px rgba(255,77,136,0.35);
 }
 .quick-card-fab::before{
   content:none;
