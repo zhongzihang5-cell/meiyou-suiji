@@ -436,90 +436,95 @@
 }
 
 /* ============ 体重输入 ============ */
-.dock-weight-top{
+.dock-weight-sheet{
+  min-height:380px;
+  max-height:min(68vh, 480px);
+  background:#fff;
+}
+.dock-weight-head{
+  position:relative;
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  padding:14px 16px 8px;
+  justify-content:center;
+  padding:8px 12px 4px;
   flex-shrink:0;
 }
-.dock-sheet-lead{
-  margin:0;
-  font-size:14px;
-  font-weight:500;
-  color:rgba(0,0,0,0.55);
-  line-height:1.47;
-  letter-spacing:0.02em;
-  white-space:nowrap;
-}
-.dock-weight-sheet{
-  min-height:360px;
-  max-height:min(65vh, 460px);
-}
-.dock-weight-display-wrap{
-  position:relative;
-  margin:4px 16px 12px;
-  padding:20px 16px 18px;
-  background:#f7f7f9;
-  border-radius:12px;
-  text-align:center;
-}
-.dock-weight-unit-toggle{
+.dock-weight-head .dock-sheet-close{
   position:absolute;
-  top:10px;
-  right:10px;
+  right:8px;
+  top:4px;
+}
+.dock-weight-grab{
+  width:36px;
+  height:4px;
+  border-radius:80px;
+  background:rgba(0,0,0,0.12);
+}
+.dock-weight-unit-seg{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  margin:8px 16px 12px;
+  padding:4px;
+  background:#f2f2f5;
+  border-radius:80px;
+  flex-shrink:0;
+}
+.dock-weight-unit-opt{
+  flex:1;
+  height:32px;
   appearance:none;
   border:0;
-  background:#fff;
   border-radius:80px;
-  padding:4px 10px;
+  background:transparent;
   font:inherit;
-  font-size:11px;
-  color:rgba(0,0,0,0.5);
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.45);
   cursor:pointer;
-  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+  transition:background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.dock-weight-unit-opt.is-active{
+  background:#fff;
+  color:#ff4d88;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
 }
 .dock-weight-display{
   display:flex;
   align-items:baseline;
   justify-content:center;
   gap:6px;
-  padding-top:8px;
+  padding:8px 16px 16px;
+  flex-shrink:0;
 }
 .dock-weight-num{
-  font-size:40px;
+  font-size:44px;
   font-weight:500;
   color:rgba(0,0,0,0.88);
   line-height:1;
   font-variant-numeric:tabular-nums;
+  letter-spacing:-0.02em;
 }
 .dock-weight-unit{
-  font-size:15px;
+  font-size:16px;
   color:rgba(0,0,0,0.35);
   line-height:1.29;
-}
-.dock-weight-delta{
-  margin:4px 0 0;
-  font-size:12px;
-  color:rgba(0,0,0,0.45);
-  line-height:1.29;
-  text-align:center;
 }
 .dock-weight-keypad{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
   gap:8px;
-  padding:0 16px 8px;
+  padding:0 16px 12px;
   flex-shrink:0;
 }
 .dock-weight-key{
-  height:44px;
+  height:48px;
   appearance:none;
   border:0;
   border-radius:8px;
   background:#f7f7f9;
   font:inherit;
-  font-size:20px;
+  font-size:22px;
   font-weight:500;
   color:rgba(0,0,0,0.82);
   cursor:pointer;
@@ -532,6 +537,16 @@
 .dock-weight-key.is-fn{
   font-size:16px;
   color:rgba(0,0,0,0.45);
+}
+.dock-weight-sheet .dock-sheet-foot{
+  border-top:none;
+  background:#fff;
+  padding:4px 16px 12px;
+}
+.dock-weight-sheet .dock-sheet-submit{
+  height:44px;
+  font-size:15px;
+  letter-spacing:0.01em;
 }
 
 /* ============ 右下悬浮快捷发布 ============ */
