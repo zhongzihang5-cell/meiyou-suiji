@@ -652,7 +652,8 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
-    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
+    const entryText = entry.primary?.text || entry.body || '';
+    if(recordFeedback && tryStartFirstDrop(entry, entryText)) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));

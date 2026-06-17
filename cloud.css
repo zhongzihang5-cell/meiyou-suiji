@@ -498,6 +498,13 @@
   color:rgba(0,0,0,0.35);
   line-height:1.29;
 }
+.dock-weight-delta{
+  margin:4px 0 0;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+  text-align:center;
+}
 .dock-weight-keypad{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
@@ -1095,6 +1102,13 @@
 .quick-card-weight-unit{
   font-size:13px;
   color:var(--my-text-tertiary);
+}
+.quick-card-weight-hint{
+  margin:0;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+  text-align:center;
 }
 .quick-card-submit{
   border:0;

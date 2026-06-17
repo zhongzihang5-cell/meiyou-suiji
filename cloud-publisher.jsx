@@ -222,12 +222,14 @@ function DockPublisher({
   const DockWeightPicker = window.DockWeightPicker;
   const CameraTransition = window.CameraTransition;
   const QuickCardIcon = window.QuickCardIcon;
+  const QuickMenuPathFlyout = window.QuickMenuPathFlyout;
   const measureElementRect = window.measureElementRect;
   const [inputMode, setInputMode] = React.useState(defaultInputMode);
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickSelected, setQuickSelected] = React.useState(null);
   const [closingToMood, setClosingToMood] = React.useState(false);
   const [moodPickerOpen, setMoodPickerOpen] = React.useState(false);
+  const [pathFlyoutOpen, setPathFlyoutOpen] = React.useState(false);
   const [dockSheet, setDockSheet] = React.useState(null);
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
@@ -352,6 +354,17 @@ function DockPublisher({
     onWeightConfirm?.(payload);
   };
 
+  const handlePathSelect = (id)=>{
+    closeQuick();
+    if(id === 'mood'){
+      setMoodPickerOpen(true);
+      return;
+    }
+    if(id === 'weight' || id === 'symptom'){
+      setDockSheet(id);
+    }
+  };
+
   const handleDietFanTap = (buttonEl)=>{
     if(!buttonEl) return;
     const phone = buttonEl.closest('.phone');
@@ -379,8 +392,8 @@ function DockPublisher({
   };
 
   React.useEffect(()=>{
-    onDockExpandedChange?.(!!dockSheet || !!quickSelected);
-  }, [dockSheet, quickSelected, onDockExpandedChange]);
+    onDockExpandedChange?.(!!dockSheet || !!quickSelected || pathFlyoutOpen);
+  }, [dockSheet, quickSelected, pathFlyoutOpen, onDockExpandedChange]);
 
   const isDockExpanded = !!dockSheet;
   const isQuickActive = quickOpen || !!quickSelected;
@@ -539,6 +552,14 @@ function DockPublisher({
                 <button type="button" className="dock-send-btn" onClick={onSend} aria-label="发送">
                   <I name="send" size={16} stroke={2}/>
                 </button>
+              ) : null}
+
+              {QuickMenuPathFlyout ? (
+                <QuickMenuPathFlyout
+                  onSelectItem={handlePathSelect}
+                  onDietClick={handleDietFanTap}
+                  onOpenChange={setPathFlyoutOpen}
+                />
               ) : null}
             </div>
 

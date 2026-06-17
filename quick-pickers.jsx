@@ -32,6 +32,18 @@ const SYMPTOM_SECTIONS = [
 const SYMPTOM_OPTIONS = SYMPTOM_SECTIONS.flatMap(s=>s.items);
 
 const WEIGHT_KEYS = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
+const WEIGHT_BASELINE_KG = 52.3;
+
+function toWeightKg(value, unit){
+  return unit === 'jin' ? value / 2 : value;
+}
+
+function formatWeightDelta(currentKg, baselineKg = WEIGHT_BASELINE_KG){
+  const delta = +(currentKg - baselineKg).toFixed(1);
+  if(delta === 0) return '与上次持平';
+  const arrow = delta < 0 ? '↓' : '↑';
+  return `比上次 ${arrow} ${Math.abs(delta).toFixed(1)}kg`;
+}
 
 function DockSheetFoot({disabled, onSubmit, label}){
   return (
@@ -120,8 +132,8 @@ function DockSymptomPicker({onConfirm, onCancel}){
   );
 }
 
-function DockWeightPicker({onConfirm, onCancel}){
-  const [value, setValue] = React.useState('');
+function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG}){
+  const [value, setValue] = React.useState(String(initialKg));
   const [unit, setUnit] = React.useState('kg');
 
   const pressKey = (key)=>{
@@ -146,6 +158,20 @@ function DockWeightPicker({onConfirm, onCancel}){
   const canSubmit = Number.isFinite(num) && num > 0;
   const display = value || '0';
   const unitLabel = unit === 'kg' ? '公斤' : '斤';
+  const kgPreview = canSubmit ? toWeightKg(num, unit) : null;
+  const deltaHint = kgPreview != null ? formatWeightDelta(kgPreview) : '';
+
+  const toggleUnit = ()=>{
+    setUnit(u=>{
+      const next = u === 'kg' ? 'jin' : 'kg';
+      const n = parseFloat(value);
+      if(Number.isFinite(n) && n > 0){
+        const converted = next === 'jin' ? (n * 2) : (n / 2);
+        setValue(String(+converted.toFixed(1)));
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="dock-sheet dock-weight-sheet">
@@ -157,7 +183,7 @@ function DockWeightPicker({onConfirm, onCancel}){
         <button
           type="button"
           className="dock-weight-unit-toggle"
-          onClick={()=>setUnit(u=>(u === 'kg' ? 'jin' : 'kg'))}
+          onClick={toggleUnit}
         >
           切换为{unit === 'kg' ? '斤' : '公斤'}
         </button>
@@ -165,6 +191,9 @@ function DockWeightPicker({onConfirm, onCancel}){
           <span className="dock-weight-num">{display}</span>
           <span className="dock-weight-unit">{unitLabel}</span>
         </div>
+        {deltaHint ? (
+          <p className="dock-weight-delta">{deltaHint}</p>
+        ) : null}
       </div>
       <div className="dock-weight-keypad">
         {WEIGHT_KEYS.map((key)=>(
@@ -206,18 +235,36 @@ function createSymptomRecordEntry(symptoms){
 }
 
 function createWeightRecordEntry({value, unit}){
-  const unitLabel = unit === 'jin' ? '斤' : 'kg';
-  const text = unit === 'jin'
-    ? `${value}斤`
-    : `${value}kg`;
+  const kg = toWeightKg(value, unit);
+  const displayVal = unit === 'jin' ? `${value}斤` : `${value}kg`;
+  const deltaText = formatWeightDelta(kg);
+  const text = `体重 ${displayVal}，${deltaText}`;
+  const tagVal = unit === 'jin' ? `${value} 斤` : `${value} kg`;
+  const gid = 'e-'+Date.now();
+  const time = window.formatNowTime();
+  const trendNote = deltaText.includes('↓')
+    ? '7 日均值 ↓ 0.4 kg'
+    : (deltaText.includes('↑') ? '7 日均值 ↑ 0.2 kg' : '7 日均值持平');
   return {
-    id:'e-'+Date.now(),
-    kind:'rec',
-    time: window.formatNowTime(),
-    body:'',
-    tags:[{ label:'体重 '+text, cat:'weight', emoji:'⚖️' }],
-    tagLayout:'t5',
+    kind:'record-group',
+    id:gid+'-g',
     isNew: true,
+    primary:{
+      id:gid,
+      time,
+      kind:'text',
+      text,
+      tags:[{ cat:'体重', val:tagVal, icon:'scale' }],
+    },
+    ai:{
+      id:gid+'-ai',
+      time,
+      kind:'chart',
+      chartType:'weightTrend',
+      title:'近 30 日体重趋势',
+      note:trendNote,
+    },
+    aiDefaultOpen:false,
   };
 }
 
@@ -424,9 +471,10 @@ function QuickSymptomPicker({ onSubmit }) {
   );
 }
 
-function QuickWeightPicker({ onSubmit, current = 52.3 }) {
+function QuickWeightPicker({ onSubmit, current = WEIGHT_BASELINE_KG }) {
   const [w, setW] = React.useState(current);
   const step = (d)=> setW(v=>Math.max(20, Math.min(150, +(v + d).toFixed(1))));
+  const deltaHint = formatWeightDelta(w);
 
   return (
     <div className="quick-card-picker quick-card-picker--weight">
@@ -438,6 +486,7 @@ function QuickWeightPicker({ onSubmit, current = 52.3 }) {
         </div>
         <button type="button" className="quick-card-weight-btn" onClick={()=>step(0.1)} aria-label="增加">+</button>
       </div>
+      <p className="quick-card-weight-hint">{deltaHint}</p>
       <button type="button" className="quick-card-submit" onClick={()=>onSubmit?.({ value: w, unit: 'kg' })}>
         记录
       </button>
@@ -525,4 +574,6 @@ Object.assign(window, {
   createFoodRecordEntry,
   createSymptomRecordEntry,
   createWeightRecordEntry,
+  WEIGHT_BASELINE_KG,
+  formatWeightDelta,
 });
