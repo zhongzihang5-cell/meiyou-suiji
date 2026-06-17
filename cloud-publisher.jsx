@@ -364,14 +364,13 @@ function DockPublisher({
     setCameraOpen(true);
   };
 
-  const handleCameraCapture = ()=>{
-    setCameraOpen(false);
-    onDietCapture?.({ type: 'capture', photoUrl: window.pickFallbackPhoto?.() || null });
-  };
-
-  const handleSelectPhoto = (photo)=>{
-    setCameraOpen(false);
-    onDietCapture?.({ type: 'select', photo });
+  const handleCameraCaptureSuccess = (payload)=>{
+    onDietCapture?.({
+      type: payload?.type || 'capture',
+      photoUrl: payload?.photoUrl || null,
+      photo: payload?.photo,
+      recognitionState: 'ready',
+    });
   };
 
   const handleCameraClose = ()=>{
@@ -418,9 +417,8 @@ function DockPublisher({
               <span className="quick-menu-item-label">记录饮食</span>
             </>
           }
-          onCapture={handleCameraCapture}
+          onCaptureSuccess={handleCameraCaptureSuccess}
           onClose={handleCameraClose}
-          onSelectPhoto={handleSelectPhoto}
           onActiveChange={onCameraActiveChange}
         />
       )}

@@ -96,6 +96,36 @@ const DIET_SCENARIOS = {
     avgKcal: null,
     foodTags: ['甜食高糖'],
   },
+  feastMeal: {
+    mealType: '午餐',
+    totalKcal: 850,
+    dailyTarget: 1800,
+    dailyIntake: 850,
+    items: [
+      { name: '米饭', kcal: 240, portion: '1 碗' },
+      { name: '红烧肉', kcal: 380 },
+      { name: '炒青菜', kcal: 80, portion: '1 盘' },
+      { name: '番茄蛋汤', kcal: 150, portion: '1 碗' },
+    ],
+    weekData: [1200, 980, null, 1450, 1100, 1320, 850],
+    daysWithRecord: 4,
+    avgKcal: 1380,
+    foodTags: [],
+  },
+  coldDrinkMeal: {
+    mealType: '下午茶',
+    totalKcal: 180,
+    dailyTarget: 1800,
+    dailyIntake: 680,
+    items: [
+      { name: '冰美式', kcal: 80 },
+      { name: '冰淇淋', kcal: 100 },
+    ],
+    weekData: [1200, 980, null, 1450, 1100, 1320, 680],
+    daysWithRecord: 4,
+    avgKcal: 1380,
+    foodTags: ['冷饮冰品'],
+  },
 };
 
 const PHOTO_ANALYZE_LOADING_MS = 5000;
@@ -103,20 +133,26 @@ const DIET_RECOGNITION_MAX_FAILURES = 5;
 const DIET_RECOGNITION_SCENARIO_KEY = 'my-demo-diet-recognition-scenario';
 
 function getDietRecognitionMaxFailures(scenario) {
-  if (scenario === 'timeout-exhausted') return 1;
-  if (scenario === 'timeout') return DIET_RECOGNITION_MAX_FAILURES;
   return DIET_RECOGNITION_MAX_FAILURES;
 }
 
+function getDietRecognitionAnalyzeMs(scenario, loadingMs = PHOTO_ANALYZE_LOADING_MS) {
+  if (scenario === 'success') return Math.round(loadingMs * 0.52);
+  return loadingMs;
+}
+
 const DIET_RECOGNITION_SCENARIOS = [
-  { value: 'success', label: '场景1 · 识别成功' },
+  { value: 'success', label: '场景1 · 进度未满即成功' },
   { value: 'timeout', label: '场景2 · 加载超时' },
-  { value: 'timeout-exhausted', label: '场景3 · 加载超时多次重试' },
+  { value: 'not-food', label: '场景3 · 识别非食物' },
 ];
 
 function readDietRecognitionScenario() {
   try {
-    return sessionStorage.getItem(DIET_RECOGNITION_SCENARIO_KEY) || 'success';
+    const value = sessionStorage.getItem(DIET_RECOGNITION_SCENARIO_KEY) || 'success';
+    if (value === 'success-early') return 'success';
+    if (value === 'timeout-exhausted') return 'not-food';
+    return value;
   } catch (e) {
     return 'success';
   }
@@ -134,6 +170,9 @@ function writeDietRecognitionScenario(value) {
 function mockRecognizeDietPhoto({ scenario, forceSuccess = false } = {}) {
   if (forceSuccess || scenario === 'success') {
     return { ok: true };
+  }
+  if (scenario === 'not-food') {
+    return { ok: false, reason: 'not-food' };
   }
   return { ok: false, reason: 'timeout' };
 }
@@ -380,51 +419,54 @@ function createDietTimeoutDemoEntry({ photoUrl, failureCount = 0 } = {}) {
   return entry;
 }
 
-function createDietTimeoutExhaustedDemoEntry({ photoUrl } = {}) {
+function createDietNotFoodDemoEntry({ photoUrl } = {}) {
   const entry = createDietCaptureGroup({ photoUrl, scenario: 'lunch' });
   entry.isNew = false;
   entry.recognitionState = 'error';
-  entry.failureCount = getDietRecognitionMaxFailures('timeout-exhausted');
-  entry.recognitionScenario = 'timeout-exhausted';
+  entry.recognitionScenario = 'not-food';
   return entry;
 }
 
 const DIET_FEEDBACK_DISPLAY_SCENARIO_KEY = 'my-demo-diet-feedback-display-scenario';
 
 const DIET_FEEDBACK_DISPLAY_SCENARIOS = [
-  { value: 'guide', label: '1 引导', title: '场景1 · 引导文案' },
-  { value: 'trend', label: '2 趋势', title: '场景2 · 7日趋势图' },
-  { value: 'day-total', label: '3 汇总', title: '场景3 · 当日汇总热量' },
-  { value: 'day-total-trend', label: '4 汇总+图', title: '场景4 · 汇总+趋势图' },
-  { value: 'day-total-trend-avg', label: '5 +均值', title: '场景5 · 汇总+趋势+均值' },
+  { value: 'dim-a', label: 'A', title: '今日≥2餐 且 近7天<3天' },
+  { value: 'dim-b', label: 'B', title: '近7天≥3天' },
+  { value: 'dim-c', label: 'C', title: '热量 700–1000 千卡' },
+  { value: 'dim-d', label: 'D', title: '经期 × 本餐有冷饮冰品' },
+  { value: 'dim-e', label: 'E', title: '今日≥5 种不同食物' },
 ];
 
+const FEEDBACK_DIM_LEGACY_MAP = {
+  guide: 'dim-a',
+  trend: 'dim-b',
+  'day-total': 'dim-a',
+  'day-total-trend': 'dim-b',
+  'day-total-trend-avg': 'dim-b',
+  'meal-insight': 'dim-c',
+  diversity: 'dim-e',
+  'cycle-diet': 'dim-d',
+  'milestone-100': 'dim-b',
+};
+
+function normalizeDietFeedbackDisplayScenario(value) {
+  if (!value) return 'dim-a';
+  return FEEDBACK_DIM_LEGACY_MAP[value] || value;
+}
+
 function getDietFeedbackDisplayConfig(scenario) {
-  switch (scenario) {
-    case 'guide':
-      return { showGuide: true, showChart: false, showDayTotal: false, showAvg: false, plainShell: false };
-    case 'trend':
-      return { showGuide: false, showChart: true, showDayTotal: false, showAvg: false, plainShell: false };
-    case 'day-total':
-      return { showGuide: false, showChart: false, showDayTotal: true, showAvg: false, plainShell: false };
-    case 'day-total-trend':
-      return {
-        showGuide: false,
-        showChart: true,
-        showDayTotal: true,
-        showAvg: false,
-        plainShell: false,
-        aiBlockOrder: ['chart', 'dayTotal'],
-      };
-    case 'day-total-trend-avg':
-      return {
-        showGuide: false,
-        showChart: true,
-        showDayTotal: true,
-        showAvg: true,
-        plainShell: false,
-        aiBlockOrder: ['chart', 'dayTotal', 'avg'],
-      };
+  const dim = normalizeDietFeedbackDisplayScenario(scenario);
+  switch (dim) {
+    case 'dim-a':
+      return { showChart: true, feedbackDim: 'A', plainShell: false };
+    case 'dim-b':
+      return { showChart: true, feedbackDim: 'B', plainShell: false };
+    case 'dim-c':
+      return { showChart: true, feedbackDim: 'C', plainShell: false };
+    case 'dim-d':
+      return { showChart: true, feedbackDim: 'D', plainShell: false };
+    case 'dim-e':
+      return { showChart: true, feedbackDim: 'E', plainShell: false };
     case 'meal-insight':
       return {
         showGuide: true,
@@ -463,61 +505,38 @@ function getDietFeedbackDisplayConfig(scenario) {
         showCycleTip: true,
         plainShell: false,
       };
-    case 'combo-ab':
+    case 'combo-bce':
       return {
         useCompactMeal: true,
-        showGuide: false,
         showChart: true,
-        showDayTotal: false,
-        showAvg: true,
+        feedbackDims: ['B', 'C', 'E'],
         plainShell: false,
       };
-    case 'combo-abe':
+    case 'combo-acd':
       return {
         useCompactMeal: true,
-        showGuide: false,
         showChart: true,
-        showDayTotal: false,
-        showAvg: true,
-        showDiversity: true,
-        diversityPlacement: 'inline-after-avg',
+        feedbackDims: ['A', 'C', 'D'],
         plainShell: false,
       };
-    case 'combo-abd':
+    case 'combo-bcd':
       return {
         useCompactMeal: true,
-        showGuide: false,
         showChart: true,
-        showDayTotal: false,
-        showAvg: true,
-        showCycleTip: true,
-        cycleTipPlacement: 'inline-after-avg',
-        plainShell: false,
-      };
-    case 'combo-abde':
-      return {
-        useCompactMeal: true,
-        showGuide: false,
-        showChart: true,
-        showDayTotal: false,
-        showAvg: true,
-        showCycleTip: true,
-        cycleTipPlacement: 'inline-after-avg',
-        cycleTipSplitParagraph: true,
-        showDiversity: true,
-        diversityPlacement: 'inline-after-avg',
+        feedbackDims: ['B', 'C', 'D'],
         plainShell: false,
       };
     default:
-      return getDietFeedbackDisplayConfig('day-total-trend-avg');
+      return getDietFeedbackDisplayConfig('dim-a');
   }
 }
 
 function readDietFeedbackDisplayScenario() {
   try {
-    return sessionStorage.getItem(DIET_FEEDBACK_DISPLAY_SCENARIO_KEY) || 'day-total-trend-avg';
+    const value = sessionStorage.getItem(DIET_FEEDBACK_DISPLAY_SCENARIO_KEY);
+    return value ? normalizeDietFeedbackDisplayScenario(value) : null;
   } catch {
-    return 'day-total-trend-avg';
+    return null;
   }
 }
 
@@ -530,11 +549,19 @@ function writeDietFeedbackDisplayScenario(value) {
   }
 }
 
-function buildDietUserContext(data, { daysWithRecord, cycleData, todayFoodCount, totalRecordDays } = {}) {
+function buildDietUserContext(data, {
+  daysWithRecord,
+  cycleData,
+  todayFoodCount,
+  totalRecordDays,
+  dayMealCount,
+  dayTotalKcal,
+  weekData,
+} = {}) {
   return {
-    dayMealCount: data.dailyIntake != null ? 2 : 1,
-    dayTotalKcal: data.dailyIntake ?? data.totalKcal,
-    weekData: data.weekData,
+    dayMealCount: dayMealCount ?? (data.dailyIntake != null ? 2 : 1),
+    dayTotalKcal: dayTotalKcal ?? data.dailyIntake ?? data.totalKcal,
+    weekData: weekData ?? data.weekData,
     daysWithRecord: daysWithRecord ?? data.daysWithRecord,
     avgKcal: data.avgKcal,
     cycleData: cycleData ?? null,
@@ -543,66 +570,109 @@ function buildDietUserContext(data, { daysWithRecord, cycleData, todayFoodCount,
   };
 }
 
-const MEAL_INSIGHT_SCENARIOS = ['meal-insight', 'diversity'];
+const FEEDBACK_DIM_DEMO_PRESETS = {
+  'dim-a': {
+    food: 'lunch',
+    ctx: {
+      daysWithRecord: 2,
+      dayMealCount: 2,
+      dayTotalKcal: 1126,
+      weekData: [null, 980, null, null, null, null, 1126],
+    },
+  },
+  'dim-b': {
+    food: 'lunch',
+    ctx: { daysWithRecord: 5 },
+  },
+  'dim-c': {
+    food: 'feastMeal',
+    ctx: {},
+  },
+  'dim-d': {
+    food: 'coldDrinkMeal',
+    ctx: { cycleData: { phase: 'period', day: 2 } },
+  },
+  'dim-e': {
+    food: 'dinner',
+    ctx: { todayFoodCount: 5, dayMealCount: 3, dayTotalKcal: 1676 },
+  },
+};
 
 function createDietFeedbackDisplayDemoEntry(displayScenario) {
-  const scenario = displayScenario || readDietFeedbackDisplayScenario() || 'guide';
-  const foodScenario = MEAL_INSIGHT_SCENARIOS.includes(scenario) ? 'dinner' : 'lunch';
-  const entry = createDietCaptureGroup({ scenario: foodScenario });
+  const scenario = normalizeDietFeedbackDisplayScenario(
+    displayScenario || readDietFeedbackDisplayScenario() || 'dim-a'
+  );
+  const preset = FEEDBACK_DIM_DEMO_PRESETS[scenario] || FEEDBACK_DIM_DEMO_PRESETS['dim-a'];
+  const data = DIET_SCENARIOS[preset.food] || DIET_SCENARIOS.lunch;
+  const entry = createDietCaptureGroup({ scenario: preset.food });
   entry.isNew = false;
   entry.displayScenario = scenario;
   entry.recognitionScenario = 'success';
-  const daysWithRecord = ['guide', ...MEAL_INSIGHT_SCENARIOS].includes(scenario)
-    ? 1
-    : DIET_SCENARIOS[foodScenario].daysWithRecord;
-  entry.userContext = buildDietUserContext(DIET_SCENARIOS[foodScenario], {
-    daysWithRecord,
-    cycleData: scenario === 'cycle-diet' ? { phase: 'period', day: 2 } : null,
-    todayFoodCount: scenario === 'diversity' ? 5 : undefined,
-    totalRecordDays: scenario === 'milestone-100' ? 100 : undefined,
-  });
+  entry.userContext = buildDietUserContext(data, preset.ctx);
   return entry;
 }
 
 const DIET_FEEDBACK_COMBO_SCENARIOS = [
-  { value: 'combo-ab', label: 'A+B', title: '紧凑识别 + 7日趋势与均值' },
-  { value: 'combo-abe', label: 'A+B+E', title: '紧凑识别 + 趋势 + 饮食多样性' },
-  { value: 'combo-abd', label: 'A+B+D', title: '紧凑识别 + 趋势 + 经期饮食提示' },
-  { value: 'combo-abde', label: 'A+B+D+E', title: '紧凑识别 + 趋势 + 经期 + 多样性' },
+  { value: 'combo-bce', label: 'BCE示例', title: 'B + C + E 文案合并一行' },
+  { value: 'combo-acd', label: 'ACD示例', title: 'A + C + D 文案合并一行' },
+  { value: 'combo-bcd', label: 'BCD示例', title: 'B + C + D 文案合并一行' },
 ];
 
 const COMBO_HINTS = {
-  'combo-ab': '紧凑 A + B（7日趋势图 + 日均热量）',
-  'combo-abe': '紧凑 A + B + E（日均热量后接多样性文案，无底色块）',
-  'combo-abd': '紧凑 A + B + D（日均热量后接经期饮食建议，无底色块）',
-  'combo-abde': '紧凑 A + B + D + E（先多样性、再经期，两段纯文案）',
+  'combo-bce': '柱状图 + B/C/E 三维度文案连续展示（不换行）',
+  'combo-acd': '柱状图 + A/C/D 三维度文案连续展示（不换行）',
+  'combo-bcd': '柱状图 + B/C/D 三维度文案连续展示（不换行）',
 };
 
 const COMBO_PERIOD_CTX = { phase: 'period', day: 2 };
 
-function createDietFeedbackComboDemoEntry(comboScenario = 'combo-ab') {
-  const presetByScenario = {
-    'combo-ab': { food: 'lunch', cycle: null, todayFoodCount: 3 },
-    'combo-abe': { food: 'lunch', cycle: null, todayFoodCount: 5 },
-    'combo-abd': { food: 'lunch', cycle: COMBO_PERIOD_CTX, todayFoodCount: 3 },
-    'combo-abde': { food: 'lunch', cycle: COMBO_PERIOD_CTX, todayFoodCount: 5 },
-  };
-  const preset = presetByScenario[comboScenario] || presetByScenario['combo-ab'];
+const COMBO_DEMO_PRESETS = {
+  'combo-bce': {
+    food: 'feastMeal',
+    ctx: {
+      daysWithRecord: 5,
+      todayFoodCount: 5,
+      dayMealCount: 3,
+      dayTotalKcal: 1676,
+    },
+  },
+  'combo-acd': {
+    food: 'feastMeal',
+    ctx: {
+      daysWithRecord: 2,
+      dayMealCount: 2,
+      dayTotalKcal: 1126,
+      weekData: [null, 980, null, null, null, null, 1126],
+      cycleData: COMBO_PERIOD_CTX,
+    },
+    foodTags: ['冷饮冰品'],
+  },
+  'combo-bcd': {
+    food: 'feastMeal',
+    ctx: {
+      daysWithRecord: 5,
+      cycleData: COMBO_PERIOD_CTX,
+    },
+    foodTags: ['冷饮冰品'],
+  },
+};
+
+function createDietFeedbackComboDemoEntry(comboScenario = 'combo-bce') {
+  const preset = COMBO_DEMO_PRESETS[comboScenario] || COMBO_DEMO_PRESETS['combo-bce'];
   const data = DIET_SCENARIOS[preset.food] || DIET_SCENARIOS.lunch;
   const entry = createDietCaptureGroup({ scenario: preset.food });
   entry.isNew = false;
   entry.displayScenario = comboScenario;
   entry.recognitionScenario = 'success';
-  entry.userContext = buildDietUserContext(data, {
-    daysWithRecord: preset.daysWithRecord ?? Math.max(data.daysWithRecord || 0, 7),
-    cycleData: preset.cycle ?? null,
-    todayFoodCount: preset.todayFoodCount,
-  });
+  entry.userContext = buildDietUserContext(data, preset.ctx);
+  if (preset.foodTags) {
+    entry.dietData.foodTags = preset.foodTags;
+  }
   return entry;
 }
 
 function DietFeedbackComboScenarioBar() {
-  const [value, setValue] = React.useState('combo-ab');
+  const [value, setValue] = React.useState('combo-bce');
 
   const handleSelect = (next) => {
     setValue(next);
@@ -613,7 +683,7 @@ function DietFeedbackComboScenarioBar() {
 
   return (
     <details className="demo-scene-dock demo-scene-dock-details is-dense">
-      <summary className="demo-scene-dock-summary">卡片组合（4）</summary>
+      <summary className="demo-scene-dock-summary">卡片组合示例（3）</summary>
       <div className="demo-scene-dock-options" role="toolbar" aria-label="饮食卡片组合场景">
         {DIET_FEEDBACK_COMBO_SCENARIOS.map((opt) => (
           <button
@@ -628,7 +698,7 @@ function DietFeedbackComboScenarioBar() {
           </button>
         ))}
       </div>
-      <p className="demo-scene-dock-hint">{COMBO_HINTS[value] || COMBO_HINTS['combo-ab']}</p>
+      <p className="demo-scene-dock-hint">{COMBO_HINTS[value] || COMBO_HINTS['combo-bce']}</p>
     </details>
   );
 }
@@ -648,9 +718,9 @@ function DietRecognitionScenarioBar() {
   };
 
   const hintByScenario = {
-    success: '拍照后正常识别并展示完整卡片',
-    timeout: '拍照后模拟识别超时，展示「AI识别遇到点小问题」与重试按钮',
-    'timeout-exhausted': '先超时并展示重试；点击一次重试失败后文案与按钮消失，仅保留照片',
+    success: '拍照后进度未走满即识别成功，直接发布到时间轴',
+    timeout: '拍照后模拟识别超时，展示重试与重拍',
+    'not-food': '拍照后识别为非食物，展示「没有检测到食物，重拍一张」',
   };
 
   return (
@@ -676,11 +746,11 @@ function DietRecognitionScenarioBar() {
 
 function DietFeedbackDisplayScenarioBar() {
   const [value, setValue] = React.useState(
-    () => readDietFeedbackDisplayScenario() || 'guide'
+    () => readDietFeedbackDisplayScenario() || 'dim-a'
   );
 
   React.useEffect(() => {
-    const onChange = () => setValue(readDietFeedbackDisplayScenario() || 'guide');
+    const onChange = () => setValue(readDietFeedbackDisplayScenario() || 'dim-a');
     window.addEventListener('dietFeedbackDisplayScenarioChange', onChange);
     return () => window.removeEventListener('dietFeedbackDisplayScenarioChange', onChange);
   }, []);
@@ -694,16 +764,16 @@ function DietFeedbackDisplayScenarioBar() {
   };
 
   const hintByScenario = {
-    guide: 'AI 可折叠标题 + 引导文案：再记录 N 天即可解锁趋势图',
-    trend: 'AI 区仅展示近 7 日热量趋势柱状图',
-    'day-total': 'AI 可折叠标题 + 当日汇总：今天已记录 N 餐，合计约 XXX kcal',
-    'day-total-trend': 'AI 区先展示趋势图，再展示当日汇总',
-    'day-total-trend-avg': 'AI 区先展示趋势图，再当日汇总，再 7 日均值',
+    'dim-a': '柱状图 + 今天饮食打卡 N 次，合计总热量千卡',
+    'dim-b': '柱状图 + 过去一周平均每天均值千卡',
+    'dim-c': '柱状图 + 这顿挺丰盛…相当于慢跑 N 分钟（按 5 分钟取整）',
+    'dim-d': '柱状图 + 经期吃冰品提示',
+    'dim-e': '柱状图 + 今日食物种类丰富提示',
   };
 
   return (
-    <div className="demo-scene-dock is-dense" role="toolbar" aria-label="维度B反馈展示场景切换">
-      <div className="demo-scene-dock-label">维度B反馈展示</div>
+    <div className="demo-scene-dock is-dense" role="toolbar" aria-label="反馈维度场景切换">
+      <div className="demo-scene-dock-label">反馈维度</div>
       <div className="demo-scene-dock-options">
         {DIET_FEEDBACK_DISPLAY_SCENARIOS.map((opt) => (
           <button
@@ -718,7 +788,7 @@ function DietFeedbackDisplayScenarioBar() {
           </button>
         ))}
       </div>
-      <p className="demo-scene-dock-hint">{hintByScenario[value] || hintByScenario.guide}</p>
+      <p className="demo-scene-dock-hint">{hintByScenario[value] || hintByScenario['dim-a']}</p>
     </div>
   );
 }
@@ -726,12 +796,13 @@ function DietFeedbackDisplayScenarioBar() {
 Object.assign(window, {
   createDietCaptureGroup,
   createDietTimeoutDemoEntry,
-  createDietTimeoutExhaustedDemoEntry,
+  createDietNotFoodDemoEntry,
   DIET_SCENARIOS,
   GALLERY_FALLBACK_PHOTOS,
   PHOTO_ANALYZE_LOADING_MS,
   DIET_RECOGNITION_MAX_FAILURES,
   getDietRecognitionMaxFailures,
+  getDietRecognitionAnalyzeMs,
   DIET_RECOGNITION_SCENARIOS,
   readDietRecognitionScenario,
   writeDietRecognitionScenario,
@@ -742,6 +813,7 @@ Object.assign(window, {
   tryCreateDietTextFeedbackEntry,
   DIET_FEEDBACK_DISPLAY_SCENARIOS,
   getDietFeedbackDisplayConfig,
+  normalizeDietFeedbackDisplayScenario,
   readDietFeedbackDisplayScenario,
   writeDietFeedbackDisplayScenario,
   createDietFeedbackDisplayDemoEntry,
