@@ -157,10 +157,9 @@ function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG})
   const num = parseFloat(value);
   const canSubmit = Number.isFinite(num) && num > 0;
   const display = value || '0';
-  const unitShort = unit === 'kg' ? 'kg' : '斤';
-  const submitLabel = canSubmit
-    ? `记录 · ${display} ${unitShort}`
-    : '记录';
+  const unitLabel = unit === 'kg' ? '公斤' : '斤';
+  const toggleUnitLabel = unit === 'kg' ? '切换为斤' : '切换为公斤';
+  const isPlaceholder = !value || display === '0';
 
   const selectUnit = (next)=>{
     if(next === unit) return;
@@ -172,37 +171,37 @@ function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG})
     setUnit(next);
   };
 
+  const toggleUnit = ()=>{
+    selectUnit(unit === 'kg' ? 'jin' : 'kg');
+  };
+
   return (
     <div className="dock-sheet dock-weight-sheet">
       <div className="dock-weight-head">
-        <span className="dock-weight-grab" aria-hidden="true"/>
-        <DockSheetClose onCancel={onCancel}/>
-      </div>
-
-      <div className="dock-weight-unit-seg" role="tablist" aria-label="体重单位">
+        <button type="button" className="dock-weight-cancel" onClick={onCancel}>取消</button>
+        <span className="dock-weight-title">体重</span>
         <button
           type="button"
-          role="tab"
-          aria-selected={unit === 'kg'}
-          className={'dock-weight-unit-opt'+(unit === 'kg' ? ' is-active' : '')}
-          onClick={()=>selectUnit('kg')}
+          className="dock-weight-confirm"
+          disabled={!canSubmit}
+          onClick={()=>canSubmit && onConfirm?.({ value: num, unit })}
         >
-          公斤 kg
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={unit === 'jin'}
-          className={'dock-weight-unit-opt'+(unit === 'jin' ? ' is-active' : '')}
-          onClick={()=>selectUnit('jin')}
-        >
-          斤
+          确定
         </button>
       </div>
 
-      <div className="dock-weight-display">
-        <span className="dock-weight-num">{display}</span>
-        <span className="dock-weight-unit">{unitShort}</span>
+      <div className="dock-weight-input-card">
+        <button
+          type="button"
+          className="dock-weight-unit-toggle"
+          onClick={toggleUnit}
+        >
+          {toggleUnitLabel}
+        </button>
+        <div className="dock-weight-display">
+          <span className={'dock-weight-num'+(isPlaceholder ? ' is-placeholder' : '')}>{display}</span>
+          <span className="dock-weight-unit">{unitLabel}</span>
+        </div>
       </div>
 
       <div className="dock-weight-keypad">
@@ -215,7 +214,7 @@ function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG})
             aria-label={key === '⌫' ? '删除' : key}
           >
             {key === '⌫' ? (
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <path d="M18 8H8a2 2 0 0 0-1.7 1l-3.3 5a1 1 0 0 0 0 1l3.3 5A2 2 0 0 0 8 20h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/>
                 <path d="m14 11-2 2 2 2M12 13h0"/>
               </svg>
@@ -223,12 +222,6 @@ function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG})
           </button>
         ))}
       </div>
-
-      <DockSheetFoot
-        disabled={!canSubmit}
-        label={submitLabel}
-        onSubmit={()=>canSubmit && onConfirm?.({ value: num, unit })}
-      />
     </div>
   );
 }
