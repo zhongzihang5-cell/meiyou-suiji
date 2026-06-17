@@ -1020,26 +1020,28 @@
   gap:6px;
 }
 .quick-weight-panel-top{
-  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   min-height:40px;
   padding:2px 0 4px;
   flex-shrink:0;
 }
 .quick-weight-unit-toggle{
-  position:absolute;
-  top:0;
-  right:0;
   appearance:none;
   border:0.5px solid rgba(0,0,0,0.1);
   background:#fff;
   border-radius:80px;
   padding:3px 8px;
+  margin-left:8px;
   font:inherit;
   font-size:11px;
   color:rgba(0,0,0,0.42);
   cursor:pointer;
   line-height:1.29;
   white-space:nowrap;
+  flex-shrink:0;
+  align-self:center;
 }
 .quick-weight-unit-toggle:active{background:#fafafa}
 .quick-weight-panel-display{
@@ -1047,7 +1049,7 @@
   align-items:baseline;
   justify-content:center;
   gap:4px;
-  width:100%;
+  max-width:100%;
 }
 .quick-weight-panel-num{
   font-size:28px;

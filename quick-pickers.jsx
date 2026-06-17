@@ -195,12 +195,12 @@ function QuickWeightPicker({ onSubmit }){
   return (
     <div className="quick-weight-panel">
       <div className="quick-weight-panel-top">
-        <button type="button" className="quick-weight-unit-toggle" onClick={w.toggleUnit}>
-          {w.toggleUnitLabel}
-        </button>
         <div className="quick-weight-panel-display">
           <span className={'quick-weight-panel-num'+(w.isPlaceholder ? ' is-placeholder' : '')}>{w.display}</span>
           <span className="quick-weight-panel-unit">{w.unitLabel}</span>
+          <button type="button" className="quick-weight-unit-toggle" onClick={w.toggleUnit}>
+            {w.toggleUnitLabel}
+          </button>
         </div>
       </div>
       <div className="quick-weight-panel-grid">
