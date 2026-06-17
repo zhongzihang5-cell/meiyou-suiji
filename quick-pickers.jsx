@@ -31,7 +31,6 @@ const SYMPTOM_SECTIONS = [
 
 const SYMPTOM_OPTIONS = SYMPTOM_SECTIONS.flatMap(s=>s.items);
 
-const WEIGHT_KEYS = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
 const WEIGHT_BASELINE_KG = 52.3;
 
 function toWeightKg(value, unit){
@@ -132,8 +131,8 @@ function DockSymptomPicker({onConfirm, onCancel}){
   );
 }
 
-function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG}){
-  const [value, setValue] = React.useState(String(initialKg));
+function useWeightInput(){
+  const [value, setValue] = React.useState('');
   const [unit, setUnit] = React.useState('kg');
 
   const pressKey = (key)=>{
@@ -147,19 +146,12 @@ function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG})
       return;
     }
     setValue(v=>{
-      if(v === '0') return key;
+      if(!v || v === '0') return key;
       if(v.includes('.') && v.split('.')[1]?.length >= 2) return v;
       if(!v.includes('.') && v.length >= 3) return v;
       return v + key;
     });
   };
-
-  const num = parseFloat(value);
-  const canSubmit = Number.isFinite(num) && num > 0;
-  const display = value || '0';
-  const unitLabel = unit === 'kg' ? '公斤' : '斤';
-  const toggleUnitLabel = unit === 'kg' ? '切换为斤' : '切换为公斤';
-  const isPlaceholder = !value || display === '0';
 
   const selectUnit = (next)=>{
     if(next === unit) return;
@@ -171,59 +163,86 @@ function DockWeightPicker({onConfirm, onCancel, initialKg = WEIGHT_BASELINE_KG})
     setUnit(next);
   };
 
-  const toggleUnit = ()=>{
-    selectUnit(unit === 'kg' ? 'jin' : 'kg');
+  const num = parseFloat(value);
+  const canSubmit = Number.isFinite(num) && num > 0;
+  const display = value || '0';
+
+  return {
+    value, unit, pressKey, selectUnit, num, canSubmit, display,
+    unitLabel: unit === 'kg' ? '公斤' : '斤',
+    toggleUnitLabel: unit === 'kg' ? '切换为斤' : '切换为公斤',
+    isPlaceholder: !value || display === '0',
+    toggleUnit: ()=>selectUnit(unit === 'kg' ? 'jin' : 'kg'),
+  };
+}
+
+function WeightKeypadConfirmIcon(){
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12.5 9.5 17 19 7"/>
+    </svg>
+  );
+}
+
+function QuickWeightPicker({ onSubmit }){
+  const w = useWeightInput();
+
+  const submit = ()=>{
+    if(!w.canSubmit) return;
+    onSubmit?.({ value: w.num, unit: w.unit });
   };
 
   return (
-    <div className="dock-sheet dock-weight-sheet">
-      <div className="dock-weight-head">
-        <button type="button" className="dock-weight-cancel" onClick={onCancel}>取消</button>
-        <span className="dock-weight-title">体重</span>
-        <button
-          type="button"
-          className="dock-weight-confirm"
-          disabled={!canSubmit}
-          onClick={()=>canSubmit && onConfirm?.({ value: num, unit })}
-        >
-          确定
+    <div className="quick-weight-panel">
+      <div className="quick-weight-panel-top">
+        <button type="button" className="quick-weight-unit-toggle" onClick={w.toggleUnit}>
+          {w.toggleUnitLabel}
         </button>
-      </div>
-
-      <div className="dock-weight-input-card">
-        <button
-          type="button"
-          className="dock-weight-unit-toggle"
-          onClick={toggleUnit}
-        >
-          {toggleUnitLabel}
-        </button>
-        <div className="dock-weight-display">
-          <span className={'dock-weight-num'+(isPlaceholder ? ' is-placeholder' : '')}>{display}</span>
-          <span className="dock-weight-unit">{unitLabel}</span>
+        <div className="quick-weight-panel-display">
+          <span className={'quick-weight-panel-num'+(w.isPlaceholder ? ' is-placeholder' : '')}>{w.display}</span>
+          <span className="quick-weight-panel-unit">{w.unitLabel}</span>
         </div>
       </div>
-
-      <div className="dock-weight-keypad">
-        {WEIGHT_KEYS.map((key)=>(
+      <div className="quick-weight-panel-grid">
+        {['1','2','3','4','5','6','7','8','9'].map((key)=>(
           <button
             key={key}
             type="button"
-            className={'dock-weight-key'+(key === '⌫' ? ' is-fn' : '')}
-            onClick={()=>pressKey(key)}
-            aria-label={key === '⌫' ? '删除' : key}
+            className="quick-weight-panel-key"
+            data-key={key}
+            onClick={()=>w.pressKey(key)}
           >
-            {key === '⌫' ? (
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M18 8H8a2 2 0 0 0-1.7 1l-3.3 5a1 1 0 0 0 0 1l3.3 5A2 2 0 0 0 8 20h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/>
-                <path d="m14 11-2 2 2 2M12 13h0"/>
-              </svg>
-            ) : key}
+            {key}
           </button>
         ))}
+        <button type="button" className="quick-weight-panel-key" data-key="dot" onClick={()=>w.pressKey('.')}>.</button>
+        <button type="button" className="quick-weight-panel-key" data-key="0" onClick={()=>w.pressKey('0')}>0</button>
+        <button
+          type="button"
+          className="quick-weight-panel-key is-delete"
+          data-key="delete"
+          onClick={()=>w.pressKey('⌫')}
+          aria-label="删除"
+        >
+          ×
+        </button>
+        <button
+          type="button"
+          className="quick-weight-panel-key is-confirm"
+          disabled={!w.canSubmit}
+          onClick={submit}
+          aria-label="记录"
+        >
+          <WeightKeypadConfirmIcon/>
+        </button>
       </div>
     </div>
   );
+}
+
+/** @deprecated 扇形内联已用 QuickWeightPicker，保留兼容旧 dock 引用 */
+function DockWeightPicker({onConfirm}){
+  return <QuickWeightPicker onSubmit={onConfirm}/>;
 }
 
 function createSymptomRecordEntry(symptoms){
@@ -471,29 +490,6 @@ function QuickSymptomPicker({ onSubmit }) {
         onClick={()=>picked.length > 0 && onSubmit?.(picked)}
       >
         {picked.length ? `记录 ${picked.length} 项` : '选择后记录'}
-      </button>
-    </div>
-  );
-}
-
-function QuickWeightPicker({ onSubmit, current = WEIGHT_BASELINE_KG }) {
-  const [w, setW] = React.useState(current);
-  const step = (d)=> setW(v=>Math.max(20, Math.min(150, +(v + d).toFixed(1))));
-  const deltaHint = formatWeightDelta(w);
-
-  return (
-    <div className="quick-card-picker quick-card-picker--weight">
-      <div className="quick-card-weight-stepper">
-        <button type="button" className="quick-card-weight-btn" onClick={()=>step(-0.1)} aria-label="减少">−</button>
-        <div className="quick-card-weight-val">
-          <span className="quick-card-weight-num">{w.toFixed(1)}</span>
-          <span className="quick-card-weight-unit">kg</span>
-        </div>
-        <button type="button" className="quick-card-weight-btn" onClick={()=>step(0.1)} aria-label="增加">+</button>
-      </div>
-      <p className="quick-card-weight-hint">{deltaHint}</p>
-      <button type="button" className="quick-card-submit" onClick={()=>onSubmit?.({ value: w, unit: 'kg' })}>
-        记录
       </button>
     </div>
   );
