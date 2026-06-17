@@ -89,12 +89,11 @@ function DockWavePlaceholder({show, focused}){
 }
 
 function QuickCardFan({
-  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onDietPick, onClose,
-  onSymptomSubmit, onWeightSubmit, onFoodSubmit,
+  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onWeightPick, onDietPick, onClose,
+  onSymptomSubmit, onFoodSubmit,
 }){
   const QuickCardIcon = window.QuickCardIcon;
   const QuickSymptomPicker = window.QuickSymptomPicker;
-  const QuickWeightPicker = window.QuickWeightPicker;
   const QuickFoodPicker = window.QuickFoodPicker;
   const [closing, setClosing] = React.useState(false);
   const wasOpenRef = React.useRef(false);
@@ -159,11 +158,15 @@ function QuickCardFan({
                   e.preventDefault();
                   e.stopPropagation();
                   onMoodPick?.();
+                } else if(card.id === 'weight'){
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onWeightPick?.();
                 }
               }}
               onClick={()=>{
                 if(!open || selected) return;
-                if(card.id !== 'mood' && card.id !== 'diet') onSelectCard(card.id);
+                if(card.id !== 'mood' && card.id !== 'diet' && card.id !== 'weight') onSelectCard(card.id);
               }}
               aria-label={card.label}
               tabIndex={open && !selected ? 0 : -1}
@@ -186,8 +189,6 @@ function QuickCardFan({
                   <QuickSymptomPicker onSubmit={onSymptomSubmit}/>
                 ) : card.id === 'diet' ? (
                   <QuickFoodPicker onSubmit={onFoodSubmit}/>
-                ) : card.id === 'weight' ? (
-                  <QuickWeightPicker onSubmit={onWeightSubmit}/>
                 ) : null}
               </div>
             </div>
@@ -222,14 +223,12 @@ function DockPublisher({
   const DockWeightPicker = window.DockWeightPicker;
   const CameraTransition = window.CameraTransition;
   const QuickCardIcon = window.QuickCardIcon;
-  const QuickMenuPathFlyout = window.QuickMenuPathFlyout;
   const measureElementRect = window.measureElementRect;
   const [inputMode, setInputMode] = React.useState(defaultInputMode);
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [quickSelected, setQuickSelected] = React.useState(null);
   const [closingToMood, setClosingToMood] = React.useState(false);
   const [moodPickerOpen, setMoodPickerOpen] = React.useState(false);
-  const [pathFlyoutOpen, setPathFlyoutOpen] = React.useState(false);
   const [dockSheet, setDockSheet] = React.useState(null);
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
@@ -281,6 +280,12 @@ function DockPublisher({
     window.setTimeout(()=> setClosingToMood(false), 260);
   };
 
+  const handleWeightFanTap = ()=>{
+    setQuickOpen(false);
+    setQuickSelected(null);
+    setDockSheet('weight');
+  };
+
   const closeMoodPicker = ()=>{
     setMoodPickerOpen(false);
     setClosingToMood(false);
@@ -329,11 +334,6 @@ function DockPublisher({
     onSymptomConfirm?.(symptoms);
   };
 
-  const handleQuickWeightSubmit = (payload)=>{
-    closeQuick();
-    onWeightConfirm?.(payload);
-  };
-
   const handleQuickFoodSubmit = (foods)=>{
     closeQuick();
     onFoodConfirm?.(foods);
@@ -352,17 +352,6 @@ function DockPublisher({
   const handleWeightConfirm = (payload)=>{
     setDockSheet(null);
     onWeightConfirm?.(payload);
-  };
-
-  const handlePathSelect = (id)=>{
-    closeQuick();
-    if(id === 'mood'){
-      setMoodPickerOpen(true);
-      return;
-    }
-    if(id === 'weight' || id === 'symptom'){
-      setDockSheet(id);
-    }
   };
 
   const handleDietFanTap = (buttonEl)=>{
@@ -392,8 +381,8 @@ function DockPublisher({
   };
 
   React.useEffect(()=>{
-    onDockExpandedChange?.(!!dockSheet || !!quickSelected || pathFlyoutOpen);
-  }, [dockSheet, quickSelected, pathFlyoutOpen, onDockExpandedChange]);
+    onDockExpandedChange?.(!!dockSheet || !!quickSelected);
+  }, [dockSheet, quickSelected, onDockExpandedChange]);
 
   const isDockExpanded = !!dockSheet;
   const isQuickActive = quickOpen || !!quickSelected;
@@ -410,10 +399,10 @@ function DockPublisher({
           onFabTap={handleFabTap}
           onSelectCard={setQuickSelected}
           onMoodPick={handleMoodFanTap}
+          onWeightPick={handleWeightFanTap}
           onDietPick={handleDietFanTap}
           onClose={closeQuick}
           onSymptomSubmit={handleQuickSymptomSubmit}
-          onWeightSubmit={handleQuickWeightSubmit}
           onFoodSubmit={handleQuickFoodSubmit}
         />
       </div>
@@ -552,14 +541,6 @@ function DockPublisher({
                 <button type="button" className="dock-send-btn" onClick={onSend} aria-label="发送">
                   <I name="send" size={16} stroke={2}/>
                 </button>
-              ) : null}
-
-              {QuickMenuPathFlyout ? (
-                <QuickMenuPathFlyout
-                  onSelectItem={handlePathSelect}
-                  onDietClick={handleDietFanTap}
-                  onOpenChange={setPathFlyoutOpen}
-                />
               ) : null}
             </div>
 
