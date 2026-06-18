@@ -15,7 +15,7 @@
  *   meiyou-record-standalone.html
  *
  * Outputs (docs/ — for GitHub Pages):
- *   index.html    入口页，链到各场景/方案
+ *   index.html    主应用（note-quick-record，直达演示）
  *   scene1.html   场景一
  *   scene2.html   场景二
  *   scene3-1.html 场景三 · 方案一
@@ -49,7 +49,17 @@ const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const inlineStyleMatch = indexHtml.match(/<style>([\s\S]*?)<\/style>/);
 const inlineStyles = inlineStyleMatch ? inlineStyleMatch[1] : '';
 
-const cssFiles = ['cloud.css', 'timeline.css', 'calendar.css', 'record-empty.css', 'record-blank.css', 'search.css', 'voice-transcribe.css'];
+const cssFiles = [
+  'cloud.css',
+  'timeline.css',
+  'calendar.css',
+  'record-empty.css',
+  'record-blank.css',
+  'search.css',
+  'voice-transcribe.css',
+  'diet-feedback.css',
+  'camera-diet.css',
+];
 const css = cssFiles
   .map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8'))
   .join('\n\n');
@@ -75,10 +85,17 @@ const scriptFiles = [
   'voice-transcribe-interludes.jsx',
   'voice-transcribe-async.jsx',
   'voice-transcribe-demo.jsx',
+  'IOSFrame.jsx',
+  'camera-transition.jsx',
+  'diet-feedback-card.jsx',
+  'diet-feedback.jsx',
+  'path-flyout.jsx',
   'demo-scenes.jsx',
   'tweaks-panel.jsx',
   'app.jsx',
 ];
+
+const tabbarIconsScript = fs.readFileSync(path.join(ROOT, 'tabbar-icons.js'), 'utf8');
 
 const scripts = scriptFiles.map((f) => {
   let content = fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -137,6 +154,8 @@ const BUILDS = [
   {
     outfile: 'meiyou-scene4-note-quick-record.html',
     pagesName: 'scene4.html',
+    alsoWriteIndex: true,
+    indexTitle: '美柚 · 记录',
     title: '美柚 · 场景四 · 记录心情反馈',
     demoScene: 'note-quick-record',
     locked: true,
@@ -231,148 +250,6 @@ const BUILDS = [
     comment: '三场景合一版（含底部场景切换栏，适合桌面预览）',
   },
 ];
-
-function buildLandingPage(builtAt) {
-  return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>美柚 · 记录演示</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    font-family:"PingFang SC",-apple-system,sans-serif;
-    background:#f2f2f5;color:#323232;
-    min-height:100vh;min-height:100dvh;
-    padding:32px 20px calc(env(safe-area-inset-bottom, 20px) + 32px);
-    display:flex;flex-direction:column;align-items:center;
-  }
-  .wrap{width:100%;max-width:420px}
-  h1{font-size:22px;font-weight:500;margin-bottom:6px}
-  .hint{font-size:14px;color:#666;line-height:1.5;margin-bottom:8px}
-  .url{
-    font-size:12px;color:#8e8e93;line-height:1.45;margin-bottom:24px;
-    word-break:break-all;
-  }
-  .cards{display:flex;flex-direction:column;gap:12px}
-  .section-label{
-    font-size:13px;color:#8e8e93;font-weight:500;
-    margin:4px 0 -4px;padding-left:2px;
-  }
-  a.card{
-    display:block;text-decoration:none;color:inherit;
-    background:#fff;border-radius:12px;padding:18px 16px;
-    box-shadow:0 2px 10px rgba(50,50,50,0.06);
-    border:0.5px solid rgba(0,0,0,0.04);
-    -webkit-tap-highlight-color:transparent;
-  }
-  a.card:active{opacity:0.92;transform:scale(0.99)}
-  .card-title{font-size:16px;font-weight:500;margin-bottom:4px}
-  .card-desc{font-size:13px;color:#8e8e93;line-height:1.45}
-  .go{
-    display:inline-block;margin-top:12px;font-size:13px;font-weight:500;
-    color:#ff4d88;
-  }
-  footer{margin-top:28px;font-size:11px;color:#c8c8cc;line-height:1.5}
-</style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>美柚 · 记录演示</h1>
-    <p class="hint">先在这里选场景，再进入演示。建议用 Safari 打开并添加到主屏幕，全屏效果更好。</p>
-    <p class="url">入口地址：zhongzihang5-cell.github.io/meiyou-suiji/</p>
-    <div class="cards">
-      <a class="card" href="./scene1.html">
-        <div class="card-title">场景一 · 日历记月经</div>
-        <div class="card-desc">默认日历页，记录「月经来了」后弹出分析，点击进入周期分析。</div>
-        <span class="go">进入场景一 →</span>
-      </a>
-      <a class="card" href="./scene2.html">
-        <div class="card-title">场景二 · 未记录运营引导</div>
-        <div class="card-desc">新用户首次进入记录 Tab，运营 landing 引导 +「记一切」演示动效。</div>
-        <span class="go">进入场景二 →</span>
-      </a>
-      <p class="section-label">场景三 · 未记录时间轴</p>
-      <a class="card" href="./scene3-1.html">
-        <div class="card-title">方案一 · 空白时间轴</div>
-        <div class="card-desc">居中极简空态，粉色箭头指向快捷记录入口。</div>
-        <span class="go">进入方案一 →</span>
-      </a>
-      <a class="card" href="./scene3-2.html">
-        <div class="card-title">方案二 · 示例蒙层</div>
-        <div class="card-desc">两条示例记录 + 半透明蒙层，预览时间轴长什么样。</div>
-        <span class="go">进入方案二 →</span>
-      </a>
-      <a class="card" href="./scene3-3.html">
-        <div class="card-title">方案三 · 生长引导</div>
-        <div class="card-desc">时间轴生长动画 + 能力卡片，引导用户开始记录。</div>
-        <span class="go">进入方案三 →</span>
-      </a>
-      <a class="card" href="./scene4.html">
-        <div class="card-title">场景四 · 记录心情反馈</div>
-        <div class="card-desc">首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈。</div>
-        <span class="go">进入场景四 →</span>
-      </a>
-      <p class="section-label">场景五 · 语音转文字</p>
-      <a class="card" href="./scene5-1.html">
-        <div class="card-title">方案一 · 落入</div>
-        <div class="card-desc">按住说话，字符直接流入时间轴底部实时转写卡。</div>
-        <span class="go">进入方案一 →</span>
-      </a>
-      <a class="card" href="./scene5-2.html">
-        <div class="card-title">方案二 · 气泡</div>
-        <div class="card-desc">输入条上方对话气泡实时转写，松手飞入时间轴。</div>
-        <span class="go">进入方案二 →</span>
-      </a>
-      <a class="card" href="./scene5-3.html">
-        <div class="card-title">方案三 · 顶起</div>
-        <div class="card-desc">从输入条向上撑起转写面板，松手面板退下、卡片落入。</div>
-        <span class="go">进入方案三 →</span>
-      </a>
-      <a class="card" href="./scene5-4.html">
-        <div class="card-title">方案四 · 悬浮</div>
-        <div class="card-desc">无边框悬浮文字 + AI 锚点，多层光晕保证可读。</div>
-        <span class="go">进入方案四 →</span>
-      </a>
-      <p class="section-label">场景五 · 异步转写（松手后）</p>
-      <a class="card" href="./scene5-5.html">
-        <div class="card-title">方案五 · 静默</div>
-        <div class="card-desc">按住：轻点脉冲；松手：稳定打字机 + 句尾语音跳动线。</div>
-        <span class="go">进入方案五 →</span>
-      </a>
-      <a class="card" href="./scene5-6.html">
-        <div class="card-title">方案六 · 声波成文</div>
-        <div class="card-desc">按住：钉钉式波形；松手：逐字落下 + 句尾语音跳动线。</div>
-        <span class="go">进入方案六 →</span>
-      </a>
-      <a class="card" href="./scene5-7.html">
-        <div class="card-title">方案七 · 流光</div>
-        <div class="card-desc">按住：呼吸光球；松手：流光点亮逐字 + 句尾语音跳动线。</div>
-        <span class="go">进入方案七 →</span>
-      </a>
-      <a class="card" href="./scene5-8.html">
-        <div class="card-title">方案八 · 聚焦显影</div>
-        <div class="card-desc">按住：磨砂波形扫光；松手：虚影逐字显影 + 句尾语音跳动线。</div>
-        <span class="go">进入方案八 →</span>
-      </a>
-      <a class="card" href="./scene5-9.html">
-        <div class="card-title">方案九 · 底栏转录</div>
-        <div class="card-desc">松手后底栏显示「正在转录」，时间轴直接打字机；相机保留右下角。</div>
-        <span class="go">进入方案九 →</span>
-      </a>
-      <a class="card" href="./scene5-10.html">
-        <div class="card-title">方案十 · 思考流</div>
-        <div class="card-desc">按住：聆听声波环；松手：快速流式吐字 + 句尾语音跳动线。</div>
-        <span class="go">进入方案十 →</span>
-      </a>
-    </div>
-    <footer>构建 ${builtAt}<br>微信内若无法加载，点右上角 ··· 用 Safari 打开</footer>
-  </div>
-</body>
-</html>`;
-}
 
 function buildRedirectPage(target, label) {
   const safeTarget = target.replace(/"/g, '&quot;');
@@ -474,6 +351,10 @@ ${lockedScript}
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
+<script>
+${tabbarIconsScript}
+</script>
+
 ${scripts.join('\n\n')}
 
 </body>
@@ -492,16 +373,41 @@ BUILDS.forEach((cfg) => {
   const kb = (Buffer.byteLength(html, 'utf8') / 1024).toFixed(1);
   console.log(`Wrote ${outPath} (${kb} KB)`);
 
-  if(cfg.pagesName){
+  if (cfg.pagesName) {
     const pagesPath = path.join(DOCS, cfg.pagesName);
     fs.writeFileSync(pagesPath, html, 'utf8');
     console.log(`Wrote ${pagesPath} (${kb} KB)`);
   }
+
+  if (cfg.alsoWriteIndex) {
+    const indexHtml = buildHtml({
+      ...cfg,
+      title: cfg.indexTitle || cfg.title,
+      builtAt,
+    });
+    const indexPath = path.join(DOCS, 'index.html');
+    fs.writeFileSync(indexPath, indexHtml, 'utf8');
+    const indexKb = (Buffer.byteLength(indexHtml, 'utf8') / 1024).toFixed(1);
+    console.log(`Wrote ${indexPath} (${indexKb} KB)`);
+  }
 });
 
-const landingPath = path.join(DOCS, 'index.html');
-fs.writeFileSync(landingPath, buildLandingPage(builtAt), 'utf8');
-console.log(`Wrote ${landingPath}`);
+function copyDirSync(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) copyDirSync(srcPath, destPath);
+    else fs.copyFileSync(srcPath, destPath);
+  }
+}
+
+const assetsSrc = path.join(ROOT, 'assets');
+const assetsDest = path.join(DOCS, 'assets');
+if (fs.existsSync(assetsSrc)) {
+  copyDirSync(assetsSrc, assetsDest);
+  console.log(`Copied assets → ${assetsDest}`);
+}
 
 fs.writeFileSync(
   path.join(DOCS, 'scene3.html'),
