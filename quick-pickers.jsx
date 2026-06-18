@@ -31,7 +31,18 @@ const SYMPTOM_SECTIONS = [
 
 const SYMPTOM_OPTIONS = SYMPTOM_SECTIONS.flatMap(s=>s.items);
 
-const WEIGHT_KEYS = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
+const WEIGHT_BASELINE_KG = 52.3;
+
+function toWeightKg(value, unit){
+  return unit === 'jin' ? value / 2 : value;
+}
+
+function formatWeightDelta(currentKg, baselineKg = WEIGHT_BASELINE_KG){
+  const delta = +(currentKg - baselineKg).toFixed(1);
+  if(delta === 0) return '与上次持平';
+  const arrow = delta < 0 ? '↓' : '↑';
+  return `比上次 ${arrow} ${Math.abs(delta).toFixed(1)}kg`;
+}
 
 function DockSheetFoot({disabled, onSubmit, label}){
   return (
@@ -120,7 +131,7 @@ function DockSymptomPicker({onConfirm, onCancel}){
   );
 }
 
-function DockWeightPicker({onConfirm, onCancel}){
+function useWeightInput(){
   const [value, setValue] = React.useState('');
   const [unit, setUnit] = React.useState('kg');
 
@@ -135,61 +146,103 @@ function DockWeightPicker({onConfirm, onCancel}){
       return;
     }
     setValue(v=>{
-      if(v === '0') return key;
-      if(v.includes('.') && v.split('.')[1]?.length >= 1) return v;
-      if(!v.includes('.') && v.replace('.','').length >= 3) return v;
+      if(!v || v === '0') return key;
+      if(v.includes('.') && v.split('.')[1]?.length >= 2) return v;
+      if(!v.includes('.') && v.length >= 3) return v;
       return v + key;
     });
+  };
+
+  const selectUnit = (next)=>{
+    if(next === unit) return;
+    const n = parseFloat(value);
+    if(Number.isFinite(n) && n > 0){
+      const converted = next === 'jin' ? (n * 2) : (n / 2);
+      setValue(String(+converted.toFixed(2)));
+    }
+    setUnit(next);
   };
 
   const num = parseFloat(value);
   const canSubmit = Number.isFinite(num) && num > 0;
   const display = value || '0';
-  const unitLabel = unit === 'kg' ? '公斤' : '斤';
+
+  return {
+    value, unit, pressKey, selectUnit, num, canSubmit, display,
+    unitLabel: unit === 'kg' ? '公斤' : '斤',
+    toggleUnitLabel: unit === 'kg' ? '切换为斤' : '切换为公斤',
+    isPlaceholder: !value || display === '0',
+    toggleUnit: ()=>selectUnit(unit === 'kg' ? 'jin' : 'kg'),
+  };
+}
+
+function WeightKeypadConfirmIcon(){
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12.5 9.5 17 19 7"/>
+    </svg>
+  );
+}
+
+function QuickWeightPicker({ onSubmit }){
+  const w = useWeightInput();
+
+  const submit = ()=>{
+    if(!w.canSubmit) return;
+    onSubmit?.({ value: w.num, unit: w.unit });
+  };
 
   return (
-    <div className="dock-sheet dock-weight-sheet">
-      <div className="dock-weight-top">
-        <p className="dock-sheet-lead">今天体重多少？</p>
-        <DockSheetClose onCancel={onCancel}/>
-      </div>
-      <div className="dock-weight-display-wrap">
-        <button
-          type="button"
-          className="dock-weight-unit-toggle"
-          onClick={()=>setUnit(u=>(u === 'kg' ? 'jin' : 'kg'))}
-        >
-          切换为{unit === 'kg' ? '斤' : '公斤'}
-        </button>
-        <div className="dock-weight-display">
-          <span className="dock-weight-num">{display}</span>
-          <span className="dock-weight-unit">{unitLabel}</span>
+    <div className="quick-weight-panel">
+      <div className="quick-weight-panel-top">
+        <div className="quick-weight-panel-display">
+          <span className={'quick-weight-panel-num'+(w.isPlaceholder ? ' is-placeholder' : '')}>{w.display}</span>
+          <span className="quick-weight-panel-unit">{w.unitLabel}</span>
+          <button type="button" className="quick-weight-unit-toggle" onClick={w.toggleUnit}>
+            {w.toggleUnitLabel}
+          </button>
         </div>
       </div>
-      <div className="dock-weight-keypad">
-        {WEIGHT_KEYS.map((key)=>(
+      <div className="quick-weight-panel-grid">
+        {['1','2','3','4','5','6','7','8','9'].map((key)=>(
           <button
             key={key}
             type="button"
-            className={'dock-weight-key'+(key === '⌫' ? ' is-fn' : '')}
-            onClick={()=>pressKey(key)}
-            aria-label={key === '⌫' ? '删除' : key}
+            className="quick-weight-panel-key"
+            data-key={key}
+            onClick={()=>w.pressKey(key)}
           >
-            {key === '⌫' ? (
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M18 8H8a2 2 0 0 0-1.7 1l-3.3 5a1 1 0 0 0 0 1l3.3 5A2 2 0 0 0 8 20h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/>
-                <path d="m14 11-2 2 2 2M12 13h0"/>
-              </svg>
-            ) : key}
+            {key}
           </button>
         ))}
+        <button type="button" className="quick-weight-panel-key" data-key="dot" onClick={()=>w.pressKey('.')}>.</button>
+        <button type="button" className="quick-weight-panel-key" data-key="0" onClick={()=>w.pressKey('0')}>0</button>
+        <button
+          type="button"
+          className="quick-weight-panel-key is-delete"
+          data-key="delete"
+          onClick={()=>w.pressKey('⌫')}
+          aria-label="删除"
+        >
+          ×
+        </button>
+        <button
+          type="button"
+          className="quick-weight-panel-key is-confirm"
+          disabled={!w.canSubmit}
+          onClick={submit}
+          aria-label="记录"
+        >
+          <WeightKeypadConfirmIcon/>
+        </button>
       </div>
-      <DockSheetFoot
-        disabled={!canSubmit}
-        onSubmit={()=>canSubmit && onConfirm?.({ value: num, unit })}
-      />
     </div>
   );
+}
+
+/** @deprecated 扇形内联已用 QuickWeightPicker，保留兼容旧 dock 引用 */
+function DockWeightPicker({onConfirm}){
+  return <QuickWeightPicker onSubmit={onConfirm}/>;
 }
 
 function createSymptomRecordEntry(symptoms){
@@ -205,20 +258,162 @@ function createSymptomRecordEntry(symptoms){
   };
 }
 
-function createWeightRecordEntry({value, unit}){
-  const unitLabel = unit === 'jin' ? '斤' : 'kg';
-  const text = unit === 'jin'
-    ? `${value}斤`
-    : `${value}kg`;
+function formatWeightValueText(value, unit){
+  const text = String(value);
+  return unit === 'jin' ? `${text}斤` : `${text}公斤`;
+}
+
+function buildWeightAnalysisNote(value, unit){
+  const todayKg = toWeightKg(value, unit);
+  const yesterdayKg = todayKg + 0.5;
+  const tailBase = '属正常波动，黄体期受孕激素影响身体容易潴留水分。';
+
+  if(unit === 'jin'){
+    const deltaJin = +(value - yesterdayKg * 2).toFixed(1);
+    if(Math.abs(deltaJin) < 0.05){
+      return {
+        prefix: '比昨天持平，变化',
+        delta: '',
+        emphasize: false,
+        tail: `${tailBase}`,
+      };
+    }
+    const sign = deltaJin > 0 ? '+' : '-';
+    const trend = deltaJin > 0 ? '上升' : '下降';
+    return {
+      prefix: '比昨天 ',
+      delta: `${sign}${Math.abs(deltaJin).toFixed(1)} 斤`,
+      emphasize: deltaJin < 0,
+      tail: `，${trend}${tailBase}`,
+    };
+  }
+
+  const deltaKg = +(todayKg - yesterdayKg).toFixed(1);
+  if(Math.abs(deltaKg) < 0.05){
+    return {
+      prefix: '比昨天持平，变化',
+      delta: '',
+      emphasize: false,
+      tail: tailBase,
+    };
+  }
+  const sign = deltaKg > 0 ? '+' : '-';
+  const trend = deltaKg > 0 ? '上升' : '下降';
   return {
-    id:'e-'+Date.now(),
-    kind:'rec',
-    time: window.formatNowTime(),
-    body:'',
-    tags:[{ label:'体重 '+text, cat:'weight', emoji:'⚖️' }],
-    tagLayout:'t5',
-    isNew: true,
+    prefix: '比昨天 ',
+    delta: `${sign}${Math.abs(deltaKg).toFixed(1)} 公斤`,
+    emphasize: deltaKg < 0,
+    tail: `，${trend}${tailBase}`,
   };
+}
+
+function buildWeightWeekChartData(todayKg, unit){
+  const days = ['周六','周日','周一','周二','周三','周四','今天'];
+  const offsets = [0.5, -0.3, -0.1, 0.2, 1.1, 0.5, 0];
+  return days.map((d, i) => {
+    let v = todayKg + offsets[i];
+    if(unit === 'jin') v = v * 2;
+    return {
+      d,
+      v: +v.toFixed(1),
+      isToday: i === days.length - 1,
+    };
+  });
+}
+
+function parseWeightFromText(text){
+  const raw = String(text || '').trim();
+  if(!raw) return null;
+
+  const labeled = raw.match(/体重\s*[:：]?\s*(\d+(?:\.\d+)?)\s*(kg|kgs|公斤|千克|斤)?/i);
+  if(labeled){
+    const value = parseFloat(labeled[1]);
+    if(!Number.isFinite(value) || value <= 0) return null;
+    const unitToken = (labeled[2] || '').toLowerCase();
+    const unit = unitToken === '斤' ? 'jin' : 'kg';
+    return { value, unit, text: raw };
+  }
+
+  const bare = raw.match(/(\d+(?:\.\d+)?)\s*(kg|kgs|公斤|千克|斤)\b/i);
+  if(bare){
+    const value = parseFloat(bare[1]);
+    if(!Number.isFinite(value) || value <= 0) return null;
+    const unitToken = bare[2].toLowerCase();
+    const unit = unitToken === '斤' ? 'jin' : 'kg';
+    return { value, unit, text: raw };
+  }
+
+  return null;
+}
+
+function buildWeightAiBlock(value, unit){
+  const todayKg = toWeightKg(value, unit);
+  const gid = 'e-'+Date.now();
+  const time = window.formatNowTime();
+  return {
+    id:gid+'-ai',
+    time,
+    kind:'chart',
+    chartType:'weightTrend',
+    title:'近7日体重趋势',
+    chartData: buildWeightWeekChartData(todayKg, unit),
+    weightUnit: unit,
+    noteParts: buildWeightAnalysisNote(value, unit),
+  };
+}
+
+function createWeightRecordEntry({value, unit}){
+  const gid = 'e-'+Date.now();
+  const time = window.formatNowTime();
+  return {
+    kind:'record-group',
+    id:gid+'-g',
+    isNew: true,
+    weightSource:'quick',
+    primary:{
+      id:gid,
+      time,
+      kind:'weight',
+      text:'',
+      weightLabel:'体重',
+      weightValue:formatWeightValueText(value, unit),
+      weightUnit:unit,
+      tags:[],
+    },
+    ai: buildWeightAiBlock(value, unit),
+    aiDefaultOpen:true,
+  };
+}
+
+function createWeightRecordEntryFromText(text, opts = {}){
+  const parsed = parseWeightFromText(text);
+  if(!parsed) return null;
+  const gid = 'e-'+Date.now();
+  const time = window.formatNowTime();
+  const valText = formatWeightValueText(parsed.value, parsed.unit);
+  return {
+    kind:'record-group',
+    id:gid+'-g',
+    isNew: true,
+    weightSource:'text',
+    primary:{
+      id:gid,
+      time,
+      kind:'weight-text',
+      text: parsed.text,
+      weightLabel:'体重',
+      weightValue: valText,
+      weightUnit: parsed.unit,
+      tags:[{ cat:'体重', val: valText, icon:'weight' }],
+      voice: opts.voice || null,
+    },
+    ai: buildWeightAiBlock(parsed.value, parsed.unit),
+    aiDefaultOpen:true,
+  };
+}
+
+function tryCreateWeightTextEntry(text, opts = {}){
+  return createWeightRecordEntryFromText(text, opts);
 }
 
 /* ============ 卡片扇 · 紧凑选择器（方案 I） ============ */
@@ -424,27 +619,6 @@ function QuickSymptomPicker({ onSubmit }) {
   );
 }
 
-function QuickWeightPicker({ onSubmit, current = 52.3 }) {
-  const [w, setW] = React.useState(current);
-  const step = (d)=> setW(v=>Math.max(20, Math.min(150, +(v + d).toFixed(1))));
-
-  return (
-    <div className="quick-card-picker quick-card-picker--weight">
-      <div className="quick-card-weight-stepper">
-        <button type="button" className="quick-card-weight-btn" onClick={()=>step(-0.1)} aria-label="减少">−</button>
-        <div className="quick-card-weight-val">
-          <span className="quick-card-weight-num">{w.toFixed(1)}</span>
-          <span className="quick-card-weight-unit">kg</span>
-        </div>
-        <button type="button" className="quick-card-weight-btn" onClick={()=>step(0.1)} aria-label="增加">+</button>
-      </div>
-      <button type="button" className="quick-card-submit" onClick={()=>onSubmit?.({ value: w, unit: 'kg' })}>
-        记录
-      </button>
-    </div>
-  );
-}
-
 const QUICK_FOOD_OPTIONS = [
   { id:'breakfast', label:'早餐' },
   { id:'lunch', label:'午餐' },
@@ -525,4 +699,9 @@ Object.assign(window, {
   createFoodRecordEntry,
   createSymptomRecordEntry,
   createWeightRecordEntry,
+  createWeightRecordEntryFromText,
+  tryCreateWeightTextEntry,
+  parseWeightFromText,
+  WEIGHT_BASELINE_KG,
+  formatWeightDelta,
 });

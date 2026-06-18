@@ -90,7 +90,7 @@ function DockWavePlaceholder({show, focused}){
 
 function QuickCardFan({
   open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onDietPick, onClose,
-  onSymptomSubmit, onWeightSubmit, onFoodSubmit,
+  onSymptomSubmit, onWeightSubmit, onFoodSubmit, weightPickerKey,
 }){
   const QuickCardIcon = window.QuickCardIcon;
   const QuickSymptomPicker = window.QuickSymptomPicker;
@@ -175,19 +175,21 @@ function QuickCardFan({
             </button>
 
             <div className="quick-card-fan-panel" aria-hidden={!isSel}>
-              <div className="quick-card-fan-panel-hd">
-                <span className="quick-card-fan-panel-title">{card.title}</span>
-                <button type="button" className="quick-card-fan-panel-close" onClick={onClose} aria-label="关闭">
-                  ×
-                </button>
-              </div>
-              <div className="quick-card-fan-panel-body">
+              {card.id !== 'weight' ? (
+                <div className="quick-card-fan-panel-hd">
+                  <span className="quick-card-fan-panel-title">{card.title}</span>
+                  <button type="button" className="quick-card-fan-panel-close" onClick={onClose} aria-label="关闭">
+                    ×
+                  </button>
+                </div>
+              ) : null}
+              <div className={'quick-card-fan-panel-body'+(card.id === 'weight' ? ' is-weight' : '')}>
                 {card.id === 'symptom' ? (
                   <QuickSymptomPicker onSubmit={onSymptomSubmit}/>
                 ) : card.id === 'diet' ? (
                   <QuickFoodPicker onSubmit={onFoodSubmit}/>
                 ) : card.id === 'weight' ? (
-                  <QuickWeightPicker onSubmit={onWeightSubmit}/>
+                  <QuickWeightPicker key={weightPickerKey} onSubmit={onWeightSubmit}/>
                 ) : null}
               </div>
             </div>
@@ -219,7 +221,6 @@ function DockPublisher({
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
   const DockSymptomPicker = window.DockSymptomPicker;
-  const DockWeightPicker = window.DockWeightPicker;
   const CameraTransition = window.CameraTransition;
   const QuickCardIcon = window.QuickCardIcon;
   const measureElementRect = window.measureElementRect;
@@ -265,6 +266,13 @@ function DockPublisher({
     const tm = setTimeout(()=>window.markScheme3BubbleSeen?.(), 2400);
     return ()=>clearTimeout(tm);
   }, [showScheme3Bubble]);
+
+  const [weightPickerKey, setWeightPickerKey] = React.useState(0);
+
+  const handleSelectQuickCard = (id)=>{
+    if(id === 'weight') setWeightPickerKey(k=>k + 1);
+    setQuickSelected(id);
+  };
 
   const closeQuick = ()=>{
     setQuickSelected(null);
@@ -347,11 +355,6 @@ function DockPublisher({
     onSymptomConfirm?.(symptoms);
   };
 
-  const handleWeightConfirm = (payload)=>{
-    setDockSheet(null);
-    onWeightConfirm?.(payload);
-  };
-
   const handleDietFanTap = (buttonEl)=>{
     if(!buttonEl) return;
     const phone = buttonEl.closest('.phone');
@@ -394,13 +397,14 @@ function DockPublisher({
           selected={quickSelected}
           closingToMood={closingToMood}
           onFabTap={handleFabTap}
-          onSelectCard={setQuickSelected}
+          onSelectCard={handleSelectQuickCard}
           onMoodPick={handleMoodFanTap}
           onDietPick={handleDietFanTap}
           onClose={closeQuick}
           onSymptomSubmit={handleQuickSymptomSubmit}
           onWeightSubmit={handleQuickWeightSubmit}
           onFoodSubmit={handleQuickFoodSubmit}
+          weightPickerKey={weightPickerKey}
         />
       </div>
 
@@ -442,11 +446,6 @@ function DockPublisher({
           ) : dockSheet === 'symptom' ? (
             <DockSymptomPicker
               onConfirm={handleSymptomConfirm}
-              onCancel={closeDockSheet}
-            />
-          ) : dockSheet === 'weight' ? (
-            <DockWeightPicker
-              onConfirm={handleWeightConfirm}
               onCancel={closeDockSheet}
             />
           ) : (
