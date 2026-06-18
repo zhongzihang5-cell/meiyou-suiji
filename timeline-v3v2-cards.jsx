@@ -41,6 +41,18 @@ function TLTagIcon({name, color = TL_PRIMARY, size = 12}){
       </svg>
     );
   }
+  if(name === 'weight'){
+    return (
+      <img
+        src="assets/quick-icon-weight.png"
+        alt=""
+        width={size}
+        height={size}
+        style={{display:'block', borderRadius:3}}
+        draggable={false}
+      />
+    );
+  }
   if(name === 'scale'){
     return (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -165,39 +177,164 @@ function ChartMoodWeek({compact = false}){
   );
 }
 
-function ChartWeightTrend({compact = false}){
-  const gradId = React.useMemo(()=>'v3wt'+Math.random().toString(36).slice(2,9), []);
-  const N = 30;
-  const data = Array.from({length:N}, (_, i)=>{
-    const base = 53;
-    const trend = -i * 0.025;
-    const noise = Math.sin(i * 0.9) * 0.25 + Math.cos(i * 0.4) * 0.15;
-    return base + trend + noise;
+function computeWeightTicks(minV, maxV, maxLines = 5){
+  const range = Math.max(maxV - minV, 0.2);
+  const targetStep = range / Math.max(maxLines - 1, 1);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(targetStep)));
+  const niceSteps = [1, 2, 2.5, 5, 10].map(n => n * magnitude);
+  let step = niceSteps.find(s => range / s <= maxLines - 1) || niceSteps[niceSteps.length - 1];
+
+  const buildTicks = (s) => {
+    let yMin = Math.floor((minV - s * 0.15) / s) * s;
+    let yMax = Math.ceil((maxV + s * 0.15) / s) * s;
+    const ticks = [];
+    for(let v = yMin; v <= yMax + 0.0001; v += s){
+      ticks.push(+v.toFixed(s < 1 ? 1 : 0));
+    }
+    return { yMin: ticks[0], yMax: ticks[ticks.length - 1], ticks, step: s };
+  };
+
+  let { yMin, yMax, ticks, step: usedStep } = buildTicks(step);
+  while(ticks.length > maxLines && usedStep < 1000){
+    usedStep *= 2;
+    ({ yMin, yMax, ticks } = buildTicks(usedStep));
+  }
+  if(ticks.length > maxLines){
+    const picked = [];
+    for(let i = 0; i < maxLines; i++){
+      const idx = Math.round(i * (ticks.length - 1) / (maxLines - 1));
+      picked.push(ticks[idx]);
+    }
+    ticks = [...new Set(picked)];
+    yMin = ticks[0];
+    yMax = ticks[ticks.length - 1];
+  }
+  return { yMin, yMax, ticks };
+}
+
+function ChartWeightTrend({compact = false, data, unit = 'kg'}){
+  const defaultData = [
+    { d:'周六', v:52.8 },
+    { d:'周日', v:52.0 },
+    { d:'周一', v:52.2 },
+    { d:'周二', v:52.5 },
+    { d:'周三', v:53.4 },
+    { d:'周四', v:52.8 },
+    { d:'今天', v:52.3, isToday:true },
+  ];
+  const series = (data && data.length) ? data : defaultData;
+  const values = series.map(p => p.v);
+  const minV = Math.min(...values);
+  const maxV = Math.max(...values);
+  const { yMin, yMax, ticks } = computeWeightTicks(minV, maxV);
+  const yRange = yMax - yMin || 1;
+
+  const w = 280;
+  const h = compact ? 96 : 108;
+  const yLabelX = 20;
+  const plotLeft = 24;
+  const plotRight = w - 12;
+  const padTop = 20;
+  const padBot = 8;
+  const innerW = plotRight - plotLeft;
+  const innerH = h - padTop - padBot;
+  const dotR = 4.2;
+
+  const yFor = v => padTop + innerH - ((v - yMin) / yRange) * innerH;
+
+  const points = series.map((d, i) => {
+    const x = plotLeft + (innerW * i) / Math.max(1, series.length - 1);
+    const y = yFor(d.v);
+    return { x, y, d, i };
   });
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const w = 100;
-  const h = compact ? 36 : 60;
-  const points = data.map((v, i)=>{
-    const x = i / (N - 1) * w;
-    const y = h - (v - min) / (max - min || 1) * (h - 6) - 3;
-    return [x, y];
-  });
-  const path = points.map(([x, y], i)=>`${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
-  const fill = `${path} L${w} ${h} L0 ${h} Z`;
-  const [lastX, lastY] = points[points.length - 1];
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const formatAxis = v => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+  const formatValueLabel = v => unit === 'jin' ? `${v.toFixed(1)}斤` : `${v.toFixed(1)}公斤`;
+
   return (
-    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={TL_PRIMARY} stopOpacity="0.25"/>
-          <stop offset="100%" stopColor={TL_PRIMARY} stopOpacity="0"/>
-        </linearGradient>
-      </defs>
-      <path d={fill} fill={`url(#${gradId})`}/>
-      <path d={path} fill="none" stroke={TL_PRIMARY} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke"/>
-      <circle cx={lastX} cy={lastY} r="2" fill={TL_PRIMARY}/>
-    </svg>
+    <div className={'v3-weight-curve' + (compact ? ' is-compact' : '')}>
+      <div className="v3-weight-curve-plot">
+        <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          {ticks.map((tick) => {
+            const y = yFor(tick);
+            return (
+              <g key={tick}>
+                <line
+                  x1={plotLeft}
+                  x2={plotRight}
+                  y1={y}
+                  y2={y}
+                  stroke="rgba(0,0,0,0.08)"
+                  strokeWidth="1"
+                  strokeDasharray="3,3"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <text
+                  x={yLabelX}
+                  y={y + 3.5}
+                  textAnchor="end"
+                  fontSize="9"
+                  fill={TL_MUTED}
+                  fontFamily="PingFang SC, -apple-system, sans-serif"
+                >
+                  {formatAxis(tick)}
+                </text>
+              </g>
+            );
+          })}
+          {linePath && (
+            <path
+              d={linePath}
+              fill="none"
+              stroke={TL_PRIMARY}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+          {points.map((p) => {
+            const isToday = !!p.d.isToday;
+            return (
+              <g key={p.i}>
+                {isToday && (
+                  <text
+                    x={p.x}
+                    y={Math.max(p.y - dotR - 6, 12)}
+                    textAnchor="middle"
+                    fontSize="10"
+                    fill={TL_PRIMARY}
+                    fontWeight="500"
+                    fontFamily="PingFang SC, -apple-system, sans-serif"
+                  >
+                    {formatValueLabel(p.d.v)}
+                  </text>
+                )}
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={dotR}
+                  fill={TL_PRIMARY}
+                  stroke="#fff"
+                  strokeWidth="1.6"
+                />
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      <div className="v3-weight-curve-axis">
+        {series.map((d, i) => (
+          <span
+            key={i}
+            className={'v3-weight-curve-day' + (d.isToday ? ' is-today' : '')}
+          >
+            {d.d}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -311,9 +448,25 @@ function ChartTodayMoodWave({data, compact = false}){
   );
 }
 
-function TLChart({type, compact = false, data}){
+function WeightAnalysisNote({ noteParts, note }){
+  if(noteParts){
+    return (
+      <div className="v3-weight-curve-note">
+        {noteParts.prefix}
+        {noteParts.delta ? (
+          <span className={noteParts.emphasize ? 'is-down' : undefined}>{noteParts.delta}</span>
+        ) : null}
+        {noteParts.tail}
+      </div>
+    );
+  }
+  if(!note) return null;
+  return <div className="v3-weight-curve-note">{note}</div>;
+}
+
+function TLChart({type, compact = false, data, weightUnit}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
-  if(type === 'weightTrend') return <ChartWeightTrend compact={compact}/>;
+  if(type === 'weightTrend') return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
   if(type === 'caloriePanel') return <ChartCaloriePanel compact={compact}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   return null;
@@ -480,6 +633,32 @@ function V3PhotoFoodAnalysis({ items, totalKcal, isNew, onComplete }) {
 
 function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnalysis = false, isNew = false, onPhotoAnalysisComplete}){
   const tagRowStyle = { display: 'flex', gap: 6, flexWrap: 'wrap' };
+  if(entry.kind === 'weight-text'){
+    return (
+      <div className="v3-weight-text-record">
+        <div className="v3-weight-text-body">{entry.text}</div>
+        {showTags && (entry.tags || []).length > 0 && (
+          <div style={tagRowStyle}>
+            {(entry.tags || []).map((t, i)=>(
+              <span key={i}><TLTag tag={t}/></span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  if(entry.kind === 'weight'){
+    return (
+      <div className="v3-weight-record">
+        <span className="v3-weight-record-icon" aria-hidden="true">
+          <img src="assets/quick-icon-weight.png" alt="" width={28} height={28} draggable={false}/>
+        </span>
+        <span className="v3-weight-record-text">
+          {entry.weightLabel || '体重'}：{entry.weightValue}
+        </span>
+      </div>
+    );
+  }
   if(entry.kind === 'mood-face'){
     const MoodFace = window.MoodFace;
     const mood = entry.primaryMood;
@@ -546,7 +725,9 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   }
   return (
     <div style={{display:'flex', flexDirection:'column', gap:8}}>
-      <div style={{fontSize:14, color:TL_TEXT, lineHeight:1.5}}>{entry.text || entry.body}</div>
+      {(entry.text || entry.body) ? (
+        <div style={{fontSize:14, color:TL_TEXT, lineHeight:1.5}}>{entry.text || entry.body}</div>
+      ) : null}
       {showTags && (entry.tags || []).length > 0 && (
         <div style={tagRowStyle}>
           {(entry.tags || []).map((t, i)=>(
@@ -629,7 +810,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
       }}>
         <V3v2Header time={a.time} title={a.title} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
         <div style={{marginTop:8}}>
-          <TLChart type={a.chartType} data={a.chartData}/>
+          <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
         </div>
       </div>
@@ -681,8 +862,10 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                 embedded
                 animateIn={isNew}
               >
-                {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
-                {a.note && <div className="diet-fb-b-stats">{a.note}</div>}
+                {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
+                {(a.noteParts || a.note) && (
+                  <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                )}
               </DietAiCollapsibleSection>
             </div>
           );
@@ -712,12 +895,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
             </button>
             {open && (
               <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
-                {a.chartType && <TLChart type={a.chartType} data={a.chartData}/>}
-                {a.note && (
-                  <div style={{
-                    fontSize:13, color:TL_TEXT, lineHeight:1.55,
-                    marginTop:a.chartType ? 8 : 0,
-                  }}>{a.note}</div>
+                {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
+                {(a.noteParts || a.note) && (
+                  <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
                 )}
               </div>
             )}

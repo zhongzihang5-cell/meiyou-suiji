@@ -258,38 +258,162 @@ function createSymptomRecordEntry(symptoms){
   };
 }
 
-function createWeightRecordEntry({value, unit}){
-  const kg = toWeightKg(value, unit);
-  const displayVal = unit === 'jin' ? `${value}斤` : `${value}kg`;
-  const deltaText = formatWeightDelta(kg);
-  const text = `体重 ${displayVal}，${deltaText}`;
-  const tagVal = unit === 'jin' ? `${value} 斤` : `${value} kg`;
+function formatWeightValueText(value, unit){
+  const text = String(value);
+  return unit === 'jin' ? `${text}斤` : `${text}公斤`;
+}
+
+function buildWeightAnalysisNote(value, unit){
+  const todayKg = toWeightKg(value, unit);
+  const yesterdayKg = todayKg + 0.5;
+  const tailBase = '属正常波动，黄体期受孕激素影响身体容易潴留水分。';
+
+  if(unit === 'jin'){
+    const deltaJin = +(value - yesterdayKg * 2).toFixed(1);
+    if(Math.abs(deltaJin) < 0.05){
+      return {
+        prefix: '比昨天持平，变化',
+        delta: '',
+        emphasize: false,
+        tail: `${tailBase}`,
+      };
+    }
+    const sign = deltaJin > 0 ? '+' : '-';
+    const trend = deltaJin > 0 ? '上升' : '下降';
+    return {
+      prefix: '比昨天 ',
+      delta: `${sign}${Math.abs(deltaJin).toFixed(1)} 斤`,
+      emphasize: deltaJin < 0,
+      tail: `，${trend}${tailBase}`,
+    };
+  }
+
+  const deltaKg = +(todayKg - yesterdayKg).toFixed(1);
+  if(Math.abs(deltaKg) < 0.05){
+    return {
+      prefix: '比昨天持平，变化',
+      delta: '',
+      emphasize: false,
+      tail: tailBase,
+    };
+  }
+  const sign = deltaKg > 0 ? '+' : '-';
+  const trend = deltaKg > 0 ? '上升' : '下降';
+  return {
+    prefix: '比昨天 ',
+    delta: `${sign}${Math.abs(deltaKg).toFixed(1)} 公斤`,
+    emphasize: deltaKg < 0,
+    tail: `，${trend}${tailBase}`,
+  };
+}
+
+function buildWeightWeekChartData(todayKg, unit){
+  const days = ['周六','周日','周一','周二','周三','周四','今天'];
+  const offsets = [0.5, -0.3, -0.1, 0.2, 1.1, 0.5, 0];
+  return days.map((d, i) => {
+    let v = todayKg + offsets[i];
+    if(unit === 'jin') v = v * 2;
+    return {
+      d,
+      v: +v.toFixed(1),
+      isToday: i === days.length - 1,
+    };
+  });
+}
+
+function parseWeightFromText(text){
+  const raw = String(text || '').trim();
+  if(!raw) return null;
+
+  const labeled = raw.match(/体重\s*[:：]?\s*(\d+(?:\.\d+)?)\s*(kg|kgs|公斤|千克|斤)?/i);
+  if(labeled){
+    const value = parseFloat(labeled[1]);
+    if(!Number.isFinite(value) || value <= 0) return null;
+    const unitToken = (labeled[2] || '').toLowerCase();
+    const unit = unitToken === '斤' ? 'jin' : 'kg';
+    return { value, unit, text: raw };
+  }
+
+  const bare = raw.match(/(\d+(?:\.\d+)?)\s*(kg|kgs|公斤|千克|斤)\b/i);
+  if(bare){
+    const value = parseFloat(bare[1]);
+    if(!Number.isFinite(value) || value <= 0) return null;
+    const unitToken = bare[2].toLowerCase();
+    const unit = unitToken === '斤' ? 'jin' : 'kg';
+    return { value, unit, text: raw };
+  }
+
+  return null;
+}
+
+function buildWeightAiBlock(value, unit){
+  const todayKg = toWeightKg(value, unit);
   const gid = 'e-'+Date.now();
   const time = window.formatNowTime();
-  const trendNote = deltaText.includes('↓')
-    ? '7 日均值 ↓ 0.4 kg'
-    : (deltaText.includes('↑') ? '7 日均值 ↑ 0.2 kg' : '7 日均值持平');
+  return {
+    id:gid+'-ai',
+    time,
+    kind:'chart',
+    chartType:'weightTrend',
+    title:'近7日体重趋势',
+    chartData: buildWeightWeekChartData(todayKg, unit),
+    weightUnit: unit,
+    noteParts: buildWeightAnalysisNote(value, unit),
+  };
+}
+
+function createWeightRecordEntry({value, unit}){
+  const gid = 'e-'+Date.now();
+  const time = window.formatNowTime();
   return {
     kind:'record-group',
     id:gid+'-g',
     isNew: true,
+    weightSource:'quick',
     primary:{
       id:gid,
       time,
-      kind:'text',
-      text,
-      tags:[{ cat:'体重', val:tagVal, icon:'scale' }],
+      kind:'weight',
+      text:'',
+      weightLabel:'体重',
+      weightValue:formatWeightValueText(value, unit),
+      weightUnit:unit,
+      tags:[],
     },
-    ai:{
-      id:gid+'-ai',
-      time,
-      kind:'chart',
-      chartType:'weightTrend',
-      title:'近 30 日体重趋势',
-      note:trendNote,
-    },
-    aiDefaultOpen:false,
+    ai: buildWeightAiBlock(value, unit),
+    aiDefaultOpen:true,
   };
+}
+
+function createWeightRecordEntryFromText(text, opts = {}){
+  const parsed = parseWeightFromText(text);
+  if(!parsed) return null;
+  const gid = 'e-'+Date.now();
+  const time = window.formatNowTime();
+  const valText = formatWeightValueText(parsed.value, parsed.unit);
+  return {
+    kind:'record-group',
+    id:gid+'-g',
+    isNew: true,
+    weightSource:'text',
+    primary:{
+      id:gid,
+      time,
+      kind:'weight-text',
+      text: parsed.text,
+      weightLabel:'体重',
+      weightValue: valText,
+      weightUnit: parsed.unit,
+      tags:[{ cat:'体重', val: valText, icon:'weight' }],
+      voice: opts.voice || null,
+    },
+    ai: buildWeightAiBlock(parsed.value, parsed.unit),
+    aiDefaultOpen:true,
+  };
+}
+
+function tryCreateWeightTextEntry(text, opts = {}){
+  return createWeightRecordEntryFromText(text, opts);
 }
 
 /* ============ 卡片扇 · 紧凑选择器（方案 I） ============ */
@@ -575,6 +699,9 @@ Object.assign(window, {
   createFoodRecordEntry,
   createSymptomRecordEntry,
   createWeightRecordEntry,
+  createWeightRecordEntryFromText,
+  tryCreateWeightTextEntry,
+  parseWeightFromText,
   WEIGHT_BASELINE_KG,
   formatWeightDelta,
 });

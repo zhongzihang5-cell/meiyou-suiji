@@ -410,6 +410,16 @@ function App(){
       return;
     }
 
+    const weightEntry = window.tryCreateWeightTextEntry?.(text, opts);
+    if (weightEntry) {
+      setDraft('');
+      markUserRecorded();
+      const entryText = weightEntry.primary?.text || '';
+      if(recordFeedback && tryStartFirstDrop(weightEntry, entryText)) return;
+      pushToTimeline(weightEntry, entryText);
+      return;
+    }
+
     const hits = window.extractKeywords(text);
     setDraft('');
     markUserRecorded();
@@ -652,7 +662,7 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
-    const entryText = entry.primary?.text || entry.body || '';
+    const entryText = entry.primary?.weightValue || entry.primary?.text || entry.body || '';
     if(recordFeedback && tryStartFirstDrop(entry, entryText)) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
