@@ -181,6 +181,56 @@ function getDiversityInlineSuffix(count){
   return { count };
 }
 
+function roundRunMinutes(kcal){
+  if (kcal == null) return 0;
+  const raw = Math.round(kcal / 8);
+  return Math.max(5, Math.round(raw / 5) * 5);
+}
+
+function getFeedbackDimCopy(dim, {
+  dayMealCount = 0,
+  dayTotalKcal,
+  avgKcal,
+  mealKcal,
+  todayFoodCount = 0,
+} = {}){
+  switch (dim) {
+    case 'A':
+      if (dayTotalKcal == null) return null;
+      return `今天饮食打卡 ${dayMealCount} 次，合计 ${formatKcal(dayTotalKcal)} 千卡。`;
+    case 'B':
+      if (avgKcal == null) return null;
+      return `过去一周平均每天 ${formatKcal(avgKcal)} 千卡。`;
+    case 'C':
+      if (mealKcal == null) return null;
+      return `这顿挺丰盛的，约 ${formatKcal(mealKcal)} 千卡，相当于慢跑 ${roundRunMinutes(mealKcal)} 分钟。`;
+    case 'D':
+      return '经期吃冰品因人而异，如果你容易痛经，减少冰品可能会舒服一些。';
+    case 'E':
+      if (todayFoodCount < 5) return null;
+      return `今天吃了 ${todayFoodCount} 种食物，种类很丰富。多样性能确保微量元素不缺乏。`;
+    default:
+      return null;
+  }
+}
+
+function getFeedbackDimComboCopy(dims, ctx){
+  if (!dims?.length) return null;
+  const parts = dims
+    .map((dim) => getFeedbackDimCopy(dim, ctx))
+    .filter(Boolean);
+  return parts.length ? parts.join('') : null;
+}
+
+function DietFeedbackDimCopy({ dim, dims, dayMealCount, dayTotalKcal, avgKcal, mealKcal, todayFoodCount }){
+  const ctx = { dayMealCount, dayTotalKcal, avgKcal, mealKcal, todayFoodCount };
+  const text = dims?.length
+    ? getFeedbackDimComboCopy(dims, ctx)
+    : getFeedbackDimCopy(dim, ctx);
+  if (!text) return null;
+  return <p className="diet-fb-b-stats">{text}</p>;
+}
+
 function DietAiAvgStats({ avgKcal, diversityCount, cycleText, cycleSplitParagraph }){
   const diversity = getDiversityInlineSuffix(diversityCount);
   const cycleInline = cycleText && !cycleSplitParagraph;
@@ -224,6 +274,8 @@ function shouldShowGuideBelowTotal(displayCfg){
 function shouldShowDisplayAi(cfg){
   if (!cfg) return false;
   return !!(
+    cfg.feedbackDim ||
+    (cfg.feedbackDims && cfg.feedbackDims.length) ||
     cfg.showGuide ||
     cfg.showChart ||
     cfg.showDayTotal ||
@@ -278,6 +330,7 @@ function DietCalorieAiBody({
   avgKcal,
   dayMealCount = 2,
   dayTotalKcal,
+  mealKcal,
   displayScenario,
   cycleData = null,
   todayFoodCount = 0,
@@ -286,6 +339,23 @@ function DietCalorieAiBody({
   const cfg = displayScenario && getConfig
     ? getConfig(displayScenario)
     : null;
+
+  if (cfg?.feedbackDim || cfg?.feedbackDims?.length) {
+    return (
+      <>
+        <DietTrendChart data={weekData} todayKcal={todayKcal}/>
+        <DietFeedbackDimCopy
+          dim={cfg.feedbackDim}
+          dims={cfg.feedbackDims}
+          dayMealCount={dayMealCount}
+          dayTotalKcal={dayTotalKcal ?? todayKcal}
+          avgKcal={avgKcal}
+          mealKcal={mealKcal ?? todayKcal}
+          todayFoodCount={todayFoodCount}
+        />
+      </>
+    );
+  }
 
   const renderAiBlock = (blockType) => {
     if (!cfg) return null;
@@ -604,14 +674,16 @@ function DietPhotoFeedbackCard({
 
   const initialPhase = (() => {
     if (recognitionStateProp === 'error') return 'error';
+    if (recognitionStateProp === 'ready') return 'ready';
     if (isNew) return 'loading';
     return 'ready';
   })();
 
   const [phase, setPhase] = React.useState(initialPhase);
-  const [revealStep, setRevealStep] = React.useState(
-    initialPhase === 'ready' ? 3 : 0
-  );
+  const [revealStep, setRevealStep] = React.useState(() => {
+    if (initialPhase === 'ready' && recognitionStateProp !== 'ready') return 3;
+    return 0;
+  });
   const [failureCount, setFailureCount] = React.useState(
     recognitionStateProp === 'error' ? Math.max(0, failureCountProp) : 0
   );
@@ -684,7 +756,12 @@ function DietPhotoFeedbackCard({
   }, [loadingMs, mockRecognize, readScenario]);
 
   React.useEffect(() => {
-    if (!isNew || recognitionStateProp === 'error') return undefined;
+    if (!isNew) return undefined;
+    if (recognitionStateProp === 'ready') {
+      startSuccessReveal();
+      return () => clearRevealTimers();
+    }
+    if (recognitionStateProp === 'error') return undefined;
     runRecognition();
     return () => {
       if (recognizeTimerRef.current) {
@@ -728,7 +805,8 @@ function DietPhotoFeedbackCard({
   const displayCfg = displayScenario && window.getDietFeedbackDisplayConfig
     ? window.getDietFeedbackDisplayConfig(displayScenario)
     : null;
-  const calorieInsight = revealStep >= 1
+  const usesFeedbackDim = !!(displayCfg?.feedbackDim || displayCfg?.feedbackDims?.length);
+  const calorieInsight = !usesFeedbackDim && revealStep >= 1
     ? resolveCalorieInsightBelowTotal(totalKcal, displayCfg)
     : null;
   const diversityCount = shouldShowMealDiversity(displayCfg) && revealStep >= 1
@@ -739,7 +817,9 @@ function DietPhotoFeedbackCard({
     : null;
   const hasInlineCalorieInsight = !!(displayCfg?.showMealInsight || displayCfg?.showCalorieInsightCard);
   const showAiInsights = resolveShowAiInsights({ showAi, displayCfg, hasInlineCalorieInsight });
-  const mealInterpretation = showAiInsights && !hasInlineCalorieInsight ? interpretation : null;
+  const mealInterpretation = !usesFeedbackDim && showAiInsights && !hasInlineCalorieInsight
+    ? interpretation
+    : null;
 
   return (
     <>
@@ -784,13 +864,14 @@ function DietPhotoFeedbackCard({
               avgKcal={ctx.avgKcal}
               dayMealCount={ctx.dayMealCount || 2}
               dayTotalKcal={ctx.dayTotalKcal}
+              mealKcal={totalKcal}
               displayScenario={displayScenario}
               cycleData={ctx.cycleData}
               todayFoodCount={ctx.todayFoodCount ?? 0}
             />
           </DietAiInsightsShell>
         )}
-        {showAiInsights && cycleInsight && !displayCfg?.showCycleTip && (
+        {showAiInsights && cycleInsight && !displayCfg?.showCycleTip && !usesFeedbackDim && (
           <>
             <div className="diet-fb-divider"/>
             <div className="diet-fb-stagger-in">
@@ -850,7 +931,8 @@ function DietTextFeedbackCard({
   const displayCfg = displayScenario && window.getDietFeedbackDisplayConfig
     ? window.getDietFeedbackDisplayConfig(displayScenario)
     : null;
-  const calorieInsight = revealStep >= 1 && showCalories
+  const usesFeedbackDim = !!(displayCfg?.feedbackDim || displayCfg?.feedbackDims?.length);
+  const calorieInsight = !usesFeedbackDim && revealStep >= 1 && showCalories
     ? resolveCalorieInsightBelowTotal(totalKcal, displayCfg)
     : null;
   const diversityCount = shouldShowMealDiversity(displayCfg) && revealStep >= 1 && showCalories
@@ -865,7 +947,7 @@ function DietTextFeedbackCard({
     displayCfg,
     hasInlineCalorieInsight,
   });
-  const interpretation = showAiInsights && !hasInlineCalorieInsight
+  const interpretation = !usesFeedbackDim && showAiInsights && !hasInlineCalorieInsight
     ? getCalorieInterpretation(totalKcal)
     : null;
 
@@ -898,6 +980,7 @@ function DietTextFeedbackCard({
               avgKcal={ctx.avgKcal}
               dayMealCount={ctx.dayMealCount || 2}
               dayTotalKcal={ctx.dayTotalKcal}
+              mealKcal={totalKcal}
               displayScenario={displayScenario}
               cycleData={ctx.cycleData}
               todayFoodCount={ctx.todayFoodCount ?? 0}

@@ -378,6 +378,193 @@ function CameraPermissionBlocked({ onEnable }) {
   );
 }
 
+function CameraCaptureAnalyzePanel({
+  phase,
+  progress = 0,
+  errorKind = null,
+  onRetry,
+  onRetake,
+  showRetry,
+  isExhausted,
+}) {
+  const isLoading = phase === 'loading';
+  const isTimeoutError = phase === 'error' && errorKind === 'timeout';
+  const isNotFoodError = phase === 'error' && errorKind === 'not-food';
+
+  return (
+    <div className={'camera-analyze-sheet' + (isLoading ? ' is-loading' : '') + (phase === 'error' ? ' is-error' : '') + (isNotFoodError ? ' is-not-food' : '')}>
+      <div className="camera-analyze-progress-track" aria-hidden={!isLoading}>
+        <div
+          className="camera-analyze-progress-fill"
+          style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
+        />
+      </div>
+      <div className="camera-analyze-status-row">
+        {isLoading && (
+          <>
+            <span className="camera-analyze-status-text">正在识别食物......</span>
+            <span className="camera-analyze-status-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="7" fill="#007AFF"/>
+                <path d="M5 8.2l1.8 1.8L11 5.8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+          </>
+        )}
+        {isTimeoutError && !isExhausted && (
+          <>
+            <span className="camera-analyze-status-text">AI识别遇到点小问题</span>
+            <div className="camera-analyze-actions">
+              {showRetry && (
+                <button type="button" className="camera-analyze-action-btn" onClick={onRetry}>
+                  重试
+                </button>
+              )}
+              <button type="button" className="camera-analyze-action-btn" onClick={onRetake}>
+                重拍
+              </button>
+            </div>
+          </>
+        )}
+        {isTimeoutError && isExhausted && (
+          <>
+            <span className="camera-analyze-status-text camera-analyze-status-text--muted">
+              识别失败，请重拍一张
+            </span>
+            <button type="button" className="camera-analyze-action-btn" onClick={onRetake}>
+              重拍
+            </button>
+          </>
+        )}
+        {isNotFoodError && (
+          <>
+            <span className="camera-analyze-status-text">没有检测到食物，重拍一张</span>
+            <button type="button" className="camera-analyze-action-btn" onClick={onRetake}>
+              重拍
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function useDietPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
+  const loadingMs = window.PHOTO_ANALYZE_LOADING_MS || 5000;
+  const mockRecognize = window.mockRecognizeDietPhoto || (() => ({ ok: true }));
+  const readScenario = window.readDietRecognitionScenario || (() => 'success');
+  const getMaxFailures = window.getDietRecognitionMaxFailures || (() => 5);
+  const resolveAnalyzeMs = window.getDietRecognitionAnalyzeMs || ((scenario, ms) => ms);
+
+  const [phase, setPhase] = React.useState(null);
+  const [photoUrl, setPhotoUrl] = React.useState(null);
+  const [progress, setProgress] = React.useState(0);
+  const [failureCount, setFailureCount] = React.useState(0);
+  const [errorKind, setErrorKind] = React.useState(null);
+  const analyzeTimerRef = React.useRef(null);
+  const progressTimerRef = React.useRef(null);
+  const finishTimerRef = React.useRef(null);
+
+  const scenario = readScenario();
+  const maxFailures = getMaxFailures(scenario);
+  const isExhausted = phase === 'error' && errorKind === 'timeout' && failureCount >= maxFailures;
+
+  const clearTimers = React.useCallback(() => {
+    if (analyzeTimerRef.current) {
+      window.clearTimeout(analyzeTimerRef.current);
+      analyzeTimerRef.current = null;
+    }
+    if (progressTimerRef.current) {
+      window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    if (finishTimerRef.current) {
+      window.clearTimeout(finishTimerRef.current);
+      finishTimerRef.current = null;
+    }
+  }, []);
+
+  const reset = React.useCallback(() => {
+    clearTimers();
+    setPhase(null);
+    setPhotoUrl(null);
+    setProgress(0);
+    setFailureCount(0);
+    setErrorKind(null);
+  }, [clearTimers]);
+
+  const runAnalyze = React.useCallback(({ url, isRetry = false, forceSuccess = false, meta } = {}) => {
+    if (!url) return;
+    clearTimers();
+    setPhotoUrl(url);
+    setPhase('loading');
+    setProgress(6);
+    setErrorKind(null);
+    if (!isRetry) setFailureCount(0);
+    onAnalyzeStart?.();
+
+    const activeScenario = readScenario();
+    const analyzeMs = resolveAnalyzeMs(activeScenario, loadingMs);
+    const isEarlySuccess = activeScenario === 'success';
+    const startedAt = Date.now();
+    progressTimerRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      const pct = Math.min(isEarlySuccess ? 58 : 92, 6 + (elapsed / loadingMs) * 86);
+      setProgress(pct);
+    }, 100);
+
+    analyzeTimerRef.current = window.setTimeout(() => {
+      clearTimers();
+      const result = mockRecognize({ scenario: readScenario(), forceSuccess });
+      if (result?.ok) {
+        finishTimerRef.current = window.setTimeout(() => {
+          onSuccess?.({ photoUrl: url, ...meta });
+          reset();
+        }, 160);
+        return;
+      }
+      setProgress(0);
+      setPhase('error');
+      setErrorKind(result?.reason === 'not-food' ? 'not-food' : 'timeout');
+      if (isRetry && result?.reason !== 'not-food') {
+        setFailureCount((count) => count + 1);
+      }
+    }, analyzeMs);
+  }, [clearTimers, loadingMs, mockRecognize, onAnalyzeStart, onSuccess, readScenario, reset, resolveAnalyzeMs]);
+
+  const handleRetry = React.useCallback((event) => {
+    if (phase !== 'error' || errorKind !== 'timeout' || failureCount >= maxFailures || !photoUrl) return;
+    const forceSuccess = !!(event?.altKey || event?.metaKey);
+    runAnalyze({ url: photoUrl, isRetry: true, forceSuccess });
+  }, [errorKind, failureCount, maxFailures, phase, photoUrl, runAnalyze]);
+
+  const handleRetake = React.useCallback(() => {
+    clearTimers();
+    setPhase(null);
+    setPhotoUrl(null);
+    setProgress(0);
+    setFailureCount(0);
+    setErrorKind(null);
+  }, [clearTimers]);
+
+  React.useEffect(() => () => clearTimers(), [clearTimers]);
+
+  return {
+    phase,
+    photoUrl,
+    progress,
+    failureCount,
+    maxFailures,
+    errorKind,
+    isExhausted,
+    runAnalyze,
+    handleRetry,
+    handleRetake,
+    reset,
+    isAnalyzing: phase != null,
+  };
+}
+
 function CameraView({
   onCapture,
   onClose,
@@ -395,22 +582,33 @@ function CameraView({
   onPhotoPermAllowFull,
   onPhotoPermLimit,
   onPhotoPermDeny,
+  analyzePhase = null,
+  capturedPhotoUrl = null,
+  analyzeProgress = 0,
+  analyzeFailureCount = 0,
+  analyzeMaxFailures = 5,
+  analyzeExhausted = false,
+  analyzeErrorKind = null,
+  onAnalyzeRetry,
+  onAnalyzeRetake,
 }) {
   const I = window.Icon;
   const [flash, setFlash] = React.useState(false);
-  const [showHelp, setShowHelp] = React.useState(false);
   
   const handleCapture = () => {
-    if (permPending || permDenied) return;
+    if (permPending || permDenied || analyzePhase) return;
     setFlash(true);
     setTimeout(() => {
       setFlash(false);
       onCapture?.();
     }, 150);
   };
+
+  const showAnalyze = !!analyzePhase;
+  const showPreview = !!capturedPhotoUrl;
   
   return (
-    <div className={'camera-view' + (visible ? ' is-visible' : '') + (permPending ? ' is-perm-pending' : '') + (permDenied ? ' is-perm-denied' : '') + (showGallery ? ' is-gallery-open' : '')}>
+    <div className={'camera-view' + (visible ? ' is-visible' : '') + (permPending ? ' is-perm-pending' : '') + (permDenied ? ' is-perm-denied' : '') + (showGallery ? ' is-gallery-open' : '') + (showAnalyze ? ' is-analyzing' : '')}>
       <button type="button" className="camera-close-btn" onClick={onClose} aria-label="返回">
         <I name="chevron-left" size={24} stroke={2.2} />
       </button>
@@ -418,6 +616,15 @@ function CameraView({
       <div className="camera-main">
         {permDenied ? (
           <CameraPermissionBlocked onEnable={onPermissionEnable} />
+        ) : showPreview ? (
+          <div className="camera-capture-stage">
+            <img src={capturedPhotoUrl} alt="" className="camera-capture-photo"/>
+            <span className="camera-frame-corner tl"/>
+            <span className="camera-frame-corner tr"/>
+            <span className="camera-frame-corner bl"/>
+            <span className="camera-frame-corner br"/>
+            {analyzePhase === 'loading' && <div className="camera-scan-line" aria-hidden="true"/>}
+          </div>
         ) : (
           <>
             <div className="camera-frame">
@@ -438,10 +645,6 @@ function CameraView({
         {flash && <div className="camera-flash" />}
       </div>
 
-      {showHelp && (
-        <CameraShootingGuideSheet onClose={() => setShowHelp(false)} />
-      )}
-      
       {showPhotoPermDialog && (
         <PhotoLibraryPermissionDialog
           onAllowFull={onPhotoPermAllowFull}
@@ -458,35 +661,40 @@ function CameraView({
       )}
 
       <div className="camera-bottom-bar">
-        <div className="camera-controls">
-          {!showGallery && (
-            <button type="button" className="camera-gallery-btn" onClick={onOpenGallery} aria-label="相册">
-              <I name="image" size={24} stroke={1.5} />
-            </button>
-          )}
-          {!permDenied && (
-            <button
-              type="button"
-              className={'camera-shutter' + (permPending ? ' is-disabled' : '')}
-              onClick={handleCapture}
-              aria-label="拍照"
-              disabled={permPending}
-            >
-              <span className="camera-shutter-ring"/>
-              <span className="camera-shutter-inner"/>
-            </button>
-          )}
-          {!permDenied && (
-            <button
-              type="button"
-              className="camera-help-btn"
-              onClick={() => setShowHelp(true)}
-              aria-label="拍摄示例"
-            >
-              <I name="help" size={22} stroke={2} />
-            </button>
-          )}
-        </div>
+        {showAnalyze ? (
+          <CameraCaptureAnalyzePanel
+            phase={analyzePhase}
+            progress={analyzeProgress}
+            errorKind={analyzeErrorKind}
+            onRetry={onAnalyzeRetry}
+            onRetake={onAnalyzeRetake}
+            showRetry={analyzeFailureCount < analyzeMaxFailures}
+            isExhausted={analyzeExhausted}
+          />
+        ) : (
+          <div className="camera-controls">
+            {!showGallery && (
+              <button type="button" className="camera-gallery-btn" onClick={onOpenGallery} aria-label="相册">
+                <I name="image" size={24} stroke={1.5} />
+              </button>
+            )}
+            {!permDenied && (
+              <button
+                type="button"
+                className={'camera-shutter' + (permPending ? ' is-disabled' : '')}
+                onClick={handleCapture}
+                aria-label="拍照"
+                disabled={permPending}
+              >
+                <span className="camera-shutter-ring"/>
+                <span className="camera-shutter-inner"/>
+              </button>
+            )}
+            {!showGallery && (
+              <span className="camera-controls-side" aria-hidden="true"/>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -497,7 +705,7 @@ function CameraTransition({
   sourceRect, 
   cardContent,
   containerRef,
-  onCapture, 
+  onCaptureSuccess,
   onClose,
   onSelectPhoto,
   onActiveChange,
@@ -627,17 +835,31 @@ function CameraTransition({
     setShowGallery(false);
   };
 
+  const handleAnalyzeSuccess = React.useCallback((payload) => {
+    onCaptureSuccess?.(payload);
+    onClose?.();
+  }, [onCaptureSuccess, onClose]);
+
+  const analyze = useDietPhotoAnalyze({ onSuccess: handleAnalyzeSuccess });
+
   const handleCameraClose = () => {
     if (showGallery) {
       handleCloseGallery();
       return;
     }
+    analyze.reset();
     onClose?.();
+  };
+
+  const handleCapturePhoto = () => {
+    const photoUrl = window.pickFallbackPhoto?.() || null;
+    analyze.runAnalyze({ url: photoUrl, meta: { type: 'capture' } });
   };
   
   const handleSelectPhoto = (photo) => {
     setShowGallery(false);
-    onSelectPhoto?.(photo);
+    const photoUrl = photo?.thumb || photo?.url || window.pickFallbackPhoto?.() || null;
+    analyze.runAnalyze({ url: photoUrl, meta: { type: 'select', photo } });
   };
 
   if (!mounted || !sourceRect) return null;
@@ -704,7 +926,7 @@ function CameraTransition({
         }}
       >
         <CameraView 
-            onCapture={onCapture} 
+            onCapture={handleCapturePhoto} 
             onClose={handleCameraClose}
             onOpenGallery={handleOpenGallery}
             visible={showCamera}
@@ -720,6 +942,15 @@ function CameraTransition({
             onPhotoPermAllowFull={handlePhotoPermAllowFull}
             onPhotoPermLimit={handlePhotoPermLimit}
             onPhotoPermDeny={handlePhotoPermDeny}
+            analyzePhase={analyze.phase}
+            capturedPhotoUrl={analyze.photoUrl}
+            analyzeProgress={analyze.progress}
+            analyzeFailureCount={analyze.failureCount}
+            analyzeMaxFailures={analyze.maxFailures}
+            analyzeExhausted={analyze.isExhausted}
+            analyzeErrorKind={analyze.errorKind}
+            onAnalyzeRetry={analyze.handleRetry}
+            onAnalyzeRetake={analyze.handleRetake}
           />
       </div>
       

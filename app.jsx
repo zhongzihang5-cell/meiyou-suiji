@@ -100,8 +100,8 @@ function App(){
   React.useEffect(()=>{
     const onInsert = (event)=>{
       const kind = event?.detail?.kind;
-      const entry = kind === 'exhausted'
-        ? window.createDietTimeoutExhaustedDemoEntry?.()
+      const entry = kind === 'not-food'
+        ? window.createDietNotFoodDemoEntry?.()
         : window.createDietTimeoutDemoEntry?.();
       if(!entry) return;
       const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
@@ -685,6 +685,9 @@ function App(){
     });
     if(!entry) return;
     entry.isNew = true;
+    if (payload?.recognitionState) {
+      entry.recognitionState = payload.recognitionState;
+    }
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));

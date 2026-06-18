@@ -231,6 +231,11 @@
 .camera-shutter.is-disabled:active .camera-shutter-inner{
   transform:none;
 }
+.camera-controls-side{
+  width:48px;
+  height:48px;
+  flex-shrink:0;
+}
 .camera-help-btn{
   width:48px;height:48px;
   border:none;
@@ -844,4 +849,144 @@
 }
 .photo-picker-float-btn:active{
   opacity:0.85;
+}
+
+/* 拍照后识别 loading / 失败重试 */
+.camera-view.is-analyzing .camera-main{
+  background:#000;
+}
+.camera-capture-stage{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+.camera-capture-photo{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.camera-capture-stage .camera-frame-corner{
+  position:absolute;
+  width:50px;
+  height:50px;
+}
+.camera-capture-stage .camera-frame-corner.tl{ top:calc(50% - 182px); left:calc(50% - 150px); }
+.camera-capture-stage .camera-frame-corner.tr{ top:calc(50% - 182px); right:calc(50% - 150px); }
+.camera-capture-stage .camera-frame-corner.bl{ bottom:calc(50% - 118px); left:calc(50% - 150px); }
+.camera-capture-stage .camera-frame-corner.br{ bottom:calc(50% - 118px); right:calc(50% - 150px); }
+.camera-scan-line{
+  position:absolute;
+  left:calc(50% - 150px);
+  width:300px;
+  height:2px;
+  top:50%;
+  transform:translateY(-50%);
+  background:linear-gradient(90deg, transparent, rgba(0,204,153,0.15) 20%, #00cc99 50%, rgba(0,204,153,0.15) 80%, transparent);
+  box-shadow:0 0 16px rgba(0,204,153,0.55), 0 0 4px rgba(0,204,153,0.8);
+  animation:cameraScanLine 2.4s ease-in-out infinite;
+  z-index:10;
+}
+.camera-scan-line::before{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:-40px;
+  bottom:-40px;
+  background:
+    repeating-linear-gradient(60deg, transparent, transparent 8px, rgba(0,204,153,0.04) 8px, rgba(0,204,153,0.04) 9px),
+    repeating-linear-gradient(-60deg, transparent, transparent 8px, rgba(0,204,153,0.04) 8px, rgba(0,204,153,0.04) 9px);
+  pointer-events:none;
+}
+@keyframes cameraScanLine{
+  0%, 100%{ transform:translateY(-80px); opacity:0.6; }
+  50%{ transform:translateY(80px); opacity:1; }
+}
+.camera-view.is-analyzing .camera-bottom-bar{
+  padding:0;
+}
+.camera-analyze-sheet{
+  width:100%;
+  background:#fff;
+  border-radius:12px 12px 0 0;
+  padding:0 16px 28px;
+  min-height:168px;
+  box-sizing:border-box;
+}
+.camera-analyze-progress-track{
+  height:3px;
+  background:rgba(0,0,0,0.06);
+  border-radius:2px;
+  overflow:hidden;
+  margin:0 -16px 16px;
+}
+.camera-analyze-progress-fill{
+  height:100%;
+  background:#00cc99;
+  border-radius:2px;
+  transition:width 0.12s linear;
+}
+.camera-analyze-status-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:28px;
+}
+.camera-analyze-status-text{
+  font-size:15px;
+  line-height:1.47;
+  color:rgba(0,0,0,0.8);
+}
+.camera-analyze-status-text--muted{
+  color:rgba(0,0,0,0.6);
+}
+.camera-analyze-status-icon{
+  width:16px;
+  height:16px;
+  flex-shrink:0;
+  display:flex;
+}
+.camera-analyze-status-icon svg{
+  width:16px;
+  height:16px;
+  display:block;
+}
+.camera-analyze-retry-btn{
+  border:none;
+  background:transparent;
+  color:#4f7cae;
+  font-size:14px;
+  line-height:1.29;
+  padding:4px 0;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.camera-analyze-retry-btn:active{
+  opacity:0.7;
+}
+.camera-analyze-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+.camera-analyze-action-btn{
+  border:none;
+  background:transparent;
+  color:#4f7cae;
+  font-size:14px;
+  line-height:1.29;
+  padding:4px 0;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.camera-analyze-action-btn:active{
+  opacity:0.7;
+}
+.camera-analyze-sheet.is-error .camera-analyze-progress-track{
+  visibility:hidden;
+  margin-bottom:0;
+  height:0;
 }
