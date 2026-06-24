@@ -718,6 +718,7 @@ function App(){
   };
 
   const showRecordTab = scene.calendar.enabled && activeTab === 'cal';
+  const showHome = activeTab === 'home';
   const showReview = activeTab === 'cash';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
@@ -733,6 +734,7 @@ function App(){
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
   const ReviewPage = window.ReviewPage;
+  const HomePage = window.HomePage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const openSearchPage = ()=>setShowSearchPage(true);
@@ -746,6 +748,10 @@ function App(){
     <>
       <div className="phone">
         <StatusBar/>
+
+      {showHome && HomePage && (
+        <HomePage/>
+      )}
 
       {showRecordTab && (
         <RecordPage
