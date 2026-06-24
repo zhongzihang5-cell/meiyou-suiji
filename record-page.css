@@ -1,0 +1,1247 @@
+/* ============ 记录 Tab（UI Kit 业务模块） ============ */
+.record-page-root {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #f2f2f5;
+  padding: 0 12px calc(84px + env(safe-area-inset-bottom, 0px));
+}
+
+.record-page-root .record-stack {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.record-page-root .record-sticky-title {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  margin: 0;
+  padding: 4px 0 0;
+  background: #f2f2f5;
+}
+
+.record-page-root .record-titlebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 0;
+}
+
+.record-page-root .record-year-nav {
+  border: 0;
+  background: transparent;
+  color: #323232;
+  font-size: 15px;
+  line-height: 1.47;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+}
+
+.record-page-root .record-year-chev {
+  font-size: 16px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.record-page-root .record-titlebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative;
+  min-width: 0;
+}
+
+.record-page-root .record-mode-menu {
+  position: relative;
+}
+
+.record-page-root .record-mode-pill,
+.record-page-root .record-mode-toggle {
+  border: 0;
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.29;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.record-page-root .record-mode-pill {
+  background: #ffffff;
+  color: #323232;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+}
+
+.record-page-root .record-mode-chev {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.record-page-root .record-mode-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 60;
+  min-width: 108px;
+  padding: 6px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.record-page-root .record-mode-dropdown button {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #323232;
+  font-size: 14px;
+  line-height: 1.47;
+  font-weight: 400;
+  text-align: left;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-page-root .record-mode-dropdown button.is-active {
+  background: #fff0f4;
+  color: #ff4d88;
+  font-weight: 500;
+}
+
+.record-page-root .record-mode-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.record-page-root .record-mode-toggle {
+  background: #ffffff;
+  color: #323232;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+}
+
+.record-page-root.is-view-mode .record-mode-toggle {
+  background: rgba(255, 77, 136, 0.08);
+  color: #ff4d88;
+  box-shadow: none;
+}
+
+.record-page-root .record-filter-pill {
+  border: 0;
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.29;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  color: #323232;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+}
+
+.record-page-root .record-filter-pill .record-mode-chev {
+  stroke: currentColor;
+}
+
+.record-page-root .record-filter-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 60;
+  min-width: 148px;
+  padding: 6px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.record-page-root .record-filter-dropdown button {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #323232;
+  font-size: 14px;
+  line-height: 1.47;
+  font-weight: 400;
+  text-align: left;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.record-page-root .record-filter-dropdown button.is-active {
+  background: #fff0f4;
+  color: #ff4d88;
+  font-weight: 500;
+}
+
+.record-page-root .record-filter-option-icon {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-type-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-view-eye,
+.record-page-root .record-view-record-icon {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-titlebar-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 12px 4px;
+}
+
+.record-page-root .record-titlebar-heading h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.19;
+  font-weight: 500;
+  color: #323232;
+}
+
+.record-page-root .record-calendar-panel {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.record-page-root .record-calendar-panel .calendar-weekdays {
+  padding: 0 16px 6px;
+}
+
+.record-page-root .record-calendar-flip {
+  perspective: 1000px;
+}
+
+.record-page-root .record-calendar-flip-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.record-page-root .record-calendar-flip-inner.is-flipping {
+  transform: rotateX(90deg);
+}
+
+.record-page-root .record-page-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  transition: opacity 0.25s ease 0.15s, transform 0.25s ease 0.15s;
+}
+
+.record-page-root.is-flipping .record-page-content {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.record-page-root .calendar-weekdays {
+  height: 20px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: center;
+  padding: 0 4px 6px;
+  background: transparent;
+}
+
+.record-page-root .calendar-weekdays span {
+  height: 20px;
+  display: grid;
+  place-items: center;
+  color: #cccccc;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.record-page-root .calendar-weekdays span:first-child,
+.record-page-root .calendar-weekdays span:last-child {
+  color: #323232;
+}
+
+.record-page-root [data-record-calendar] > .record-calendar,
+.record-page-root .record-calendar-panel > .record-calendar {
+  border-radius: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  background: #ffffff;
+}
+
+.record-page-root .record-calendar {
+  padding: 0 12px 12px;
+  overflow: hidden;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.record-page-root .calendar-scroll-window {
+  overflow: hidden;
+  transition: height 0.24s ease;
+}
+
+.record-page-root .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  row-gap: 4pt;
+  column-gap: 4px;
+  padding: 4px;
+  transform: translateY(var(--calendar-offset-y, 0px));
+  transition: transform 0.24s ease;
+  will-change: transform;
+}
+
+.record-page-root .calendar-day {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
+  border: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  background: transparent;
+  color: #4cd96f;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 400;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.record-page-root .calendar-day.is-empty {
+  pointer-events: none;
+  cursor: default;
+}
+
+.record-page-root .calendar-day.is-fertile {
+  color: #b972ff;
+}
+
+.record-page-root .calendar-day.is-period {
+  background: #ffdbe7;
+  color: #ffffff;
+}
+
+.record-page-root .calendar-day.is-period-lit {
+  background: #ff4d88;
+  color: #ffffff;
+}
+
+.record-page-root .calendar-day.is-today {
+  background: #ff4d88;
+  color: #ffffff;
+}
+
+.record-page-root .calendar-day.is-selected {
+  box-shadow: inset 0 0 0 1.5px #ffffff, 0 0 0 1.5px #ff4d88;
+}
+
+.record-page-root.is-view-mode .calendar-day {
+  color: #333333;
+  background: transparent;
+}
+
+.record-page-root.is-view-mode .calendar-day.is-fertile {
+  color: #333333;
+}
+
+.record-page-root.is-view-mode .calendar-day.is-period,
+.record-page-root.is-view-mode .calendar-day.is-period-lit {
+  background: transparent;
+  color: #333333;
+}
+
+.record-page-root.is-view-mode .calendar-day.is-today {
+  background: transparent;
+  color: #ff4d88;
+  box-shadow: inset 0 0 0 1.5px #ff4d88;
+}
+
+.record-page-root.is-view-mode .calendar-day.is-selected {
+  background: #ff4d88;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.record-page-root .calendar-day:not(.is-empty) {
+  display: grid;
+  grid-template-rows: 10px auto 12px;
+  align-content: center;
+  justify-items: center;
+  row-gap: 2px;
+  place-items: unset;
+}
+
+.record-page-root .calendar-day-ovulation {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 10px;
+  width: 100%;
+}
+
+.record-page-root .calendar-day-ovulation.is-slot {
+  visibility: hidden;
+}
+
+.record-page-root .calendar-day-ovulation .calendar-icon.is-ovulation {
+  display: block;
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.record-page-root .calendar-day.is-view-cell .calendar-day-number {
+  position: static;
+  transform: none;
+}
+
+.record-page-root .calendar-day:not(.is-empty) .calendar-day-number {
+  position: static;
+  transform: none;
+  grid-row: 2;
+  line-height: 1;
+}
+
+.record-page-root .calendar-day-records {
+  position: static;
+  grid-row: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 11px;
+  width: 100%;
+  transform: none;
+}
+
+.record-page-root .calendar-day-records .record-type-icon {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.record-page-root .calendar-day-records.is-slot {
+  visibility: hidden;
+}
+
+.record-page-root .calendar-day.is-today b {
+  position: absolute;
+  top: calc(50% + 13px);
+  left: 50%;
+  display: block;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 400;
+  transform: translateX(-50%);
+}
+
+.record-page-root .calendar-day-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  transform: translate(-50%, -50%);
+}
+
+.record-page-root .calendar-day-icons {
+  position: absolute;
+  top: calc(50% + 15px);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 12px;
+  transform: translateX(-50%);
+}
+
+.record-page-root .calendar-icon {
+  display: block;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.record-page-root .calendar-icon.is-floating {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.record-page-root .calendar-icon.is-today-mark {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  transform: translateX(-50%);
+}
+
+.record-page-root .calendar-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 12px;
+  color: #999999;
+  font-size: 12px;
+  line-height: 1.33;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.record-page-root .calendar-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.record-page-root .calendar-legend i {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: inline-block;
+  background: #ff4d88;
+}
+
+.record-page-root .calendar-legend .period-soft {
+  background: #ffdbe7;
+}
+
+.record-page-root .calendar-legend .fertile {
+  background: #b972ff;
+}
+
+.record-page-root .calendar-legend-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.record-page-root .calendar-more {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  color: #666666;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.record-page-root .record-combo-card {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.record-page-root .record-combo-card .combo-row {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+.record-page-root .record-combo-card .avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(255, 77, 136, 0.18), rgba(185, 114, 255, 0.16));
+  position: relative;
+  overflow: hidden;
+}
+
+.record-page-root .record-combo-card .avatar::before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  display: block;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.92) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 78%, rgba(255, 255, 255, 0.92) 0 30%, transparent 31%),
+    linear-gradient(135deg, rgba(255, 77, 136, 0.42), rgba(185, 114, 255, 0.38));
+}
+
+.record-page-root .record-combo-card strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: #323232;
+}
+
+.record-page-root .record-combo-card p {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.33;
+  color: #666666;
+}
+
+.record-page-root .record-combo-card .btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  min-height: 25px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #ff4d88;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.29;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-page-root .business-list-group {
+  display: grid;
+  gap: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.record-page-root .list-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.record-page-root .list-item::after {
+  content: "";
+  position: absolute;
+  left: 48px;
+  right: 0;
+  bottom: 0;
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.record-page-root .list-item:last-child::after {
+  display: none;
+}
+
+.record-page-root .list-item > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.record-page-root .list-item strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: #323232;
+}
+
+.record-page-root .list-icon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.record-page-root .mock-list-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  background: var(--mock-icon-bg, #ffdbe7);
+}
+
+.record-page-root .mock-list-icon.is-circle {
+  border-radius: 50%;
+}
+
+.record-page-root .mock-list-icon.is-square {
+  border-radius: 4px;
+}
+
+.record-page-root .mock-list-icon.is-pill {
+  border-radius: 999px;
+  width: 26px;
+  height: 16px;
+}
+
+.record-page-root .mock-list-icon.is-diamond {
+  transform: rotate(45deg) scale(0.72);
+  border-radius: 2px;
+}
+
+.record-page-root .mock-list-icon.is-bar {
+  width: 20px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.record-page-root .period-keyicon {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.record-page-root .list-side-text {
+  color: #999999;
+  font-size: 17px;
+  line-height: 1.47;
+  white-space: nowrap;
+}
+
+.record-page-root .list-add {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid #ff4d88;
+  border-radius: 999px;
+  background: transparent;
+  color: #ff4d88;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.record-page-root .list-add svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.record-page-root .ios26-segmented {
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
+  flex: 0 0 80px;
+  height: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 4px;
+  background: #cccccc;
+}
+
+.record-page-root .ios26-segmented button {
+  min-width: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-page-root .ios26-segmented button.is-active {
+  border-radius: 2px;
+  background: #ff4d88;
+  box-shadow: 0 1px 4px rgba(255, 77, 136, 0.24);
+}
+
+.record-page-root.record-month-open {
+  overflow-x: hidden;
+  z-index: 110;
+}
+
+.record-page-root .record-month-view {
+  position: absolute;
+  top: -44px;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--my-tabbar-h, 58px));
+  z-index: 90;
+  background: #ffffff;
+  padding-top: 44px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateX(-100%);
+  transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.record-page-root.record-month-open .record-month-view {
+  transform: translateX(0);
+}
+
+.record-page-root .month-view-nav {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.record-page-root .month-back-today {
+  border: 0;
+  background: transparent;
+  color: #323232;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+}
+
+.record-page-root .month-back-today svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.record-page-root .record-month-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  background: #ffffff;
+}
+
+.record-page-root .record-month-year-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0 12px;
+}
+
+.record-page-root .record-month-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.33;
+  color: #323232;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-month-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ff4d88;
+}
+
+.record-page-root .record-month-year {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 500;
+  color: #323232;
+}
+
+.record-page-root .record-month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 14px;
+  min-width: 0;
+}
+
+.record-page-root .record-month-block {
+  min-width: 0;
+}
+
+.record-page-root .record-month-block h4 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 500;
+  color: #323232;
+}
+
+.record-page-root .record-month-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-bottom: 4px;
+  color: #cccccc;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.record-page-root .record-month-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  column-gap: 0;
+  row-gap: 2px;
+}
+
+.record-page-root .record-month-days span {
+  min-height: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 400;
+  color: #323232;
+  border-radius: 0;
+}
+
+.record-page-root .record-month-days span.is-empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.record-page-root .record-month-days span.is-period {
+  background: #ff4d88;
+  color: #ffffff;
+}
+
+.record-page-root .record-month-days span.is-period-start {
+  border-radius: 4px 0 0 4px;
+}
+
+.record-page-root .record-month-days span.is-period-end {
+  border-radius: 0 4px 4px 0;
+}
+
+.record-page-root .record-month-days span.is-period-start.is-period-end {
+  border-radius: 4px;
+}
+
+.record-page-root .record-month-days span.is-today-label {
+  color: #ff4d88;
+  font-weight: 500;
+  background: transparent;
+}
+
+.record-page-root .record-view-panel {
+  background: transparent;
+  border-radius: 0;
+  margin: 0;
+  padding: 0 0 12px;
+}
+
+.record-page-root .record-view-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  background: #f2f2f5;
+  border-radius: 12px 12px 0 0;
+}
+
+.record-page-root .record-view-day-date {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.record-page-root .record-view-day-main {
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.record-page-root .record-view-day-week {
+  font-size: 14px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .record-view-day-count {
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+}
+
+.record-page-root .record-view-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.record-page-root .record-view-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 108px;
+  box-sizing: border-box;
+}
+
+.record-page-root .record-view-card-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.29;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .record-view-card-head i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-view-card-head i.is-period {
+  background: #ff4d88;
+}
+
+.record-page-root .record-view-card-head i.is-mood {
+  background: #c8a882;
+}
+
+.record-page-root .record-view-card-head i.is-weight {
+  background: #ff9500;
+}
+
+.record-page-root .record-view-card-head i.is-sleep {
+  background: #8d54ff;
+}
+
+.record-page-root .record-view-card-head i.is-love {
+  background: #ff6b9d;
+}
+
+.record-page-root .record-view-subtext {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .record-view-card-head i.is-symptom {
+  background: #4f7cae;
+}
+
+.record-page-root .record-view-card-head i.is-diet {
+  background: #00cc99;
+}
+
+.record-page-root .record-view-value {
+  font-size: 21px;
+  line-height: 1.19;
+  font-weight: 500;
+  color: #323232;
+}
+
+.record-page-root .record-view-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.record-page-root .record-view-metric strong {
+  font-size: 21px;
+  line-height: 1.19;
+  font-weight: 500;
+  color: #323232;
+}
+
+.record-page-root .record-view-metric em {
+  font-size: 12px;
+  line-height: 1.29;
+  font-style: normal;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .record-view-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.record-page-root .record-view-tag {
+  display: inline-block;
+  font-size: 11px;
+  line-height: 1.29;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 400;
+}
+
+.record-page-root .record-view-tag.is-period {
+  background: #fff0f4;
+  color: #ff4d88;
+}
+
+.record-page-root .record-view-tag.is-love {
+  background: #fff0f4;
+  color: #ff6b9d;
+}
+
+.record-page-root .record-view-tag.is-symptom {
+  background: #e8f3ff;
+  color: #4f7cae;
+}
+
+.record-page-root .record-view-moods {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.record-page-root .record-view-mood-chip {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.record-page-root .record-view-diet-summary {
+  font-size: 15px;
+  line-height: 1.47;
+  font-weight: 500;
+  color: #323232;
+  margin-bottom: 10px;
+}
+
+.record-page-root .record-view-meals {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.record-page-root .record-view-meal-photo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  background: #f2f2f5;
+}
+
+.record-page-root .record-view-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .record-view-empty span {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.record-page-root .record-view-empty p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.29;
+}

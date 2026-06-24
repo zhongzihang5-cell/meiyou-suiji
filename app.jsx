@@ -219,6 +219,14 @@ function App(){
     scrollToSisterAnalysis();
   };
 
+  const openPeriodAnalysis = ()=>{
+    if(scene.calendar.linkPeriodToNote) {
+      openSisterAnalysis();
+      return;
+    }
+    setShowAnalysisNotice(false);
+  };
+
   const handleSisterCycleComplete = React.useCallback(()=>{
     setSisterCycleDone(true);
     requestAnimationFrame(()=>{
@@ -717,7 +725,7 @@ function App(){
     dayLbl: '今日',
   };
 
-  const showCalendar = scene.calendar.enabled && activeTab === 'cal';
+  const showRecordTab = scene.calendar.enabled && activeTab === 'cal';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
   const showTodayGuide = scene.record.todayGuide && !hideTodayGuide;
@@ -745,8 +753,8 @@ function App(){
       <div className="phone">
         <StatusBar/>
 
-      {showCalendar && (
-        <CalendarPage
+      {showRecordTab && (
+        <RecordPage
           key={scene.id}
           periodFlowEnabled={scene.calendar.periodFlow}
           onAnalysisReady={()=>setShowAnalysisNotice(true)}
@@ -757,7 +765,7 @@ function App(){
       {scene.floatNotice.enabled && (
         <FloatNotice
           show={showFloatNotice}
-          onOpen={openSisterAnalysis}
+          onOpen={openPeriodAnalysis}
           onClose={()=>setShowAnalysisNotice(false)}
         />
       )}
