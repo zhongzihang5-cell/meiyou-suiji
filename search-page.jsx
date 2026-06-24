@@ -8,7 +8,10 @@ const SEARCH_FILTER_TAGS = [
   { id: 'sleep', label: '睡眠', emoji: '😴' },
 ];
 
-const SEARCH_VOICE_DEMO_TEXT = '今天有点累，肚子也有点胀';
+const SEARCH_VOICE_DEMO_TEXT = '上个月体重';
+const SEARCH_VOICE_CHAR_MS = 52;
+const SEARCH_VOICE_CHAR_JITTER = 38;
+const SEARCH_SUGGESTIONS = ['活动', '事件', '会议', '比赛', '展览', '访问'];
 
 const IOS_KB_ROWS = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -16,10 +19,26 @@ const IOS_KB_ROWS = [
   ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
 ];
 
-function IosSearchKeyboard({ onKey, onBackspace, onSpace }) {
+function IosSearchKeyboard({ query, onKey, onBackspace, onSpace, onSearch, onVoice, isVoiceActive }) {
   const I = window.Icon;
+  const canSearch = !!query.trim();
   return (
     <div className="ios-search-keyboard" aria-hidden="true">
+      {query ? (
+        <div className="ios-kb-suggestions">
+          {SEARCH_SUGGESTIONS.map((word) => (
+            <button
+              key={word}
+              type="button"
+              className="ios-kb-suggestion"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onKey(word)}
+            >
+              {word}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="ios-kb-rows">
         {IOS_KB_ROWS.map((row, rowIndex) => (
           <div key={rowIndex} className="ios-kb-row">
@@ -60,35 +79,71 @@ function IosSearchKeyboard({ onKey, onBackspace, onSpace }) {
           >
             拼
           </button>
-          <span className="ios-kb-key ios-kb-key--fn ios-kb-key--search">
-            <I name="search" size={16} stroke={2}/>
-          </span>
+          <button
+            type="button"
+            className={'ios-kb-key ios-kb-key--fn ios-kb-key--search' + (canSearch ? ' is-ready' : '')}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => { if (canSearch) onSearch(); }}
+            aria-label="搜索"
+            disabled={!canSearch}
+          >
+            <I name="search" size={16} stroke={2.2}/>
+          </button>
         </div>
       </div>
       <div className="ios-kb-accessory">
         <span className="ios-kb-globe" aria-hidden="true">🌐</span>
-        <span className="ios-kb-mic" aria-hidden="true">
+        <button
+          type="button"
+          className={'ios-kb-mic' + (isVoiceActive ? ' is-active' : '')}
+          aria-label="语音输入"
+          aria-pressed={isVoiceActive}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={onVoice}
+        >
           <I name="mic" size={18} stroke={1.8}/>
-        </span>
+        </button>
       </div>
     </div>
   );
 }
 
-function StreamSearchOverlay({ onClose }) {
+function StreamSearchOverlay({ onClose, onSearch, onSearchClear }) {
   const [query, setQuery] = React.useState('');
   const [activeFilter, setActiveFilter] = React.useState(null);
+  const [phase, setPhase] = React.useState('compose'); // compose | results
+  const [showKeyboard, setShowKeyboard] = React.useState(true);
   const [voiceListening, setVoiceListening] = React.useState(false);
   const inputRef = React.useRef(null);
+  const voiceStreamRef = React.useRef(null);
+
+  const stopVoiceStream = React.useCallback(() => {
+    if (voiceStreamRef.current) {
+      clearTimeout(voiceStreamRef.current);
+      voiceStreamRef.current = null;
+    }
+    setVoiceListening(false);
+  }, []);
 
   React.useEffect(() => {
-    if (voiceListening) {
-      inputRef.current?.blur();
-      return undefined;
-    }
-    const tm = setTimeout(() => inputRef.current?.focus(), 180);
+    const tm = setTimeout(() => {
+      inputRef.current?.focus();
+      setShowKeyboard(true);
+    }, 180);
     return () => clearTimeout(tm);
-  }, [voiceListening]);
+  }, []);
+
+  React.useEffect(() => {
+    const shell = document.querySelector('.suiji-shell.is-search-open');
+    if (!shell) return undefined;
+    shell.classList.toggle('is-search-kb-open', showKeyboard);
+    return () => shell.classList.remove('is-search-kb-open');
+  }, [showKeyboard]);
+
+  React.useEffect(() => () => {
+    if (voiceStreamRef.current) clearTimeout(voiceStreamRef.current);
+    document.querySelector('.suiji-shell')?.classList.remove('is-search-kb-open');
+  }, []);
 
   React.useEffect(() => {
     const onKey = (e) => {
@@ -98,114 +153,195 @@ function StreamSearchOverlay({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const appendKey = (key) => setQuery((prev) => prev + key);
-  const handleBackspace = () => setQuery((prev) => prev.slice(0, -1));
-  const handleSpace = () => setQuery((prev) => (prev && !/\s$/.test(prev) ? prev + ' ' : prev));
+  const dismissKeyboard = () => {
+    setShowKeyboard(false);
+    inputRef.current?.blur();
+  };
+
+  const openKeyboard = () => {
+    setShowKeyboard(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const appendKey = (key) => {
+    stopVoiceStream();
+    if (phase === 'results') onSearchClear?.();
+    setPhase('compose');
+    setQuery((prev) => prev + key);
+  };
+  const handleBackspace = () => {
+    stopVoiceStream();
+    if (phase === 'results') onSearchClear?.();
+    setPhase('compose');
+    setQuery((prev) => prev.slice(0, -1));
+  };
+  const handleSpace = () => {
+    stopVoiceStream();
+    if (phase === 'results') onSearchClear?.();
+    setPhase('compose');
+    setQuery((prev) => (prev && !/\s$/.test(prev) ? prev + ' ' : prev));
+  };
+  const handleClear = () => {
+    stopVoiceStream();
+    setQuery('');
+    setActiveFilter(null);
+    setPhase('compose');
+    onSearchClear?.();
+    openKeyboard();
+  };
 
   const handleVoiceInput = () => {
-    if (voiceListening) {
-      setVoiceListening(false);
-      setQuery(SEARCH_VOICE_DEMO_TEXT);
-      requestAnimationFrame(() => inputRef.current?.focus());
-      return;
-    }
-    inputRef.current?.blur();
+    if (voiceListening) return;
+    if (phase === 'results') onSearchClear?.();
+    setActiveFilter(null);
+    setPhase('compose');
+    setQuery('');
+    setShowKeyboard(true);
     setVoiceListening(true);
+    inputRef.current?.focus();
+
+    const chars = Array.from(SEARCH_VOICE_DEMO_TEXT);
+    let i = 0;
+    const tick = () => {
+      i += 1;
+      if (i > chars.length) {
+        voiceStreamRef.current = null;
+        setVoiceListening(false);
+        setPhase('results');
+        onSearch?.({ query: SEARCH_VOICE_DEMO_TEXT, filterId: null });
+        dismissKeyboard();
+        return;
+      }
+      setQuery(chars.slice(0, i).join(''));
+      voiceStreamRef.current = setTimeout(
+        tick,
+        SEARCH_VOICE_CHAR_MS + Math.random() * SEARCH_VOICE_CHAR_JITTER,
+      );
+    };
+    voiceStreamRef.current = setTimeout(tick, 120);
   };
 
   const handleFilterClick = (tag) => {
+    stopVoiceStream();
     setActiveFilter(tag.id);
     setQuery(tag.label);
-    if (voiceListening) setVoiceListening(false);
-    requestAnimationFrame(() => inputRef.current?.focus());
+    setPhase('results');
+    onSearch?.({ query: tag.label, filterId: tag.id });
+    dismissKeyboard();
   };
 
   const handleSubmit = () => {
     if (!query.trim()) return;
-    onClose?.();
+    stopVoiceStream();
+    setPhase('results');
+    onSearch?.({ query: query.trim(), filterId: activeFilter });
+    dismissKeyboard();
   };
 
-  const micActive = voiceListening;
-  const showKeyboard = !voiceListening;
-  const canSend = !!query.trim();
+  const handleInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   const I = window.Icon;
 
   return (
     <div className="ios-search-overlay" role="presentation">
       <div className="ios-search-top">
         <div className="ios-search-bar-row">
-          <div className={'ios-search-field-wrap' + (voiceListening ? ' is-listening' : '')}>
+          <div className={'ios-search-field-wrap' + (voiceListening ? ' is-voice-active' : '')}>
+            <span className="ios-search-field-ico" aria-hidden="true">
+              <I name="search" size={17} stroke={1.8}/>
+            </span>
+            <input
+              ref={inputRef}
+              className="ios-search-field"
+              type="text"
+              enterKeyHint="search"
+              placeholder="试试搜「上个月体重」"
+              value={query}
+              onFocus={openKeyboard}
+              onClick={openKeyboard}
+              onChange={(e) => {
+                stopVoiceStream();
+                setQuery(e.target.value);
+                if (phase === 'results') {
+                  setPhase('compose');
+                  onSearchClear?.();
+                }
+              }}
+              onKeyDown={handleInputKeyDown}
+              aria-label="搜索"
+            />
             {voiceListening ? (
-              <div className="ios-search-listening" aria-live="polite">
-                <span className="ios-search-listening-text">正在听</span>
-                <span className="ios-search-listening-waves" aria-hidden="true">
-                  {Array.from({ length: 12 }, (_, i) => <span key={i}></span>)}
-                </span>
+              <div className="ios-search-voice-pill" aria-hidden="true">
+                <I name="mic" size={11} stroke={2.2}/>
+                <span>普</span>
               </div>
+            ) : null}
+            {query ? (
+              <button
+                type="button"
+                className="ios-search-clear"
+                aria-label="清除"
+                onClick={handleClear}
+              >
+                <I name="close" size={10} stroke={2.4}/>
+              </button>
             ) : (
-              <React.Fragment>
-                <span className="ios-search-field-ico" aria-hidden="true">
-                  <I name="search" size={17} stroke={1.8}/>
-                </span>
-                <input
-                  ref={inputRef}
-                  className="ios-search-field"
-                  type="search"
-                  enterKeyHint="search"
-                  placeholder="搜索"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  aria-label="搜索"
-                />
-              </React.Fragment>
+              <button
+                type="button"
+                className={'ios-search-mic' + (voiceListening ? ' is-active' : '')}
+                aria-label="语音输入"
+                aria-pressed={voiceListening}
+                onClick={handleVoiceInput}
+              >
+                <I name="mic" size={18} stroke={1.7}/>
+              </button>
             )}
-            <button
-              type="button"
-              className={'ios-search-mic' + (micActive ? ' is-active' : '')}
-              aria-label="语音输入"
-              aria-pressed={micActive}
-              onClick={handleVoiceInput}
-            >
-              <I name="mic" size={18} stroke={1.7}/>
-            </button>
           </div>
-          <button
-            type="button"
-            className={'ios-search-send' + (canSend ? ' is-ready' : '')}
-            aria-label="发送"
-            disabled={!canSend}
-            onClick={handleSubmit}
-          >
-            <I name="send" size={16} stroke={2}/>
+          <button type="button" className="ios-search-dismiss" aria-label="关闭" onClick={onClose}>
+            <I name="close" size={14} stroke={2.2}/>
           </button>
         </div>
 
-        <div className="ios-search-panel">
-          <div className="ios-search-filters" aria-label="按类型筛选">
-            <p className="ios-search-filter-label">按类型筛选</p>
-            <div className="ios-search-filter-tags">
-              {SEARCH_FILTER_TAGS.map((tag) => {
-                const active = activeFilter === tag.id;
-                return (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    className={'ios-search-filter-tag' + (active ? ' is-active' : '')}
-                    aria-pressed={active}
-                    onClick={() => handleFilterClick(tag)}
-                  >
-                    {tag.emoji ? <span className="ios-search-filter-emoji" aria-hidden="true">{tag.emoji}</span> : null}
-                    {tag.label}
-                  </button>
-                );
-              })}
+        {phase === 'compose' ? (
+          <div className="ios-search-panel">
+            <div className="ios-search-filters" aria-label="类型筛选">
+              <div className="ios-search-filter-tags">
+                {SEARCH_FILTER_TAGS.map((tag) => {
+                  const active = activeFilter === tag.id;
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      className={'ios-search-filter-tag' + (active ? ' is-active' : '')}
+                      aria-pressed={active}
+                      onClick={() => handleFilterClick(tag)}
+                    >
+                      {tag.emoji ? <span className="ios-search-filter-emoji" aria-hidden="true">{tag.emoji}</span> : null}
+                      {tag.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       {showKeyboard ? (
-        <IosSearchKeyboard onKey={appendKey} onBackspace={handleBackspace} onSpace={handleSpace}/>
+      <IosSearchKeyboard
+        query={query}
+        onKey={appendKey}
+        onBackspace={handleBackspace}
+        onSpace={handleSpace}
+        onSearch={handleSubmit}
+        onVoice={handleVoiceInput}
+        isVoiceActive={voiceListening}
+      />
       ) : null}
     </div>
   );

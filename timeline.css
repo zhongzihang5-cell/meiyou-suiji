@@ -10,6 +10,37 @@
   scroll-margin-bottom:140px;
 }
 
+.tl-search-empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:min(52vh, 420px);
+  padding:48px 32px 80px;
+  text-align:center;
+}
+.tl-search-empty-ico{
+  display:flex;
+  justify-content:center;
+  color:rgba(0,0,0,0.22);
+  margin-bottom:16px;
+}
+.tl-search-empty-title{
+  margin:0 0 8px;
+  font-size:21px;
+  line-height:1.19;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+}
+.tl-search-empty-desc{
+  margin:0;
+  font-size:15px;
+  line-height:1.47;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+  max-width:280px;
+}
+
 /* 日期分区 — 不同天之间加大间距 */
 .tl-day-section-head{
   margin-bottom:12px;

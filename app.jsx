@@ -56,7 +56,9 @@ function App(){
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
+  const [searchCriteria, setSearchCriteria] = useState(null);
   const scheme3FirstVisitRef = useRef(null);
+  const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
@@ -165,6 +167,7 @@ function App(){
     setActiveTab(next.activeTab);
     setShowPhoto(false);
     setShowSearchPage(false);
+    setSearchCriteria(null);
     scheme3FirstVisitRef.current = null;
     setFirstDropAnim(null);
     firstRecordAnimDoneRef.current = false;
@@ -723,7 +726,59 @@ function App(){
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const toggleSearchPage = ()=> setShowSearchPage((prev)=> !prev);
-  const closeSearchPage = ()=> setShowSearchPage(false);
+  const restoreSearchCloseScroll = React.useCallback(()=>{
+    const saved = searchCloseScrollRef.current;
+    if(!saved) return;
+    const stream = streamRef.current;
+    if(!stream) return;
+    const { anchorId, scrollTop } = saved;
+    if(anchorId){
+      const el = stream.querySelector(`[data-entry-id="${anchorId}"]`);
+      if(el){
+        const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - 28;
+        stream.scrollTop = Math.max(0, top);
+        return;
+      }
+    }
+    stream.scrollTop = scrollTop;
+  }, []);
+  const closeSearchPage = ()=> {
+    const filterTimelineForSearchFn = window.filterTimelineForSearch;
+    const filtered = (searchCriteria && filterTimelineForSearchFn)
+      ? filterTimelineForSearchFn(timeline, searchCriteria)
+      : timeline;
+    searchCloseScrollRef.current = {
+      anchorId: window.getSearchAnchorEntryId?.(filtered),
+      scrollTop: streamRef.current?.scrollTop ?? 0,
+    };
+    setShowSearchPage(false);
+    setSearchCriteria(null);
+  };
+  const handleTimelineSearch = (criteria)=> setSearchCriteria(criteria);
+  const handleTimelineSearchClear = ()=> setSearchCriteria(null);
+
+  const filterTimelineForSearch = window.filterTimelineForSearch;
+  const countTimelineSearchItems = window.countTimelineSearchItems;
+  const isSearchActive = !!(searchCriteria && (searchCriteria.query?.trim() || searchCriteria.filterId));
+  const displayTimeline = React.useMemo(()=>{
+    if(!isSearchActive || !filterTimelineForSearch) return timeline;
+    return filterTimelineForSearch(timeline, searchCriteria);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch]);
+  const searchResultCount = React.useMemo(()=>{
+    if(!isSearchActive || !countTimelineSearchItems) return null;
+    return countTimelineSearchItems(displayTimeline);
+  }, [displayTimeline, isSearchActive, countTimelineSearchItems]);
+
+  React.useLayoutEffect(()=>{
+    if(searchCriteria) return;
+    if(!searchCloseScrollRef.current) return;
+    restoreSearchCloseScroll();
+    requestAnimationFrame(()=>{
+      restoreSearchCloseScroll();
+      searchCloseScrollRef.current = null;
+    });
+  }, [searchCriteria, restoreSearchCloseScroll]);
+
   const showSearchDock = !showSearchPage;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
@@ -761,7 +816,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage?' is-search-open':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage?' is-search-open':'')+(isSearchActive?' is-search-filtered':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -833,8 +888,17 @@ function App(){
             </div>
           )}
 
+          {isSearchActive && searchResultCount === 0 ? (
+            <div className="tl-search-empty" role="status">
+              <span className="tl-search-empty-ico" aria-hidden="true">
+                <I name="search" size={44} stroke={1.4}/>
+              </span>
+              <p className="tl-search-empty-title">无结果</p>
+              <p className="tl-search-empty-desc">检查拼写或尝试新搜索词。</p>
+            </div>
+          ) : (
           <TimelineStream
-            blocks={timeline}
+            blocks={displayTimeline}
             endRef={timelineEndRef}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
@@ -844,6 +908,7 @@ function App(){
             onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}
             onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
+          )}
         </div>
 
         {!voiceTranscribe && showSearchDock && (
@@ -868,7 +933,11 @@ function App(){
         </>
         )}
         {showSearchPage && StreamSearchOverlay && (
-          <StreamSearchOverlay onClose={closeSearchPage}/>
+          <StreamSearchOverlay
+            onClose={closeSearchPage}
+            onSearch={handleTimelineSearch}
+            onSearchClear={handleTimelineSearchClear}
+          />
         )}
       </div>
 

@@ -239,6 +239,44 @@ const SCENE_CONTEXT = {
 const TIMELINE_BLOCKS = [
   { type:'gap', id:'gap-top' },
   {
+    type:'day', id:'d-4-28', date:'4/28', weekday:'周一',
+    items:[
+      {
+        kind:'record-group', id:'e-428-w-g',
+        primary:{
+          id:'e-428-w', time:'08:20', kind:'weight',
+          text:'',
+          weightLabel:'体重',
+          weightValue:'53.6公斤',
+          tags:[],
+        },
+      },
+    ],
+  },
+  {
+    type:'day', id:'d-5-13', date:'5/13', weekday:'周二',
+    items:[
+      {
+        kind:'record-group', id:'e-513-sleep-g',
+        primary:{
+          id:'e-513-sleep', time:'23:20', kind:'text',
+          text:'昨晚翻来覆去到一点才睡着，今天起来还是有点昏。',
+          tags:[{ cat:'睡眠', val:'失眠', icon:'sleep' }],
+        },
+      },
+      {
+        kind:'record-group', id:'e-513-w-g',
+        primary:{
+          id:'e-513-w', time:'07:10', kind:'weight',
+          text:'',
+          weightLabel:'体重',
+          weightValue:'53.1公斤',
+          tags:[],
+        },
+      },
+    ],
+  },
+  {
     type:'day', id:'d-5-14', date:'5/14', weekday:'周四',
     items:[
       {
@@ -249,6 +287,16 @@ const TIMELINE_BLOCKS = [
           tags:[
             { cat:'运动', val:'跑步', icon:'run' },
             { cat:'心情', val:'愉快', icon:'mood' },
+          ],
+        },
+      },
+      {
+        kind:'record-group', id:'e-514-diet-g',
+        primary:{
+          id:'e-514-diet', time:'12:30', kind:'text',
+          text:'午饭吃了鸡胸肉沙拉，没喝咖啡。',
+          tags:[
+            { cat:'饮食', val:'沙拉', icon:'food' },
           ],
         },
       },
@@ -306,7 +354,7 @@ const TIMELINE_BLOCKS = [
           id:'e-519-podcast', time:'21:20', kind:'text',
           text:'晚上听了会儿播客，整个人慢下来不少，打算十一点前睡。',
           tags:[
-            { cat:'心情', val:'放松', icon:'mood' },
+            { cat:'睡眠', val:'早睡', icon:'sleep' },
           ],
         },
         ai:{
@@ -343,7 +391,7 @@ const TIMELINE_BLOCKS = [
           duration:'0:18',
           text:'今天有点累，肚子也有点胀，午饭吃了三明治和拿铁，下午还一直有点犯困。',
           tags:[
-            { cat:'情绪', val:'疲惫', icon:'mood' },
+            { cat:'症状', val:'疲惫', icon:'sym' },
             { cat:'症状', val:'腹胀', icon:'sym' },
             { cat:'饮食', val:'三明治·拿铁', icon:'food' },
           ],
@@ -353,6 +401,19 @@ const TIMELINE_BLOCKS = [
           title:'本周情绪走势', note:'今日 ▽ 低于上周均值',
         },
         aiDefaultOpen:false,
+      },
+    ],
+  },
+  {
+    type:'day', id:'d-5-17', date:'5/17', weekday:'周日',
+    items:[
+      {
+        kind:'record-group', id:'e-517-fit-g',
+        primary:{
+          id:'e-517-fit', time:'18:10', kind:'text',
+          text:'去健身房练了四十分钟，出了一身汗。',
+          tags:[{ cat:'运动', val:'健身', icon:'run' }],
+        },
       },
     ],
   },
