@@ -17,33 +17,138 @@ function HomeTopBar(){
   );
 }
 
-function HomePeriodHero(){
-  const bars = [
-    ['7/4','17%', false],
-    ['7/5','50%', false],
-    ['7/6','100%', true],
-    ['7/7','83%', false],
-    ['7/8','50%', false],
-  ];
+const HOME_PERIOD_PROBABILITY = [
+  { date:'6/25', label:'周四', value:32 },
+  { date:'6/26', label:'周五', value:68 },
+  { date:'6/27', label:'周六', value:100, peak:true },
+  { date:'6/28', label:'周日', value:82 },
+  { date:'6/29', label:'周一', value:46 },
+];
+
+function HomePeriodHero({onOpen}){
   return (
-    <section className="home-period-hero">
+    <button type="button" className="home-period-hero" onClick={onOpen} aria-label="查看经期详情">
       <div className="home-hero-left">
-        <div className="home-hero-title">经期第4天</div>
-        <div className="home-hero-sub">预计在明天结束 <HomeChevron/></div>
+        <div className="home-hero-title">距月经开始还有3天</div>
+        <div className="home-hero-sub">预测经期开始日6月27日 <HomeChevron/></div>
       </div>
       <div className="home-hero-cta">查看详情</div>
       <div className="home-prob-card">
-        <div className="home-prob-label">下次月经几率</div>
-        <div className="home-prob-bars">
-          {bars.map(([day, height, peak])=>(
-            <div key={day} className={'home-prob-bar' + (peak ? ' is-peak' : '')}>
-              <div className="home-prob-col"><div className="home-prob-fill" style={{height}}></div></div>
-              <div className="home-prob-day">{day}</div>
-            </div>
-          ))}
+        <img className="home-prob-image" src="assets/home-period-forecast-cutout.png" alt="下次月经预测图" />
+      </div>
+    </button>
+  );
+}
+
+function HomePeriodProbabilityChart(){
+  return (
+    <div className="home-detail-chart" aria-label="下次月经几率柱状图">
+      {HOME_PERIOD_PROBABILITY.map(item=>(
+        <div key={item.date} className={'home-detail-bar-item' + (item.peak ? ' is-peak' : '')}>
+          <div className="home-detail-bar-track">
+            <div className="home-detail-bar-fill" style={{height:item.value + '%'}}></div>
+          </div>
+          <div className="home-detail-bar-date">{item.date}</div>
+          <div className="home-detail-bar-week">{item.label}</div>
         </div>
+      ))}
+    </div>
+  );
+}
+
+function HomePeriodIconRow(){
+  const icons = [
+    ['小腹胀', 'M8 15c2.5-4 5.5-4 8 0'],
+    ['头发出油', 'M8 18c1-6 7-6 8 0'],
+  ];
+  return (
+    <div className="home-detail-icons">
+      {icons.map(([label, path])=>(
+        <div className="home-detail-icon-item" key={label}>
+          <span className="home-detail-round-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d={path}/><circle cx="12" cy="11" r="4" fill="rgba(255,255,255,0.28)" stroke="none"/></svg>
+          </span>
+          <span>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function HomePeriodAdviceCard(){
+  return (
+    <section className="home-detail-card">
+      <div className="home-detail-card-title">
+        <span className="home-detail-title-dot"></span>
+        黄体期 · 生活指南
+      </div>
+      <div className="home-detail-advice">
+        <div className="home-detail-advice-title">经前期知识</div>
+        <p>每次来月经前就像变了个人？会出现焦虑抑郁、情绪波动、饮食改变、失眠、乳房胀痛、腰酸背痛等一系列症状。</p>
+      </div>
+      <div className="home-detail-advice">
+        <div className="home-detail-advice-title">饮食建议</div>
+        <p>来月经前容易长痘痘？少吃辛辣刺激食物，同时高糖、高脂食物也尽量少吃。</p>
+      </div>
+      <div className="home-detail-advice">
+        <div className="home-detail-advice-title">运动建议</div>
+        <p>月经来之前，卵巢内的黄体受挤压后容易破裂出血。建议避免突然改变体位、剧烈运动。</p>
       </div>
     </section>
+  );
+}
+
+function HomePeriodDetail({onBack}){
+  return (
+    <main className="home-detail-page" aria-label="今日密报">
+      <div className="home-detail-head">
+        <div className="home-detail-nav">
+          <button type="button" className="home-detail-back" onClick={onBack} aria-label="返回">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <div className="home-detail-title">今日密报</div>
+          <div className="home-detail-nav-spacer"></div>
+        </div>
+        <div className="home-detail-days">
+          <span>周二(6月23日)</span>
+          <span className="is-active">今天(6月24日)</span>
+          <span>周四(6月25日)</span>
+        </div>
+      </div>
+
+      <section className="home-detail-card home-detail-main-card">
+        <div className="home-detail-section">
+          <div className="home-detail-section-title">
+            下次月经开始几率
+            <span className="home-detail-section-note">6/27最高</span>
+          </div>
+          <HomePeriodProbabilityChart/>
+          <div className="home-detail-chart-summary">最高几率出现在 6月27日，也可能延后。</div>
+          <div className="home-detail-chart-hint">预测会随记录更新</div>
+        </div>
+
+        <div className="home-detail-cycle-block">
+          <div className="home-detail-cycle-title">黄体期 · 第11天 <span>i</span></div>
+          <div className="home-detail-cycle-sub">距离月经开始（6月27日）还有3天</div>
+          <div className="home-detail-orbit">
+            <img src="assets/home-period-forecast-cutout.png" alt="周期预测图" />
+          </div>
+        </div>
+
+        <div className="home-detail-section">
+          <div className="home-detail-section-title">症状预测</div>
+          <p>熟悉的小腹坠胀感出现了吗？它可能是在提醒你，再过几天月经就要来了哦。</p>
+          <HomePeriodIconRow/>
+        </div>
+
+        <div className="home-detail-section">
+          <div className="home-detail-section-title">白带变化</div>
+          <p>黄体期快结束这几天，白带可能会进一步变少，质地变干，颜色发白或微微发黄。</p>
+        </div>
+      </section>
+
+      <HomePeriodAdviceCard/>
+    </main>
   );
 }
 
@@ -116,10 +221,15 @@ function HomeFeedCard({kind}){
 }
 
 function HomePage(){
+  const [detailOpen, setDetailOpen] = React.useState(false);
+  if(detailOpen){
+    return <HomePeriodDetail onBack={()=>setDetailOpen(false)}/>;
+  }
+
   return (
     <main className="home-page" aria-label="首页">
       <HomeTopBar/>
-      <HomePeriodHero/>
+      <HomePeriodHero onOpen={()=>setDetailOpen(true)}/>
       <HomeFlowBar/>
       <section className="home-feed" aria-label="推荐内容">
         <HomeFeedCard/>
