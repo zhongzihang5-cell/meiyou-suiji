@@ -717,7 +717,7 @@ function App(){
     dayLbl: '今日',
   };
 
-  const showCalendar = scene.calendar.enabled && activeTab === 'cal';
+  const showRecordTab = scene.calendar.enabled && activeTab === 'cal';
   const showReview = activeTab === 'cash';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
@@ -747,8 +747,8 @@ function App(){
       <div className="phone">
         <StatusBar/>
 
-      {showCalendar && (
-        <CalendarPage
+      {showRecordTab && (
+        <RecordPage
           key={scene.id}
           periodFlowEnabled={scene.calendar.periodFlow}
           onAnalysisReady={()=>setShowAnalysisNotice(true)}
