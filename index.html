@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="camera-diet.css?v=20260617-v1">
 <link rel="stylesheet" href="diet-feedback.css?v=20260617-v1">
 <link rel="stylesheet" href="path-flyout.css?v=20260616-v105">
+<link rel="stylesheet" href="review-page.css?v=20260624-review-titlebar">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;letter-spacing:0}
@@ -95,19 +96,12 @@ html,body{
 .statusbar{
   height:44px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;
-  font-size:15px;font-weight:600;color:var(--my-text-primary);
+  padding:0 18px;
+  background:var(--my-bg);
+  font-size:14px;font-weight:600;color:var(--my-text-primary);
 }
-.sb-r{display:flex;align-items:center;gap:5px}
-.sb-bars{display:inline-flex;gap:1.5px;align-items:flex-end}
-.sb-bars i{display:block;width:3px;background:var(--my-text-primary);border-radius:1px}
-.sb-bars i:nth-child(1){height:4px}
-.sb-bars i:nth-child(2){height:6px}
-.sb-bars i:nth-child(3){height:8px}
-.sb-bars i:nth-child(4){height:10px}
-.sb-batt{width:24px;height:11px;border:1.2px solid var(--my-text-primary);border-radius:3px;position:relative;padding:1px}
-.sb-batt::after{content:'';position:absolute;right:-3px;top:3px;width:1.5px;height:4px;background:var(--my-text-primary);border-radius:0 1px 1px 0}
-.sb-batt i{display:block;height:100%;width:75%;background:var(--my-text-primary);border-radius:1px}
+.sb-right{display:flex;align-items:center;gap:6px}
+.statusbar svg{display:block}
 
 .app{padding-bottom:160px}
 
@@ -930,10 +924,10 @@ window.__BUILD__ = '20260522-v101-dev';
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-<script type="text/babel" src="icons.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="icons.jsx?v=20260624-tab-review"></script>
 <script type="text/babel" src="data.jsx?v=20260617-v123"></script>
 <script src="tabbar-icons.js?v=20260616-v101"></script>
-<script type="text/babel" src="components.jsx?v=20260616-v101"></script>
+<script type="text/babel" src="components.jsx?v=20260624-review-titlebar"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="timeline-sister-cards.jsx?v=20260602-v104"></script>
 <script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260617-v123"></script>
@@ -946,6 +940,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="record-blank-scheme3.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank-scheme1-ceremony.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="search-page.jsx?v=20260602-v102"></script>
+<script type="text/babel" src="review-page.jsx?v=20260624-review-titlebar"></script>
 <script type="text/babel" src="cloud-publisher.jsx?v=20260617-v110"></script>
 <script type="text/babel" src="voice-transcribe-recorder.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-interludes.jsx?v=20260602-v102"></script>

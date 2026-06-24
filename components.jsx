@@ -3,14 +3,24 @@ function StatusBar(){
   return (
     <div className="statusbar">
       <span>9:41</span>
-      <div className="sb-r">
-        <span className="sb-bars"><i></i><i></i><i></i><i></i></span>
-        <svg width="15" height="11" viewBox="0 0 15 11" fill="none">
-          <path d="M7.5 1.5a8 8 0 0 1 5.5 2M7.5 4.5a5 5 0 0 1 3.5 1.5M7.5 7.5a2 2 0 0 1 1.5.7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-          <circle cx="7.5" cy="10" r="0.8" fill="currentColor"/>
+      <span className="sb-right">
+        <svg width="17" height="11" viewBox="0 0 17 11" aria-hidden="true">
+          <rect x="0" y="6" width="3" height="5" rx="1" fill="currentColor"/>
+          <rect x="4.5" y="4" width="3" height="7" rx="1" fill="currentColor"/>
+          <rect x="9" y="2" width="3" height="9" rx="1" fill="currentColor"/>
+          <rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/>
         </svg>
-        <div className="sb-batt"><i></i></div>
-      </div>
+        <svg width="16" height="11" viewBox="0 0 16 11" aria-hidden="true">
+          <path d="M8 2.5c2 0 3.8.8 5.1 2.1l1.3-1.3C13 1.7 10.6.7 8 .7S3 1.7 1.6 3.3L2.9 4.6C4.2 3.3 6 2.5 8 2.5z" fill="currentColor"/>
+          <path d="M8 6c1 0 2 .4 2.7 1.1l1.3-1.3C11 4.8 9.6 4.2 8 4.2s-3 .6-4 1.6l1.3 1.3C6 6.4 7 6 8 6z" fill="currentColor"/>
+          <circle cx="8" cy="9.2" r="1.3" fill="currentColor"/>
+        </svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" strokeOpacity="0.4"/>
+          <rect x="2" y="2" width="17" height="8" rx="1.5" fill="currentColor"/>
+          <rect x="22.5" y="3.5" width="1.8" height="5" rx="0.9" fill="currentColor" fillOpacity="0.4"/>
+        </svg>
+      </span>
     </div>
   );
 }
@@ -206,7 +216,7 @@ function CycleReport({item}){
 }
 
 // ============ Tab bar ============
-// Order: 美柚 / 记录 / 点滴(center) / 返现 / 我
+// Order: 美柚 / 记录 / 点滴(center) / 回顾 / 我
 function TabBar({active='note', onChange}){
   const I = window.Icon;
   const tabIcons = window.TABBAR_ICONS || {};
@@ -217,7 +227,7 @@ function TabBar({active='note', onChange}){
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
     {id:'note', label:'点滴', custom:<I name="mic" size={26} stroke={1.7}/>},
-    {id:'cash', label:'返现', custom:icon('cash')},
+    {id:'cash', label:'回顾', custom:<I name="line-chart" size={26} stroke={1.7}/>},
     {id:'me', label:'我', custom:icon('me')},
   ];
   return (
