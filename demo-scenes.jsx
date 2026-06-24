@@ -23,7 +23,6 @@ const DEMO_SCENES = {
     calendar: {
       enabled: true,
       periodFlow: true,
-      linkPeriodToNote: false,
     },
     floatNotice: {
       enabled: true,

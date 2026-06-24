@@ -219,14 +219,6 @@ function App(){
     scrollToSisterAnalysis();
   };
 
-  const openPeriodAnalysis = ()=>{
-    if(scene.calendar.linkPeriodToNote) {
-      openSisterAnalysis();
-      return;
-    }
-    setShowAnalysisNotice(false);
-  };
-
   const handleSisterCycleComplete = React.useCallback(()=>{
     setSisterCycleDone(true);
     requestAnimationFrame(()=>{
@@ -767,7 +759,7 @@ function App(){
       {scene.floatNotice.enabled && (
         <FloatNotice
           show={showFloatNotice}
-          onOpen={openPeriodAnalysis}
+          onOpen={openSisterAnalysis}
           onClose={()=>setShowAnalysisNotice(false)}
         />
       )}
