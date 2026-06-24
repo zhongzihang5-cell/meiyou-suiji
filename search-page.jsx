@@ -250,7 +250,8 @@ function StreamSearchOverlay({ onClose, onSearch, onSearchClear }) {
   return (
     <div className="ios-search-overlay" role="presentation">
       <div className="ios-search-top">
-        <div className="ios-search-bar-row">
+        <div className="ios-search-float-sheet">
+          <div className="ios-search-bar-row">
           <div className={'ios-search-field-wrap' + (voiceListening ? ' is-voice-active' : '')}>
             <span className="ios-search-field-ico" aria-hidden="true">
               <I name="search" size={17} stroke={1.8}/>
@@ -330,6 +331,7 @@ function StreamSearchOverlay({ onClose, onSearch, onSearchClear }) {
             </div>
           </div>
         ) : null}
+        </div>
       </div>
 
       {showKeyboard ? (
