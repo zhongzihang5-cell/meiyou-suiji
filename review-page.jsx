@@ -33,6 +33,10 @@ function ReviewMoodIcon(){
   return <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><path d="M9 9.5h.01M15 9.5h.01"/></svg>;
 }
 
+function ReviewDietIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M6 3v7a3 3 0 0 0 6 0V3"/><path d="M9 3v18"/><path d="M17 3c-1.5 1-2.5 3-2.5 5.5S15.5 13 17 14v7"/></svg>;
+}
+
 function ReviewChevron(){
   return <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>;
 }
@@ -343,6 +347,76 @@ function WeightChart(){
   );
 }
 
+function getDietCalorieData(){
+  const days = 29;
+  const data = [];
+  let seed = 20260624;
+  const rnd = ()=>{
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  for(let i = 0; i < days; i++){
+    const weekly = 80 * Math.sin(i / 1.1);
+    const noise = (rnd() - 0.5) * 150;
+    data.push(Math.round(1860 + weekly + noise));
+  }
+  let maxI = 0;
+  let minI = 0;
+  data.forEach((v, i)=>{
+    if(v > data[maxI]) maxI = i;
+    if(v < data[minI]) minI = i;
+  });
+  data[maxI] = 2050;
+  data[minI] = 1700;
+  return data;
+}
+
+function DietChart(){
+  const data = getDietCalorieData();
+  const n = data.length;
+  const W = 340, H = 168, padL = 34, padR = 14, padT = 14, padB = 24;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMin = 1200, yMax = 2200;
+  const refLo = 1600, refHi = 2000;
+  const X = i => x0 + (x1 - x0) * (i / (n - 1));
+  const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
+  const pts = data.map((v, i)=>[X(i), Y(v)]);
+  const labels = {0:'5/27', 14:'6/10', 28:'6/24'};
+  let maxI = 0;
+  let minI = 0;
+  data.forEach((v, i)=>{ if(v > data[maxI]) maxI = i; if(v < data[minI]) minI = i; });
+  const markAnchor = i => X(i) > x1 - 60 ? 'end' : (X(i) < x0 + 60 ? 'start' : 'middle');
+
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="每日饮食热量趋势曲线">
+      <rect x={x0} y={Y(refHi)} width={x1 - x0} height={Y(refLo) - Y(refHi)} fill="rgba(255,149,0,0.06)"/>
+      {[1200,1500,1800,2100].map(g=>(
+        <React.Fragment key={g}>
+          <line x1={x0} y1={Y(g)} x2={x1} y2={Y(g)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={Y(g) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{g}</text>
+        </React.Fragment>
+      ))}
+      <path d={reviewSmoothPath(pts)} fill="none" stroke="#ff9500" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"/>
+      {[
+        {i:maxI, below:false, label:'2050 kcal 最高'},
+        {i:minI, below:true, label:'1700 kcal 最低'},
+      ].map(item=>(
+        <React.Fragment key={item.label}>
+          <circle cx={X(item.i)} cy={Y(data[item.i])} r="3.5" fill="#ff9500" stroke="#fff" strokeWidth="1.5"/>
+          <text x={X(item.i)} y={Y(data[item.i]) + (item.below ? 15 : -8)} textAnchor={markAnchor(item.i)} fontSize="9.5" fontWeight="600" fill="#ff9500" fontFamily="PingFang SC">{item.label}</text>
+        </React.Fragment>
+      ))}
+      {Object.keys(labels).map(k=>(
+        <text key={k} x={X(+k)} y={H - 7} textAnchor="middle" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{labels[k]}</text>
+      ))}
+    </svg>
+  );
+}
+
+function ReviewDietTrend({value}){
+  return <div className="review-metric-value is-diet-trend">{value}</div>;
+}
+
 function MoodChart(){
   const data = [72,68,75,70,66,73,78,74,69,80,76,71,82,77,73,86,79,75,84,81,78,85,80,83];
   const n = data.length;
@@ -389,6 +463,17 @@ function ReviewPage(){
   const weightData = [103.3,98.2,101.4,97.6,98.6,97.5,97.9,97.3,96.5,99.4,102.0,100.6,101.6,99.9,101.0,102.1,100.7,101.3,101.9,100.6,101.5,102.0,101.4,101.1];
   const weightAvg = weightData.reduce((s, x)=>s + x, 0) / weightData.length;
   const weightDelta = weightData[weightData.length - 1] - weightData[0];
+  const dietData = getDietCalorieData();
+  const dietAvg = dietData.reduce((s, x)=>s + x, 0) / dietData.length;
+  const dietSlope = (()=>{
+    const n = dietData.length;
+    const sx = dietData.reduce((s, _v, i)=>s + i, 0);
+    const sy = dietData.reduce((s, v)=>s + v, 0);
+    const sxy = dietData.reduce((s, v, i)=>s + i * v, 0);
+    const sxx = dietData.reduce((s, _v, i)=>s + i * i, 0);
+    return (n * sxy - sx * sy) / (n * sxx - sx * sx);
+  })();
+  const dietTrend = dietSlope * (dietData.length - 1) >= 60 ? '↗ 上升' : (dietSlope * (dietData.length - 1) <= -60 ? '↘ 下降' : '→ 平稳');
 
   return (
     <main className="review-page" aria-label="回顾">
@@ -396,7 +481,7 @@ function ReviewPage(){
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>2 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>3 项</b></p>
 
       <ReviewCard
         title="月经周期"
@@ -434,6 +519,27 @@ function ReviewPage(){
           </>
         )}
         more="查看完整体重变化"
+      />
+
+      <ReviewCard
+        title="饮食热量"
+        iconClass="is-diet"
+        icon={<ReviewDietIcon/>}
+        chart={<DietChart/>}
+        legend={(
+          <>
+            <span className="review-legend-item is-diet"><i></i>每日热量</span>
+            <span className="review-legend-item is-diet-band"><i></i>均衡参考区间</span>
+          </>
+        )}
+        metrics={(
+          <>
+            <ReviewMetric value={Math.round(dietAvg / 10) * 10} unit="kcal" label="近1月日均"/>
+            <ReviewMetric value="+10" unit="kcal" label="较上月"/>
+            <div className="review-metric"><ReviewDietTrend value={dietTrend}/><div className="review-metric-label">整体趋势</div></div>
+          </>
+        )}
+        more="查看完整热量变化"
       />
 
       <ReviewCard
