@@ -313,7 +313,7 @@
   height:24px;
 }
 .home-detail-chart{
-  height:154px;
+  height:172px;
   margin:12px 0 8px;
   padding:14px 8px 0;
   border-radius:10px;
@@ -332,6 +332,14 @@
   align-items:center;
   justify-content:flex-end;
   gap:4px;
+}
+.home-detail-bar-percent{
+  height:16px;
+  font-size:11px;
+  line-height:16px;
+  font-weight:600;
+  color:var(--my-text-secondary);
+  font-variant-numeric:tabular-nums;
 }
 .home-detail-bar-track{
   flex:1;
@@ -369,7 +377,8 @@
   color:var(--my-text-tertiary);
 }
 .home-detail-bar-item.is-peak .home-detail-bar-date,
-.home-detail-bar-item.is-peak .home-detail-bar-week{
+.home-detail-bar-item.is-peak .home-detail-bar-week,
+.home-detail-bar-item.is-peak .home-detail-bar-percent{
   color:var(--my-brand-red);
 }
 .home-detail-chart-summary{

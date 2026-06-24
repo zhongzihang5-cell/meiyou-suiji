@@ -18,11 +18,11 @@ function HomeTopBar(){
 }
 
 const HOME_PERIOD_PROBABILITY = [
-  { date:'6/25', label:'周四', value:32 },
-  { date:'6/26', label:'周五', value:68 },
-  { date:'6/27', label:'周六', value:100, peak:true },
-  { date:'6/28', label:'周日', value:82 },
-  { date:'6/29', label:'周一', value:46 },
+  { date:'6/25', label:'周四', value:28 },
+  { date:'6/26', label:'周五', value:63 },
+  { date:'6/27', label:'周六', value:86, peak:true },
+  { date:'6/28', label:'周日', value:72 },
+  { date:'6/29', label:'周一', value:41 },
 ];
 
 function HomePeriodHero({onOpen}){
@@ -45,6 +45,7 @@ function HomePeriodProbabilityChart(){
     <div className="home-detail-chart" aria-label="下次月经几率柱状图">
       {HOME_PERIOD_PROBABILITY.map(item=>(
         <div key={item.date} className={'home-detail-bar-item' + (item.peak ? ' is-peak' : '')}>
+          <div className="home-detail-bar-percent">{item.value}%</div>
           <div className="home-detail-bar-track">
             <div className="home-detail-bar-fill" style={{height:item.value + '%'}}></div>
           </div>
