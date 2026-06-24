@@ -2,7 +2,7 @@ const { useState, useRef, useEffect, useCallback } = React;
 
 const MODE_TABS = ['经期', '备孕', '怀孕', '育儿'];
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
-const PERIOD_DAYS = [14, 15, 16, 19, 20, 21];
+const PERIOD_DAYS = [14, 15, 16, 17, 18, 19, 20, 21];
 
 const ICON_HEART = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTkuMjYxNzkgMS44NTA2QzEwLjg2MzIgMi43MzY1MSAxMS40MzY4IDQuOTAwMjUgMTAuNjUwNiA2LjcyODM2QzEwLjE0NDQgNy45MDU0MyA5LjI2NjQgOC44MDgyNiA4LjQyNjcyIDkuNDQ5ODZDOC4wMTEyOCA5Ljc2NzMgNy40MDU4MiAxMC4wODE2IDYuOTA3MTggMTAuMzE1M0M2LjM0OTE1IDEwLjU3NjkgNS43MDc1MSAxMC41NzY3IDUuMTQ2NzggMTAuMzIxQzQuNjIwODcgMTAuMDgxMSAzLjk4MDgxIDkuNzYwMTcgMy41ODY3MiA5LjQ2MDE3QzIuNzQyOTggOC44MTc4OCAxLjg1ODM0IDcuOTExNzEgMS4zNDk0MiA2LjcyODM2QzAuNTYzMjAxIDQuOTAwMjUgMS4xMzY3NSAyLjczNjUxIDIuNzM4MjEgMS44NTA2QzMuNjAzMzUgMS4zNzIwMSA0LjU5NDY5IDEuMzc5NSA1LjM5NDU5IDEuODk3MDVDNS40NjcyNyAxLjk0NDA3IDUuNTY5NjMgMi4wMjU3MyA1LjY2OTU0IDIuMTA5NzZDNS44NjEwNiAyLjI3MDg0IDYuMTQyMDcgMi4yNzQxIDYuMzM1NDUgMi4xMTUyNkM2LjQ0NzI0IDIuMDIzNDQgNi41NjM3IDEuOTMxODMgNi42NDQzNiAxLjg3ODlDNy40MDUzMSAxLjM3OTUgOC40MTAyIDEuMzc5NSA5LjI2MTc5IDEuODUwNloiIGZpbGw9IiNmZjk0YjgiLz48L3N2Zz4=';
 
@@ -10,30 +10,53 @@ const ICON_OVULATION = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMT
 
 const ICON_TODAY = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQuNDcwMDMgMEM0LjgzNzAyIDAgNS4xNTQ0MSAwLjEzNzA2MSA1LjQzMDA3IDAuMzg3Nzk3QzcuMDIwNjUgMi4wMjMxNyA4LjI1OTc2IDQuMDAyNDUgOC45Mjk1MiA2LjI1MjgyQzkuMDc0NjIgNi43MzI3NiA4Ljk2NTYxIDcuMjE3MTMgOC44NzA5NSA3LjQwNTYzQzguNzI1NTIgNy42NjYxMiA4LjU3ODU0IDcuOTA0NzcgOC4wNTU5MyA4LjA5ODI0QzcuMzkyMDkgOC4zMTcxNSA1LjY0MDE1IDguNSA0LjQ3OTAyIDguNUMzLjMxNzg5IDguNSAxLjYyNTM2IDguMzQ3OTMgMC45Mzc0NTIgOC4wODg0M0MwLjQ4ODcyMyA3Ljg5ODQ3IDAuMjgwMjE1IDcuNjU1NjkgMC4xMzk0MzEgNy40MDU2M0MwLjAzNjY2MSA3LjIyMzA5IC0wLjA3OTQxOCA2LjcyNiAwLjA3NDYzNTUgNi4yNTI4MkMwLjc0NjczMSA0LjAxNzgxIDEuOTQ2NTMgMi4wMTM3NCAzLjUyODEgMC4zODc2NjVDMy43ODk3MiAwLjEzNzA2MSA0LjEwMzA0IDAgNC40NzAwMyAwWiIgZmlsbD0iI2ZmZDkxOSIgdHJhbnNmb3JtPSJtYXRyaXgoMCAxIC0xIDAgMTAuNSAxLjUpIi8+PC9zdmc+';
 
+const ICON_YELLOW_PLUS = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTYgMTFDNi45NjY1IDExIDcuNzUgMTAuMjE2NSA3Ljc1IDkuMjVWNy43NUg5LjI1QzEwLjIxNjUgNy43NSAxMSA2Ljk2NjUgMTEgNkMxMSA1LjAzMzUgMTAuMjE2NSA0LjI1IDkuMjUgNC4yNUg3Ljc1VjIuNzVDNy43NSAxLjc4MzUgNi45NjY1IDEgNiAxQzUuMDMzNSAxIDQuMjUgMS43ODM1IDQuMjUgMi43NVY0LjI1SDIuNzVDMS43ODM1IDQuMjUgMSA1LjAzMzUgMSA2QzEgNi45NjY1IDEuNzgzNSA3Ljc1IDIuNzUgNy43NUg0LjI1VjkuMjVDNC4yNSAxMC4yMTY1IDUuMDMzNSAxMSA2IDExWiIgZmlsbD0iI2ZmZDkxOSIvPjwvc3ZnPg==';
+const ICON_YELLOW_BOTTLE = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQuOTY1NzMgMS41MjQzQzUuMTg0ODEgMS4xMTg5MyA1LjY1MzE0IDAuOTE2NDk1IDYuMDk4NTEgMS4wMzQ2NkM2LjU2NzQ2IDEuMTU5MDkgNi44Nzg3NSAxLjYwMzAzIDYuODM1OTMgMi4wODYzMUw2LjY2NzU1IDMuOTg2NEg4LjQ5OTk5QzkuNjcwMzcgMy45ODY0IDEwLjU5MDcgNC45ODY5NiAxMC40OTMgNi4xNTMyN0wxMC4yNDA3IDkuMTY2NzVDMTAuMTU0IDEwLjIwMyA5LjI4NzU3IDEwLjk5OTkgOC4yNDc2OSAxMC45OTk5SDMuMzY4OTFWMTFIMy4zNDkzNkgzLjI4NDA1VjEwLjk5ODFDMi4yOTEyNyAxMC45NTM3IDEuNSAxMC4xMzQ4IDEuNSA5LjEzMTA4VjYuNTA0ODlDMS41IDUuNTAxMTUgMi4yOTEyNyA0LjY4MjIzIDMuMjg0MDUgNC42Mzc4N1Y0LjYzNTg4TDMuMjg0MzYgNC42MzU1NEw0Ljk2NTczIDEuNTI0M1oiIGZpbGw9IiNmZmQ5MTkiLz48L3N2Zz4=';
+const ICON_YELLOW_BARS = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTUgMi41QzUgMS45NDc3MiA1LjQ0NzcyIDEuNSA2IDEuNUM2LjU1MjI4IDEuNSA3IDEuOTQ3NzIgNyAyLjVWOS41QzcgMTAuMDUyMyA2LjU1MjI4IDEwLjUgNiAxMC41QzUuNDQ3NzIgMTAuNSA1IDEwLjA1MjMgNSA5LjVWMi41WiIgZmlsbD0iI2ZmZDkxOSIvPjxwYXRoIGQ9Ik04LjI1IDQuNjI1QzguMjUgNC4wNzI3MiA4LjY5NzcyIDMuNjI1IDkuMjUgMy42MjVDOS44MDIyOCAzLjYyNSAxMC4yNSA0LjA3MjcyIDEwLjI1IDQuNjI1VjkuNUMxMC4yNSAxMC4wNTIzIDkuODAyMjggMTAuNSA5LjI1IDEwLjVDOC42OTc3MiAxMC41IDguMjUgMTAuMDUyMyA4LjI1IDkuNVY0LjYyNVoiIGZpbGw9IiNmZmQ5MTkiLz48cGF0aCBkPSJNMS43NSA1Ljg3NUMxLjc1IDUuMzIyNzIgMi4xOTc3MiA0Ljg3NSAyLjc1IDQuODc1QzMuMzAyMjggNC44NzUgMy43NSA1LjMyMjcyIDMuNzUgNS44NzVWOS41QzMuNzUgMTAuMDUyMyAzLjMwMjI4IDEwLjUgMi43NSAxMC41QzIuMTk3NzIgMTAuNSAxLjc1IDEwLjA1MjMgMS43NSA5LjVWNS44NzVaIiBmaWxsPSIjZmZkOTE5Ii8+PC9zdmc+';
+const ICON_YELLOW_LIKE = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTUuMiA1LjJWNy41SDMuNUMzLjIyMzkgNy41IDMgNy43MjQgMyA4VjEwLjVIMy41VjEwLjI1SDUuMlY1LjJaIiBmaWxsPSIjZmZkOTE5Ii8+PHBhdGggZD0iTTUuMiA1LjJDNi4xIDMuOCA3LjggMy4yIDkuMSA0LjFDMTAuMyA1IDkuOCA2LjggOC41IDcuNkw4LjIgOC4ySDUuMlY1LjJaIiBmaWxsPSIjZmZkOTE5Ii8+PC9zdmc+';
+
+const YELLOW_MARK_ICONS = {
+  plus: ICON_YELLOW_PLUS,
+  bottle: ICON_YELLOW_BOTTLE,
+  bars: ICON_YELLOW_BARS,
+  like: ICON_YELLOW_LIKE,
+};
+
+// business-record-calendar（kit-519 + 分散记录图标）
 const CALENDAR_DAYS = [
   null, null, null,
-  { n: 1, fertile: true },
-  { n: 2, fertile: true },
-  { n: 3, fertile: true },
-  { n: 4 },
-  { n: 5 }, { n: 6 }, { n: 7 }, { n: 8 }, { n: 9 }, { n: 10 },
-  { n: 11 }, { n: 12 }, { n: 13 },
-  { n: 14, period: true },
-  { n: 15, today: true, selected: true, period: true },
+  { n: 1, fertile: true, marks: ['plus'] },
+  { n: 2, fertile: true, heart: true, marks: ['plus', 'like', 'bars'] },
+  { n: 3, fertile: true, marks: ['like'] },
+  { n: 4, heart: true, marks: ['like', 'bars'] },
+  { n: 5, marks: ['bars'] },
+  { n: 6, heart: true, marks: ['plus'] },
+  { n: 7, marks: ['bottle', 'like'] },
+  { n: 8, marks: ['plus'] },
+  { n: 9, heart: true, marks: ['bars'] },
+  { n: 10, marks: ['like', 'plus'] },
+  { n: 11, marks: ['bottle'] },
+  { n: 12, heart: true, marks: ['like'] },
+  { n: 13, marks: ['bars', 'plus'] },
+  { n: 14, period: true, today: true, todayMark: true, marks: ['plus'] },
+  { n: 15, period: true },
   { n: 16, period: true },
-  { n: 17 }, { n: 18 },
-  { n: 19, period: true }, { n: 20, period: true }, { n: 21, period: true },
-  { n: 22 }, { n: 23 }, { n: 24 }, { n: 25 },
+  { n: 17, predicted: true },
+  { n: 18, predicted: true },
+  { n: 19, period: true },
+  { n: 20, period: true },
+  { n: 21, period: true },
+  { n: 22 },
+  { n: 23 },
+  { n: 24 },
+  { n: 25 },
   { n: 26 },
-  { n: 27, fertile: true }, { n: 28, fertile: true }, { n: 29, fertile: true },
-  { n: 30, fertile: true }, { n: 31, fertile: true, ovulation: true },
+  { n: 27, fertile: true },
+  { n: 28, fertile: true },
+  { n: 29, fertile: true },
+  { n: 30, fertile: true },
+  { n: 31, fertile: true, ovulation: true },
   null,
-];
-
-const DIET_MEAL_IMAGES = [
-  'assets/diet-meal-1.png',
-  'assets/diet-meal-2.png',
-  'assets/diet-meal-3.png',
 ];
 
 const FILTER_OPTIONS = [
@@ -53,8 +76,6 @@ const RECORD_TYPES = [
 ];
 
 const CALENDAR_ICON_TYPES = ['period', 'love', 'weight'];
-
-const JUNE_2026_FIRST_WEEKDAY = 3; // 6月1日是周三
 
 const DAY_RECORDS = {
   1: ['weight'],
@@ -114,6 +135,123 @@ const RECORD_ITEMS = [
   { id: 'stool', label: '便便', iconBg: '#ffe7ef', iconShape: 'is-diamond' },
   { id: 'plan', label: '计划', iconBg: '#e8eef6', iconShape: 'is-bar' },
   { id: 'diet', label: '饮食', iconBg: '#ffe7d6', iconShape: 'is-circle' },
+];
+
+// 记录列表项
+const MORPH_ITEMS = [
+  {
+    id: 'period',
+    label: '月经来了',
+    iconBg: '#ffe8f0',
+    iconShape: 'is-square',
+    recordType: 'segment',
+    usePeriodIcon: true,
+  },
+  {
+    id: 'period-time',
+    label: '记下具体时间',
+    iconBg: '#ffe8f0',
+    iconShape: 'is-circle',
+    recordType: 'add',
+  },
+  {
+    id: 'flow',
+    label: '流量',
+    iconBg: '#ffe8f0',
+    iconShape: 'is-square',
+    recordType: 'add',
+  },
+  {
+    id: 'color',
+    label: '颜色',
+    iconBg: '#ffe8f0',
+    iconShape: 'is-circle',
+    recordType: 'add',
+  },
+  {
+    id: 'cramps',
+    label: '痛经',
+    iconBg: '#ffe8f0',
+    iconShape: 'is-circle',
+    recordType: 'add',
+  },
+  {
+    id: 'love',
+    label: '爱爱',
+    iconBg: '#fff0c9',
+    iconShape: 'is-circle',
+    recordType: 'add',
+  },
+  {
+    id: 'symptom',
+    label: '症状',
+    iconBg: '#dff3ff',
+    iconShape: 'is-square',
+    recordType: 'add',
+  },
+  {
+    id: 'mood',
+    label: '心情',
+    iconBg: '#fff3c9',
+    iconShape: 'is-circle',
+    recordType: 'mood',
+  },
+  {
+    id: 'discharge',
+    label: '白带',
+    iconBg: '#eadfff',
+    iconShape: 'is-pill',
+    recordType: 'add',
+  },
+  {
+    id: 'temp',
+    label: '体温',
+    iconBg: '#e8e0ff',
+    iconShape: 'is-circle',
+    recordType: 'add',
+  },
+  {
+    id: 'weight',
+    label: '体重',
+    iconBg: '#e2ebff',
+    iconShape: 'is-circle',
+    recordType: 'add',
+  },
+  {
+    id: 'diary',
+    label: '日记',
+    iconBg: '#fff3c9',
+    iconShape: 'is-square',
+    recordType: 'diary',
+  },
+  {
+    id: 'habit',
+    label: '好习惯',
+    iconBg: '#dff3ff',
+    iconShape: 'is-circle',
+    recordType: 'habit',
+  },
+  {
+    id: 'stool',
+    label: '便便',
+    iconBg: '#ffe7ef',
+    iconShape: 'is-diamond',
+    recordType: 'add',
+  },
+  {
+    id: 'plan',
+    label: '计划',
+    iconBg: '#e8eef6',
+    iconShape: 'is-bar',
+    recordType: 'add',
+  },
+  {
+    id: 'diet',
+    label: '饮食',
+    iconBg: '#ffe7d6',
+    iconShape: 'is-circle',
+    recordType: 'add',
+  },
 ];
 
 const MONTH_BLOCKS_2025 = [
@@ -201,12 +339,73 @@ function MonthBlock({ block }) {
   );
 }
 
-function EyeIcon() {
+function AnalysisNavIcon() {
   return (
-    <svg className="record-view-eye" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
-      <circle cx="12" cy="12" r="3"/>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="4" y="13" width="3.2" height="7" rx="1" fill="currentColor"/>
+      <rect x="10.4" y="9" width="3.2" height="11" rx="1" fill="currentColor"/>
+      <rect x="16.8" y="5" width="3.2" height="15" rx="1" fill="currentColor"/>
+      <circle cx="17" cy="17" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.6"/>
+      <path d="M20 20l2 2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
     </svg>
+  );
+}
+
+function RecordViewFilterBar({
+  activeFilter,
+  activeFilterLabel,
+  filterMenuOpen,
+  onToggleMenu,
+  onCloseMenu,
+  onSelectFilter,
+}) {
+  return (
+    <div className="record-view-filter-bar">
+      <div className="record-mode-menu">
+        <button
+          type="button"
+          className="record-filter-pill"
+          aria-expanded={filterMenuOpen}
+          aria-haspopup="listbox"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleMenu();
+          }}
+        >
+          {activeFilterLabel}
+          <svg className="record-mode-chev" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 10l5 5 5-5"/>
+          </svg>
+        </button>
+        {filterMenuOpen ? (
+          <div className="record-filter-dropdown" role="listbox" aria-label="记录筛选">
+            {FILTER_OPTIONS.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                role="option"
+                aria-selected={activeFilter === item.key}
+                className={activeFilter === item.key ? 'is-active' : ''}
+                onClick={() => onSelectFilter(item.key)}
+              >
+                <span className="record-filter-option-icon" aria-hidden="true">
+                  <RecordTypeIcon type={item.key} size={16}/>
+                </span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      {filterMenuOpen ? (
+        <button
+          type="button"
+          className="record-mode-menu-backdrop"
+          aria-label="关闭菜单"
+          onClick={onCloseMenu}
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -334,100 +533,180 @@ function CalendarRecordMarks({ records, activeFilter, isView, isSelected }) {
   );
 }
 
-function getJuneWeekdayLabel(day) {
-  return '周' + WEEKDAYS[(JUNE_2026_FIRST_WEEKDAY + day - 1) % 7];
-}
+function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo }) {
+  if (item.recordType === 'segment') {
+    return (
+      <div className="ios26-segmented" role="tablist" aria-label="是否选择">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={periodYes}
+          className={periodYes ? 'is-active' : ''}
+          onClick={onPeriodYes}
+        >
+          是
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={!periodYes}
+          className={!periodYes ? 'is-active' : ''}
+          onClick={onPeriodNo}
+        >
+          否
+        </button>
+      </div>
+    );
+  }
 
-function hasViewRecords(day) {
-  const isPeriod = day >= 14 && day <= 21;
-  return getDayRecordTypes(day, isPeriod).length > 0;
-}
+  if (item.recordType === 'mood') {
+    return (
+      <div className="list-mood-actions">
+        <span className="list-mood-emojis" aria-hidden="true">
+          <span>🥳</span>
+          <span>👻</span>
+          <span>😐</span>
+          <span>🐼</span>
+          <span>😎</span>
+        </span>
+        <button type="button" className="list-add" aria-label={'新增' + item.label}>
+          <PlusIcon/>
+        </button>
+      </div>
+    );
+  }
 
-function getViewRecordCount(day) {
-  const isPeriod = day >= 14 && day <= 21;
-  return getDayRecordTypes(day, isPeriod).length;
-}
+  if (item.recordType === 'diary') {
+    return (
+      <div className="list-diary-actions">
+        <svg className="list-camera" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 8h3l1.5-2h7L17 8h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z"/>
+          <circle cx="12" cy="13" r="3.2"/>
+        </svg>
+        <svg className="list-chevron" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5l7 7-7 7"/>
+        </svg>
+      </div>
+    );
+  }
 
-function ViewRecordCards() {
+  if (item.recordType === 'habit') {
+    return (
+      <div className="list-habit-actions">
+        <span className="list-habit-icons" aria-hidden="true">🍞🍎🥤⚾</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="record-view-grid" aria-label="当日记录">
-      <article className="record-view-card">
-        <header className="record-view-card-head">
-          <i className="is-period"/>
-          <span>经期</span>
-        </header>
-        <div className="record-view-value">第3天</div>
-        <div className="record-view-tags">
-          <span className="record-view-tag is-period">流量中</span>
-          <span className="record-view-tag is-period">鲜红</span>
-          <span className="record-view-tag is-period">痛经轻</span>
-        </div>
-      </article>
+    <button type="button" className="list-add" aria-label={'新增' + item.label}>
+      <PlusIcon/>
+    </button>
+  );
+}
 
-      <article className="record-view-card">
-        <header className="record-view-card-head">
-          <i className="is-mood"/>
-          <span>心情</span>
-        </header>
-        <div className="record-view-moods" aria-hidden="true">
-          <span className="record-view-mood-chip" style={{ background: '#fff3c9' }}>😊</span>
-          <span className="record-view-mood-chip" style={{ background: '#ffe3ef' }}>💗</span>
-          <span className="record-view-mood-chip" style={{ background: '#e4f7d9' }}>🌿</span>
-        </div>
-      </article>
+function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo }) {
+  const delay = (index * 50) + 'ms';
 
-      <article className="record-view-card">
-        <header className="record-view-card-head">
-          <i className="is-weight"/>
-          <span>体重</span>
-        </header>
-        <div className="record-view-metric">
-          <strong>52.3</strong>
-          <em>kg</em>
+  return (
+    <div className="health-morph-row" style={{ '--row-delay': delay }}>
+      <div className="health-morph-body">
+        <div className="health-morph-left" aria-hidden="true">
+          <div className="health-morph-icon-slot">
+            {item.id === 'period' ? (
+              <PeriodKeyIcon/>
+            ) : (
+              <span
+                className={'mock-list-icon ' + item.iconShape}
+                style={{ '--mock-icon-bg': item.iconBg }}
+              />
+            )}
+          </div>
         </div>
-      </article>
-
-      <article className="record-view-card">
-        <header className="record-view-card-head">
-          <i className="is-love"/>
-          <span>爱爱</span>
-        </header>
-        <div className="record-view-value">1次</div>
-        <div className="record-view-tags">
-          <span className="record-view-tag is-love">无措施爱爱</span>
-          <span className="record-view-tag is-love">11:57分</span>
+        <div className="health-morph-label">{item.label}</div>
+        <div className="health-morph-right">
+          <HealthMorphRecordPane
+            item={item}
+            periodYes={periodYes}
+            onPeriodYes={onPeriodYes}
+            onPeriodNo={onPeriodNo}
+          />
         </div>
-      </article>
-
-      <article className="record-view-card">
-        <header className="record-view-card-head">
-          <i className="is-symptom"/>
-          <span>症状</span>
-        </header>
-        <div className="record-view-tags">
-          <span className="record-view-tag is-symptom">痛经</span>
-          <span className="record-view-tag is-symptom">疲劳</span>
-          <span className="record-view-tag is-symptom">腹胀</span>
-        </div>
-      </article>
-
-      <article className="record-view-card">
-        <header className="record-view-card-head">
-          <i className="is-diet"/>
-          <span>饮食</span>
-        </header>
-        <div className="record-view-diet-summary">3餐 · 1680kcal</div>
-        <div className="record-view-meals" aria-hidden="true">
-          {DIET_MEAL_IMAGES.map((src, i) => (
-            <img key={src} className="record-view-meal-photo" src={src} alt={'饮食记录' + (i + 1)}/>
-          ))}
-        </div>
-      </article>
+      </div>
     </div>
   );
 }
 
+function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo }) {
+  return (
+    <div className="health-morph-list" aria-label="健康记录列表">
+      {MORPH_ITEMS.map((item, index) => (
+        <HealthMorphRow
+          key={item.id}
+          item={item}
+          index={index}
+          periodYes={periodYes}
+          onPeriodYes={onPeriodYes}
+          onPeriodNo={onPeriodNo}
+        />
+      ))}
+    </div>
+  );
+}
+
+function KitCalendarDayButton({ day, selected, periodLit, onSelect }) {
+  if (!day) return <span className="calendar-day" aria-hidden="true"/>;
+
+  const isPeriod = !!(day.period || periodLit);
+  const cls = [
+    'calendar-day',
+    day.fertile ? 'is-fertile' : '',
+    isPeriod ? 'is-period' : '',
+    periodLit && (day.period || day.predicted) ? 'is-period-lit' : '',
+    day.predicted ? 'is-predicted' : '',
+    day.today ? 'is-today' : '',
+    selected ? 'is-selected' : '',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <button type="button" className={cls} onClick={() => onSelect(day.n)}>
+      {day.heart ? (
+        <img className="calendar-icon is-floating" src={ICON_HEART} alt=""/>
+      ) : null}
+      {day.ovulation ? (
+        <img className="calendar-icon is-floating" src={ICON_OVULATION} alt=""/>
+      ) : null}
+      {day.todayMark ? (
+        <img className="calendar-icon is-today-mark" src={ICON_TODAY} alt=""/>
+      ) : null}
+      {day.marks?.length ? (
+        <>
+          <span className="calendar-day-number">{day.n}</span>
+          <span className="calendar-day-icons" aria-hidden="true">
+            {day.marks.map((key) => (
+              <img key={key} className="calendar-icon" src={YELLOW_MARK_ICONS[key]} alt=""/>
+            ))}
+          </span>
+        </>
+      ) : (
+        <span className="calendar-day-number">{day.n}</span>
+      )}
+    </button>
+  );
+}
+
 function CalendarDayButton({ day, selected, periodLit, onSelect, isView, activeFilter }) {
+  if (!isView) {
+    return (
+      <KitCalendarDayButton
+        day={day}
+        selected={selected}
+        periodLit={periodLit}
+        onSelect={onSelect}
+      />
+    );
+  }
+
   if (!day) return <span className="calendar-day is-empty" aria-hidden="true"/>;
 
   const isPeriod = !!(day.period || periodLit);
@@ -481,16 +760,11 @@ function RecordPage({
   periodFlowEnabled = true,
 }) {
   const [activeMode, setActiveMode] = useState(0);
-  const [selectedDay, setSelectedDay] = useState(15);
+  const [selectedDay, setSelectedDay] = useState(14);
   const [periodYes, setPeriodYes] = useState(false);
   const [litDays, setLitDays] = useState([]);
   const [monthOpen, setMonthOpen] = useState(false);
   const [legendCollapsed, setLegendCollapsed] = useState(false);
-  const [isView, setIsView] = useState(false);
-  const [flipping, setFlipping] = useState(false);
-  const [modeMenuOpen, setModeMenuOpen] = useState(false);
-  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all');
   const [calendarOffset, setCalendarOffset] = useState(0);
   const dragAreaRef = useRef(null);
   const gridRef = useRef(null);
@@ -560,269 +834,96 @@ function RecordPage({
     setLegendCollapsed((v) => !v);
   };
 
-  const toggleView = useCallback(() => {
-    setFlipping(true);
-    setModeMenuOpen(false);
-    setFilterMenuOpen(false);
-    setTimeout(() => {
-      setIsView((v) => {
-        if (v) setActiveFilter('all');
-        return !v;
-      });
-      setTimeout(() => setFlipping(false), 50);
-    }, 280);
-  }, []);
-
-  const activeFilterLabel = getFilterType(activeFilter).label;
-  const headerMenuOpen = isView ? filterMenuOpen : modeMenuOpen;
-
-  const closeHeaderMenu = () => {
-    setModeMenuOpen(false);
-    setFilterMenuOpen(false);
-  };
-
   return (
     <div
       className={
         'record-page-root'
         + (monthOpen ? ' record-month-open' : '')
-        + (isView ? ' is-view-mode' : '')
-        + (flipping ? ' is-flipping' : '')
       }
       aria-label="记录页"
     >
       <div className="record-stack">
-        <div className="record-sticky-title">
-          <div className="record-titlebar-top">
-            <button
-              type="button"
-              className="record-year-nav"
-              aria-label="打开月年视图"
-              onClick={() => setMonthOpen(true)}
-            >
-              <span className="record-year-chev" aria-hidden="true">‹</span>
-              <span>2026年</span>
-            </button>
-            <div className="record-titlebar-actions">
-              <div className="record-mode-menu">
-                {isView ? (
-                  <>
-                    <button
-                      type="button"
-                      className="record-filter-pill"
-                      aria-expanded={filterMenuOpen}
-                      aria-haspopup="listbox"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFilterMenuOpen((v) => !v);
-                      }}
-                    >
-                      {activeFilterLabel}
-                      <svg className="record-mode-chev" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M7 10l5 5 5-5"/>
-                      </svg>
-                    </button>
-                    {filterMenuOpen ? (
-                      <div className="record-filter-dropdown" role="listbox" aria-label="记录筛选">
-                        {FILTER_OPTIONS.map((item) => (
-                          <button
-                            key={item.key}
-                            type="button"
-                            role="option"
-                            aria-selected={activeFilter === item.key}
-                            className={activeFilter === item.key ? 'is-active' : ''}
-                            onClick={() => {
-                              setActiveFilter(item.key);
-                              setFilterMenuOpen(false);
-                            }}
-                          >
-                            <span className="record-filter-option-icon" aria-hidden="true">
-                              <RecordTypeIcon type={item.key} size={16}/>
-                            </span>
-                            <span>{item.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className="record-mode-pill"
-                      aria-expanded={modeMenuOpen}
-                      aria-haspopup="listbox"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setModeMenuOpen((v) => !v);
-                      }}
-                    >
-                      {MODE_TABS[activeMode]}
-                      <svg className="record-mode-chev" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M7 10l5 5 5-5"/>
-                      </svg>
-                    </button>
-                    {modeMenuOpen ? (
-                      <div className="record-mode-dropdown" role="listbox" aria-label="模式选择">
-                        {MODE_TABS.map((label, i) => (
-                          <button
-                            key={label}
-                            type="button"
-                            role="option"
-                            aria-selected={activeMode === i}
-                            className={activeMode === i ? 'is-active' : ''}
-                            onClick={() => {
-                              setActiveMode(i);
-                              setModeMenuOpen(false);
-                            }}
-                          >
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-                    ) : null}
-                  </>
-                )}
-              </div>
+        <div className="record-sticky-title" data-record-sticky-title>
+          <div className="record-calendar-titlebar">
+            <div className="mock-nav nav-tabs-layout">
               <button
                 type="button"
-                className="record-mode-toggle"
-                aria-label={isView ? '切换到记录' : '切换到查看'}
-                onClick={toggleView}
+                className="icon-button small record-month-back"
+                aria-label="打开月年视图"
+                onClick={() => setMonthOpen(true)}
               >
-                {isView ? <RecordIcon/> : <EyeIcon/>}
-                {isView ? '记录' : '查看'}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+                <span>6月</span>
               </button>
+              <span className="nav-flex-space" aria-hidden="true"/>
+              <div className="nav-primary-tabs" role="tablist" aria-label="模式选择">
+                {MODE_TABS.map((label, i) => (
+                  <button
+                    key={label}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeMode === i}
+                    className={activeMode === i ? 'is-active' : ''}
+                    onClick={() => setActiveMode(i)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <span className="nav-flex-space" aria-hidden="true"/>
+              <span className="nav-spacer" aria-hidden="true"/>
+            </div>
+            <div className="calendar-weekdays" aria-label="星期">
+              {WEEKDAYS.map((w) => <span key={w}>{w}</span>)}
             </div>
           </div>
         </div>
 
-        {headerMenuOpen ? (
-          <button
-            type="button"
-            className="record-mode-menu-backdrop"
-            aria-label="关闭菜单"
-            onClick={closeHeaderMenu}
-          />
-        ) : null}
-
         <div className="record-calendar-panel" data-record-calendar>
-          <div className="record-titlebar-heading">
-            <h2>6月</h2>
-          </div>
-          <div className="calendar-weekdays" aria-label="星期">
-            {WEEKDAYS.map((w) => <span key={w}>{w}</span>)}
-          </div>
           <div className="record-calendar">
-            <div className="record-calendar-flip">
-              <div className={'record-calendar-flip-inner' + (flipping ? ' is-flipping' : '')}>
-                <div className="calendar-scroll-window" ref={dragAreaRef} data-calendar-drag>
-                  <div
-                    className="calendar-grid"
-                    ref={gridRef}
-                    aria-label="记录日历"
-                    style={{ '--calendar-offset-y': `${calendarOffset}px` }}
-                  >
-                    {CALENDAR_DAYS.map((day, i) => (
-                      <CalendarDayButton
-                        key={i}
-                        day={day}
-                        selected={day && day.n === selectedDay}
-                        periodLit={day && litDays.includes(day.n)}
-                        onSelect={handleDaySelect}
-                        isView={isView}
-                        activeFilter={isView ? activeFilter : 'all'}
-                      />
-                    ))}
-                  </div>
-                </div>
+            <div className="calendar-scroll-window" ref={dragAreaRef} data-calendar-drag>
+              <div
+                className="calendar-grid"
+                ref={gridRef}
+                aria-label="记录日历"
+                style={{ '--calendar-offset-y': `${calendarOffset}px` }}
+              >
+                {CALENDAR_DAYS.map((day, i) => (
+                  <CalendarDayButton
+                    key={i}
+                    day={day}
+                    selected={day && day.n === selectedDay}
+                    periodLit={day && litDays.includes(day.n)}
+                    onSelect={handleDaySelect}
+                    isView={false}
+                    activeFilter="all"
+                  />
+                ))}
               </div>
             </div>
-            {!isView ? (
-              <div className="calendar-legend" onClick={handleLegendClick}>
-                <span><i/>月经期</span>
-                <span><i className="period-soft"/>预测经期</span>
-                <span><i className="fertile"/>易孕期</span>
-                <span>
-                  <img className="calendar-legend-icon" src={ICON_OVULATION} alt=""/>
-                  排卵日
-                </span>
-                <svg className="calendar-more" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M9 5l7 7-7 7"/>
-                </svg>
-              </div>
-            ) : null}
+            <div className="calendar-legend" onClick={handleLegendClick}>
+              <span><i/>月经期</span>
+              <span><i className="period-soft"/>预测经期</span>
+              <span><i className="fertile"/>易孕期</span>
+              <span>
+                <img className="calendar-legend-icon" src={ICON_OVULATION} alt=""/>
+                排卵日
+              </span>
+              <svg className="calendar-more" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
           </div>
         </div>
 
         <div className="record-page-content">
-        {isView ? (
-          <div className="record-view-panel" aria-label="查看记录">
-            <div className="record-view-day">
-              <div className="record-view-day-date">
-                <span className="record-view-day-main">6月{selectedDay}日</span>
-                <span className="record-view-day-week">{getJuneWeekdayLabel(selectedDay)}</span>
-              </div>
-              <em className="record-view-day-count">
-                {hasViewRecords(selectedDay)
-                  ? getViewRecordCount(selectedDay) + '项记录'
-                  : '0条记录'}
-              </em>
-            </div>
-            {hasViewRecords(selectedDay) ? (
-              <ViewRecordCards/>
-            ) : (
-              <div className="record-view-empty">
-                <span aria-hidden="true">📝</span>
-                <p>无记录</p>
-              </div>
-            )}
-          </div>
-        ) : (
-        <div className="business-list-group" aria-label="记录入口">
-          {RECORD_ITEMS.map((item) => (
-            <div key={item.id} className="list-item">
-              <span className="list-icon" aria-hidden="true">
-                {item.type === 'segment' ? (
-                  <PeriodKeyIcon/>
-                ) : (
-                  <span
-                    className={'mock-list-icon ' + item.iconShape}
-                    style={{ '--mock-icon-bg': item.iconBg }}
-                  />
-                )}
-              </span>
-              <div><strong>{item.label}</strong></div>
-              {item.type === 'segment' ? (
-                <div className="ios26-segmented" role="tablist" aria-label="是否选择">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={periodYes}
-                    className={periodYes ? 'is-active' : ''}
-                    onClick={() => handlePeriodToggle(true)}
-                  >
-                    是
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={!periodYes}
-                    className={!periodYes ? 'is-active' : ''}
-                    onClick={() => handlePeriodToggle(false)}
-                  >
-                    否
-                  </button>
-                </div>
-              ) : (
-                <button type="button" className="list-add" aria-label={'新增' + item.label}>
-                  <PlusIcon/>
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-        )}
+          <HealthMorphList
+            periodYes={periodYes}
+            onPeriodYes={() => handlePeriodToggle(true)}
+            onPeriodNo={() => handlePeriodToggle(false)}
+          />
         </div>
       </div>
 

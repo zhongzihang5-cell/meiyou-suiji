@@ -433,12 +433,28 @@ function VoiceWave({playing, mini, compact}){
   );
 }
 
+function formatVoiceDuration(raw, compact) {
+  const s = String(raw || '0');
+  if (!compact) {
+    if (/^\d+["″']?$/.test(s)) {
+      return '0:' + String(parseInt(s, 10)).padStart(2, '0');
+    }
+    return s;
+  }
+  let sec = 0;
+  if (/^\d+["″']?$/.test(s)) {
+    sec = parseInt(s, 10);
+  } else {
+    const m = s.match(/^(\d+):(\d+)$/);
+    if (m) sec = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+    else if (/^\d+$/.test(s)) sec = parseInt(s, 10);
+  }
+  return sec + '″';
+}
+
 function TlVoicePlayBtn({voice, compact}){
   const [playing, setPlaying] = React.useState(false);
-  const raw = voice?.duration || '0:00';
-  const duration = /^\d+["″]?$/.test(raw)
-    ? '0:'+String(parseInt(raw, 10)).padStart(2, '0')
-    : raw;
+  const duration = formatVoiceDuration(voice?.duration || '0:00', compact);
   return (
     <button
       type="button"
@@ -453,10 +469,12 @@ function TlVoicePlayBtn({voice, compact}){
             <rect x="13.5" y="6" width="3.5" height="12" rx="0.8"/>
           </svg>
         ) : (
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg viewBox="0 0 12 12" fill="currentColor">
+            <path d="M3.4 1.6c.3-.2.7-.2 1 .1l5.6 3.6c.3.2.3.7 0 .9l-5.6 3.6c-.3.2-.7.2-1-.1-.2-.2-.4-.5-.4-.8V2.4c0-.3.2-.6.4-.8z"/>
+          </svg>
         )}
       </span>
-      <VoiceWave playing={playing} mini compact={compact}/>
+      {!compact ? <VoiceWave playing={playing} mini compact={compact}/> : null}
       <span className="tl-voice-pill-dur">{duration}</span>
     </button>
   );
@@ -477,8 +495,8 @@ function TlVoiceInline({voice, text}){
   }
   return (
     <div className="tl-voice-block has-voice-pill">
-      {text && <span className="tl-voice-text">{text}</span>}
       <TlVoicePlayBtn voice={voice} compact/>
+      {text && <span className="tl-voice-text">{text}</span>}
     </div>
   );
 }

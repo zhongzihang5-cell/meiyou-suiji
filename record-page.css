@@ -27,48 +27,247 @@
   position: sticky;
   top: 0;
   z-index: 45;
-  margin: 0;
-  padding: 4px 0 0;
+  margin: 0 -12px;
+  padding: 0 12px;
   background: #f2f2f5;
 }
 
-.record-page-root .record-titlebar-top {
+.record-page-root .record-calendar-titlebar {
+  background: #f2f2f5;
+}
+
+.record-page-root .nav-titlebar-row {
+  display: flex;
+  align-items: stretch;
+  min-height: 44px;
+  background: #f2f2f5;
+}
+
+.record-page-root .nav-titlebar-gray {
+  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: center;
+  min-width: 0;
+  background: #f2f2f5;
+}
+
+.record-page-root .record-month-back {
+  background: #ffffff;
+  flex-shrink: 0;
+  padding-right: 8px;
+}
+
+.record-page-root .mock-nav.nav-titlebar-layout {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   min-height: 44px;
+  height: auto;
+  padding: 0;
+  background: transparent;
+}
+
+.record-page-root .nav-titlebar-side {
   min-width: 0;
 }
 
-.record-page-root .record-year-nav {
-  border: 0;
-  background: transparent;
-  color: #323232;
-  font-size: 15px;
-  line-height: 1.47;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  display: inline-flex;
+.record-page-root .nav-titlebar-left {
+  justify-self: start;
+  display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.record-page-root .nav-titlebar-right {
+  justify-self: end;
+}
+
+.record-page-root .record-back-today {
+  height: 24px;
+  padding: 0 10px;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  background: #ffffff;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 400;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.record-page-root .mock-nav.nav-tabs-layout {
+  display: grid;
+  grid-template-columns: auto minmax(8px, 1fr) auto minmax(8px, 1fr) auto;
+  align-items: center;
+  min-height: 44px;
+  height: auto;
+  padding: 0;
+  background: transparent;
+}
+
+.record-page-root .nav-flex-space {
+  min-width: 8px;
+}
+
+.record-page-root .nav-spacer {
+  width: 44px;
+  height: 44px;
+  justify-self: end;
+}
+
+.record-page-root .record-month-back {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 8px;
+  background: transparent;
+}
+
+.record-page-root .nav-primary-tabs {
+  justify-self: center;
+}
+
+.record-page-root .icon-button {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #323232;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-page-root .icon-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.record-page-root .record-month-back {
+  width: auto;
+  min-width: 72px;
+  height: 44px;
+  padding: 0 4px;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  align-items: center;
+  justify-content: start;
+  gap: 4px;
+}
+
+.record-page-root .record-month-back span {
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.record-page-root .nav-primary-tabs {
+  justify-self: center;
+  width: auto;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.record-page-root .nav-primary-tabs button {
+  position: relative;
+  height: 44px;
+  min-width: 44px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.record-page-root .nav-primary-tabs button.is-active {
+  color: #ff4d88;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.record-page-root .nav-primary-tabs button.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 24px;
+  height: 3px;
+  border-radius: 999px;
+  background: #ff4d88;
+  transform: translateX(-50%);
+}
+
+.record-page-root .nav-icon-text {
+  justify-self: end;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #323232;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1px;
+  cursor: pointer;
+  font-family: inherit;
   padding: 0;
 }
 
-.record-page-root .record-year-chev {
-  font-size: 16px;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.45);
+.record-page-root .nav-icon-text svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-.record-page-root .record-titlebar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+.record-page-root .nav-icon-text .record-view-record-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.record-page-root .nav-icon-text span {
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.record-page-root .record-calendar-titlebar .calendar-weekdays {
+  padding: 0 4px;
+  background: #f2f2f5;
+}
+
+.record-page-root [data-record-calendar] > .record-calendar,
+.record-page-root .record-calendar-panel > .record-calendar {
+  border-radius: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  background: #ffffff;
+}
+
+.record-page-root .record-view-filter-bar {
   position: relative;
-  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
 }
 
 .record-page-root .record-mode-menu {
@@ -78,8 +277,8 @@
 .record-page-root .record-mode-pill,
 .record-page-root .record-mode-toggle {
   border: 0;
-  border-radius: 14px;
-  padding: 5px 12px;
+  border-radius: 80px;
+  padding: 6px 14px;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.29;
@@ -155,7 +354,7 @@
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 
-.record-page-root.is-view-mode .record-mode-toggle {
+.record-page-root.is-content-view .record-mode-toggle {
   background: rgba(255, 77, 136, 0.08);
   color: #ff4d88;
   box-shadow: none;
@@ -260,12 +459,13 @@
 }
 
 .record-page-root .record-calendar-panel {
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% + 24px);
+  max-width: calc(100% + 24px);
   min-width: 0;
+  margin: 0 -12px;
   box-sizing: border-box;
-  background: #ffffff;
-  border-radius: 12px;
+  background: linear-gradient(180deg, #fff5f8 0%, #ffffff 56px);
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -291,12 +491,9 @@
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  transition: opacity 0.25s ease 0.15s, transform 0.25s ease 0.15s;
-}
-
-.record-page-root.is-flipping .record-page-content {
-  opacity: 0;
-  transform: translateY(12px);
+  margin: 0;
+  padding: 0 0 12px;
+  background: #f2f2f5;
 }
 
 .record-page-root .calendar-weekdays {
@@ -305,22 +502,17 @@
   grid-template-columns: repeat(7, minmax(0, 1fr));
   align-items: center;
   padding: 0 4px 6px;
-  background: transparent;
+  background: #f2f2f5;
 }
 
 .record-page-root .calendar-weekdays span {
   height: 20px;
   display: grid;
   place-items: center;
-  color: #cccccc;
+  color: rgba(0, 0, 0, 0.6);
   font-size: 10px;
   line-height: 1;
   font-weight: 400;
-}
-
-.record-page-root .calendar-weekdays span:first-child,
-.record-page-root .calendar-weekdays span:last-child {
-  color: #323232;
 }
 
 .record-page-root [data-record-calendar] > .record-calendar,
@@ -333,7 +525,7 @@
 }
 
 .record-page-root .record-calendar {
-  padding: 0 12px 12px;
+  padding: 0 0 12px;
   overflow: hidden;
   background: #ffffff;
   box-sizing: border-box;
@@ -342,6 +534,7 @@
 .record-page-root .calendar-scroll-window {
   overflow: hidden;
   transition: height 0.24s ease;
+  position: relative;
 }
 
 .record-page-root .calendar-grid {
@@ -389,6 +582,11 @@
   color: #ffffff;
 }
 
+.record-page-root .calendar-day.is-predicted {
+  background: #ffdbe7;
+  color: #ffffff;
+}
+
 .record-page-root .calendar-day.is-period-lit {
   background: #ff4d88;
   color: #ffffff;
@@ -430,7 +628,7 @@
   box-shadow: none;
 }
 
-.record-page-root .calendar-day:not(.is-empty) {
+.record-page-root.is-view-mode .calendar-day:not(.is-empty) {
   display: grid;
   grid-template-rows: 10px auto 12px;
   align-content: center;
@@ -466,7 +664,7 @@
   transform: none;
 }
 
-.record-page-root .calendar-day:not(.is-empty) .calendar-day-number {
+.record-page-root.is-view-mode .calendar-day:not(.is-empty) .calendar-day-number {
   position: static;
   transform: none;
   grid-row: 2;
@@ -548,6 +746,89 @@
   width: 13px;
   height: 13px;
   transform: translateX(-50%);
+}
+
+.record-page-root .calendar-vaccine-span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% * 0.72 - 14px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.record-page-root .calendar-vaccine-span-inner {
+  position: absolute;
+  left: 58%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #4cd96f;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.record-page-root .calendar-vaccine-span-inner i {
+  width: 3px;
+  height: 10px;
+  border-radius: 2px;
+  background: #4cd96f;
+  flex-shrink: 0;
+}
+
+.record-page-root .calendar-legend.is-parenting span,
+.record-page-root .calendar-legend.is-record span {
+  color: #4cd96f;
+}
+
+.record-page-root .calendar-legend i.vaccine-mark {
+  width: 3px;
+  height: 10px;
+  border-radius: 2px;
+  background: #4cd96f;
+}
+
+.record-page-root .record-combo-entry {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 0;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 15px;
+  line-height: 1.47;
+  font-family: inherit;
+  font-weight: 400;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.record-page-root .record-combo-icon.is-recovery {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #ff4d88;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-combo-label {
+  flex: 1;
+  text-align: left;
+}
+
+.record-page-root .record-combo-chev {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #cccccc;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
 }
 
 .record-page-root .calendar-legend {
@@ -721,6 +1002,75 @@
   line-height: 1.47;
   font-weight: 400;
   color: #323232;
+}
+
+.record-page-root .list-item-detail {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .list-chevron {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #cccccc;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.record-page-root .list-mood-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.record-page-root .list-mood-emojis {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.record-page-root .list-mood-emojis span {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.record-page-root .list-mood-emojis span.is-active {
+  opacity: 1;
+  filter: none;
+}
+
+.record-page-root .list-diary-actions,
+.record-page-root .list-habit-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.record-page-root .list-camera {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #cccccc;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.record-page-root .list-habit-icons {
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: -2px;
+  opacity: 0.45;
 }
 
 .record-page-root .list-icon {
@@ -1244,4 +1594,269 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.29;
+}
+
+/* ============ 记录 / 查看 同行形变 ============ */
+.record-page-root {
+  --morph-duration: 320ms;
+  --morph-ease: ease;
+}
+
+.record-page-root .record-content-divider {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 0;
+  background: #f2f2f5;
+}
+
+.record-page-root .record-content-date {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.record-page-root .record-content-date-main {
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.record-page-root .record-content-date-week {
+  font-size: 14px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .health-morph-list {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.record-page-root.is-content-view .health-morph-list {
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.record-page-root .health-morph-row {
+  position: relative;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f1f1f4;
+  transition:
+    border-radius var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms),
+    box-shadow var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms),
+    margin-left var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms),
+    margin-right var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms),
+    margin-bottom var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms),
+    border-bottom-color var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms),
+    background-color var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms);
+}
+
+.record-page-root.is-content-view .health-morph-row {
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 10px;
+  border-bottom-color: transparent;
+}
+
+.record-page-root.is-content-view .health-morph-row:last-child {
+  margin-bottom: 0;
+}
+
+.record-page-root .health-morph-row:last-child {
+  border-bottom-color: transparent;
+}
+
+.record-page-root .health-morph-row::after {
+  content: "";
+  position: absolute;
+  left: 60px;
+  right: 0;
+  bottom: 0;
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.record-page-root .health-morph-row:last-child::after,
+.record-page-root.is-content-view .health-morph-row::after {
+  display: none;
+}
+
+.record-page-root .health-morph-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  min-height: 61px;
+  box-sizing: border-box;
+}
+
+.record-page-root .health-morph-left {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.record-page-root .health-morph-icon-slot,
+.record-page-root .health-morph-stripe {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transition: opacity var(--morph-duration) var(--morph-ease) var(--row-delay, 0ms);
+}
+
+.record-page-root .health-morph-icon-slot {
+  left: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  opacity: 1;
+}
+
+.record-page-root .health-morph-stripe {
+  left: 6px;
+  width: 3px;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+.record-page-root.is-content-view .health-morph-icon-slot {
+  opacity: 0;
+}
+
+.record-page-root.is-content-view .health-morph-stripe {
+  opacity: 1;
+}
+
+.record-page-root .health-morph-label {
+  flex-shrink: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.record-page-root .health-morph-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.record-page-root .health-morph-view-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.record-page-root .health-morph-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #fff0f4;
+  color: #ff4d88;
+  font-size: 11px;
+  line-height: 1.29;
+  font-weight: 400;
+}
+
+.record-page-root .health-morph-tag.is-symptom {
+  background: #e8f3ff;
+  color: #378add;
+}
+
+.record-page-root .health-morph-moods {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.record-page-root .health-morph-mood-chip {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.record-page-root .health-morph-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.record-page-root .health-morph-metric strong {
+  font-size: 21px;
+  line-height: 1.19;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.record-page-root .health-morph-metric em {
+  font-size: 12px;
+  line-height: 1.29;
+  font-style: normal;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.record-page-root .health-morph-diet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.record-page-root .health-morph-diet-summary {
+  font-size: 15px;
+  line-height: 1.47;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.record-page-root .health-morph-meals {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.record-page-root .health-morph-meal-photo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  background: #f2f2f5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .record-page-root .health-morph-row,
+  .record-page-root .health-morph-icon-slot,
+  .record-page-root .health-morph-stripe,
+  .record-page-root .health-morph-record-slot,
+  .record-page-root .health-morph-view-slot {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
 }

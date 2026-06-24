@@ -530,23 +530,8 @@ function App(){
           // 通过 window event 监听 typewriter 完成
           const onTypewriterDone = ()=>{
             window.removeEventListener('demoTypewriterDone', onTypewriterDone);
-            // 等标签动画完成（400ms + 120ms*2 + 150ms = ~790ms）后回填来源
             setTimeout(()=>{
-              // 回填记录 1、2 的 sourceFrom
-              setTimeline(blocks=>blocks.map(b=>{
-                if(b.type!=='day') return b;
-                const items = (b.items||[]).map(it=>{
-                  if(it.id===demoR1Id || it.id===demoR2Id){
-                    return {...it, primary:{...it.primary, sourceFrom:'🎤 来自 6月3日 12:00 的语音'}, _sourceNew:true};
-                  }
-                  return it;
-                });
-                return {...b, items, entries:undefined};
-              }));
-              // 阶段 6 完成，解锁
-              setTimeout(()=>{
-                setIsDemoRunning(false);
-              }, 250);
+              setIsDemoRunning(false);
             }, 900);
           };
           window.addEventListener('demoTypewriterDone', onTypewriterDone);
@@ -732,13 +717,14 @@ function App(){
   const DietFeedbackComboScenarioBar = window.DietFeedbackComboScenarioBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
-  const SearchPage = window.SearchPage;
+  const StreamSearchOverlay = window.StreamSearchOverlay;
   const ReviewPage = window.ReviewPage;
   const HomePage = window.HomePage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
-  const openSearchPage = ()=>setShowSearchPage(true);
-  const closeSearchPage = ()=>setShowSearchPage(false);
+  const toggleSearchPage = ()=> setShowSearchPage((prev)=> !prev);
+  const closeSearchPage = ()=> setShowSearchPage(false);
+  const showSearchDock = !showSearchPage;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
@@ -775,7 +761,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage?' is-search-open':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -788,7 +774,7 @@ function App(){
           timeline={timeline}
           scene={scene}
           onOpenCalendar={()=>setActiveTab('cal')}
-          onOpenSearch={openSearchPage}
+          onOpenSearch={toggleSearchPage}
           sisterPlayAnimation={sisterPlayAnimation}
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={!showTodayGuide}
@@ -799,6 +785,7 @@ function App(){
             <img src="assets/curly-arrow-pink.png" alt=""/>
           </div>
         ) : null}
+        {!showSearchDock && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -819,6 +806,7 @@ function App(){
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />
+        )}
         </>
         ) : (
         <>
@@ -827,10 +815,11 @@ function App(){
           <h1 className="stream-title">点滴</h1>
           <div className="stream-actions">
             <button
-              className="stream-action"
+              className={'stream-action' + (showSearchPage ? ' is-active' : '')}
               aria-label="搜索"
+              aria-pressed={showSearchPage}
               type="button"
-              onClick={openSearchPage}
+              onClick={toggleSearchPage}
             >
               <I name="search" size={20} stroke={1.7}/>
             </button>
@@ -857,7 +846,7 @@ function App(){
           />
         </div>
 
-        {!voiceTranscribe && (
+        {!voiceTranscribe && showSearchDock && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -878,6 +867,9 @@ function App(){
         )}
         </>
         )}
+        {showSearchPage && StreamSearchOverlay && (
+          <StreamSearchOverlay onClose={closeSearchPage}/>
+        )}
       </div>
 
       {voiceTranscribe && showRecordShell && !showRecordEmpty && !showRecordBlank && VoiceTranscribeInputLayer && (
@@ -890,14 +882,10 @@ function App(){
         />
       )}
 
-      {showSearchPage && (
-        <SearchPage timeline={timeline} onClose={closeSearchPage}/>
-      )}
-
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      {!showSearchPage && <TabBar active={activeTab} onChange={handleTabChange}/>}
+      <TabBar active={activeTab} onChange={handleTabChange}/>
       </div>
 
       {!window.__STANDALONE_LOCKED_SCENE && (

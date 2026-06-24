@@ -639,6 +639,11 @@
   color:var(--my-text-secondary);
   cursor:pointer;
   border:none;background:transparent;
+  padding:0;
+  transition:color 0.18s ease;
+}
+.stream-action.is-active{
+  color:#ff4d88;
 }
 
 /* ============ 场景模块占位 ============ */
@@ -1448,43 +1453,54 @@
   display:inline;
   line-height:1.47;
 }
-.tl-voice-block.has-voice-pill .tl-voice-pill{
+.tl-voice-block.has-voice-pill .tl-voice-pill.is-compact{
   display:inline-flex;
   vertical-align:middle;
-  margin:0 0 0 4px;
+  margin:0 6px 0 0;
   position:relative;
   top:-1px;
-  height:24px;
-  min-height:24px;
+  height:20px;
+  min-height:20px;
   min-width:0;
-  padding:0 6px 0 2px;
-  gap:3px;
+  padding:0 6px 0 4px;
+  gap:2px;
+  background:#f2f2f5;
+  color:rgba(0,0,0,0.6);
+  border-radius:80px;
 }
-.tl-voice-block.has-voice-pill .tl-voice-pill-ico{
-  width:18px;
-  height:18px;
+.tl-voice-block.has-voice-pill .tl-voice-pill.is-compact:hover{
+  background:#ebebee;
 }
-.tl-voice-block.has-voice-pill .tl-voice-pill-ico svg{
-  width:8px;
-  height:8px;
+.tl-voice-block.has-voice-pill .tl-voice-pill.is-compact:active{
+  transform:scale(0.97);
 }
-.tl-voice-block.has-voice-pill .tl-voice-pill .tl-voice-wave.is-mini{
-  width:16px;
+.tl-voice-block.has-voice-pill .tl-voice-pill.is-compact.is-playing{
+  background:#ebebee;
+}
+.tl-voice-block.has-voice-pill .tl-voice-pill.is-compact .tl-voice-pill-ico{
+  width:auto;
+  height:auto;
+  border-radius:0;
+  background:transparent;
+  color:#ff4d88;
+}
+.tl-voice-block.has-voice-pill .tl-voice-pill.is-compact .tl-voice-pill-ico svg{
+  width:10px;
   height:10px;
-  gap:1px;
+  margin-left:0;
 }
-.tl-voice-block.has-voice-pill .tl-voice-pill .tl-voice-wave.is-mini span{
-  width:1.5px;
-}
-.tl-voice-block.has-voice-pill .tl-voice-pill-dur{
-  font-size:11px;
+.tl-voice-block.has-voice-pill .tl-voice-pill.is-compact .tl-voice-pill-dur{
+  font-size:12px;
+  line-height:1;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
 }
 .fade-in .tl-voice-pill,
 .v3-card-enter .tl-voice-pill{
   animation:vtVoicePillIn 0.42s cubic-bezier(0.22,1,0.36,1) 0.1s both;
 }
-.fade-in .tl-voice-pill:not(.is-playing) .tl-voice-wave.is-mini span,
-.v3-card-enter .tl-voice-pill:not(.is-playing) .tl-voice-wave.is-mini span{
+.fade-in .tl-voice-pill:not(.is-playing):not(.is-compact) .tl-voice-wave.is-mini span,
+.v3-card-enter .tl-voice-pill:not(.is-playing):not(.is-compact) .tl-voice-wave.is-mini span{
   animation:vtVoiceWavePop 0.48s cubic-bezier(0.22,1,0.36,1) both;
   animation-delay:calc(0.14s + var(--i, 0) * 0.045s);
 }
