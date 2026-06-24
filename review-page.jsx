@@ -185,38 +185,43 @@ function CycleDetailPage({open, onClose}){
         </div>
 
         <div className="review-detail-card">
-          <div className="review-insight-head">趋势洞察</div>
-          <div className="review-insight-item is-good">
-            <span className="review-insight-dot"></span>
-            <div>
-              <div className="review-insight-title">整体规律性：相当好</div>
-              <div className="review-insight-text">50 次里只有 2025 年 1 月那次 <b>36 天</b> 超出「正常上限」35 天，其余都在 28-34 天之间。周期间波动的标准差只有约 <b>1.9 天</b>。临床上通常认为同一年内波动小于 7-9 天就算「规律」，你远好于这个标准。</div>
-            </div>
+          <div className="review-insight-head">
+            <span className="review-ai-badge" aria-hidden="true">AI</span>
+            <span>趋势分析</span>
           </div>
-          <div className="review-insight-item is-note">
-            <span className="review-insight-dot"></span>
-            <div>
-              <div className="review-insight-title">最值得注意：周期在逐渐缩短</div>
-              <div className="review-insight-text">把 50 个周期拟合一条趋势线，斜率约 <b>-0.11 天/周期</b>，相当于每年缩短 1 天多，两年累计缩短约 2.5 天。最近两个周期都是 <b>28 天</b>，是整段记录里最短的，当前这次又「提前」来了。</div>
+          <div className="review-insight-body">
+            <div className="review-insight-item is-good">
+              <span className="review-insight-dot"></span>
+              <div>
+                <div className="review-insight-title">整体规律性：相当好</div>
+                <div className="review-insight-text">50 次里只有 2025 年 1 月那次 <b>36 天</b> 超出「正常上限」35 天，其余都在 28-34 天之间。周期间波动的标准差只有约 <b>1.9 天</b>。临床上通常认为同一年内波动小于 7-9 天就算「规律」，你远好于这个标准。</div>
+              </div>
             </div>
-          </div>
-          <div className="review-insight-item is-good">
-            <span className="review-insight-dot"></span>
-            <div>
-              <div className="review-insight-title">不只是变短，还变得更稳了</div>
-              <div className="review-insight-text">把前 12 个周期和后 12 个周期对比很明显：前半段在 <b>29-36 天</b> 之间跳，跨度 7 天；后半段收窄到 <b>28-31 天</b>，跨度只有 3 天。波动几乎减半，你的身体在向「28-31 天」这个更窄的区间收敛。</div>
+            <div className="review-insight-item is-note">
+              <span className="review-insight-dot"></span>
+              <div>
+                <div className="review-insight-title">最值得注意：周期在逐渐缩短</div>
+                <div className="review-insight-text">把 50 个周期拟合一条趋势线，斜率约 <b>-0.11 天/周期</b>，相当于每年缩短 1 天多，两年累计缩短约 2.5 天。最近两个周期都是 <b>28 天</b>，是整段记录里最短的，当前这次又「提前」来了。</div>
+              </div>
             </div>
-          </div>
-          <div className="review-insight-item is-note">
-            <span className="review-insight-dot"></span>
-            <div>
-              <div className="review-insight-title">季节的规律倾向</div>
-              <div className="review-insight-text">按月对比两年同月：4-5 月偏短（<b>28-29 天</b>），冬季 12-2 月偏长（<b>30-32 天</b>），看着像「春短冬长」。但只有两年数据，而且这个「季节性」和整体下降趋势混在一起、没法拆开，所以只能算一个值得继续观察的猜想。</div>
+            <div className="review-insight-item is-good">
+              <span className="review-insight-dot"></span>
+              <div>
+                <div className="review-insight-title">不只是变短，还变得更稳了</div>
+                <div className="review-insight-text">把前 12 个周期和后 12 个周期对比很明显：前半段在 <b>29-36 天</b> 之间跳，跨度 7 天；后半段收窄到 <b>28-31 天</b>，跨度只有 3 天。波动几乎减半，你的身体在向「28-31 天」这个更窄的区间收敛。</div>
+              </div>
             </div>
-          </div>
-          <div className="review-insight-summary">
-            <div className="review-summary-head">总结</div>
-            <p className="review-summary-text">总的来说，你的周期完全在健康区间内，规律性还在变好，没有需要担心的异常。轻微、渐进的周期缩短很常见，可能和年龄、压力、作息、体重等很多因素相关。这是对记录的解读，不是医学诊断。</p>
+            <div className="review-insight-item is-note">
+              <span className="review-insight-dot"></span>
+              <div>
+                <div className="review-insight-title">季节的规律倾向</div>
+                <div className="review-insight-text">按月对比两年同月：4-5 月偏短（<b>28-29 天</b>），冬季 12-2 月偏长（<b>30-32 天</b>），看着像「春短冬长」。但只有两年数据，而且这个「季节性」和整体下降趋势混在一起、没法拆开，所以只能算一个值得继续观察的猜想。</div>
+              </div>
+            </div>
+            <div className="review-insight-summary">
+              <div className="review-summary-head">总结</div>
+              <p className="review-summary-text">总的来说，你的周期完全在健康区间内，规律性还在变好，没有需要担心的异常。轻微、渐进的周期缩短很常见，可能和年龄、压力、作息、体重等很多因素相关。这是对记录的解读，不是医学诊断。</p>
+            </div>
           </div>
         </div>
       </div>

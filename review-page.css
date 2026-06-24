@@ -416,6 +416,26 @@
   font-size:15px;
   font-weight:600;
   color:var(--my-text-primary);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.review-ai-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:24px;
+  height:18px;
+  padding:0 6px;
+  border-radius:var(--r-pill);
+  background:var(--my-brand-soft);
+  color:var(--my-brand-red);
+  font-size:10px;
+  font-weight:700;
+  line-height:18px;
+}
+.review-insight-body{
+  margin-top:8px;
 }
 .review-insight-item{
   display:flex;
@@ -457,19 +477,21 @@
   font-variant-numeric:tabular-nums;
 }
 .review-insight-summary{
-  margin-top:16px;
-  padding-top:14px;
-  border-top:0.5px solid var(--my-line);
+  margin-top:12px;
+  padding:12px;
+  border:0.5px solid rgba(255,77,136,0.12);
+  border-radius:var(--r-sm);
+  background:linear-gradient(180deg, rgba(255,77,136,0.05), rgba(255,149,0,0.04));
 }
 .review-summary-head{
-  margin-bottom:6px;
-  font-size:15px;
+  margin-bottom:5px;
+  font-size:14px;
   font-weight:600;
   color:var(--my-text-primary);
 }
 .review-summary-text{
   margin:0;
-  font-size:14px;
-  line-height:22px;
+  font-size:13px;
+  line-height:21px;
   color:var(--my-text-primary);
 }
