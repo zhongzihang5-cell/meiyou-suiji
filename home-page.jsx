@@ -34,7 +34,7 @@ function HomePeriodHero({onOpen}){
       </div>
       <div className="home-hero-cta">查看详情</div>
       <div className="home-prob-card">
-        <img className="home-prob-image" src="assets/home-period-forecast-cutout.png" alt="下次月经预测图" />
+        <img className="home-prob-image" src="assets/home-pregnancy-rate-flower-cutout.png" alt="今日怀孕几率图" />
       </div>
     </button>
   );
@@ -117,33 +117,30 @@ function HomePeriodDetail({onBack}){
         </div>
       </div>
 
-      <section className="home-detail-card home-detail-main-card">
-        <div className="home-detail-section">
-          <div className="home-detail-section-title">
-            下次月经开始几率
-            <span className="home-detail-section-note">6/27最高</span>
-          </div>
+      <section className="home-detail-card home-detail-probability-card">
+        <div className="home-detail-section home-detail-probability-section">
+          <div className="home-detail-section-title">下次月经开始几率</div>
+          <div className="home-detail-section-subtitle">距离月经开始（6月27日）还有3天</div>
           <HomePeriodProbabilityChart/>
-          <div className="home-detail-chart-summary">最高几率出现在 6月27日，也可能延后。</div>
-          <div className="home-detail-chart-hint">预测会随记录更新</div>
         </div>
+      </section>
 
+      <section className="home-detail-card home-detail-main-card">
         <div className="home-detail-cycle-block">
-          <div className="home-detail-cycle-title">黄体期 · 第11天 <span>i</span></div>
-          <div className="home-detail-cycle-sub">距离月经开始（6月27日）还有3天</div>
+          <div className="home-detail-cycle-title">你现在处于黄体期 · 第11天 <span>i</span></div>
           <div className="home-detail-orbit">
-            <img src="assets/home-period-forecast-cutout.png" alt="周期预测图" />
+            <img src="assets/home-period-orbit-detail-cutout.png" alt="周期预测图" />
           </div>
         </div>
 
         <div className="home-detail-section">
-          <div className="home-detail-section-title">症状预测</div>
+          <div className="home-detail-advice-title">症状预测</div>
           <p>熟悉的小腹坠胀感出现了吗？它可能是在提醒你，再过几天月经就要来了哦。</p>
           <HomePeriodIconRow/>
         </div>
 
         <div className="home-detail-section">
-          <div className="home-detail-section-title">白带变化</div>
+          <div className="home-detail-advice-title">白带变化</div>
           <p>黄体期快结束这几天，白带可能会进一步变少，质地变干，颜色发白或微微发黄。</p>
         </div>
       </section>

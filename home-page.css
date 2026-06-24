@@ -197,15 +197,22 @@
 .home-detail-main-card{
   padding-top:16px;
 }
+.home-detail-probability-card{
+  padding:16px 14px 22px;
+}
+.home-detail-probability-section{
+  padding:0;
+  border-top:0;
+}
 .home-detail-cycle-block{
-  padding:16px 0 12px;
+  padding:0 0 12px;
   text-align:left;
 }
 .home-detail-cycle-title{
   display:flex;
   align-items:center;
   gap:4px;
-  font-size:19px;
+  font-size:15px;
   font-weight:600;
   color:var(--my-brand-red);
 }
@@ -221,15 +228,16 @@
   justify-content:center;
   font-weight:600;
 }
-.home-detail-cycle-sub{
+.home-detail-section-subtitle{
   margin-top:8px;
-  font-size:15px;
+  font-size:13px;
+  line-height:1.4;
   color:var(--my-text-primary);
   font-weight:500;
 }
 .home-detail-orbit{
-  width:188px;
-  height:172px;
+  width:232px;
+  height:220px;
   margin:18px auto 0;
   display:flex;
   align-items:center;
@@ -255,10 +263,8 @@
   gap:6px;
   font-size:15px;
   font-weight:600;
-  color:var(--my-text-primary);
+  color:var(--my-brand-red);
 }
-.home-detail-section-title::before,
-.home-detail-card-title::before,
 .home-detail-advice-title::before{
   content:'';
   width:5px;
@@ -267,15 +273,6 @@
   background:var(--my-brand-red);
   box-shadow:0 0 6px rgba(255,77,136,0.42);
   flex-shrink:0;
-}
-.home-detail-section-note{
-  margin-left:2px;
-  padding:2px 7px;
-  border-radius:999px;
-  background:var(--my-brand-soft);
-  color:var(--my-brand-red);
-  font-size:11px;
-  font-weight:500;
 }
 .home-detail-section p,
 .home-detail-advice p{
@@ -314,7 +311,7 @@
 }
 .home-detail-chart{
   height:172px;
-  margin:12px 0 8px;
+  margin:12px 0 14px;
   padding:14px 8px 0;
   border-radius:10px;
   background:linear-gradient(180deg,rgba(255,77,136,0.05),rgba(255,77,136,0.02));
@@ -380,21 +377,6 @@
 .home-detail-bar-item.is-peak .home-detail-bar-week,
 .home-detail-bar-item.is-peak .home-detail-bar-percent{
   color:var(--my-brand-red);
-}
-.home-detail-chart-summary{
-  padding:8px 10px;
-  border-radius:8px;
-  background:var(--my-brand-soft);
-  color:var(--my-brand-red);
-  font-size:12px;
-  line-height:1.35;
-}
-.home-detail-chart-hint{
-  margin-top:7px;
-  text-align:right;
-  font-size:11px;
-  line-height:1.2;
-  color:var(--my-text-tertiary);
 }
 .home-detail-card-title{
   display:flex;
