@@ -215,7 +215,7 @@ function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
   onFoodConfirm, onDietCapture,
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
-  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'text',
+  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
   demoPhase, isDemoRunning,
 }){
   const I = window.Icon;
@@ -537,6 +537,10 @@ function DockPublisher({
                   <I name="send" size={16} stroke={2}/>
                 </button>
               ) : null}
+
+              <button type="button" className="dock-camera-btn" aria-label="上传照片">
+                <I name="camera" size={22} stroke={1.7}/>
+              </button>
             </div>
 
           </div>
