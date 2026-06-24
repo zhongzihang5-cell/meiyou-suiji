@@ -91,6 +91,17 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
         <path d="M3 13h18M12 9v12M8 9a3 3 0 0 1 4-3 3 3 0 0 1 4 3"/>
       </svg>
     );
+    case 'line-chart': return (
+      <svg {...common}>
+        <path d="M4 19V5"/>
+        <path d="M4 19h16"/>
+        <path d="M7 15l3.2-3.4 3 2.4L18 8"/>
+        <circle cx="7" cy="15" r="0.9" fill="currentColor" stroke="none"/>
+        <circle cx="10.2" cy="11.6" r="0.9" fill="currentColor" stroke="none"/>
+        <circle cx="13.2" cy="14" r="0.9" fill="currentColor" stroke="none"/>
+        <circle cx="18" cy="8" r="0.9" fill="currentColor" stroke="none"/>
+      </svg>
+    );
     case 'user': return (
       <svg {...common}>
         <circle cx="12" cy="8" r="4"/>

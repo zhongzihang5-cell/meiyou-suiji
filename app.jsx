@@ -726,6 +726,7 @@ function App(){
   };
 
   const showRecordTab = scene.calendar.enabled && activeTab === 'cal';
+  const showReview = activeTab === 'cash';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
   const showTodayGuide = scene.record.todayGuide && !hideTodayGuide;
@@ -739,6 +740,7 @@ function App(){
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const SearchPage = window.SearchPage;
+  const ReviewPage = window.ReviewPage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const openSearchPage = ()=>setShowSearchPage(true);
@@ -768,6 +770,10 @@ function App(){
           onOpen={openPeriodAnalysis}
           onClose={()=>setShowAnalysisNotice(false)}
         />
+      )}
+
+      {showReview && ReviewPage && (
+        <ReviewPage/>
       )}
 
       <div
