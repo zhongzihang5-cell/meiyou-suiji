@@ -737,6 +737,7 @@ function KitCalendarDayButton({ day, selected, periodLit, onSelect, activeFilter
   const showHeart = day.heart && shouldShowCalendarIcon('love', activeFilter);
   const showOvulation = day.ovulation && activeFilter === 'all';
   const showTodayMark = day.todayMark && activeFilter === 'all';
+  const hasIconRow = !!(day.marks?.length);
   const cls = [
     'calendar-day',
     day.fertile ? 'is-fertile' : '',
@@ -758,12 +759,18 @@ function KitCalendarDayButton({ day, selected, periodLit, onSelect, activeFilter
       {showTodayMark ? (
         <img className="calendar-icon is-today-mark" src={ICON_TODAY} alt=""/>
       ) : null}
-      <span className="calendar-day-number">{day.n}</span>
-      <span className="calendar-day-icons" aria-hidden="true">
-        {filteredMarks.map((key) => (
-          <img key={key} className="calendar-icon" src={YELLOW_MARK_ICONS[key]} alt=""/>
-        ))}
-      </span>
+      {hasIconRow ? (
+        <>
+          <span className="calendar-day-number">{day.n}</span>
+          <span className="calendar-day-icons" aria-hidden="true">
+            {filteredMarks.map((key) => (
+              <img key={key} className="calendar-icon" src={YELLOW_MARK_ICONS[key]} alt=""/>
+            ))}
+          </span>
+        </>
+      ) : (
+        <span className="calendar-day-number">{day.n}</span>
+      )}
     </button>
   );
 }
@@ -949,18 +956,17 @@ function RecordPage({
                 ))}
               </div>
               <span className="nav-flex-space" aria-hidden="true"/>
-              <span className="nav-spacer record-view-nav-spacer" aria-hidden="true"/>
+              <RecordViewNavMenu
+                activeFilter={activeViewFilter}
+                filterMenuOpen={viewMenuOpen}
+                onToggleMenu={() => setViewMenuOpen((v) => !v)}
+                onCloseMenu={() => setViewMenuOpen(false)}
+                onSelectFilter={(key) => {
+                  setActiveViewFilter(key);
+                  setViewMenuOpen(false);
+                }}
+              />
             </div>
-            <RecordViewNavMenu
-              activeFilter={activeViewFilter}
-              filterMenuOpen={viewMenuOpen}
-              onToggleMenu={() => setViewMenuOpen((v) => !v)}
-              onCloseMenu={() => setViewMenuOpen(false)}
-              onSelectFilter={(key) => {
-                setActiveViewFilter(key);
-                setViewMenuOpen(false);
-              }}
-            />
             <div className="calendar-weekdays" aria-label="星期">
               {WEEKDAYS.map((w) => <span key={w}>{w}</span>)}
             </div>

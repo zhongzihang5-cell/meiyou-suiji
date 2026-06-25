@@ -101,7 +101,7 @@
 
 .record-page-root .mock-nav.nav-tabs-layout {
   display: grid;
-  grid-template-columns: auto minmax(8px, 1fr) auto minmax(8px, 1fr) auto;
+  grid-template-columns: auto minmax(8px, 1fr) auto minmax(8px, 1fr) 76px;
   align-items: center;
   min-height: 44px;
   height: auto;
@@ -250,25 +250,20 @@
   font-weight: 400;
 }
 
-.record-page-root .record-view-nav-spacer {
-  width: 72px;
-  height: 44px;
-  justify-self: end;
-}
-
 .record-page-root .record-view-nav {
-  position: absolute;
-  top: 8px;
-  right: 4px;
-  z-index: 5;
+  position: relative;
+  justify-self: end;
+  width: 76px;
 }
 
 .record-page-root .record-view-nav-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
+  width: 76px;
   height: 28px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 0;
   border-radius: 80px;
   background: #ffffff;
@@ -280,6 +275,8 @@
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .record-page-root .record-view-nav-btn svg {
