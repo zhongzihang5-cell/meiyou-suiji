@@ -33,6 +33,7 @@
 }
 
 .record-page-root .record-calendar-titlebar {
+  position: relative;
   background: #f2f2f5;
 }
 
@@ -247,6 +248,123 @@
   font-size: 11px;
   line-height: 1;
   font-weight: 400;
+}
+
+.record-page-root .record-view-nav-spacer {
+  width: 72px;
+  height: 44px;
+  justify-self: end;
+}
+
+.record-page-root .record-view-nav {
+  position: absolute;
+  top: 8px;
+  right: 4px;
+  z-index: 5;
+}
+
+.record-page-root .record-view-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 80px;
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.record-page-root .record-view-nav-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-view-nav-btn.is-open {
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16);
+}
+
+.record-page-root .record-view-nav-option-icon {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-view-nav-option-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.record-page-root .record-view-nav-option-img {
+  width: 12px;
+  height: 12px;
+  display: block;
+  object-fit: contain;
+}
+
+.record-page-root .record-view-nav-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 60;
+  width: 132px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.record-page-root .record-view-nav-dropdown button {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 14px;
+  line-height: 1.47;
+  font-weight: 400;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.record-page-root .record-view-nav-dropdown button.is-active {
+  background: #fff0f4;
+  color: #ff4d88;
+}
+
+.record-page-root .record-view-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.record-page-root .record-view-nav-check {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.record-page-root .record-view-nav-dropdown button.is-active .record-view-nav-check {
+  opacity: 1;
+  color: #ff4d88;
 }
 
 .record-page-root .record-calendar-titlebar .calendar-weekdays {
@@ -611,9 +729,14 @@
 }
 
 .record-page-root.is-view-mode .calendar-day.is-period,
+.record-page-root.is-view-mode .calendar-day.is-period-lit,
+.record-page-root.is-view-mode .calendar-day.is-predicted {
+  background: #ffdbe7;
+  color: #ffffff;
+}
+
 .record-page-root.is-view-mode .calendar-day.is-period-lit {
-  background: transparent;
-  color: #333333;
+  background: #ff4d88;
 }
 
 .record-page-root.is-view-mode .calendar-day.is-today {

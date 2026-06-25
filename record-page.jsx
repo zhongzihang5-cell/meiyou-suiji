@@ -22,21 +22,29 @@ const YELLOW_MARK_ICONS = {
   like: ICON_YELLOW_LIKE,
 };
 
+const FILTER_MARK_ICONS = {
+  love: ICON_HEART,
+  weight: ICON_YELLOW_BARS,
+  symptom: ICON_YELLOW_PLUS,
+  habit: ICON_YELLOW_BOTTLE,
+  stool: ICON_YELLOW_LIKE,
+};
+
 // business-record-calendar（kit-519 + 分散记录图标）
 const CALENDAR_DAYS = [
   null, null, null,
   { n: 1, fertile: true, marks: ['plus'] },
-  { n: 2, fertile: true, heart: true, marks: ['plus', 'like', 'bars'] },
-  { n: 3, fertile: true, marks: ['like'] },
-  { n: 4, heart: true, marks: ['like', 'bars'] },
-  { n: 5, marks: ['bars'] },
-  { n: 6, heart: true, marks: ['plus'] },
-  { n: 7, marks: ['bottle', 'like'] },
+  { n: 2, fertile: true, heart: true, marks: ['plus', 'bottle', 'bars'] },
+  { n: 3, fertile: true, heart: true },
+  { n: 4, heart: true, marks: ['bottle', 'bars'] },
+  { n: 5, marks: ['bars', 'bottle'] },
+  { n: 6, heart: true, marks: ['plus', 'bottle'] },
+  { n: 7, marks: ['like'] },
   { n: 8, marks: ['plus'] },
   { n: 9, heart: true, marks: ['bars'] },
-  { n: 10, marks: ['like', 'plus'] },
-  { n: 11, marks: ['bottle'] },
-  { n: 12, heart: true, marks: ['like'] },
+  { n: 10, heart: true, marks: ['bottle', 'plus'] },
+  { n: 11, marks: ['bottle', 'like'] },
+  { n: 12, heart: true, marks: ['bottle'] },
   { n: 13, marks: ['bars', 'plus'] },
   { n: 14, period: true, today: true, todayMark: true, marks: ['plus'] },
   { n: 15, period: true },
@@ -59,20 +67,28 @@ const CALENDAR_DAYS = [
   null,
 ];
 
-const FILTER_OPTIONS = [
+const VIEW_FILTER_OPTIONS = [
   { key: 'all', label: '全部', color: '#ff4d88' },
-  { key: 'period', label: '经期', color: '#ff4d88' },
-  { key: 'love', label: '爱爱', color: '#ff6b9d' },
+  { key: 'love', label: '爱爱', color: '#ff94b8' },
   { key: 'weight', label: '体重', color: '#c8a882' },
+  { key: 'symptom', label: '症状', color: '#4f7cae' },
+  { key: 'habit', label: '好习惯', color: '#7cc576' },
+  { key: 'stool', label: '便便', color: '#b972ff' },
 ];
 
+const MARK_FILTER_MAP = {
+  bars: 'weight',
+  plus: 'symptom',
+  like: 'stool',
+  bottle: 'habit',
+};
+
 const RECORD_TYPES = [
-  ...FILTER_OPTIONS,
+  ...VIEW_FILTER_OPTIONS,
+  { key: 'period', label: '经期', color: '#ff4d88' },
   { key: 'mood', label: '心情', color: '#c8a882' },
-  { key: 'symptom', label: '症状', color: '#4f7cae' },
   { key: 'sleep', label: '睡眠', color: '#8d54ff' },
   { key: 'diet', label: '饮食', color: '#00cc99' },
-  { key: 'stool', label: '便便', color: '#b972ff' },
 ];
 
 const CALENDAR_ICON_TYPES = ['period', 'love', 'weight'];
@@ -96,7 +112,18 @@ const DAY_RECORDS = {
 };
 
 function getFilterType(key) {
-  return RECORD_TYPES.find((t) => t.key === key) || FILTER_OPTIONS[0];
+  return RECORD_TYPES.find((t) => t.key === key) || VIEW_FILTER_OPTIONS[0];
+}
+
+function getFilteredMarks(marks, activeFilter) {
+  if (!marks?.length) return [];
+  if (activeFilter === 'all') return marks;
+  return marks.filter((key) => MARK_FILTER_MAP[key] === activeFilter);
+}
+
+function shouldShowCalendarIcon(iconFilter, activeFilter) {
+  if (activeFilter === 'all') return true;
+  return iconFilter === activeFilter;
 }
 
 function getDayRecordTypes(dayN, isPeriod) {
@@ -351,35 +378,76 @@ function AnalysisNavIcon() {
   );
 }
 
-function RecordViewFilterBar({
+function ViewLayersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2L2 7l10 5 10-5-10-5z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M2 12l10 5 10-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M2 17l10 5 10-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function ViewCheckIcon() {
+  return (
+    <svg className="record-view-nav-check" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 12l5 5L19 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function ViewFilterOptionIcon({ type }) {
+  if (type === 'all') {
+    return (
+      <span className="record-view-nav-option-icon" aria-hidden="true">
+        <ViewLayersIcon/>
+      </span>
+    );
+  }
+  const src = FILTER_MARK_ICONS[type];
+  return (
+    <span className="record-view-nav-option-icon" aria-hidden="true">
+      <img className="record-view-nav-option-img" src={src} alt=""/>
+    </span>
+  );
+}
+
+function RecordViewNavMenu({
   activeFilter,
-  activeFilterLabel,
   filterMenuOpen,
   onToggleMenu,
   onCloseMenu,
   onSelectFilter,
 }) {
+  const activeOption = VIEW_FILTER_OPTIONS.find((item) => item.key === activeFilter)
+    || VIEW_FILTER_OPTIONS[0];
+  const isFiltered = activeFilter !== 'all';
+  const buttonLabel = isFiltered ? activeOption.label : '视图';
+
   return (
-    <div className="record-view-filter-bar">
-      <div className="record-mode-menu">
-        <button
-          type="button"
-          className="record-filter-pill"
-          aria-expanded={filterMenuOpen}
-          aria-haspopup="listbox"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleMenu();
-          }}
-        >
-          {activeFilterLabel}
-          <svg className="record-mode-chev" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 10l5 5 5-5"/>
-          </svg>
-        </button>
-        {filterMenuOpen ? (
-          <div className="record-filter-dropdown" role="listbox" aria-label="记录筛选">
-            {FILTER_OPTIONS.map((item) => (
+    <div className="record-view-nav">
+      <button
+        type="button"
+        className={'record-view-nav-btn' + (filterMenuOpen ? ' is-open' : '')}
+        aria-expanded={filterMenuOpen}
+        aria-haspopup="listbox"
+        aria-label={isFiltered ? `已筛选：${activeOption.label}` : '视图筛选'}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleMenu();
+        }}
+      >
+        {isFiltered ? (
+          <ViewFilterOptionIcon type={activeFilter}/>
+        ) : (
+          <ViewLayersIcon/>
+        )}
+        <span>{buttonLabel}</span>
+      </button>
+      {filterMenuOpen ? (
+        <>
+          <div className="record-view-nav-dropdown" role="listbox" aria-label="视图筛选">
+            {VIEW_FILTER_OPTIONS.map((item) => (
               <button
                 key={item.key}
                 type="button"
@@ -388,22 +456,19 @@ function RecordViewFilterBar({
                 className={activeFilter === item.key ? 'is-active' : ''}
                 onClick={() => onSelectFilter(item.key)}
               >
-                <span className="record-filter-option-icon" aria-hidden="true">
-                  <RecordTypeIcon type={item.key} size={16}/>
-                </span>
+                <ViewFilterOptionIcon type={item.key}/>
                 <span>{item.label}</span>
+                <ViewCheckIcon/>
               </button>
             ))}
           </div>
-        ) : null}
-      </div>
-      {filterMenuOpen ? (
-        <button
-          type="button"
-          className="record-mode-menu-backdrop"
-          aria-label="关闭菜单"
-          onClick={onCloseMenu}
-        />
+          <button
+            type="button"
+            className="record-mode-menu-backdrop"
+            aria-label="关闭菜单"
+            onClick={onCloseMenu}
+          />
+        </>
       ) : null}
     </div>
   );
@@ -483,6 +548,16 @@ function RecordTypeIcon({ type, size = 12, color }) {
         <svg {...props}>
           <path d="M12 3c-3 4-4 7-4 10a4 4 0 0 0 8 0c0-3-1-6-4-10z" fill={fill}/>
           <path d="M12 20v1" stroke={fill} strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      );
+    case 'habit':
+      return (
+        <svg {...props}>
+          <path
+            d="M12 21C8.5 17.5 6 14.2 6 10.8 6 7.8 8.2 5.5 11 5.5c1.4 0 2.6.6 3.4 1.5.8-.9 2-1.5 3.4-1.5 2.8 0 5 2.3 5 5.3 0 3.4-2.5 6.7-6 10.2z"
+            fill={fill}
+          />
+          <path d="M12 5.5v15" stroke={fill} strokeWidth="1.4" strokeLinecap="round" opacity="0.45"/>
         </svg>
       );
     case 'love':
@@ -654,10 +729,14 @@ function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo }) {
   );
 }
 
-function KitCalendarDayButton({ day, selected, periodLit, onSelect }) {
+function KitCalendarDayButton({ day, selected, periodLit, onSelect, activeFilter = 'all' }) {
   if (!day) return <span className="calendar-day" aria-hidden="true"/>;
 
   const isPeriod = !!(day.period || periodLit);
+  const filteredMarks = getFilteredMarks(day.marks, activeFilter);
+  const showHeart = day.heart && shouldShowCalendarIcon('love', activeFilter);
+  const showOvulation = day.ovulation && activeFilter === 'all';
+  const showTodayMark = day.todayMark && activeFilter === 'all';
   const cls = [
     'calendar-day',
     day.fertile ? 'is-fertile' : '',
@@ -670,27 +749,21 @@ function KitCalendarDayButton({ day, selected, periodLit, onSelect }) {
 
   return (
     <button type="button" className={cls} onClick={() => onSelect(day.n)}>
-      {day.heart ? (
+      {showHeart ? (
         <img className="calendar-icon is-floating" src={ICON_HEART} alt=""/>
       ) : null}
-      {day.ovulation ? (
+      {showOvulation ? (
         <img className="calendar-icon is-floating" src={ICON_OVULATION} alt=""/>
       ) : null}
-      {day.todayMark ? (
+      {showTodayMark ? (
         <img className="calendar-icon is-today-mark" src={ICON_TODAY} alt=""/>
       ) : null}
-      {day.marks?.length ? (
-        <>
-          <span className="calendar-day-number">{day.n}</span>
-          <span className="calendar-day-icons" aria-hidden="true">
-            {day.marks.map((key) => (
-              <img key={key} className="calendar-icon" src={YELLOW_MARK_ICONS[key]} alt=""/>
-            ))}
-          </span>
-        </>
-      ) : (
-        <span className="calendar-day-number">{day.n}</span>
-      )}
+      <span className="calendar-day-number">{day.n}</span>
+      <span className="calendar-day-icons" aria-hidden="true">
+        {filteredMarks.map((key) => (
+          <img key={key} className="calendar-icon" src={YELLOW_MARK_ICONS[key]} alt=""/>
+        ))}
+      </span>
     </button>
   );
 }
@@ -703,6 +776,7 @@ function CalendarDayButton({ day, selected, periodLit, onSelect, isView, activeF
         selected={selected}
         periodLit={periodLit}
         onSelect={onSelect}
+        activeFilter={activeFilter}
       />
     );
   }
@@ -766,6 +840,8 @@ function RecordPage({
   const [monthOpen, setMonthOpen] = useState(false);
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [calendarOffset, setCalendarOffset] = useState(0);
+  const [viewMenuOpen, setViewMenuOpen] = useState(false);
+  const [activeViewFilter, setActiveViewFilter] = useState('all');
   const dragAreaRef = useRef(null);
   const gridRef = useRef(null);
   const timersRef = useRef([]);
@@ -873,8 +949,18 @@ function RecordPage({
                 ))}
               </div>
               <span className="nav-flex-space" aria-hidden="true"/>
-              <span className="nav-spacer" aria-hidden="true"/>
+              <span className="nav-spacer record-view-nav-spacer" aria-hidden="true"/>
             </div>
+            <RecordViewNavMenu
+              activeFilter={activeViewFilter}
+              filterMenuOpen={viewMenuOpen}
+              onToggleMenu={() => setViewMenuOpen((v) => !v)}
+              onCloseMenu={() => setViewMenuOpen(false)}
+              onSelectFilter={(key) => {
+                setActiveViewFilter(key);
+                setViewMenuOpen(false);
+              }}
+            />
             <div className="calendar-weekdays" aria-label="星期">
               {WEEKDAYS.map((w) => <span key={w}>{w}</span>)}
             </div>
@@ -898,7 +984,7 @@ function RecordPage({
                     periodLit={day && litDays.includes(day.n)}
                     onSelect={handleDaySelect}
                     isView={false}
-                    activeFilter="all"
+                    activeFilter={activeViewFilter}
                   />
                 ))}
               </div>
