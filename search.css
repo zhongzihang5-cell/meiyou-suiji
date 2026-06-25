@@ -18,24 +18,6 @@
   z-index:120;
   pointer-events:none;
 }
-.ios-search-overlay.is-date-picker-open{
-  pointer-events:auto;
-}
-.ios-search-date-scrim{
-  position:absolute;
-  inset:0;
-  z-index:4;
-  display:block;
-  width:100%;
-  height:100%;
-  border:none;
-  background:rgba(0,0,0,0.36);
-  padding:0;
-  pointer-events:auto;
-  animation:iosSearchDateScrimIn 0.24s ease both;
-  cursor:pointer;
-}
-
 .ios-search-top{
   position:absolute;
   top:8px;
@@ -66,8 +48,11 @@
 .ios-search-overlay.is-date-picker-open .ios-search-float-sheet{
   border-radius:0 0 16px 16px;
   border:none;
+  background:var(--my-bg);
   box-shadow:0 8px 24px rgba(0,0,0,0.08);
-  padding:12px 18px 18px;
+  max-height:33.333vh;
+  overflow:hidden;
+  padding:8px 18px 10px;
   animation:iosSearchDateDrop 0.32s cubic-bezier(0.22,1,0.36,1) both;
 }
 
@@ -308,7 +293,7 @@
 }
 
 .ios-search-date-picker{
-  padding:12px 0 4px;
+  padding:6px 0 2px;
   color:rgba(0,0,0,0.78);
   animation:iosSearchDateContentIn 0.32s cubic-bezier(0.22,1,0.36,1) both;
 }
@@ -317,23 +302,23 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:20px;
-  height:32px;
-  margin-bottom:20px;
+  gap:16px;
+  height:24px;
+  margin-bottom:10px;
 }
 
 .ios-search-date-title{
-  min-width:108px;
+  min-width:96px;
   text-align:center;
-  font-size:17px;
+  font-size:15px;
   line-height:1.3;
   font-weight:500;
   color:rgba(0,0,0,0.72);
 }
 
 .ios-search-date-nav{
-  width:30px;
-  height:30px;
+  width:24px;
+  height:24px;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -355,27 +340,27 @@
 }
 
 .ios-search-date-weekdays{
-  margin-bottom:8px;
+  margin-bottom:4px;
 }
 .ios-search-date-weekdays span{
-  height:22px;
+  height:18px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:14px;
+  font-size:12px;
   line-height:1;
   font-weight:400;
   color:rgba(0,0,0,0.72);
 }
 
 .ios-search-date-grid{
-  row-gap:2px;
+  row-gap:0;
 }
 
 .ios-search-date-cell{
   position:relative;
   min-width:0;
-  height:42px;
+  height:28px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -383,7 +368,7 @@
   background:transparent;
   color:rgba(0,0,0,0.30);
   font:inherit;
-  font-size:18px;
+  font-size:14px;
   line-height:1;
   font-weight:400;
   cursor:pointer;
@@ -393,8 +378,8 @@
   cursor:default;
 }
 .ios-search-date-cell span{
-  width:34px;
-  height:34px;
+  width:24px;
+  height:24px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -407,16 +392,16 @@
   background:rgba(255,77,136,0.08);
 }
 .ios-search-date-cell.is-today span{
-  border:1.5px solid #ff7faf;
+  border:1px solid #ff7faf;
   color:#d55f8f;
 }
 .ios-search-date-cell i{
   position:absolute;
   left:50%;
-  bottom:4px;
-  width:4px;
-  height:4px;
-  margin-left:-2px;
+  bottom:1px;
+  width:3px;
+  height:3px;
+  margin-left:-1.5px;
   border-radius:50%;
   background:#ff4d88;
 }
@@ -424,12 +409,23 @@
   pointer-events:none;
 }
 
-.ios-search-date-handle{
-  width:30px;
-  height:4px;
+.ios-search-date-collapse{
+  width:34px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:6px auto 0;
+  border:none;
   border-radius:999px;
-  background:rgba(0,0,0,0.26);
-  margin:16px auto 0;
+  background:rgba(0,0,0,0.06);
+  color:rgba(0,0,0,0.42);
+  padding:0;
+  cursor:pointer;
+  transform:rotate(-90deg);
+}
+.ios-search-date-collapse:active{
+  background:rgba(0,0,0,0.10);
 }
 
 .ios-kb-suggestions{
