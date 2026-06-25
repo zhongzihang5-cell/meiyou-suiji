@@ -90,6 +90,15 @@ function HomePeriodProbabilityChart(){
             <stop offset="0%" stopColor="#ff4d88" stopOpacity="0.2"/>
             <stop offset="100%" stopColor="#ff4d88" stopOpacity="0"/>
           </linearGradient>
+          <linearGradient id="homePeriodLineStroke" x1={padX} y1="0" x2={width - padX} y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#ffa9c7"/>
+            <stop offset="18%" stopColor="#ff86af"/>
+            <stop offset="30%" stopColor="#ff5f98"/>
+            <stop offset="36%" stopColor="#f42b76"/>
+            <stop offset="45%" stopColor="#ff649a"/>
+            <stop offset="68%" stopColor="#ff99ba"/>
+            <stop offset="100%" stopColor="#ffc7d9"/>
+          </linearGradient>
         </defs>
         {[90,60,30,0].map((tick)=>(
           <g key={tick}>
