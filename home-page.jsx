@@ -18,11 +18,21 @@ function HomeTopBar(){
 }
 
 const HOME_PERIOD_PROBABILITY = [
-  { date:'6/25', label:'周四', value:28 },
-  { date:'6/26', label:'周五', value:63 },
-  { date:'6/27', label:'周六', value:86, peak:true },
-  { date:'6/28', label:'周日', value:72 },
-  { date:'6/29', label:'周一', value:41 },
+  { date:'6/22', label:'周一', value:12 },
+  { date:'6/23', label:'周二', value:18 },
+  { date:'6/24', label:'今天', value:28, today:true, axis:true },
+  { date:'6/25', label:'周四', value:46, valueLabel:true },
+  { date:'6/26', label:'周五', value:68, valueLabel:true },
+  { date:'6/27', label:'周六', value:86, peak:true, valueLabel:true, axis:true },
+  { date:'6/28', label:'周日', value:78, valueLabel:true },
+  { date:'6/29', label:'周一', value:58, valueLabel:true },
+  { date:'6/30', label:'周二', value:39, axis:true },
+  { date:'7/1', label:'周三', value:26 },
+  { date:'7/2', label:'周四', value:17, axis:true },
+  { date:'7/3', label:'周五', value:11 },
+  { date:'7/4', label:'周六', value:8, axis:true },
+  { date:'7/5', label:'周日', value:6 },
+  { date:'7/6', label:'周一', value:5, axis:true },
 ];
 
 function HomePeriodHero({onOpen}){
@@ -41,21 +51,77 @@ function HomePeriodHero({onOpen}){
 }
 
 function HomePeriodProbabilityChart(){
+  const width = 320;
+  const height = 174;
+  const padX = 28;
+  const padTop = 34;
+  const padBottom = 42;
+  const chartW = width - padX * 2;
+  const chartH = height - padTop - padBottom;
+  const maxValue = 90;
+  const points = HOME_PERIOD_PROBABILITY.map((item, index)=>{
+    const x = padX + (chartW / (HOME_PERIOD_PROBABILITY.length - 1)) * index;
+    const y = padTop + (1 - item.value / maxValue) * chartH;
+    return {...item, x, y};
+  });
+  const linePath = points.reduce((path, point, index)=>{
+    if(index === 0) return `M${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
+    const prev = points[index - 1];
+    const beforePrev = points[index - 2] || prev;
+    const next = points[index + 1] || point;
+    const tension = 0.42;
+    const cp1x = prev.x + (point.x - beforePrev.x) * tension / 6;
+    const cp1y = prev.y + (point.y - beforePrev.y) * tension / 6;
+    const cp2x = point.x - (next.x - prev.x) * tension / 6;
+    const cp2y = point.y - (next.y - prev.y) * tension / 6;
+    return path + ` C${cp1x.toFixed(1)} ${cp1y.toFixed(1)} ${cp2x.toFixed(1)} ${cp2y.toFixed(1)} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
+  }, '');
+  const areaPath = linePath + ` L ${points[points.length - 1].x.toFixed(1)} ${height - padBottom} L ${points[0].x.toFixed(1)} ${height - padBottom} Z`;
+  const today = points.find(point=>point.today);
+  const peak = points.find(point=>point.peak);
+  const ticks = points.filter(point=>point.axis);
+  const valueLabels = points.filter(point=>point.peak);
+
   return (
-    <div className="home-detail-chart" aria-label="下次月经几率柱状图">
-      {HOME_PERIOD_PROBABILITY.map(item=>(
-        <div key={item.date} className={'home-detail-bar-item' + (item.peak ? ' is-peak' : '')}>
-          <div className="home-detail-bar-percent">{item.value}%</div>
-          <div className="home-detail-bar-track">
-            <div className="home-detail-bar-fill" style={{height:item.value + '%'}}></div>
-          </div>
-          <div className="home-detail-bar-date">{item.date}</div>
-          <div className="home-detail-bar-week">{item.label}</div>
-        </div>
-      ))}
+    <div className="home-detail-line-chart" aria-label="未来15天下次月经开始几率折线图">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="未来15天下次月经开始几率，6月27日最高，今天为6月24日">
+        <defs>
+          <linearGradient id="homePeriodLineArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ff4d88" stopOpacity="0.2"/>
+            <stop offset="100%" stopColor="#ff4d88" stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        {[90,60,30,0].map((tick)=>(
+          <g key={tick}>
+            <line className="home-detail-line-grid" x1={padX} x2={width - padX} y1={padTop + (1 - tick / maxValue) * chartH} y2={padTop + (1 - tick / maxValue) * chartH}/>
+            <text className="home-detail-line-y-tick" x={padX - 7} y={padTop + (1 - tick / maxValue) * chartH + 3}>{tick}%</text>
+          </g>
+        ))}
+        <path className="home-detail-line-area" d={areaPath}/>
+        <path className="home-detail-line-path" d={linePath}/>
+        {today && (
+          <g className="home-detail-line-today">
+            <circle cx={today.x} cy={today.y} r="4"/>
+            <text x={today.x} y={today.y - 10}>今天</text>
+          </g>
+        )}
+        {peak && (
+          <g className="home-detail-line-peak">
+            <circle cx={peak.x} cy={peak.y} r="4.5"/>
+            <circle cx={peak.x} cy={peak.y} r="7"/>
+          </g>
+        )}
+        {valueLabels.map(point=>(
+          <text key={point.date + '-value'} className={'home-detail-line-value-label' + (point.peak ? ' is-peak' : '')} x={point.x} y={point.y - (point.peak ? 15 : 8)}>{point.value}%</text>
+        ))}
+        {ticks.map(point=>(
+          <text key={point.date} className={'home-detail-line-tick' + (point.peak ? ' is-peak' : '') + (point.today ? ' is-today' : '')} x={point.x} y={height - 14}>{point.date}</text>
+        ))}
+      </svg>
     </div>
   );
 }
+
 
 function HomePeriodIconRow(){
   const icons = [

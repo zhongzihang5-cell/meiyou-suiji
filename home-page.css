@@ -309,74 +309,88 @@
   width:24px;
   height:24px;
 }
-.home-detail-chart{
-  height:172px;
-  margin:12px 0 14px;
-  padding:14px 8px 0;
+.home-detail-line-chart{
+  height:188px;
+  margin:12px 0 16px;
   border-radius:10px;
   background:linear-gradient(180deg,rgba(255,77,136,0.05),rgba(255,77,136,0.02));
   border:1px solid rgba(255,77,136,0.08);
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:8px;
-  align-items:end;
-}
-.home-detail-bar-item{
-  height:100%;
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-end;
-  gap:4px;
-}
-.home-detail-bar-percent{
-  height:16px;
-  font-size:11px;
-  line-height:16px;
-  font-weight:600;
-  color:var(--my-text-secondary);
-  font-variant-numeric:tabular-nums;
-}
-.home-detail-bar-track{
-  flex:1;
-  width:26px;
-  min-height:86px;
-  border-radius:999px;
-  background:rgba(255,77,136,0.09);
-  display:flex;
-  align-items:flex-end;
   overflow:hidden;
 }
-.home-detail-bar-fill{
+.home-detail-line-chart svg{
   width:100%;
-  min-height:8px;
-  border-radius:999px 999px 4px 4px;
-  background:linear-gradient(180deg,#ffa1c4,#ff6a9d);
+  height:100%;
+  display:block;
 }
-.home-detail-bar-item.is-peak .home-detail-bar-track{
-  background:rgba(255,77,136,0.15);
+.home-detail-line-grid{
+  stroke:rgba(255,77,136,0.09);
+  stroke-width:1;
 }
-.home-detail-bar-item.is-peak .home-detail-bar-fill{
-  background:linear-gradient(180deg,#ff4d88,#ff2f74);
-  box-shadow:0 0 12px rgba(255,77,136,0.36);
-}
-.home-detail-bar-date{
-  font-size:12px;
-  line-height:1;
-  font-weight:600;
-  color:var(--my-text-primary);
+.home-detail-line-y-tick{
+  fill:var(--my-text-tertiary);
+  font-size:9px;
+  text-anchor:end;
   font-variant-numeric:tabular-nums;
 }
-.home-detail-bar-week{
-  font-size:10px;
-  line-height:1;
-  color:var(--my-text-tertiary);
+.home-detail-line-area{
+  fill:url(#homePeriodLineArea);
 }
-.home-detail-bar-item.is-peak .home-detail-bar-date,
-.home-detail-bar-item.is-peak .home-detail-bar-week,
-.home-detail-bar-item.is-peak .home-detail-bar-percent{
-  color:var(--my-brand-red);
+.home-detail-line-path{
+  fill:none;
+  stroke:var(--my-brand-red);
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.home-detail-line-today line{
+  stroke:rgba(79,124,174,0.42);
+  stroke-width:1.5;
+  stroke-dasharray:4 4;
+}
+.home-detail-line-today circle{
+  fill:#4f7cae;
+  stroke:#fff;
+  stroke-width:2;
+}
+.home-detail-line-today text{
+  fill:#4f7cae;
+  font-size:10px;
+  font-weight:600;
+  text-anchor:middle;
+}
+.home-detail-line-peak circle:first-of-type{
+  fill:var(--my-brand-red);
+  stroke:#fff;
+  stroke-width:2;
+}
+.home-detail-line-peak circle:nth-of-type(2){
+  fill:none;
+  stroke:rgba(255,77,136,0.14);
+  stroke-width:3;
+}
+.home-detail-line-value-label{
+  fill:rgba(255,77,136,0.82);
+  font-size:9px;
+  font-weight:600;
+  text-anchor:middle;
+  font-variant-numeric:tabular-nums;
+}
+.home-detail-line-value-label.is-peak{
+  fill:var(--my-brand-red);
+}
+.home-detail-line-tick{
+  fill:var(--my-text-tertiary);
+  font-size:10px;
+  text-anchor:middle;
+  font-variant-numeric:tabular-nums;
+}
+.home-detail-line-tick.is-peak{
+  fill:var(--my-brand-red);
+  font-weight:600;
+}
+.home-detail-line-tick.is-today{
+  fill:#4f7cae;
+  font-weight:600;
 }
 .home-detail-card-title{
   display:flex;
