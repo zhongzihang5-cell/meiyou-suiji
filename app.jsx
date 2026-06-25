@@ -756,6 +756,22 @@ function App(){
   };
   const handleTimelineSearch = (criteria)=> setSearchCriteria(criteria);
   const handleTimelineSearchClear = ()=> setSearchCriteria(null);
+  const handleTimelineDateSelect = React.useCallback((recordDate)=>{
+    if(!recordDate?.dayId) return;
+    setShowSearchPage(false);
+    setSearchCriteria(null);
+    const scrollToDay = ()=>{
+      const stream = streamRef.current;
+      if(!stream) return;
+      const el = stream.querySelector(`[data-day-id="${recordDate.dayId}"]`);
+      if(!el) return;
+      const header = stream.parentElement?.querySelector('.stream-header');
+      const headerH = header?.getBoundingClientRect().height || 0;
+      const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - headerH - 18;
+      stream.scrollTop = Math.max(0, top);
+    };
+    requestAnimationFrame(()=>requestAnimationFrame(scrollToDay));
+  }, []);
 
   const filterTimelineForSearch = window.filterTimelineForSearch;
   const countTimelineSearchItems = window.countTimelineSearchItems;
@@ -934,9 +950,11 @@ function App(){
         )}
         {showSearchPage && StreamSearchOverlay && (
           <StreamSearchOverlay
+            timeline={timeline}
             onClose={closeSearchPage}
             onSearch={handleTimelineSearch}
             onSearchClear={handleTimelineSearchClear}
+            onDateSelect={handleTimelineDateSelect}
           />
         )}
       </div>

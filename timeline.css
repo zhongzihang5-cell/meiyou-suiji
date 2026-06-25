@@ -636,7 +636,7 @@
   align-items:center;
   justify-content:space-between;
   padding:8px 18px 14px;
-  background:rgba(250,247,244,0.92);
+  background:var(--my-bg);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
 }
