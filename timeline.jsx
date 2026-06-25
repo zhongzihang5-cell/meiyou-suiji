@@ -68,7 +68,10 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
   return (
     <>
       {hideDayHeader ? null : (
-        <div className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}>
+        <div
+          className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}
+          data-day-id={day.id}
+        >
           <CycleDayHeader day={day} items={items} dayBlocks={dayBlocks}/>
         </div>
       )}
