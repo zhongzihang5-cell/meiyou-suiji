@@ -796,6 +796,8 @@ function App(){
   }, [searchCriteria, restoreSearchCloseScroll]);
 
   const showSearchDock = !showSearchPage;
+  const [homeDetailOpen, setHomeDetailOpen] = React.useState(false);
+  const showBottomTabBar = !homeDetailOpen;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
@@ -803,11 +805,11 @@ function App(){
 
   return (
     <>
-      <div className="phone">
+      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '')}>
         <StatusBar/>
 
       {showHome && HomePage && (
-        <HomePage/>
+        <HomePage onDetailOpenChange={setHomeDetailOpen}/>
       )}
 
       {showRecordTab && (
@@ -972,7 +974,7 @@ function App(){
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      <TabBar active={activeTab} onChange={handleTabChange}/>
+      {showBottomTabBar && <TabBar active={activeTab} onChange={handleTabChange}/>}
       </div>
 
       {!window.__STANDALONE_LOCKED_SCENE && (

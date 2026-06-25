@@ -132,10 +132,10 @@
   object-position:center;
 }
 .home-detail-page{
-  height:calc(100vh - 44px - var(--my-tabbar-h));
+  height:calc(100vh - 44px);
   overflow-y:auto;
   overflow-x:hidden;
-  padding:0 10px 88px;
+  padding:0 10px 28px;
   background:linear-gradient(180deg,#ff4d88 0,#ff83b3 118px,#f2f2f5 218px,#f2f2f5 100%);
   -webkit-overflow-scrolling:touch;
 }

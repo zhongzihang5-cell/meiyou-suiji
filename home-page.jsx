@@ -284,8 +284,13 @@ function HomeFeedCard({kind}){
   );
 }
 
-function HomePage(){
+function HomePage({onDetailOpenChange}={}){
   const [detailOpen, setDetailOpen] = React.useState(false);
+
+  React.useEffect(()=>{
+    onDetailOpenChange?.(detailOpen);
+    return ()=>onDetailOpenChange?.(false);
+  }, [detailOpen, onDetailOpenChange]);
   if(detailOpen){
     return <HomePeriodDetail onBack={()=>setDetailOpen(false)}/>;
   }
