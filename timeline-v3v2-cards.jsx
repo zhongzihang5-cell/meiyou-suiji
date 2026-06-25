@@ -677,11 +677,12 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     );
   }
   if(entry.kind === 'voice'){
+    const TlVoiceInline = window.TlVoiceInline;
     const text = entry.text || entry.body || '';
     const voice = entry.voice || (entry.duration ? { duration: entry.duration } : null);
     return (
       <div style={{display:'flex', flexDirection:'column', gap:8}}>
-        <TlVoiceInline voice={voice} text={text}/>
+        {TlVoiceInline ? <TlVoiceInline voice={voice} text={text}/> : null}
         {showTags && (entry.tags || []).length > 0 && (
           <div style={tagRowStyle}>
             {(entry.tags || []).map((t, i)=>(

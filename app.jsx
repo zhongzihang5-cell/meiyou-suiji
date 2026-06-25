@@ -756,6 +756,22 @@ function App(){
   };
   const handleTimelineSearch = (criteria)=> setSearchCriteria(criteria);
   const handleTimelineSearchClear = ()=> setSearchCriteria(null);
+  const handleTimelineDateSelect = React.useCallback((recordDate)=>{
+    if(!recordDate?.dayId) return;
+    setShowSearchPage(false);
+    setSearchCriteria(null);
+    const scrollToDay = ()=>{
+      const stream = streamRef.current;
+      if(!stream) return;
+      const el = stream.querySelector(`[data-day-id="${recordDate.dayId}"]`);
+      if(!el) return;
+      const header = stream.parentElement?.querySelector('.stream-header');
+      const headerH = header?.getBoundingClientRect().height || 0;
+      const top = el.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop - headerH - 18;
+      stream.scrollTop = Math.max(0, top);
+    };
+    requestAnimationFrame(()=>requestAnimationFrame(scrollToDay));
+  }, []);
 
   const filterTimelineForSearch = window.filterTimelineForSearch;
   const countTimelineSearchItems = window.countTimelineSearchItems;
@@ -780,6 +796,8 @@ function App(){
   }, [searchCriteria, restoreSearchCloseScroll]);
 
   const showSearchDock = !showSearchPage;
+  const [homeDetailOpen, setHomeDetailOpen] = React.useState(false);
+  const showBottomTabBar = !homeDetailOpen;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
@@ -787,11 +805,11 @@ function App(){
 
   return (
     <>
-      <div className="phone">
+      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '')}>
         <StatusBar/>
 
       {showHome && HomePage && (
-        <HomePage/>
+        <HomePage onDetailOpenChange={setHomeDetailOpen}/>
       )}
 
       {showRecordTab && (
@@ -934,9 +952,11 @@ function App(){
         )}
         {showSearchPage && StreamSearchOverlay && (
           <StreamSearchOverlay
+            timeline={timeline}
             onClose={closeSearchPage}
             onSearch={handleTimelineSearch}
             onSearchClear={handleTimelineSearchClear}
+            onDateSelect={handleTimelineDateSelect}
           />
         )}
       </div>
@@ -954,7 +974,7 @@ function App(){
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      <TabBar active={activeTab} onChange={handleTabChange}/>
+      {showBottomTabBar && <TabBar active={activeTab} onChange={handleTabChange}/>}
       </div>
 
       {!window.__STANDALONE_LOCKED_SCENE && (

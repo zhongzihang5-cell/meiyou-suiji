@@ -486,7 +486,7 @@ function ReviewPage(){
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>3 项</b></p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>3 项</b>可回顾</p>
 
       <ReviewCard
         title="月经周期"
