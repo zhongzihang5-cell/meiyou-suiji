@@ -90,7 +90,7 @@ function resolveInitialCalendarMonth(dateMap) {
   return { year: latest.year, monthIndex: latest.monthIndex };
 }
 
-function SearchDatePicker({ timeline, onPickDate, onCollapse }) {
+function SearchDatePicker({ timeline, onPickDate }) {
   const I = window.Icon;
   const today = new Date();
   const recordDateMap = React.useMemo(() => buildTimelineDateMap(timeline), [timeline]);
@@ -155,9 +155,6 @@ function SearchDatePicker({ timeline, onPickDate, onCollapse }) {
           );
         })}
       </div>
-      <button type="button" className="ios-search-date-collapse" aria-label="收起按日期查找" onClick={onCollapse}>
-        <I name="arrow" size={15} stroke={2}/>
-      </button>
     </div>
   );
 }
@@ -428,10 +425,18 @@ function StreamSearchOverlay({ timeline, onClose, onSearch, onSearchClear, onDat
 
   return (
     <div className={'ios-search-overlay' + (datePickerOpen ? ' is-date-picker-open' : '')} role="presentation">
+      {datePickerOpen ? (
+        <button
+          type="button"
+          className="ios-search-date-outside"
+          aria-label="关闭按日期查找"
+          onClick={closeDatePicker}
+        />
+      ) : null}
       <div className="ios-search-top">
         <div className="ios-search-float-sheet">
         {datePickerOpen ? (
-          <SearchDatePicker timeline={timeline} onPickDate={handleDatePick} onCollapse={closeDatePicker}/>
+          <SearchDatePicker timeline={timeline} onPickDate={handleDatePick}/>
         ) : (
           <>
           <div className="ios-search-bar-row">
