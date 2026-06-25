@@ -1119,6 +1119,17 @@
   display: block;
 }
 
+.record-page-root .diet-keyicon {
+  display: grid;
+  place-items: center;
+}
+
+.record-page-root .diet-keyicon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
 .record-page-root .list-side-text {
   color: #999999;
   font-size: 17px;
@@ -1850,7 +1861,341 @@
   background: #f2f2f5;
 }
 
+/* ============ 添加饮食弹窗 ============ */
+.phone.is-diet-sheet-open {
+  overflow: hidden;
+}
+
+.phone.is-diet-sheet-open .tabbar,
+.phone.is-diet-sheet-open .record-page-root {
+  pointer-events: none;
+}
+
+.phone .diet-add-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+  background: rgba(0, 0, 0, 0.5);
+  animation: dietMaskFadeIn 0.18s ease;
+}
+
+@keyframes dietMaskFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.phone .diet-add-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 130;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 85%;
+  background: #f2f2f5;
+  border-radius: 16px 16px 0 0;
+  animation: dietSheetUp 0.28s cubic-bezier(0.2, 0, 0, 1);
+  font-family: 'PingFang SC', -apple-system, sans-serif;
+}
+
+@keyframes dietSheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.phone .diet-add-header {
+  display: grid;
+  grid-template-columns: 72px 1fr 72px;
+  align-items: center;
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 12px;
+  background: #f2f2f5;
+  border-radius: 16px 16px 0 0;
+}
+
+.phone .diet-add-title {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 500;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.phone .diet-add-header-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+}
+
+.phone .diet-add-header-btn.is-primary {
+  color: #ff4d88;
+  justify-self: end;
+}
+
+.phone .diet-add-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 12px 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.phone .diet-add-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.phone .diet-add-card-title {
+  margin: 0 0 12px;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.phone .diet-meal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.phone .diet-meal-chip {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 4px;
+  font-size: 14px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+  background: #f2f2f5;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.phone .diet-meal-chip.is-active {
+  color: #ff4d88;
+  background: rgba(255, 77, 136, 0.12);
+}
+
+.phone .diet-add-form-card {
+  padding: 0 12px;
+}
+
+.phone .diet-add-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.phone .diet-add-row:last-child {
+  border-bottom: 0;
+}
+
+.phone .diet-add-label {
+  flex-shrink: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.phone .diet-add-row-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.phone .diet-add-time-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-left: auto;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  position: relative;
+}
+
+.phone .diet-add-chevron {
+  width: 16px;
+  height: 16px;
+  color: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.phone .diet-add-time-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.phone .diet-add-input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  min-width: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+  text-align: right;
+  outline: none;
+  caret-color: #ff4d88;
+}
+
+.phone .diet-add-input::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.phone .diet-add-input-short {
+  width: auto;
+  flex: 1;
+  max-width: 96px;
+}
+
+.phone .diet-unit-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 8px;
+  background: #f2f2f5;
+  flex-shrink: 0;
+}
+
+.phone .diet-unit-toggle button {
+  border: 0;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+  background: transparent;
+  cursor: pointer;
+}
+
+.phone .diet-unit-toggle button.is-active {
+  color: #ff4d88;
+  background: #fff;
+}
+
+.phone .diet-add-unit {
+  flex-shrink: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.phone .diet-add-photo-card .diet-add-card-title {
+  margin-bottom: 12px;
+}
+
+.phone .diet-photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.phone .diet-photo-thumb {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.phone .diet-photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.phone .diet-photo-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.phone .diet-photo-add {
+  width: 72px;
+  height: 72px;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.phone .diet-photo-add svg {
+  width: 22px;
+  height: 22px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.phone .diet-photo-add span {
+  font-size: 11px;
+  line-height: 1.29;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.phone .diet-photo-file {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .phone .diet-add-sheet {
+    animation: none;
+  }
+
   .record-page-root .health-morph-row,
   .record-page-root .health-morph-icon-slot,
   .record-page-root .health-morph-stripe,
