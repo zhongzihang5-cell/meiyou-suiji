@@ -1,4 +1,4 @@
-// ============ 点滴内联搜索浮层（非独立页面） ============
+// ============ 点滴内联搜索面板（顶部下推） ============
 
 const SEARCH_FILTER_TAGS = [
   { id: 'date', label: '按日期', icon: 'calendar' },
@@ -14,6 +14,43 @@ const SEARCH_VOICE_CHAR_MS = 52;
 const SEARCH_VOICE_CHAR_JITTER = 38;
 const SEARCH_SUGGESTIONS = ['活动', '事件', '会议', '比赛', '展览', '访问'];
 const SEARCH_CALENDAR_WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+const SEARCH_SWIPE_CLOSE_THRESHOLD = 48;
+const SEARCH_CLOSE_MS = 260;
+const SEARCH_PANEL_OPEN_MS = 300;
+
+const TIMELINE_INTERACTIVE_SELECTOR = [
+  'button',
+  'a',
+  'input',
+  'textarea',
+  'select',
+  'label',
+  '[role="button"]',
+  '[data-entry-id]',
+  '[data-day-id]',
+  '.tl-card',
+  '.tl-mood-insight',
+  '.weekly-card',
+  '.cycle-sum',
+  '.cycle-card',
+  '.signal-card',
+  '.health',
+  '.guide',
+  '.stream-health',
+  '.card-more-wrap',
+  '.tl-voice-pill',
+  '.tl-search-empty',
+].join(', ');
+
+function isTimelineBlankClick(target) {
+  const stream = document.querySelector('.suiji-stream');
+  if (!stream || !target || !stream.contains(target)) return false;
+  if (target.closest('.ios-search-push, .ios-search-keyboard, .dock-wrap, .stream-header, .tabbar, .quick-float-wrap')) {
+    return false;
+  }
+  if (target.closest(TIMELINE_INTERACTIVE_SELECTOR)) return false;
+  return true;
+}
 
 const IOS_KB_ROWS = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -252,11 +289,15 @@ function StreamSearchOverlay({ timeline, onClose, onSearch, onSearchClear, onDat
   const [query, setQuery] = React.useState('');
   const [activeFilter, setActiveFilter] = React.useState(null);
   const [phase, setPhase] = React.useState('compose'); // compose | results
-  const [showKeyboard, setShowKeyboard] = React.useState(true);
+  const [showKeyboard, setShowKeyboard] = React.useState(false);
   const [datePickerOpen, setDatePickerOpen] = React.useState(false);
   const [voiceListening, setVoiceListening] = React.useState(false);
+  const [panelActive, setPanelActive] = React.useState(false);
+  const [panelClosing, setPanelClosing] = React.useState(false);
   const inputRef = React.useRef(null);
   const voiceStreamRef = React.useRef(null);
+  const swipeStartYRef = React.useRef(null);
+  const closeTimerRef = React.useRef(null);
 
   const stopVoiceStream = React.useCallback(() => {
     if (voiceStreamRef.current) {
@@ -266,12 +307,40 @@ function StreamSearchOverlay({ timeline, onClose, onSearch, onSearchClear, onDat
     setVoiceListening(false);
   }, []);
 
-  React.useEffect(() => {
-    const tm = setTimeout(() => {
-      inputRef.current?.focus();
+  const requestClose = React.useCallback(() => {
+    if (panelClosing) return;
+    stopVoiceStream();
+    setShowKeyboard(false);
+    setPanelActive(false);
+    setPanelClosing(true);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
+      closeTimerRef.current = null;
+      setPanelClosing(false);
+      onClose();
+    }, SEARCH_CLOSE_MS);
+  }, [onClose, panelClosing, stopVoiceStream]);
+
+  React.useLayoutEffect(() => {
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setPanelActive(true));
+    });
+    const kbTimer = setTimeout(() => {
       setShowKeyboard(true);
-    }, 180);
-    return () => clearTimeout(tm);
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }, SEARCH_PANEL_OPEN_MS);
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+      clearTimeout(kbTimer);
+    };
+  }, []);
+
+  React.useEffect(() => () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    if (voiceStreamRef.current) clearTimeout(voiceStreamRef.current);
+    document.querySelector('.suiji-shell')?.classList.remove('is-search-kb-open', 'is-search-date-open');
   }, []);
 
   React.useEffect(() => {
@@ -282,18 +351,36 @@ function StreamSearchOverlay({ timeline, onClose, onSearch, onSearchClear, onDat
     return () => shell.classList.remove('is-search-kb-open', 'is-search-date-open');
   }, [showKeyboard, datePickerOpen]);
 
-  React.useEffect(() => () => {
-    if (voiceStreamRef.current) clearTimeout(voiceStreamRef.current);
-    document.querySelector('.suiji-shell')?.classList.remove('is-search-kb-open', 'is-search-date-open');
-  }, []);
-
   React.useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') requestClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [requestClose]);
+
+  React.useEffect(() => {
+    const stream = document.querySelector('.suiji-stream');
+    if (!stream) return undefined;
+    const onStreamClick = (event) => {
+      if (panelClosing || !isTimelineBlankClick(event.target)) return;
+      requestClose();
+    };
+    stream.addEventListener('click', onStreamClick);
+    return () => stream.removeEventListener('click', onStreamClick);
+  }, [requestClose, panelClosing]);
+
+  const handleSwipeStart = (event) => {
+    swipeStartYRef.current = event.touches[0].clientY;
+  };
+
+  const handleSwipeEnd = (event) => {
+    const startY = swipeStartYRef.current;
+    swipeStartYRef.current = null;
+    if (startY == null) return;
+    const deltaY = event.changedTouches[0].clientY - startY;
+    if (deltaY < -SEARCH_SWIPE_CLOSE_THRESHOLD) requestClose();
+  };
 
   const dismissKeyboard = () => {
     setShowKeyboard(false);
@@ -405,15 +492,6 @@ function StreamSearchOverlay({ timeline, onClose, onSearch, onSearchClear, onDat
     onDateSelect?.(recordDate);
   };
 
-  const closeDatePicker = () => {
-    stopVoiceStream();
-    setDatePickerOpen(false);
-    setActiveFilter(null);
-    setPhase('compose');
-    onSearchClear?.();
-    onClose?.();
-  };
-
   const handleInputKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -422,121 +500,126 @@ function StreamSearchOverlay({ timeline, onClose, onSearch, onSearchClear, onDat
   };
 
   const I = window.Icon;
+  const panelClass = [
+    'ios-search-push',
+    panelActive ? 'is-active' : '',
+    panelClosing ? 'is-closing' : '',
+    datePickerOpen ? 'is-date-picker-open' : '',
+  ].filter(Boolean).join(' ');
 
   return (
-    <div className={'ios-search-overlay' + (datePickerOpen ? ' is-date-picker-open' : '')} role="presentation">
-      {datePickerOpen ? (
-        <button
-          type="button"
-          className="ios-search-date-outside"
-          aria-label="关闭按日期查找"
-          onClick={closeDatePicker}
-        />
-      ) : null}
-      <div className="ios-search-top">
-        <div className="ios-search-float-sheet">
-        {datePickerOpen ? (
-          <SearchDatePicker timeline={timeline} onPickDate={handleDatePick}/>
-        ) : (
-          <>
-          <div className="ios-search-bar-row">
-          <div className={'ios-search-field-wrap' + (voiceListening ? ' is-voice-active' : '')}>
-            <span className="ios-search-field-ico" aria-hidden="true">
-              <I name="search" size={17} stroke={1.8}/>
-            </span>
-            <input
-              ref={inputRef}
-              className="ios-search-field"
-              type="text"
-              enterKeyHint="search"
-              placeholder="试试搜「上个月体重」"
-              value={query}
-              onFocus={openKeyboard}
-              onClick={openKeyboard}
-              onChange={(e) => {
-                stopVoiceStream();
-                setQuery(e.target.value);
-                if (phase === 'results') {
-                  setPhase('compose');
-                  onSearchClear?.();
-                }
-              }}
-              onKeyDown={handleInputKeyDown}
-              aria-label="搜索"
-            />
-            {voiceListening ? (
-              <div className="ios-search-voice-pill" aria-hidden="true">
-                <I name="mic" size={11} stroke={2.2}/>
-                <span>普</span>
-              </div>
-            ) : null}
-            {query ? (
-              <button
-                type="button"
-                className="ios-search-clear"
-                aria-label="清除"
-                onClick={handleClear}
-              >
-                <I name="close" size={10} stroke={2.4}/>
-              </button>
+    <>
+      <div
+        className={panelClass}
+        role="search"
+        onTouchStart={handleSwipeStart}
+        onTouchEnd={handleSwipeEnd}
+      >
+        <div className="ios-search-push-inner">
+          <div className="ios-search-sheet">
+            {datePickerOpen ? (
+              <SearchDatePicker timeline={timeline} onPickDate={handleDatePick}/>
             ) : (
-              <button
-                type="button"
-                className={'ios-search-mic' + (voiceListening ? ' is-active' : '')}
-                aria-label="语音输入"
-                aria-pressed={voiceListening}
-                onClick={handleVoiceInput}
-              >
-                <I name="mic" size={18} stroke={1.7}/>
-              </button>
+              <>
+                <div className="ios-search-bar-row">
+                  <div className={'ios-search-field-wrap' + (voiceListening ? ' is-voice-active' : '')}>
+                    <span className="ios-search-field-ico" aria-hidden="true">
+                      <I name="search" size={17} stroke={1.8}/>
+                    </span>
+                    <input
+                      ref={inputRef}
+                      className="ios-search-field"
+                      type="text"
+                      enterKeyHint="search"
+                      placeholder="试试搜「上个月体重」"
+                      value={query}
+                      onFocus={openKeyboard}
+                      onClick={openKeyboard}
+                      onChange={(e) => {
+                        stopVoiceStream();
+                        setQuery(e.target.value);
+                        if (phase === 'results') {
+                          setPhase('compose');
+                          onSearchClear?.();
+                        }
+                      }}
+                      onKeyDown={handleInputKeyDown}
+                      aria-label="搜索"
+                    />
+                    {voiceListening ? (
+                      <div className="ios-search-voice-pill" aria-hidden="true">
+                        <I name="mic" size={11} stroke={2.2}/>
+                        <span>普</span>
+                      </div>
+                    ) : null}
+                    {query ? (
+                      <button
+                        type="button"
+                        className="ios-search-clear"
+                        aria-label="清除"
+                        onClick={handleClear}
+                      >
+                        <I name="close" size={10} stroke={2.4}/>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className={'ios-search-mic' + (voiceListening ? ' is-active' : '')}
+                        aria-label="语音输入"
+                        aria-pressed={voiceListening}
+                        onClick={handleVoiceInput}
+                      >
+                        <I name="mic" size={18} stroke={1.7}/>
+                      </button>
+                    )}
+                  </div>
+                  <button type="button" className="ios-search-dismiss" aria-label="关闭" onClick={requestClose}>
+                    <I name="close" size={14} stroke={2.2}/>
+                  </button>
+                </div>
+
+                {phase === 'compose' ? (
+                  <div className="ios-search-panel">
+                    <div className="ios-search-filters" aria-label="类型筛选">
+                      <div className="ios-search-filter-tags">
+                        {SEARCH_FILTER_TAGS.map((tag) => {
+                          const active = activeFilter === tag.id;
+                          return (
+                            <button
+                              key={tag.id}
+                              type="button"
+                              className={'ios-search-filter-tag' + (active ? ' is-active' : '')}
+                              aria-pressed={active}
+                              onClick={() => handleFilterClick(tag)}
+                            >
+                              {tag.icon ? <I name={tag.icon} size={14} stroke={1.8}/> : null}
+                              {tag.emoji ? <span className="ios-search-filter-emoji" aria-hidden="true">{tag.emoji}</span> : null}
+                              {tag.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </>
             )}
           </div>
-          <button type="button" className="ios-search-dismiss" aria-label="关闭" onClick={onClose}>
-            <I name="close" size={14} stroke={2.2}/>
-          </button>
-        </div>
-
-        {phase === 'compose' ? (
-          <div className="ios-search-panel">
-            <div className="ios-search-filters" aria-label="类型筛选">
-              <div className="ios-search-filter-tags">
-                {SEARCH_FILTER_TAGS.map((tag) => {
-                  const active = activeFilter === tag.id;
-                  return (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      className={'ios-search-filter-tag' + (active ? ' is-active' : '')}
-                      aria-pressed={active}
-                      onClick={() => handleFilterClick(tag)}
-                    >
-                      {tag.icon ? <I name={tag.icon} size={14} stroke={1.8}/> : null}
-                      {tag.emoji ? <span className="ios-search-filter-emoji" aria-hidden="true">{tag.emoji}</span> : null}
-                      {tag.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        ) : null}
-          </>
-        )}
         </div>
       </div>
 
       {showKeyboard && !datePickerOpen ? (
-      <IosSearchKeyboard
-        query={query}
-        onKey={appendKey}
-        onBackspace={handleBackspace}
-        onSpace={handleSpace}
-        onSearch={handleSubmit}
-        onVoice={handleVoiceInput}
-        isVoiceActive={voiceListening}
-      />
+        <IosSearchKeyboard
+          query={query}
+          onKey={appendKey}
+          onBackspace={handleBackspace}
+          onSpace={handleSpace}
+          onSearch={handleSubmit}
+          onVoice={handleVoiceInput}
+          isVoiceActive={voiceListening}
+        />
       ) : null}
-    </div>
+    </>
   );
 }
 

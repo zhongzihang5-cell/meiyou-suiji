@@ -2,74 +2,50 @@
   opacity:0;
   pointer-events:none;
 }
-.suiji-shell.is-search-open .suiji-stream{
-  padding-bottom:calc(248px + var(--my-safe-bottom) + 80px);
-}
-.suiji-shell.is-search-open:not(.is-search-kb-open) .suiji-stream{
-  padding-bottom:calc(24px + var(--my-safe-bottom) + 80px);
-}
-.suiji-shell.is-search-date-open .suiji-stream{
-  padding-bottom:calc(24px + var(--my-safe-bottom) + 80px);
-}
 
-.ios-search-overlay{
+.ios-search-push{
   position:absolute;
-  inset:0;
-  z-index:120;
+  top:0;
+  left:0;
+  right:0;
+  z-index:25;
   pointer-events:none;
 }
-.ios-search-overlay.is-date-picker-open{
+.ios-search-push.is-active,
+.ios-search-push.is-closing{
   pointer-events:auto;
 }
-.ios-search-date-outside{
-  position:absolute;
-  inset:0;
-  z-index:4;
-  display:block;
-  width:100%;
-  height:100%;
-  border:none;
-  background:transparent;
-  padding:0;
-  cursor:default;
+.ios-search-push-inner{
+  overflow:hidden;
+  transform:translate3d(0,-100%,0);
+  transition:transform 0.3s cubic-bezier(0.2,0,0,1);
+  backface-visibility:hidden;
+  border-radius:0 0 16px 16px;
 }
-.ios-search-top{
-  position:absolute;
-  top:8px;
-  right:12px;
-  left:12px;
-  z-index:25;
-  pointer-events:auto;
+.ios-search-push.is-active .ios-search-push-inner{
+  transform:translate3d(0,0,0);
 }
-.ios-search-overlay.is-date-picker-open .ios-search-top{
-  top:0;
-  right:0;
-  left:0;
-  z-index:25;
+.ios-search-push.is-closing .ios-search-push-inner{
+  transform:translate3d(0,-100%,0);
+  transition-duration:0.26s;
+  transition-timing-function:cubic-bezier(0.4,0,1,1);
 }
 
-.ios-search-float-sheet{
+.ios-search-sheet{
   display:flex;
   flex-direction:column;
   gap:0;
   padding:10px 12px 12px;
-  background:#ffffff;
-  border:0.5px solid rgba(0,0,0,0.06);
-  border-radius:14px;
-  box-shadow:
-    0 10px 36px rgba(0,0,0,0.08),
-    0 2px 8px rgba(0,0,0,0.04);
-  animation:iosSearchSheetDrop 0.44s cubic-bezier(0.22,1,0.36,1) both;
-}
-.ios-search-overlay.is-date-picker-open .ios-search-float-sheet{
-  border-radius:0 0 16px 16px;
-  border:none;
   background:var(--my-bg);
-  box-shadow:0 8px 24px rgba(0,0,0,0.08);
-  max-height:33.333vh;
-  overflow:hidden;
+  border-radius:0 0 16px 16px;
+  border:0.5px solid rgba(0,0,0,0.06);
+  border-top:none;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.10),
+    0 2px 6px rgba(0,0,0,0.04);
+}
+.ios-search-push.is-date-picker-open .ios-search-sheet{
   padding:8px 18px 10px;
-  animation:iosSearchDateDrop 0.32s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 .ios-search-bar-row{
@@ -77,11 +53,20 @@
   align-items:center;
   gap:8px;
 }
+.ios-search-bar-row .ios-search-date-title{
+  flex:1;
+  min-width:0;
+  text-align:center;
+  font-size:15px;
+  line-height:1.3;
+  font-weight:500;
+  color:rgba(0,0,0,0.72);
+}
 
 .ios-search-panel{
   margin-top:10px;
   padding-top:10px;
-  border-top:0.5px solid rgba(0,0,0,0.06);
+  border-top:0.5px solid rgba(0,0,0,0.08);
   background:transparent;
   border-radius:0;
   box-shadow:none;
@@ -89,7 +74,7 @@
   padding-right:0;
   padding-bottom:0;
 }
-.ios-search-overlay.is-date-picker-open .ios-search-panel{
+.ios-search-push.is-date-picker-open .ios-search-panel{
   margin-top:8px;
   padding-top:8px;
   border-top:none;
@@ -104,7 +89,7 @@
   gap:6px;
   min-height:40px;
   padding:0 10px 0 12px;
-  background:#f2f2f5;
+  background:#ffffff;
   border-radius:10px;
   box-shadow:none;
 }
@@ -136,14 +121,14 @@
   border:none;
   background:transparent;
   box-shadow:none;
-  color:rgba(0,0,0,0.45);
+  color:rgba(0,0,0,0.6);
   cursor:pointer;
   flex-shrink:0;
   padding:0;
   border-radius:50%;
 }
 .ios-search-dismiss:active{
-  background:rgba(0,0,0,0.05);
+  background:rgba(0,0,0,0.06);
 }
 
 .ios-search-field-ico{
@@ -211,48 +196,6 @@
   border-radius:50%;
 }
 
-.ios-search-results{
-  position:absolute;
-  top:120px;
-  left:0;
-  right:0;
-  bottom:calc(248px + var(--my-safe-bottom));
-  z-index:1;
-  pointer-events:none;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0 32px;
-}
-
-.ios-search-empty{
-  text-align:center;
-  max-width:280px;
-}
-
-.ios-search-empty-ico{
-  display:flex;
-  justify-content:center;
-  color:rgba(0,0,0,0.22);
-  margin-bottom:16px;
-}
-
-.ios-search-empty-title{
-  margin:0 0 8px;
-  font-size:21px;
-  line-height:1.19;
-  font-weight:500;
-  color:rgba(0,0,0,0.8);
-}
-
-.ios-search-empty-desc{
-  margin:0;
-  font-size:15px;
-  line-height:1.47;
-  font-weight:400;
-  color:rgba(0,0,0,0.45);
-}
-
 .ios-search-filters{
   margin-top:0;
 }
@@ -286,7 +229,7 @@
   padding:0 12px;
   border:none;
   border-radius:80px;
-  background:#f2f2f5;
+  background:#ffffff;
   font-size:13px;
   line-height:1;
   font-weight:400;
@@ -311,7 +254,6 @@
 .ios-search-date-picker{
   padding:6px 0 2px;
   color:rgba(0,0,0,0.78);
-  animation:iosSearchDateContentIn 0.32s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 .ios-search-date-head{
@@ -451,17 +393,20 @@
   cursor:pointer;
 }
 
-.ios-search-keyboard{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:3;
+.suiji-shell.is-search-open .ios-search-keyboard{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  right:auto;
+  bottom:var(--my-tabbar-h);
+  z-index:95;
   pointer-events:auto;
   padding:8px 4px calc(6px + env(safe-area-inset-bottom, 0px));
   background:#d1d5db;
   border-top:0.5px solid rgba(0,0,0,0.08);
-  animation:iosSearchKeyboardUp 0.46s cubic-bezier(0.22,1,0.36,1) both;
+  animation:iosSearchKeyboardUp 0.3s cubic-bezier(0.2,0,0,1) both;
 }
 
 .ios-kb-rows{
@@ -574,20 +519,9 @@
   color:#ff4d88;
 }
 
-@keyframes iosSearchSheetDrop{
-  from{
-    opacity:0;
-    transform:translateY(-18px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
 @keyframes iosSearchKeyboardUp{
-  from{transform:translateY(100%)}
-  to{transform:translateY(0)}
+  from{transform:translate3d(-50%,100%,0)}
+  to{transform:translate3d(-50%,0,0)}
 }
 
 @keyframes iosSearchVoicePillIn{
@@ -595,29 +529,9 @@
   to{opacity:1;transform:translateY(0) scale(1)}
 }
 
-@keyframes iosSearchDateScrimIn{
-  from{opacity:0}
-  to{opacity:1}
-}
-
-@keyframes iosSearchDateDrop{
-  from{
-    opacity:0;
-    transform:translateY(-32px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-@keyframes iosSearchDateContentIn{
-  from{
-    opacity:0;
-    transform:translateY(-10px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
+@media (prefers-reduced-motion: reduce){
+  .ios-search-push-inner,
+  .suiji-shell.is-search-open .ios-search-keyboard{
+    animation:none !important;
   }
 }

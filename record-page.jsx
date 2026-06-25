@@ -250,9 +250,25 @@ const MORPH_ITEMS = [
     label: '饮食',
     iconBg: '#ffe7d6',
     iconShape: 'is-circle',
-    recordType: 'add',
+    recordType: 'diet',
   },
 ];
+
+const DIET_MEAL_TYPES = [
+  { id: 'breakfast', label: '早餐', defaultTime: '08:00' },
+  { id: 'morning-snack', label: '早加餐', defaultTime: '10:30' },
+  { id: 'lunch', label: '午餐', defaultTime: '12:30' },
+  { id: 'afternoon-snack', label: '午加餐', defaultTime: '15:30' },
+  { id: 'dinner', label: '晚餐', defaultTime: '18:30' },
+  { id: 'evening-snack', label: '晚加餐', defaultTime: '22:00' },
+  { id: 'drink', label: '饮品', defaultTime: '15:00' },
+  { id: 'other', label: '其他', defaultTime: '12:00' },
+];
+
+function getDietDefaultTime(mealTypeId) {
+  const item = DIET_MEAL_TYPES.find((m) => m.id === mealTypeId);
+  return item ? item.defaultTime : '08:00';
+}
 
 const MONTH_BLOCKS_2025 = [
   { title: '10月', days: [null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31] },
@@ -293,6 +309,31 @@ function PeriodKeyIcon() {
         transform="rotate(180 13 13)"
       />
     </svg>
+  );
+}
+
+function DietKeyIcon() {
+  return (
+    <span
+      className="mock-list-icon is-circle diet-keyicon"
+      style={{ '--mock-icon-bg': '#ffe7d6' }}
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 4v6" fill="none" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M6.5 4h3" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M6.5 4V3M8 4V3M9.5 4V3" stroke="#ff9a3c" strokeWidth="1.3" strokeLinecap="round"/>
+        <path d="M8 10v9.5" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
+        <path
+          d="M15 4c0 2.5-1.8 4.5-3 4.5s-3-2-3-4.5"
+          fill="none"
+          stroke="#ff9a3c"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <path d="M12 8.5v11" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    </span>
   );
 }
 
@@ -533,7 +574,250 @@ function CalendarRecordMarks({ records, activeFilter, isView, isSelected }) {
   );
 }
 
-function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo }) {
+function ChevronRightIcon() {
+  return (
+    <svg className="diet-add-chevron" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function DietAddSheet({ open, onClose, onDone }) {
+  const [mealType, setMealType] = useState('breakfast');
+  const [time, setTime] = useState('08:00');
+  const [foodName, setFoodName] = useState('');
+  const [amount, setAmount] = useState('');
+  const [amountUnit, setAmountUnit] = useState('g');
+  const [calories, setCalories] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+  const timeInputRef = useRef(null);
+  const photoInputRef = useRef(null);
+  const photosRef = useRef([]);
+
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
+
+  useEffect(() => {
+    if (!open) return;
+    setMealType('breakfast');
+    setTime('08:00');
+    setFoodName('');
+    setAmount('');
+    setAmountUnit('g');
+    setCalories('');
+    setPhotos([]);
+  }, [open]);
+
+  useEffect(() => {
+    const phone = portalTarget;
+    if (!phone) return undefined;
+    if (open) phone.classList.add('is-diet-sheet-open');
+    else phone.classList.remove('is-diet-sheet-open');
+    return () => phone.classList.remove('is-diet-sheet-open');
+  }, [open, portalTarget]);
+
+  const releasePhotos = () => {
+    photosRef.current.forEach((url) => URL.revokeObjectURL(url));
+  };
+
+  const handleClose = () => {
+    releasePhotos();
+    onClose();
+  };
+
+  const handleMealTypeChange = (id) => {
+    setMealType(id);
+    setTime(getDietDefaultTime(id));
+    setAmountUnit(id === 'drink' ? 'ml' : 'g');
+  };
+
+  const handlePhotoPick = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setPhotos((prev) => [...prev, ...urls]);
+    event.target.value = '';
+  };
+
+  const handleDone = () => {
+    onDone?.({
+      mealType,
+      time,
+      foodName: foodName.trim(),
+      amount: amount.trim(),
+      amountUnit,
+      calories: calories.trim(),
+      photos,
+    });
+    handleClose();
+  };
+
+  if (!open || !portalTarget) return null;
+
+  const sheet = (
+    <>
+      <div className="diet-add-mask" onClick={handleClose} aria-hidden="true"/>
+      <div className="diet-add-sheet" role="dialog" aria-modal="true" aria-label="添加饮食">
+        <header className="diet-add-header">
+          <button type="button" className="diet-add-header-btn" onClick={handleClose}>取消</button>
+          <h2 className="diet-add-title">添加饮食</h2>
+          <button type="button" className="diet-add-header-btn is-primary" onClick={handleDone}>完成</button>
+        </header>
+
+        <div className="diet-add-body">
+          <section className="diet-add-card">
+            <h3 className="diet-add-card-title">餐式类型</h3>
+            <div className="diet-meal-grid" role="listbox" aria-label="餐式类型">
+              {DIET_MEAL_TYPES.map((meal) => (
+                <button
+                  key={meal.id}
+                  type="button"
+                  role="option"
+                  aria-selected={mealType === meal.id}
+                  className={'diet-meal-chip' + (mealType === meal.id ? ' is-active' : '')}
+                  onClick={() => handleMealTypeChange(meal.id)}
+                >
+                  {meal.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="diet-add-card diet-add-form-card">
+            <div className="diet-add-row is-link">
+              <span className="diet-add-label">时间</span>
+              <button
+                type="button"
+                className="diet-add-time-btn"
+                onClick={() => timeInputRef.current?.showPicker?.() || timeInputRef.current?.click()}
+              >
+                <span>{time}</span>
+                <ChevronRightIcon/>
+                <input
+                  ref={timeInputRef}
+                  type="time"
+                  className="diet-add-time-input"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  aria-label="选择时间"
+                />
+              </button>
+            </div>
+            <div className="diet-add-row">
+              <span className="diet-add-label">食物名称</span>
+              <input
+                type="text"
+                className="diet-add-input"
+                placeholder="请输入"
+                value={foodName}
+                onChange={(e) => setFoodName(e.target.value)}
+                aria-label="食物名称"
+              />
+            </div>
+            <div className="diet-add-row">
+              <span className="diet-add-label">数量</span>
+              <div className="diet-add-row-end">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  className="diet-add-input diet-add-input-short"
+                  placeholder="请输入"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  aria-label="数量"
+                />
+                <div className="diet-unit-toggle" role="group" aria-label="数量单位">
+                  <button
+                    type="button"
+                    className={amountUnit === 'g' ? 'is-active' : ''}
+                    onClick={() => setAmountUnit('g')}
+                  >
+                    克
+                  </button>
+                  <button
+                    type="button"
+                    className={amountUnit === 'ml' ? 'is-active' : ''}
+                    onClick={() => setAmountUnit('ml')}
+                  >
+                    毫升
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="diet-add-row">
+              <span className="diet-add-label">总热量</span>
+              <div className="diet-add-row-end">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  className="diet-add-input diet-add-input-short"
+                  placeholder="请输入"
+                  value={calories}
+                  onChange={(e) => setCalories(e.target.value)}
+                  aria-label="总热量"
+                />
+                <span className="diet-add-unit">千卡</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="diet-add-card diet-add-photo-card">
+            <h3 className="diet-add-card-title">饮食备注</h3>
+            <div className="diet-photo-grid">
+              {photos.map((url, index) => (
+                <div key={url} className="diet-photo-thumb">
+                  <img src={url} alt="" />
+                  <button
+                    type="button"
+                    className="diet-photo-remove"
+                    aria-label="删除照片"
+                    onClick={() => {
+                      const url = photos[index];
+                      if (url) URL.revokeObjectURL(url);
+                      setPhotos((prev) => prev.filter((_, i) => i !== index));
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="diet-photo-add"
+                onClick={() => photoInputRef.current?.click()}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 8h3l1.5-2h7L17 8h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                  <circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+                <span>添加照片</span>
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="diet-photo-file"
+                onChange={handlePhotoPick}
+                aria-hidden="true"
+                tabIndex={-1}
+              />
+            </div>
+          </section>
+        </div>
+      </div>
+    </>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(sheet, portalTarget);
+  }
+  return sheet;
+}
+
+function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
   if (item.recordType === 'segment') {
     return (
       <div className="ios26-segmented" role="tablist" aria-label="是否选择">
@@ -598,6 +882,14 @@ function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo }) {
     );
   }
 
+  if (item.recordType === 'diet') {
+    return (
+      <button type="button" className="list-add" onClick={onDietAdd} aria-label={'新增' + item.label}>
+        <PlusIcon/>
+      </button>
+    );
+  }
+
   return (
     <button type="button" className="list-add" aria-label={'新增' + item.label}>
       <PlusIcon/>
@@ -605,7 +897,7 @@ function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo }) {
   );
 }
 
-function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo }) {
+function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
   const delay = (index * 50) + 'ms';
 
   return (
@@ -615,6 +907,8 @@ function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo }) {
           <div className="health-morph-icon-slot">
             {item.id === 'period' ? (
               <PeriodKeyIcon/>
+            ) : item.id === 'diet' ? (
+              <DietKeyIcon/>
             ) : (
               <span
                 className={'mock-list-icon ' + item.iconShape}
@@ -630,6 +924,7 @@ function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo }) {
             periodYes={periodYes}
             onPeriodYes={onPeriodYes}
             onPeriodNo={onPeriodNo}
+            onDietAdd={onDietAdd}
           />
         </div>
       </div>
@@ -637,7 +932,7 @@ function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo }) {
   );
 }
 
-function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo }) {
+function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
   return (
     <div className="health-morph-list" aria-label="健康记录列表">
       {MORPH_ITEMS.map((item, index) => (
@@ -648,6 +943,7 @@ function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo }) {
           periodYes={periodYes}
           onPeriodYes={onPeriodYes}
           onPeriodNo={onPeriodNo}
+          onDietAdd={onDietAdd}
         />
       ))}
     </div>
@@ -766,6 +1062,7 @@ function RecordPage({
   const [monthOpen, setMonthOpen] = useState(false);
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [calendarOffset, setCalendarOffset] = useState(0);
+  const [dietSheetOpen, setDietSheetOpen] = useState(false);
   const dragAreaRef = useRef(null);
   const gridRef = useRef(null);
   const timersRef = useRef([]);
@@ -923,6 +1220,7 @@ function RecordPage({
             periodYes={periodYes}
             onPeriodYes={() => handlePeriodToggle(true)}
             onPeriodNo={() => handlePeriodToggle(false)}
+            onDietAdd={() => setDietSheetOpen(true)}
           />
         </div>
       </div>
@@ -955,6 +1253,11 @@ function RecordPage({
           </div>
         </div>
       </section>
+
+      <DietAddSheet
+        open={dietSheetOpen}
+        onClose={() => setDietSheetOpen(false)}
+      />
     </div>
   );
 }

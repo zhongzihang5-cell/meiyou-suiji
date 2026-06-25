@@ -795,7 +795,6 @@ function App(){
     });
   }, [searchCriteria, restoreSearchCloseScroll]);
 
-  const showSearchDock = !showSearchPage;
   const [homeDetailOpen, setHomeDetailOpen] = React.useState(false);
   const showBottomTabBar = !homeDetailOpen;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
@@ -858,7 +857,7 @@ function App(){
             <img src="assets/curly-arrow-pink.png" alt=""/>
           </div>
         ) : null}
-        {!showSearchDock && (
+        {!voiceTranscribe && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -929,7 +928,7 @@ function App(){
           )}
         </div>
 
-        {!voiceTranscribe && showSearchDock && (
+        {!voiceTranscribe && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -948,8 +947,6 @@ function App(){
           isDemoRunning={isDemoRunning}
         />
         )}
-        </>
-        )}
         {showSearchPage && StreamSearchOverlay && (
           <StreamSearchOverlay
             timeline={timeline}
@@ -958,6 +955,8 @@ function App(){
             onSearchClear={handleTimelineSearchClear}
             onDateSelect={handleTimelineDateSelect}
           />
+        )}
+        </>
         )}
       </div>
 
