@@ -585,6 +585,81 @@ function MoodQuickOverlay({ open, onSubmit, onClose }) {
   );
 }
 
+const SYMPTOM_QUICK_OPTIONS = [
+  { id:'back',     icon:'assets/symptom-back.png',      label:'腰酸',       color:'#ff6b96', emoji:'🦴' },
+  { id:'cramp',    icon:'assets/symptom-cramp.png',     label:'腹痛',       color:'#ff6b96', emoji:'⚡' },
+  { id:'bloat',    icon:'assets/symptom-bloat.png',     label:'小腹坠胀',   color:'#ff6b96', emoji:'❗' },
+  { id:'breast',   icon:'assets/symptom-breast.png',    label:'乳房胀痛',   color:'#ff6b96', emoji:'💗' },
+  { id:'sore',     icon:'assets/symptom-sore.png',      label:'身体酸痛',   color:'#ff6b96', emoji:'😣' },
+  { id:'discharge',icon:'assets/symptom-discharge.png', label:'褐色分泌物', color:'#ff6b96', emoji:'💧' },
+  { id:'acne',     icon:'assets/symptom-acne.png',      label:'粉刺',       color:'#ff6b96', emoji:'🔴' },
+  { id:'insomnia', icon:'assets/symptom-insomnia.png',  label:'失眠',       color:'#ff6b96', emoji:'😴' },
+  { id:'diarrhea', icon:'assets/symptom-diarrhea.png',  label:'腹泻',       color:'#ff6b96', emoji:'💩' },
+  { id:'tired',    icon:'assets/symptom-tired.png',     label:'疲惫',       color:'#ff6b96', emoji:'😩' },
+];
+
+function SymptomQuickOverlay({ open, onSubmit, onClose }) {
+  const [choosing, setChoosing] = React.useState(false);
+  const [selected, setSelected] = React.useState(null);
+  const [toastText, setToastText] = React.useState('');
+  const [toastShow, setToastShow] = React.useState(false);
+  const [ready, setReady] = React.useState(false);
+  const busyRef = React.useRef(false);
+
+  React.useEffect(()=>{
+    if(!open){
+      setChoosing(false);
+      setSelected(null);
+      setToastShow(false);
+      busyRef.current = false;
+      setReady(false);
+      return;
+    }
+    const tm = window.setTimeout(()=>setReady(true), 150);
+    return ()=>window.clearTimeout(tm);
+  }, [open]);
+
+  const pick = (opt)=>{
+    if(busyRef.current) return;
+    busyRef.current = true;
+    setChoosing(true);
+    setSelected(opt.id);
+    setToastText('症状已记录 · ' + opt.label);
+    setToastShow(true);
+    window.setTimeout(()=>{
+      onSubmit?.([{ id: opt.id, label: opt.label, emoji: opt.emoji }]);
+      setToastShow(false);
+    }, 600);
+  };
+
+  return (
+    <>
+      <div
+        className={'symptom-quick'+(open ? ' show' : '')+(choosing ? ' choosing' : '')}
+        aria-hidden={!open}
+      >
+        <div className="symptom-quick-card" style={{pointerEvents: ready ? 'auto' : 'none'}}>
+          {SYMPTOM_QUICK_OPTIONS.map((opt, i)=>(
+            <button
+              key={opt.id}
+              type="button"
+              className={'symptom-quick-opt'+(selected === opt.id ? ' sel' : '')}
+              style={{'--mc': opt.color, '--d': (i * 0.03).toFixed(3) + 's'}}
+              onClick={()=>pick(opt)}
+            >
+              <span className="symptom-quick-icon">
+                <img src={opt.icon} alt="" draggable={false}/>
+              </span>
+              <span className="symptom-quick-lbl">{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className={'symptom-quick-toast'+(toastShow ? ' show' : '')}>{toastText}</div>
+    </>
+  );
+}
+
 function QuickSymptomPicker({ onSubmit }) {
   const [sel, setSel] = React.useState([]);
   const toggle = (id)=> setSel(s=> s.includes(id) ? s.filter(x=>x!==id) : [...s, id]);
@@ -692,6 +767,8 @@ Object.assign(window, {
   QuickMoodPicker,
   MoodQuickOverlay,
   MOOD_QUICK_OPTIONS,
+  SymptomQuickOverlay,
+  SYMPTOM_QUICK_OPTIONS,
   QuickSymptomPicker,
   QuickWeightPicker,
   QuickFoodPicker,

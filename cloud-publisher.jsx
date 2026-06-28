@@ -89,7 +89,7 @@ function DockWavePlaceholder({show, focused}){
 }
 
 function QuickCardFan({
-  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onDietPick, onClose,
+  open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onSymptomPick, onDietPick, onClose,
   onSymptomSubmit, onWeightSubmit, onFoodSubmit, weightPickerKey,
 }){
   const QuickCardIcon = window.QuickCardIcon;
@@ -159,11 +159,15 @@ function QuickCardFan({
                   e.preventDefault();
                   e.stopPropagation();
                   onMoodPick?.();
+                } else if(card.id === 'symptom'){
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onSymptomPick?.();
                 }
               }}
               onClick={()=>{
                 if(!open || selected) return;
-                if(card.id !== 'mood' && card.id !== 'diet') onSelectCard(card.id);
+                if(card.id !== 'mood' && card.id !== 'diet' && card.id !== 'symptom') onSelectCard(card.id);
               }}
               aria-label={card.label}
               tabIndex={open && !selected ? 0 : -1}
@@ -229,6 +233,7 @@ function DockPublisher({
   const [quickSelected, setQuickSelected] = React.useState(null);
   const [closingToMood, setClosingToMood] = React.useState(false);
   const [moodPickerOpen, setMoodPickerOpen] = React.useState(false);
+  const [symptomPickerOpen, setSymptomPickerOpen] = React.useState(false);
   const [dockSheet, setDockSheet] = React.useState(null);
   const [recording, setRecording] = React.useState(false);
   const [recSec, setRecSec] = React.useState(0);
@@ -256,6 +261,7 @@ function DockPublisher({
       setQuickSelected(null);
       setDockSheet(null);
       setMoodPickerOpen(false);
+      setSymptomPickerOpen(false);
       setClosingToMood(false);
     }
     prevTabRef.current = activeTab;
@@ -298,6 +304,26 @@ function DockPublisher({
     setQuickOpen(false);
     setQuickSelected(null);
     onMoodConfirm?.(moods);
+  };
+
+  const handleSymptomFanTap = ()=>{
+    setSymptomPickerOpen(true);
+    setClosingToMood(true);
+    setQuickOpen(false);
+    window.setTimeout(()=> setClosingToMood(false), 260);
+  };
+
+  const closeSymptomPicker = ()=>{
+    setSymptomPickerOpen(false);
+    setClosingToMood(false);
+  };
+
+  const handleSymptomOverlaySubmit = (symptoms)=>{
+    setSymptomPickerOpen(false);
+    setClosingToMood(false);
+    setQuickOpen(false);
+    setQuickSelected(null);
+    onSymptomConfirm?.(symptoms);
   };
 
   const handleFabTap = ()=>{
@@ -388,6 +414,7 @@ function DockPublisher({
   const isQuickActive = quickOpen || !!quickSelected;
   const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
   const MoodOverlay = window.MoodQuickOverlay || (()=>null);
+  const SymptomOverlay = window.SymptomQuickOverlay || (()=>null);
 
   return (
     <>
@@ -399,6 +426,7 @@ function DockPublisher({
           onFabTap={handleFabTap}
           onSelectCard={handleSelectQuickCard}
           onMoodPick={handleMoodFanTap}
+          onSymptomPick={handleSymptomFanTap}
           onDietPick={handleDietFanTap}
           onClose={closeQuick}
           onSymptomSubmit={handleQuickSymptomSubmit}
@@ -432,6 +460,15 @@ function DockPublisher({
           open={moodPickerOpen}
           onSubmit={handleMoodOverlaySubmit}
           onClose={closeMoodPicker}
+        />,
+        document.body
+      )}
+
+      {ReactDOM.createPortal(
+        <SymptomOverlay
+          open={symptomPickerOpen}
+          onSubmit={handleSymptomOverlaySubmit}
+          onClose={closeSymptomPicker}
         />,
         document.body
       )}
