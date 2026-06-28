@@ -20,9 +20,9 @@
 /* === 维度A：识别结果 === */
 .diet-fb-sec-a{
   padding:8px 16px 14px;
-  font-size:14px;
-  line-height:1.47;
-  color:rgba(0,0,0,0.8);
+  font-size:16px;
+  line-height:1.6;
+  color:#323232;
 }
 .diet-fb-foods{
   font-size:inherit;

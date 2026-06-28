@@ -65,24 +65,12 @@ function summarizeDayItems(items, day){
   return { count, kcal, weight, stats };
 }
 
-function resolveDayTitleLabel(day, allDays){
-  if(day.isToday) return '今天';
-  const days = allDays || [];
-  const todayIdx = days.findIndex(d => d.isToday);
-  const idx = days.findIndex(d => d.id === day.id);
-  if(todayIdx >= 0 && idx === todayIdx - 1) return '昨天';
-  if(todayIdx >= 0 && idx === todayIdx - 2) return '前天';
+function resolveDayTitleLabel(day){
   const { month, day: dayNum } = parseDayParts(day.date);
   return `${month}月${dayNum}日`;
 }
 
-function formatDayMeta(day, titleLabel){
-  const relative = titleLabel === '今天' || titleLabel === '昨天' || titleLabel === '前天';
-  if(relative){
-    const { month, day: dayNum } = parseDayParts(day.date);
-    const datePart = `${month}月${dayNum}日`;
-    return day.weekday ? `${datePart} · ${day.weekday}` : datePart;
-  }
+function formatDayMeta(day){
   return day.weekday || '';
 }
 

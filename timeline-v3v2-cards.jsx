@@ -125,10 +125,12 @@ function TLKindIcon({kind, color = TL_PRIMARY, size = 14}){
 function TLTag({tag, size = 'sm'}){
   const fs = size === 'xs' ? 10.5 : 11.5;
   return (
-    <span className={'v3-tag'+(size === 'xs' ? ' is-xs' : '')} style={{fontSize: fs}}>
-      <TLTagIcon name={tag.icon} color="currentColor" size={11}/>
+    <span
+      className={'v3-tag'+(size === 'xs' ? ' is-xs' : '')}
+      data-cat={tag.cat}
+      style={{fontSize: fs}}
+    >
       <span className="v3-tag-cat">{tag.cat}</span>
-      {tag.val ? <span className="v3-tag-val">{tag.val}</span> : null}
     </span>
   );
 }
@@ -464,10 +466,160 @@ function WeightAnalysisNote({ noteParts, note }){
   return <div className="v3-weight-curve-note">{note}</div>;
 }
 
+function ChartSymptomDots({data}){
+  const todayLabels = Array.isArray(data?.todayLabels) ? data.todayLabels : [];
+
+  const COLS = [
+    {key:'6/22', label:'6/22', isToday:false},
+    {key:'6/23', label:'6/23', isToday:false},
+    {key:'6/24', label:'6/24', isToday:false},
+    {key:'6/25', label:'6/25', isToday:false},
+    {key:'6/26', label:'6/26', isToday:false},
+    {key:'6/27', label:'6/27', isToday:false},
+    {key:'today',label:'今天', isToday:true },
+  ];
+  const RECORDS = {
+    '6/22':['乳房胀痛','失眠','疲惫'],
+    '6/23':['乳房胀痛'],
+    '6/24':['乳房胀痛','失眠'],
+    '6/25':['腹泻'],
+    '6/26':['腹泻'],
+    '6/27':['腹泻'],
+    'today': todayLabels,
+  };
+  const BASE_ROWS = ['乳房胀痛','腹泻','失眠','疲惫'];
+
+  const rows = [...BASE_ROWS];
+  const seen = new Set(rows);
+  todayLabels.forEach(s=>{
+    if(!seen.has(s)){ rows.push(s); seen.add(s); }
+  });
+
+  const VB_W = 320;
+  const PLOT_LEFT = 78;
+  const PLOT_RIGHT = 312;
+  const LABEL_X = 70;
+  const PLOT_TOP = 12;
+  const ROW_H = 30;
+  const DOT_R = 5;
+  const X_LABEL_GAP = 16;
+  const GRID_R = 8;
+
+  const colW = (PLOT_RIGHT - PLOT_LEFT) / COLS.length;
+  const rowsBottom = PLOT_TOP + ROW_H * rows.length;
+  const xLabelY = rowsBottom + X_LABEL_GAP;
+  const vbH = xLabelY + 10;
+  const colCenter = i => PLOT_LEFT + colW * (i + 0.5);
+  const rowCenter = j => PLOT_TOP + ROW_H * (j + 0.5);
+
+  const lutealSoft = 'rgba(255,196,0,.18)';
+  const grid = 'rgba(0,0,0,.05)';
+
+  return (
+    <div style={{width:'100%'}}>
+      <svg viewBox={`0 0 ${VB_W} ${vbH}`} width="100%" height="auto" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <rect
+          x={PLOT_LEFT}
+          y={PLOT_TOP}
+          width={(PLOT_RIGHT - PLOT_LEFT).toFixed(1)}
+          height={(rowsBottom - PLOT_TOP).toFixed(1)}
+          rx={GRID_R}
+          fill={lutealSoft}
+        />
+        {rows.map((_, j)=>{
+          const y = rowCenter(j);
+          return (
+            <line
+              key={'gl-'+j}
+              x1={PLOT_LEFT}
+              y1={y}
+              x2={PLOT_RIGHT}
+              y2={y}
+              stroke={grid}
+              strokeWidth="1"
+              strokeDasharray="2 3"
+              vectorEffect="non-scaling-stroke"
+            />
+          );
+        })}
+        {rows.map((name, j)=>(
+          <text
+            key={'rl-'+j}
+            x={LABEL_X}
+            y={rowCenter(j)}
+            textAnchor="end"
+            dominantBaseline="central"
+            fontSize="11"
+            fontFamily="PingFang SC, -apple-system, sans-serif"
+            fill={TL_MUTED}
+          >
+            {name}
+          </text>
+        ))}
+        {rows.map((name, j)=>{
+          const y = rowCenter(j);
+          return COLS.map((col, i)=>{
+            const has = (RECORDS[col.key] || []).includes(name);
+            if(!has) return null;
+            return (
+              <circle
+                key={`d-${j}-${i}`}
+                cx={colCenter(i).toFixed(1)}
+                cy={y}
+                r={DOT_R}
+                fill={TL_PRIMARY}
+              />
+            );
+          });
+        })}
+        {COLS.map((col, i)=>(
+          <text
+            key={'cl-'+i}
+            x={colCenter(i).toFixed(1)}
+            y={xLabelY}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="10"
+            fontFamily="PingFang SC, -apple-system, sans-serif"
+            fontWeight={col.isToday ? 600 : 400}
+            fill={col.isToday ? TL_PRIMARY : TL_MUTED}
+          >
+            {col.label}
+          </text>
+        ))}
+      </svg>
+      <div style={{
+        display:'flex', justifyContent:'center', alignItems:'center',
+        flexWrap:'wrap', gap:'6px 12px', marginTop:8,
+      }}>
+        {[
+          {label:'月经期', bg:'rgba(255,77,136,.16)',  bd:'rgba(255,77,136,.55)'},
+          {label:'卵泡期', bg:'rgba(0,204,153,.16)',   bd:'rgba(0,204,153,.55)'},
+          {label:'排卵期', bg:'rgba(185,114,255,.18)', bd:'rgba(185,114,255,.55)'},
+          {label:'黄体期', bg:'rgba(255,196,0,.18)',   bd:'rgba(255,196,0,.55)'},
+        ].map(it=>(
+          <span key={it.label} style={{
+            display:'inline-flex', alignItems:'center', gap:5,
+            fontSize:11, color:TL_MUTED,
+          }}>
+            <span style={{
+              width:12, height:8, borderRadius:3,
+              background:it.bg, border:'0.5px solid '+it.bd,
+              display:'inline-block',
+            }}/>
+            {it.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TLChart({type, compact = false, data, weightUnit}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
   if(type === 'weightTrend') return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
   if(type === 'caloriePanel') return <ChartCaloriePanel compact={compact}/>;
+  if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   return null;
 }
@@ -487,7 +639,10 @@ function V3v2Header({time, title, isNew, entryId, entryKind}){
     <div style={{display:'flex', alignItems:'center', gap:6, minWidth:0}}>
       {time && (
         <div style={{
-          fontSize:11.5, color:TL_MUTED, fontWeight:400, fontVariantNumeric:'tabular-nums', flexShrink:0,
+          fontSize:12, color:'rgba(0,0,0,0.5)', fontWeight:400,
+          fontVariantNumeric:'tabular-nums', flexShrink:0,
+          padding:'2px 8px', border:'0.5px dashed rgba(0,0,0,0.2)', borderRadius:6,
+          lineHeight:1.2,
         }}>{time}</div>
       )}
       {title && (
@@ -659,6 +814,18 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       </div>
     );
   }
+  if(entry.kind === 'symptom'){
+    return (
+      <div className="v3-weight-record">
+        <span className="v3-weight-record-icon v3-symptom-record-icon" aria-hidden="true">
+          <img src="assets/symptom-icon.png" alt="" draggable={false}/>
+        </span>
+        <span className="v3-weight-record-text">
+          {entry.symptomLabel || '症状'}：{entry.symptomValue}
+        </span>
+      </div>
+    );
+  }
   if(entry.kind === 'mood-face'){
     const MoodFace = window.MoodFace;
     const mood = entry.primaryMood;
@@ -727,7 +894,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   return (
     <div style={{display:'flex', flexDirection:'column', gap:8}}>
       {(entry.text || entry.body) ? (
-        <div style={{fontSize:14, color:TL_TEXT, lineHeight:1.5}}>{entry.text || entry.body}</div>
+        <div style={{fontSize:16, color:'#323232', lineHeight:1.6}}>{entry.text || entry.body}</div>
       ) : null}
       {showTags && (entry.tags || []).length > 0 && (
         <div style={tagRowStyle}>
@@ -854,6 +1021,8 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
       )}
       {a && showAi && (() => {
         const DietAiCollapsibleSection = window.DietAiCollapsibleSection;
+        const TypewriterText = window.TypewriterText;
+        const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;
         if (DietAiCollapsibleSection) {
           return (
             <div ref={aiPanelRef}>
@@ -865,7 +1034,13 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
               >
                 {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
                 {(a.noteParts || a.note) && (
-                  <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                  streamNote ? (
+                    <div className="v3-weight-curve-note">
+                      <TypewriterText text={a.note} active followScroll/>
+                    </div>
+                  ) : (
+                    <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                  )
                 )}
               </DietAiCollapsibleSection>
             </div>
@@ -898,7 +1073,13 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
               <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
                 {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
                 {(a.noteParts || a.note) && (
-                  <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                  streamNote ? (
+                    <div className="v3-weight-curve-note">
+                      <TypewriterText text={a.note} active followScroll/>
+                    </div>
+                  ) : (
+                    <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                  )
                 )}
               </div>
             )}

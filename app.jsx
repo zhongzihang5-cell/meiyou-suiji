@@ -642,7 +642,6 @@ function App(){
       const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
         || window.resolveEntryDayId('', timeline);
       if(tryStartFirstDrop(entry, '')){
-        if(isFirst && entry.guideText) appendMoodGuide(entry.guideText, dayId);
         return;
       }
       setTimeline(blocks=>{
@@ -653,7 +652,6 @@ function App(){
         }) : blocks;
         return window.appendTimelineEntry(cleaned, entry, { dayId });
       });
-      if(isFirst && entry.guideText) appendMoodGuide(entry.guideText, dayId);
       return;
     }
     const entry = window.createMoodRecordEntryLegacy(moods);

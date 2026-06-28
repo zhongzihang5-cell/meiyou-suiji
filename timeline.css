@@ -50,14 +50,14 @@
 .tl-gap-divider + .tl-day-section-head{
   padding-top:0;
 }
-/* 日总结卡片 — 两行紧凑排版 */
+/* 日期分隔 — 日期 + 星期 横排 */
 .tl-day-summary{
   display:flex;
   flex-direction:column;
-  gap:5px;
-  background:#fff5f8;
-  border-radius:12px;
-  padding:8px 14px;
+  gap:4px;
+  background:transparent;
+  border-radius:0;
+  padding:4px 0 8px;
   border:none;
   box-shadow:none;
   position:relative;
@@ -67,22 +67,22 @@
 .tl-day-summary-top{
   display:flex;
   align-items:baseline;
-  gap:8px;
+  gap:10px;
   min-width:0;
 }
 .tl-day-summary-title{
-  font-size:17px;
-  font-weight:500;
-  color:rgba(0,0,0,0.85);
-  letter-spacing:-0.02em;
-  line-height:1.19;
+  font-size:22px;
+  font-weight:600;
+  color:#323232;
+  letter-spacing:0;
+  line-height:1.2;
   flex-shrink:0;
 }
 .tl-day-summary-meta{
-  font-size:12px;
-  color:#b5889e;
+  font-size:14px;
+  color:#999999;
   font-weight:400;
-  line-height:1.29;
+  line-height:1.3;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -383,11 +383,12 @@
   letter-spacing:0.02em;
 }
 .rec-body{
-  font-size:15px;
-  line-height:1.7;
-  color:var(--my-text-primary);
+  font-size:16px;
+  line-height:1.6;
+  color:#323232;
   margin-bottom:12px;
   word-break:break-word;
+  letter-spacing:0;
 }
 
 /* 照片 */
@@ -1144,12 +1145,15 @@
 .card-more-menu-item--danger{color:var(--my-danger)}
 .card-more-menu-item svg{flex-shrink:0}
 .tl-rec-card-time{
-  font-size:11.5px;
+  font-size:12px;
   font-weight:400;
-  color:rgba(0,0,0,0.42);
+  color:rgba(0,0,0,0.5);
   font-variant-numeric:tabular-nums;
-  letter-spacing:-0.02em;
+  letter-spacing:0;
   line-height:1.2;
+  padding:2px 8px;
+  border:0.5px dashed rgba(0,0,0,0.2);
+  border-radius:6px;
 }
 .tl-rec-card-kind{
   display:inline-flex;
@@ -1205,10 +1209,10 @@
 }
 .tl-t5-body{
   margin:0;
-  font-size:14px;
-  line-height:1.55;
-  color:rgba(0,0,0,0.82);
-  letter-spacing:0.01em;
+  font-size:16px;
+  line-height:1.6;
+  color:#323232;
+  letter-spacing:0;
 }
 .tl-typewriter-cursor{
   display:inline-block;
@@ -1652,9 +1656,9 @@
 }
 .tl-voice-text{
   margin:0;
-  font-size:14px;
-  line-height:inherit;
-  color:rgba(0,0,0,0.8);
+  font-size:16px;
+  line-height:1.6;
+  color:#323232;
 }
 .tl-voice-block + .tl-extract-label,
 .tl-voice-card .tl-extract-label{
@@ -2341,46 +2345,58 @@
   display:block;
   border-radius:8px;
 }
+.v3-symptom-record-icon img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  border-radius:0;
+}
 .v3-weight-text-record{
   display:flex;
   flex-direction:column;
   gap:8px;
 }
 .v3-weight-text-body{
-  font-size:14px;
+  font-size:16px;
   font-weight:400;
   color:#323232;
-  line-height:1.5;
+  line-height:1.6;
 }
 .v3-weight-record-text{
-  font-size:14px;
+  font-size:16px;
   font-weight:400;
   color:#323232;
-  line-height:1.5;
+  line-height:1.6;
 }
 .v3-tag{
   display:inline-flex;
   align-items:center;
-  gap:4px;
-  padding:3px 8px;
-  background:#fde2e9;
-  border-radius:8px;
+  padding:2px 9px;
+  background:transparent;
+  border:0.5px solid currentColor;
+  border-radius:6px;
   color:#ff4d88;
-  font-weight:500;
+  font-weight:400;
   white-space:nowrap;
   font-size:11.5px;
+  line-height:1.45;
+  letter-spacing:0.02em;
 }
 .v3-tag.is-xs{
-  padding:2px 6px;
+  padding:1px 7px;
   font-size:10.5px;
 }
 .v3-tag-cat{
-  opacity:0.88;
-  font-size:0.92em;
-}
-.v3-tag-val{
   font-size:1em;
+  line-height:inherit;
 }
+.v3-tag[data-cat="体重"]{color:#8d54ff}
+.v3-tag[data-cat="心情"]{color:#f2b705}
+.v3-tag[data-cat="症状"]{color:#4f7cae}
+.v3-tag[data-cat="饮食"]{color:#ff9500}
+.v3-tag[data-cat="运动"]{color:#00cc99}
+.v3-tag[data-cat="睡眠"]{color:#2d5cad}
+.v3-tag[data-cat="喝水"]{color:#5ab8ff}
 .v3-card-enter{
   animation:v3CardEnter 0.32s cubic-bezier(0.2,0,0,1) both;
 }
@@ -2618,9 +2634,10 @@
 }
 .v3-weight-curve-note{
   margin:10px 0 0;
-  font-size:14px;
-  line-height:1.47;
-  color:rgba(0,0,0,0.6);
+  font-size:16px;
+  line-height:1.6;
+  color:#323232;
+  letter-spacing:0;
 }
 .v3-weight-curve-note .is-down{
   color:#ff4d4d;

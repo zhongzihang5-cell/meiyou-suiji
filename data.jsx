@@ -261,7 +261,7 @@ const TIMELINE_BLOCKS = [
         primary:{
           id:'e-513-sleep', time:'23:20', kind:'text',
           text:'昨晚翻来覆去到一点才睡着，今天起来还是有点昏。',
-          tags:[{ cat:'睡眠', val:'失眠', icon:'sleep' }],
+          tags:[{ cat:'症状', icon:'sym' }],
         },
       },
       {
@@ -285,8 +285,8 @@ const TIMELINE_BLOCKS = [
           id:'e-514-1', time:'07:45', kind:'text',
           text:'今天状态不错，去跑了三公里，出汗之后心情也好了很多。',
           tags:[
-            { cat:'运动', val:'跑步', icon:'run' },
-            { cat:'心情', val:'愉快', icon:'mood' },
+            { cat:'运动', icon:'run' },
+            { cat:'心情', icon:'mood' },
           ],
         },
       },
@@ -296,7 +296,7 @@ const TIMELINE_BLOCKS = [
           id:'e-514-diet', time:'12:30', kind:'text',
           text:'午饭吃了鸡胸肉沙拉，没喝咖啡。',
           tags:[
-            { cat:'饮食', val:'沙拉', icon:'food' },
+            { cat:'饮食', icon:'food' },
           ],
         },
       },
@@ -343,8 +343,8 @@ const TIMELINE_BLOCKS = [
           duration:'0:08',
           text:'晚饭吃了沙拉，喝了两杯水',
           tags:[
-            { cat:'饮食', val:'沙拉', icon:'food' },
-            { cat:'热量', val:'320 kcal', icon:'flame' },
+            { cat:'饮食', icon:'food' },
+            { cat:'喝水', icon:'water' },
           ],
         },
       },
@@ -353,16 +353,8 @@ const TIMELINE_BLOCKS = [
         primary:{
           id:'e-519-podcast', time:'21:20', kind:'text',
           text:'晚上听了会儿播客，整个人慢下来不少，打算十一点前睡。',
-          tags:[
-            { cat:'睡眠', val:'早睡', icon:'sleep' },
-          ],
+          tags:[],
         },
-        ai:{
-          id:'e-519-podcast-ai', time:'21:21', kind:'chart',
-          title:'卵泡期睡眠',
-          note:'卵泡期睡眠相对稳定时，第二天精力往往更好；你今晚准备早睡，是个不错的习惯。',
-        },
-        aiDefaultOpen:false,
       },
     ],
   },
@@ -391,9 +383,8 @@ const TIMELINE_BLOCKS = [
           duration:'0:18',
           text:'今天有点累，肚子也有点胀，午饭吃了三明治和拿铁，下午还一直有点犯困。',
           tags:[
-            { cat:'症状', val:'疲惫', icon:'sym' },
-            { cat:'症状', val:'腹胀', icon:'sym' },
-            { cat:'饮食', val:'三明治·拿铁', icon:'food' },
+            { cat:'症状', icon:'sym' },
+            { cat:'饮食', icon:'food' },
           ],
         },
         ai:{
@@ -412,7 +403,7 @@ const TIMELINE_BLOCKS = [
         primary:{
           id:'e-517-fit', time:'18:10', kind:'text',
           text:'去健身房练了四十分钟，出了一身汗。',
-          tags:[{ cat:'运动', val:'健身', icon:'run' }],
+          tags:[{ cat:'运动', icon:'run' }],
         },
       },
     ],
@@ -420,13 +411,7 @@ const TIMELINE_BLOCKS = [
   {
     type:'day', id:'d-5-18', date:'5/18', weekday:'周一', isToday:true,
     phaseTag:'经期第 1 天', phaseKind:'period', cycleDay:1, periodLen:5,
-    items:[
-      {
-        kind:'guide', id:'g-518-post',
-        hiddenUntilSisterDone:true,
-        text:'经期刚开始，肚子和腰有点不舒服很正常。今晚有什么想记下来的吗？',
-      },
-    ],
+    items:[],
   },
 ];
 

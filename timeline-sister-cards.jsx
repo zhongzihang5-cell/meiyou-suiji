@@ -542,7 +542,7 @@ function DemoVoiceCard({entry, isNew}){
     <div className={'tl-card tl-t5-card'+(isNew?' tl-demo-expand':'')} data-entry-id={entry.id}>
       <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind="mixed" onEdit={window.openEditModal}/>
       <section className="tl-t5-main">
-        <div className="tl-t5-body" style={{minHeight:24, lineHeight:'1.6', fontSize:15}}>
+        <div className="tl-t5-body" style={{minHeight:24, lineHeight:'1.6', fontSize:16}}>
           {fullText.substring(0, typedLen)}
           {!typeDone && <span className="ai-caret"/>}
         </div>

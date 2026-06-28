@@ -245,16 +245,53 @@ function DockWeightPicker({onConfirm}){
   return <QuickWeightPicker onSubmit={onConfirm}/>;
 }
 
+const SYMPTOM_NOTES = {
+  '腰酸':'首次在黄体期记录腰酸。黄体期孕激素升高会让盆腔充血、韧带松弛，腰部容易感到酸胀，这在经前比较常见。热敷腰部 15 分钟或做几个轻柔的腰部拉伸，会舒服不少。',
+  '腹痛':'黄体期前列腺素开始积累，子宫可能会有轻微收缩感，这是身体在为下次经期做准备。热敷小腹或喝杯温热的饮品，可以帮助放松。',
+  '小腹坠胀':'黄体期盆腔充血容易引起小腹坠胀感，尤其是久坐后会更明显。起来走动几分钟、避免长时间保持同一姿势，会舒服一些。',
+  '乳房胀痛':'黄体期已经记录了 4 天乳房胀痛，孕激素持续刺激乳腺组织是主要原因，经期来后通常会明显缓解。这几天可以换穿宽松内衣、减少咖啡因摄入。',
+  '身体酸痛':'黄体期孕激素会让肌肉和关节的敏感度升高，身体更容易感到酸痛。轻度拉伸比完全不动更有帮助，但不用勉强做高强度运动。',
+  '褐色分泌物':'黄体期末段少量褐色分泌物通常是经期临近的信号，属于正常现象。如果量多或持续时间长，可以留意观察。',
+  '粉刺':'黄体期孕激素升高会刺激皮脂分泌增加，冒痘在这个阶段很常见。做好清洁保湿就好，经期过后皮肤状态通常会自己恢复。',
+  '失眠':'近 7 天已经有 3 天没睡好了，黄体期后半段孕激素下降确实会影响睡眠质量。睡前 1 小时放下手机、保持卧室凉爽，试试腹式呼吸帮助入睡。',
+  '腹泻':'腹泻已经持续 4 天了，黄体期末段前列腺素升高会加速肠道蠕动，这是比较常见的经前反应。注意补充水分，如果持续加重建议就医。',
+  '疲惫':'黄体期身体的能量消耗本来就比其他阶段大，感到疲惫是正常的。今天允许自己放慢节奏，早点休息就好。',
+};
+
+function buildSymptomNote(labels){
+  return labels.map(l=>SYMPTOM_NOTES[l]).filter(Boolean).join('\n\n');
+}
+
 function createSymptomRecordEntry(symptoms){
   const list = Array.isArray(symptoms) ? symptoms : [symptoms];
+  const time = window.formatNowTime();
+  const gid = 'e-'+Date.now();
+  const todayLabels = list.map(s=>s.label);
+  const note = buildSymptomNote(todayLabels);
+
   return {
-    id:'e-'+Date.now(),
-    kind:'rec',
-    time: window.formatNowTime(),
-    body:'',
-    tags:list.map(s=>({ label:s.label, cat:'symptom', emoji:s.emoji || '🤒' })),
-    tagLayout:'t5',
+    kind:'record-group',
+    id: gid+'-g',
     isNew: true,
+    primary:{
+      id: gid,
+      time,
+      kind:'symptom',
+      text:'',
+      symptomLabel:'症状',
+      symptomValue: todayLabels.join('、'),
+      tags:[],
+    },
+    ai:{
+      id: gid+'-ai',
+      time,
+      kind:'chart',
+      chartType:'symptomDots',
+      title:'近7天症状情况',
+      chartData:{ todayLabels },
+      note,
+    },
+    aiDefaultOpen:true,
   };
 }
 
