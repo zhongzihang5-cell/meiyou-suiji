@@ -58,7 +58,6 @@ function summarizeDayItems(items, day){
   });
 
   const stats = [];
-  if(count > 0) stats.push({ v: String(count), l: '条' });
   if(kcal > 0) stats.push({ v: String(Math.round(kcal)), l: 'kcal' });
   if(weight != null) stats.push({ v: weight.toFixed(1), l: 'kg' });
 
@@ -77,7 +76,6 @@ function formatDayMeta(day){
 function CycleDayHeader({day, items, dayBlocks}){
   const title = resolveDayTitleLabel(day, dayBlocks);
   const meta = formatDayMeta(day, title);
-  const { stats } = summarizeDayItems(items, day);
 
   return (
     <div className={'tl-day-summary'+(day.isToday ? ' is-today' : '')}>
@@ -85,16 +83,6 @@ function CycleDayHeader({day, items, dayBlocks}){
         <span className="tl-day-summary-title">{title}</span>
         {meta && <span className="tl-day-summary-meta">{meta}</span>}
       </div>
-      {stats.length > 0 && (
-        <div className="tl-day-summary-stats">
-          {stats.map((s, i)=>(
-            <span key={i} className="tl-day-summary-stat">
-              <span className="tl-day-summary-stat-v">{s.v}</span>
-              <span className="tl-day-summary-stat-l">{s.l}</span>
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

@@ -123,10 +123,21 @@ function CardMoreMenu({delayMs = 0, entryId, entryKind, onEdit}){
 
 function TlRecCardHead({time, isNew, entryId, entryKind, onEdit}){
   if(!time) return null;
+  const canEdit = !!(entryId && onEdit);
   return (
     <div className="tl-rec-card-hd">
-      <span className="tl-rec-card-time">{time}</span>
-      <CardMoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} onEdit={onEdit}/>
+      {canEdit ? (
+        <button
+          type="button"
+          className="tl-rec-card-time tl-rec-card-time-action"
+          onClick={()=>onEdit(entryId, entryKind)}
+          aria-label={`编辑 ${time}`}
+        >
+          {time}
+        </button>
+      ) : (
+        <span className="tl-rec-card-time">{time}</span>
+      )}
     </div>
   );
 }

@@ -57,11 +57,18 @@
   gap:4px;
   background:transparent;
   border-radius:0;
-  padding:4px 0 8px;
+  padding:4px 0 8px 24px;
   border:none;
   box-shadow:none;
   position:relative;
   z-index:3;
+  transform:translateY(-16px);
+}
+.tl-gap-divider + .tl-day-section-head .tl-day-summary{
+  transform:translateY(-16px);
+}
+.tl-gap-divider + .tl-day-section-head::after{
+  top:-7.3px;
 }
 
 .tl-day-summary-top{
@@ -71,7 +78,7 @@
   min-width:0;
 }
 .tl-day-summary-title{
-  font-size:22px;
+  font-size:17px;
   font-weight:600;
   color:#323232;
   letter-spacing:0;
@@ -123,11 +130,11 @@
 .tl-rail-continuous::before{
   content:'';
   position:absolute;
-  left:6px;
+  left:6.5px;
   top:0;
   bottom:0;
   width:1px;
-  background:rgba(0,0,0,0.08);
+  background:rgba(0,0,0,0.09);
   pointer-events:none;
   z-index:0;
 }
@@ -146,9 +153,20 @@
   z-index:2;
   pointer-events:none;
 }
-.tl-day-section-head.tl-rail-break::before{
-  left:5px;
-  width:3px;
+.tl-day-section-head.tl-rail-break::before{display:none}
+
+.tl-day-section-head::after{
+  content:'';
+  position:absolute;
+  left:1.5px;
+  top:8.7px;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:linear-gradient(180deg, #ff77b2 0%, #ff4d88 100%);
+  box-shadow:0 0 0 3px var(--my-bg);
+  z-index:4;
+  pointer-events:none;
 }
 
 /* 日标题 — 大号日期 + 周期条 */
@@ -212,11 +230,14 @@
 .tl-rail-node{
   display:flex;
   gap:6px;
-  padding-bottom:14px;
+  padding-bottom:36.5px;
   position:relative;
   z-index:1;
 }
-.tl-rail-node.is-feed-last{padding-bottom:4px}
+.tl-rail-node.is-feed-last{padding-bottom:36.5px}
+.tl-day-section-head + .tl-rail-node{
+  margin-top:20.5px;
+}
 .tl-rail-node.is-guide{
   padding-top:16px;
   align-items:flex-start;
@@ -252,8 +273,8 @@
   width:6px;
   height:6px;
   border-radius:50%;
-  background:rgba(255,77,136,0.32);
-  border:1.5px solid rgba(255,77,136,0.48);
+  background:#d1d1d6;
+  border:none;
   margin-top:0;
   z-index:1;
   flex-shrink:0;
@@ -263,6 +284,7 @@
   flex:1;
   min-width:0;
   padding-top:0;
+  margin-top:-20.5px;
 }
 .tl-rail-body .v3-card-wrap,
 .tl-rail-body > .fade-in{
@@ -1151,9 +1173,18 @@
   font-variant-numeric:tabular-nums;
   letter-spacing:0;
   line-height:1.2;
-  padding:2px 8px;
-  border:0.5px dashed rgba(0,0,0,0.2);
-  border-radius:6px;
+  padding:0;
+  border:0;
+  border-radius:0;
+}
+.tl-rec-card-time-action{
+  appearance:none;
+  background:transparent;
+  font-family:inherit;
+  cursor:pointer;
+}
+.tl-rec-card-time-action:active{
+  opacity:0.68;
 }
 .tl-rec-card-kind{
   display:inline-flex;
@@ -2350,6 +2381,12 @@
   height:100%;
   object-fit:contain;
   border-radius:0;
+}
+.v3-period-record-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--my-brand-red);
 }
 .v3-weight-text-record{
   display:flex;

@@ -499,6 +499,9 @@ function App(){
         const r1 = {
           kind:'record-group', id:demoR1Id, isNew:true, _demoCard:true,
           primary:{ id:demoR1Id, time:'10:00', kind:'text',
+            kind:'symptom',
+            symptomLabel:'症状',
+            symptomValue:'头痛',
             text:'头痛',
             tags:[{cat:'症状', val:'头痛', icon:'sym'}],
           },
@@ -506,7 +509,9 @@ function App(){
         const r2 = {
           kind:'record-group', id:demoR2Id, isNew:true, _demoCard:true,
           primary:{ id:demoR2Id, time:'16:00', kind:'text',
-            text:'月经开始',
+            kind:'period',
+            periodLabel:'月经来了',
+            text:'月经来了',
             tags:[{cat:'月经', val:'', icon:'period'}],
           },
         };

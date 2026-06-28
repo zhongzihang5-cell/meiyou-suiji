@@ -633,17 +633,23 @@ function V3Chevron({open}){
 }
 
 function V3v2Header({time, title, isNew, entryId, entryKind}){
-  const MoreMenu = window.CardMoreMenu;
+  const canEdit = !!(time && entryId && window.openEditModal);
   if(!time && !title) return null;
   return (
     <div style={{display:'flex', alignItems:'center', gap:6, minWidth:0}}>
       {time && (
-        <div style={{
+        <button
+          type="button"
+          onClick={canEdit ? (()=>window.openEditModal(entryId, entryKind)) : undefined}
+          aria-label={canEdit ? `编辑 ${time}` : undefined}
+          style={{
           fontSize:12, color:'rgba(0,0,0,0.5)', fontWeight:400,
           fontVariantNumeric:'tabular-nums', flexShrink:0,
-          padding:'2px 8px', border:'0.5px dashed rgba(0,0,0,0.2)', borderRadius:6,
-          lineHeight:1.2,
-        }}>{time}</div>
+          padding:0, border:0, borderRadius:0,
+          lineHeight:1.2, background:'transparent',
+          cursor:canEdit ? 'pointer' : 'default',
+          fontFamily:'inherit',
+        }}>{time}</button>
       )}
       {title && (
         <div style={{
@@ -651,7 +657,6 @@ function V3v2Header({time, title, isNew, entryId, entryKind}){
           flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
         }}>{title}</div>
       )}
-      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} onEdit={window.openEditModal}/>}
     </div>
   );
 }
@@ -822,6 +827,18 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
         </span>
         <span className="v3-weight-record-text">
           {entry.symptomLabel || '症状'}：{entry.symptomValue}
+        </span>
+      </div>
+    );
+  }
+  if(entry.kind === 'period'){
+    return (
+      <div className="v3-weight-record">
+        <span className="v3-weight-record-icon v3-period-record-icon" aria-hidden="true">
+          <TLTagIcon name="period" size={28}/>
+        </span>
+        <span className="v3-weight-record-text">
+          {entry.periodLabel || '月经来了'}
         </span>
       </div>
     );

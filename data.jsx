@@ -387,11 +387,6 @@ const TIMELINE_BLOCKS = [
             { cat:'饮食', icon:'food' },
           ],
         },
-        ai:{
-          id:'t2', time:'14:24', kind:'chart', chartType:'moodWeek',
-          title:'本周情绪走势', note:'今日 ▽ 低于上周均值',
-        },
-        aiDefaultOpen:false,
       },
     ],
   },
@@ -407,11 +402,6 @@ const TIMELINE_BLOCKS = [
         },
       },
     ],
-  },
-  {
-    type:'day', id:'d-5-18', date:'5/18', weekday:'周一', isToday:true,
-    phaseTag:'经期第 1 天', phaseKind:'period', cycleDay:1, periodLen:5,
-    items:[],
   },
 ];
 

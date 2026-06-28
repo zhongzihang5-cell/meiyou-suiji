@@ -189,12 +189,26 @@ function formatVoiceDur(sec){
   return m+':'+String(s).padStart(2,'0');
 }
 
+function buildRuntimeTodayBlock(){
+  if(window.buildTodayDayBlock) return window.buildTodayDayBlock();
+  const d = new Date();
+  const weekday = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  return {
+    type:'day',
+    id:'d-today',
+    date:`${d.getMonth() + 1}/${d.getDate()}`,
+    weekday,
+    isToday:true,
+    items:[],
+  };
+}
+
 function resolveEntryDayId(text, blocks){
   const days = blocks.filter(b=>b.type==='day');
   const todayIdx = days.findIndex(d=>d.isToday);
   if(/前天/.test(text) && todayIdx > 1) return days[todayIdx - 2].id;
   if(/昨天|昨晚/.test(text) && todayIdx > 0) return days[todayIdx - 1].id;
-  return days.find(d=>d.isToday)?.id || days[days.length - 1]?.id;
+  return days.find(d=>d.isToday)?.id || buildRuntimeTodayBlock().id;
 }
 
 function resolveDayHint(text, blocks, dayId){
@@ -205,9 +219,13 @@ function resolveDayHint(text, blocks, dayId){
 }
 
 function appendTimelineEntry(blocks, entry, opts={}){
-  const dayId = opts.dayId || resolveEntryDayId(entry.body || '', blocks);
-  return blocks.map(b=>{
-    if(b.type !== 'day' || b.id !== dayId) return b;
+  const targetDayId = opts.dayId || resolveEntryDayId(entry.body || '', blocks);
+  const hasTargetDay = blocks.some(b=>b.type === 'day' && b.id === targetDayId);
+  const sourceBlocks = hasTargetDay
+    ? blocks
+    : [...blocks, { ...buildRuntimeTodayBlock(), id: targetDayId }];
+  return sourceBlocks.map(b=>{
+    if(b.type !== 'day' || b.id !== targetDayId) return b;
     const list = b.items || b.entries || [];
     return {
       ...b,
