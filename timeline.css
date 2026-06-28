@@ -1090,6 +1090,9 @@
   gap:8px;
   margin-bottom:10px;
 }
+.tl-t5-card.has-period-summary .tl-rec-card-hd{
+  margin-bottom:-6px;
+}
 
 /* ---- 卡片 ··· 更多菜单 ---- */
 .card-more-wrap{
@@ -1163,6 +1166,43 @@
 .tl-t5-main{
   margin:0;
 }
+.tl-period-summary{
+  margin:0;
+}
+.tl-period-summary-row{
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-bottom:0.5px solid rgba(0,0,0,0.08);
+}
+.tl-period-summary-row:last-child{
+  border-bottom:none;
+}
+.tl-t5-card.has-period-summary .tl-period-summary-row:last-child{
+  border-bottom:0.5px solid rgba(0,0,0,0.08);
+}
+.tl-period-summary-icon{
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
+.tl-period-summary-icon svg{
+  display:block;
+  width:22px;
+  height:22px;
+}
+.tl-period-summary-text{
+  min-width:0;
+  font-size:16px;
+  line-height:1.4;
+  color:#323232;
+  font-weight:400;
+  letter-spacing:0;
+}
 .tl-t5-body{
   margin:0;
   font-size:14px;
@@ -1232,6 +1272,9 @@
   border-top:0.5px dashed rgba(0,0,0,0.08);
   margin:10px -16px 0;
 }
+.tl-t5-card.has-period-summary .tl-t5-divider-dashed{
+  display:none;
+}
 .tl-t5-insight{
   margin:0;
 }
@@ -1250,6 +1293,10 @@
   font-family:inherit;
   text-align:left;
 }
+.tl-ai-toggle.is-period-style{
+  gap:8px;
+  padding:14px 0 12px;
+}
 .tl-ai-toggle.is-locked{
   cursor:default;
 }
@@ -1266,6 +1313,37 @@
   justify-content:center;
   flex-shrink:0;
 }
+.tl-ai-toggle.is-period-style .tl-ai-badge{
+  width:24px;
+  height:24px;
+  border-radius:0;
+  background:transparent;
+}
+.tl-period-analysis-spark{
+  position:relative;
+  width:22px;
+  height:22px;
+  display:block;
+}
+.tl-period-analysis-spark::before,
+.tl-period-analysis-spark::after{
+  content:"";
+  position:absolute;
+  background:linear-gradient(135deg, #ff6aa0 0%, #ff4d88 52%, #b85cff 100%);
+  clip-path:polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
+}
+.tl-period-analysis-spark::before{
+  left:1px;
+  top:2px;
+  width:15px;
+  height:15px;
+}
+.tl-period-analysis-spark::after{
+  right:1px;
+  bottom:2px;
+  width:9px;
+  height:9px;
+}
 .tl-ai-label{
   font-size:11px;
   color:#FF4D88;
@@ -1277,6 +1355,11 @@
   font-weight:500;
   flex:1;
   min-width:0;
+}
+.tl-ai-toggle.is-period-style .tl-ai-title{
+  font-size:16px;
+  line-height:1.35;
+  font-weight:600;
 }
 .tl-ai-chevron{
   display:flex;
@@ -1374,6 +1457,29 @@
   background:rgba(0,0,0,0.02);
   border:0.5px solid rgba(0,0,0,0.05);
   border-radius:10px;
+}
+.tl-t5-card.has-period-summary .tl-t5-analysis-body,
+.tl-t5-card.has-period-summary .tl-t5-analysis-lead,
+.tl-t5-card.has-period-summary .tl-t5-analysis-text{
+  font-size:16px;
+  line-height:1.6;
+  color:#323232;
+  letter-spacing:0;
+}
+.tl-t5-card.has-period-summary .tl-t5-analysis-body b,
+.tl-t5-card.has-period-summary .tl-t5-analysis-body strong{
+  font-weight:500;
+  color:#ff4d88;
+}
+.tl-t5-card.has-period-summary .tl-t5-insight .cycle-card,
+.tl-t5-card.has-period-summary .tl-t5-insight .signal-card{
+  margin:0 0 12px;
+}
+.tl-t5-card.has-period-summary .cycle-card .cc-head .cc-title,
+.tl-t5-card.has-period-summary .signal-card .cc-head .cc-title,
+.tl-t5-card.has-period-summary .signal-card .sc-title{
+  font-size:16px;
+  line-height:1.35;
 }
 
 /* === 语音记录 & 美柚姐姐分析卡片 === */

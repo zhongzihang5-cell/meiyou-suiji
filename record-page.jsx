@@ -2,7 +2,36 @@ const { useState, useRef, useEffect, useCallback } = React;
 
 const MODE_TABS = ['经期', '备孕', '怀孕', '育儿'];
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
-const PERIOD_DAYS = [14, 15, 16, 17, 18, 19, 20, 21];
+const PERIOD_DAYS = [14, 15, 16, 17, 18];
+const PERIOD_FLOW_LEVELS = [40, 80, 60, 30, 20];
+const PERIOD_FLOW_FILL_AT_MS = 1550;
+const PERIOD_FLOW_SETTLE_AT_MS = 1900;
+const PERIOD_FLOW_MIN_START_GAP_MS = 118;
+const PERIOD_FLOW_OVERLAP_PROGRESS = 0.65;
+
+function getPeriodFlowDuration(level) {
+  return Math.round(125 + level * 5.3);
+}
+
+function getPeriodFlowTiming(index) {
+  const level = PERIOD_FLOW_LEVELS[index];
+  return {
+    level,
+    delay: 0,
+    duration: getPeriodFlowDuration(level),
+  };
+}
+
+function getPeriodFlowStartDelay(index) {
+  let delay = 0;
+  for (let i = 0; i < index; i += 1) {
+    delay += Math.max(
+      Math.round(getPeriodFlowDuration(PERIOD_FLOW_LEVELS[i]) * PERIOD_FLOW_OVERLAP_PROGRESS),
+      PERIOD_FLOW_MIN_START_GAP_MS
+    );
+  }
+  return delay;
+}
 
 const ICON_HEART = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTkuMjYxNzkgMS44NTA2QzEwLjg2MzIgMi43MzY1MSAxMS40MzY4IDQuOTAwMjUgMTAuNjUwNiA2LjcyODM2QzEwLjE0NDQgNy45MDU0MyA5LjI2NjQgOC44MDgyNiA4LjQyNjcyIDkuNDQ5ODZDOC4wMTEyOCA5Ljc2NzMgNy40MDU4MiAxMC4wODE2IDYuOTA3MTggMTAuMzE1M0M2LjM0OTE1IDEwLjU3NjkgNS43MDc1MSAxMC41NzY3IDUuMTQ2NzggMTAuMzIxQzQuNjIwODcgMTAuMDgxMSAzLjk4MDgxIDkuNzYwMTcgMy41ODY3MiA5LjQ2MDE3QzIuNzQyOTggOC44MTc4OCAxLjg1ODM0IDcuOTExNzEgMS4zNDk0MiA2LjcyODM2QzAuNTYzMjAxIDQuOTAwMjUgMS4xMzY3NSAyLjczNjUxIDIuNzM4MjEgMS44NTA2QzMuNjAzMzUgMS4zNzIwMSA0LjU5NDY5IDEuMzc5NSA1LjM5NDU5IDEuODk3MDVDNS40NjcyNyAxLjk0NDA3IDUuNTY5NjMgMi4wMjU3MyA1LjY2OTU0IDIuMTA5NzZDNS44NjEwNiAyLjI3MDg0IDYuMTQyMDcgMi4yNzQxIDYuMzM1NDUgMi4xMTUyNkM2LjQ0NzI0IDIuMDIzNDQgNi41NjM3IDEuOTMxODMgNi42NDQzNiAxLjg3ODlDNy40MDUzMSAxLjM3OTUgOC40MTAyIDEuMzc5NSA5LjI2MTc5IDEuODUwNloiIGZpbGw9IiNmZjk0YjgiLz48L3N2Zz4=';
 
@@ -38,14 +67,14 @@ const CALENDAR_DAYS = [
   { n: 11, marks: ['bottle'] },
   { n: 12, heart: true, marks: ['like'] },
   { n: 13, marks: ['bars', 'plus'] },
-  { n: 14, period: true, today: true, todayMark: true, marks: ['plus'] },
+  { n: 14, period: true, today: true },
   { n: 15, period: true },
   { n: 16, period: true },
   { n: 17, predicted: true },
   { n: 18, predicted: true },
-  { n: 19, period: true },
-  { n: 20, period: true },
-  { n: 21, period: true },
+  { n: 19 },
+  { n: 20 },
+  { n: 21 },
   { n: 22 },
   { n: 23 },
   { n: 24 },
@@ -582,6 +611,297 @@ function ChevronRightIcon() {
   );
 }
 
+const PERIOD_PICKER_FLOW = ['非常少量', '少量', '中量', '大量', '非常大量'];
+const PERIOD_PICKER_COLOR = ['浅红色', '鲜红色', '深红色', '褐色', '黑色'];
+const PERIOD_PICKER_CRAMPS = ['完全不痛', '轻微痛', '比较痛', '非常痛', '痛到极致'];
+
+function PickerCheckIcon() {
+  return (
+    <span className="prp-ck" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12.5 L10 17 L19 7.5" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </span>
+  );
+}
+
+function PeriodPickerIcon({ type, index }) {
+  if (type === 'flow') {
+    const reds = ['#f4a9bb', '#ef85a0', '#ea5e82', '#e63d6b', '#e01f5b'];
+    const marks = [
+      { rx: 3.4, ry: 5.5, cy: 28 },
+      { rx: 4.6, ry: 8.5, cy: 30 },
+      { rx: 6.2, ry: 11, cy: 31 },
+      { rx: 7.8, ry: 13.5, cy: 32 },
+      { rx: 9.2, ry: 16, cy: 32 },
+    ];
+    const mark = marks[index];
+    return (
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="20" y="14" width="24" height="38" rx="12" fill="#fff" stroke="rgba(255,77,136,.16)" strokeWidth="1"/>
+        <path
+          d={`M32 ${mark.cy - mark.ry} C ${32 + mark.rx * 1.1} ${mark.cy - mark.ry * 0.4}, ${32 + mark.rx * 1.05} ${mark.cy + mark.ry * 0.7}, 32 ${mark.cy + mark.ry} C ${32 - mark.rx * 1.05} ${mark.cy + mark.ry * 0.7}, ${32 - mark.rx * 1.1} ${mark.cy - mark.ry * 0.4}, 32 ${mark.cy - mark.ry} Z`}
+          fill={reds[index]}
+        />
+      </svg>
+    );
+  }
+
+  if (type === 'color') {
+    const drop = ['#f08a86', '#e94b3f', '#c0202b', '#7d3a1e', '#2c1a16'][index];
+    return (
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 17 C32 25 44 33 44 41 C44 48 38.6 53 32 53 C25.4 53 20 48 20 41 C20 33 32 25 32 17 Z" fill={drop}/>
+        <ellipse cx="27" cy="40" rx="2.8" ry="4.4" fill="rgba(255,255,255,.34)"/>
+      </svg>
+    );
+  }
+
+  const sym = '#ec3f80';
+  const symbols = [
+    <g key="sprout">
+      <path d="M32 45 C32 39 32 36 32 32" stroke={sym} strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+      <path d="M32 38 C28.2 38 25.2 36 24 31.6 C28.2 31.6 31 33.8 32 38 Z" fill={sym}/>
+      <path d="M32 35 C35.8 35 38.8 33 40 28.6 C35.8 28.6 33 30.8 32 35 Z" fill={sym}/>
+    </g>,
+    <g key="bow" fill={sym}>
+      <path d="M32 36 L21.5 30 L21.5 42 Z"/>
+      <path d="M32 36 L42.5 30 L42.5 42 Z"/>
+      <circle cx="32" cy="36" r="3.2"/>
+    </g>,
+    <path key="bolt" d="M35.5 28 L26 40.5 L31.2 40.5 L29 48 L39 34 L33.4 34 Z" fill={sym}/>,
+    <g key="spark" fill={sym}>
+      <path d="M32 28 C33 34 34 35 40 37 C34 39 33 40 32 46 C31 40 30 39 24 37 C30 35 31 34 32 28 Z"/>
+      <circle cx="42.6" cy="29.6" r="1.8"/>
+      <circle cx="22.4" cy="44" r="1.5"/>
+    </g>,
+    <g key="swirl" stroke={sym} strokeWidth="2.2" fill="none" strokeLinecap="round">
+      <path d="M27.6 34 C24 34 22.8 37.6 25.2 39.8 C27.4 41.8 30.9 40.2 30.4 36.9 C30.1 34.6 28.2 33.7 26.4 35"/>
+      <path d="M36.4 34 C40 34 41.2 37.6 38.8 39.8 C36.6 41.8 33.1 40.2 33.6 36.9 C33.9 34.6 35.8 33.7 37.6 35"/>
+    </g>,
+  ];
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M18 22 L46 22 Q49.5 22 49.5 25.5 L49.5 31 C49.5 39.5 43.5 45 38.5 44.4 C35.4 44 33.4 42 32 40.6 C30.6 42 28.6 44 25.5 44.4 C20.5 45 14.5 39.5 14.5 31 L14.5 25.5 Q14.5 22 18 22 Z" fill="#fcdccf"/>
+      {symbols[index]}
+    </svg>
+  );
+}
+
+function PeriodPickerOptions({ title, group, options, value, onChange }) {
+  return (
+    <section className="prp-card">
+      <h3 className="prp-sec-title">{title}</h3>
+      <div className="prp-row">
+        {options.map((label, index) => {
+          const selected = value === index;
+          return (
+            <button
+              key={label}
+              type="button"
+              className={'prp-opt' + (selected ? ' sel' : '')}
+              aria-pressed={selected}
+              aria-label={label}
+              onClick={() => onChange(selected ? null : index)}
+            >
+              <span className="prp-ic">
+                <span className="prp-ic-inner">
+                  <PeriodPickerIcon type={group} index={index}/>
+                </span>
+                <PickerCheckIcon/>
+              </span>
+              <span className="prp-lb">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function PeriodRecordPicker({ open, onCancel, onConfirm }) {
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+  const [flow, setFlow] = useState(null);
+  const [color, setColor] = useState(null);
+  const [cramps, setCramps] = useState(null);
+  const [hour, setHour] = useState(10);
+  const [minute, setMinute] = useState(0);
+  const timeDragRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setFlow(null);
+    setColor(null);
+    setCramps(null);
+    setHour(10);
+    setMinute(0);
+  }, [open]);
+
+  useEffect(() => {
+    const phone = portalTarget;
+    if (!phone) return undefined;
+    if (open) phone.classList.add('is-period-picker-open');
+    else phone.classList.remove('is-period-picker-open');
+    return () => phone.classList.remove('is-period-picker-open');
+  }, [open, portalTarget]);
+
+  const value = {
+    flow: flow != null ? PERIOD_PICKER_FLOW[flow] : null,
+    color: color != null ? PERIOD_PICKER_COLOR[color] : null,
+    cramps: cramps != null ? PERIOD_PICKER_CRAMPS[cramps] : null,
+    time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+  };
+
+  const changeTimePart = (part, delta) => {
+    const apply = (current, max) => Math.max(0, Math.min(max, current + delta));
+    if (part === 'hour') setHour((current) => apply(current, 23));
+    if (part === 'minute') setMinute((current) => apply(current, 59));
+  };
+
+  const updateTimeDrag = (clientY) => {
+    const drag = timeDragRef.current;
+    if (!drag) return;
+    drag.carry += clientY - drag.lastY;
+    drag.lastY = clientY;
+    const step = 18;
+    while (drag.carry <= -step) {
+      changeTimePart(drag.part, 1);
+      drag.carry += step;
+    }
+    while (drag.carry >= step) {
+      changeTimePart(drag.part, -1);
+      drag.carry -= step;
+    }
+  };
+
+  const startTimeDragAt = (part, clientY, pointerId = null, source = 'mouse') => {
+    timeDragRef.current = {
+      part,
+      pointerId,
+      source,
+      lastY: clientY,
+      carry: 0,
+    };
+  };
+
+  const startTimeDrag = (part, event) => {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    startTimeDragAt(part, event.clientY, event.pointerId, 'pointer');
+  };
+
+  const moveTimeDrag = (event) => {
+    const drag = timeDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    updateTimeDrag(event.clientY);
+  };
+
+  const stopTimeDrag = (event) => {
+    const drag = timeDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    timeDragRef.current = null;
+  };
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onMouseMove = (event) => {
+      if (!timeDragRef.current || timeDragRef.current.source === 'pointer') return;
+      event.preventDefault();
+      updateTimeDrag(event.clientY);
+    };
+    const onTouchMove = (event) => {
+      if (!timeDragRef.current || timeDragRef.current.source === 'pointer') return;
+      event.preventDefault();
+      updateTimeDrag(event.touches[0]?.clientY ?? timeDragRef.current.lastY);
+    };
+    const end = () => {
+      timeDragRef.current = null;
+    };
+    window.addEventListener('mousemove', onMouseMove, { passive: false });
+    window.addEventListener('mouseup', end);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', end);
+    window.addEventListener('touchcancel', end);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', end);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', end);
+      window.removeEventListener('touchcancel', end);
+    };
+  }, [open]);
+
+  if (!open || !portalTarget) return null;
+
+  const picker = (
+    <div className="prp-mask" onClick={(event) => { if (event.target === event.currentTarget) onCancel(); }}>
+      <div className="prp-sheet" role="dialog" aria-modal="true" aria-label="今日经期记录">
+        <header className="prp-bar">
+          <button type="button" className="prp-cancel" onClick={onCancel}>取消</button>
+          <h2 className="prp-title">今日经期记录</h2>
+          <button type="button" className="prp-confirm" onClick={() => onConfirm(value)}>确定</button>
+        </header>
+        <div className="prp-body">
+          <PeriodPickerOptions title="流量" group="flow" options={PERIOD_PICKER_FLOW} value={flow} onChange={setFlow}/>
+          <PeriodPickerOptions title="颜色" group="color" options={PERIOD_PICKER_COLOR} value={color} onChange={setColor}/>
+          <PeriodPickerOptions title="痛经" group="cramps" options={PERIOD_PICKER_CRAMPS} value={cramps} onChange={setCramps}/>
+          <section className="prp-card prp-time-card">
+            <h3 className="prp-sec-title">时间</h3>
+            <div className="prp-wheel-wrap">
+              <div className="prp-fixed-time" aria-label={`时间 ${value.time}`}>
+                <button
+                  type="button"
+                  className="prp-time-number"
+                  aria-label="调整小时"
+                  onPointerDown={(event) => startTimeDrag('hour', event)}
+                  onPointerMove={moveTimeDrag}
+                  onPointerUp={stopTimeDrag}
+                  onPointerCancel={stopTimeDrag}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    startTimeDragAt('hour', event.clientY, null, 'mouse');
+                  }}
+                  onTouchStart={(event) => {
+                    startTimeDragAt('hour', event.touches[0]?.clientY ?? 0, null, 'touch');
+                  }}
+                >
+                  {String(hour).padStart(2, '0')}
+                </button>
+                <span className="prp-colon">:</span>
+                <button
+                  type="button"
+                  className="prp-time-number"
+                  aria-label="调整分钟"
+                  onPointerDown={(event) => startTimeDrag('minute', event)}
+                  onPointerMove={moveTimeDrag}
+                  onPointerUp={stopTimeDrag}
+                  onPointerCancel={stopTimeDrag}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    startTimeDragAt('minute', event.clientY, null, 'mouse');
+                  }}
+                  onTouchStart={(event) => {
+                    startTimeDragAt('minute', event.touches[0]?.clientY ?? 0, null, 'touch');
+                  }}
+                >
+                  {String(minute).padStart(2, '0')}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(picker, portalTarget);
+  }
+  return picker;
+}
+
 function DietAddSheet({ open, onClose, onDone }) {
   const [mealType, setMealType] = useState('breakfast');
   const [time, setTime] = useState('08:00');
@@ -950,22 +1270,56 @@ function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
   );
 }
 
-function KitCalendarDayButton({ day, selected, periodLit, onSelect }) {
+function CalendarDayLabel({ day }) {
+  return (
+    <>
+      <span className="calendar-day-number">{day.n}</span>
+      {day.today ? <b>今天</b> : null}
+    </>
+  );
+}
+
+function PeriodStartPlayIcon() {
+  return (
+    <span className="period-start-play" aria-hidden="true">
+      <svg viewBox="0 0 12 12">
+        <path d="M4.2 2.8v6.4L9 6 4.2 2.8z"/>
+      </svg>
+    </span>
+  );
+}
+
+function KitCalendarDayButton({ day, selected, periodLit, periodFlow, periodStartSettled, onSelect }) {
   if (!day) return <span className="calendar-day" aria-hidden="true"/>;
 
   const isPeriod = !!(day.period || periodLit);
+  const flowStyle = periodFlow ? {
+    '--period-liquid-level': `${periodFlow.level}%`,
+    '--period-liquid-duration': `${periodFlow.duration}ms`,
+  } : undefined;
   const cls = [
     'calendar-day',
     day.fertile ? 'is-fertile' : '',
     isPeriod ? 'is-period' : '',
     periodLit && (day.period || day.predicted) ? 'is-period-lit' : '',
+    periodFlow ? 'is-period-flow' : '',
+    periodFlow?.phase === 'filling' ? 'is-period-flow-filling' : '',
+    periodStartSettled ? 'is-period-start-settled' : '',
     day.predicted ? 'is-predicted' : '',
     day.today ? 'is-today' : '',
     selected ? 'is-selected' : '',
   ].filter(Boolean).join(' ');
 
   return (
-    <button type="button" className={cls} onClick={() => onSelect(day.n)}>
+    <button type="button" className={cls} style={flowStyle} onClick={() => onSelect(day.n)}>
+      {periodFlow ? (
+        <span className="calendar-liquid" aria-hidden="true">
+          <span className="calendar-liquid-label">
+            <CalendarDayLabel day={day}/>
+          </span>
+        </span>
+      ) : null}
+      {periodStartSettled ? <PeriodStartPlayIcon/> : null}
       {day.heart ? (
         <img className="calendar-icon is-floating" src={ICON_HEART} alt=""/>
       ) : null}
@@ -977,7 +1331,7 @@ function KitCalendarDayButton({ day, selected, periodLit, onSelect }) {
       ) : null}
       {day.marks?.length ? (
         <>
-          <span className="calendar-day-number">{day.n}</span>
+          <CalendarDayLabel day={day}/>
           <span className="calendar-day-icons" aria-hidden="true">
             {day.marks.map((key) => (
               <img key={key} className="calendar-icon" src={YELLOW_MARK_ICONS[key]} alt=""/>
@@ -985,7 +1339,7 @@ function KitCalendarDayButton({ day, selected, periodLit, onSelect }) {
           </span>
         </>
       ) : (
-        <span className="calendar-day-number">{day.n}</span>
+        <CalendarDayLabel day={day}/>
       )}
     </button>
   );
@@ -998,6 +1352,8 @@ function CalendarDayButton({ day, selected, periodLit, onSelect, isView, activeF
         day={day}
         selected={selected}
         periodLit={periodLit}
+        periodFlow={day?.periodFlow}
+        periodStartSettled={day?.periodStartSettled}
         onSelect={onSelect}
       />
     );
@@ -1053,16 +1409,20 @@ function CalendarDayButton({ day, selected, periodLit, onSelect, isView, activeF
 function RecordPage({
   onAnalysisReady,
   onPeriodReset,
+  onPeriodRecordSubmit,
   periodFlowEnabled = true,
 }) {
   const [activeMode, setActiveMode] = useState(0);
   const [selectedDay, setSelectedDay] = useState(14);
   const [periodYes, setPeriodYes] = useState(false);
   const [litDays, setLitDays] = useState([]);
+  const [periodFlowLevels, setPeriodFlowLevels] = useState({});
+  const [periodFlowPhase, setPeriodFlowPhase] = useState('idle');
   const [monthOpen, setMonthOpen] = useState(false);
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [calendarOffset, setCalendarOffset] = useState(0);
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
+  const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
   const dragAreaRef = useRef(null);
   const gridRef = useRef(null);
   const timersRef = useRef([]);
@@ -1078,32 +1438,65 @@ function RecordPage({
     clearTimers();
     setPeriodYes(false);
     setLitDays([]);
+    setPeriodFlowLevels({});
+    setPeriodFlowPhase('idle');
+    setPeriodPickerOpen(false);
     onPeriodReset?.();
   }, [clearTimers, onPeriodReset]);
 
   const runPeriodAnimation = useCallback(() => {
     clearTimers();
     setLitDays([]);
+    setPeriodFlowLevels({});
+    setPeriodFlowPhase('rising');
     PERIOD_DAYS.forEach((d, i) => {
-      const t = setTimeout(() => {
-        setLitDays((prev) => (prev.includes(d) ? prev : [...prev, d]));
-      }, i * 280);
-      timersRef.current.push(t);
+      const startDelay = getPeriodFlowStartDelay(i);
+      const startTimer = setTimeout(() => {
+        setPeriodFlowLevels((prev) => ({ ...prev, [d]: 0 }));
+      }, startDelay);
+      const riseTimer = setTimeout(() => {
+        setPeriodFlowLevels((prev) => ({ ...prev, [d]: PERIOD_FLOW_LEVELS[i] }));
+      }, startDelay + 24);
+      timersRef.current.push(startTimer, riseTimer);
     });
-    const t2 = setTimeout(() => {
+    const fillTimer = setTimeout(() => {
+      setPeriodFlowPhase('filling');
+      setPeriodFlowLevels(() => {
+        const next = {};
+        PERIOD_DAYS.forEach((d) => {
+          next[d] = 100;
+        });
+        return next;
+      });
+    }, PERIOD_FLOW_FILL_AT_MS);
+    timersRef.current.push(fillTimer);
+    const settleTimer = setTimeout(() => {
+      setPeriodFlowLevels({});
+      setPeriodFlowPhase('settled');
+      setLitDays([14]);
       if (periodFlowEnabled) onAnalysisReady?.();
-    }, PERIOD_DAYS.length * 280 + 200);
-    timersRef.current.push(t2);
+    }, PERIOD_FLOW_SETTLE_AT_MS);
+    timersRef.current.push(settleTimer);
   }, [clearTimers, onAnalysisReady, periodFlowEnabled]);
 
   const handlePeriodToggle = (yes) => {
     if (yes) {
       if (periodYes) return;
       setPeriodYes(true);
-      runPeriodAnimation();
+      clearTimers();
+      setLitDays([]);
+      setPeriodFlowLevels({});
+      setPeriodFlowPhase('idle');
+      setPeriodPickerOpen(true);
       return;
     }
     resetPeriod();
+  };
+
+  const continuePeriodFlow = (recordValue) => {
+    onPeriodRecordSubmit?.(recordValue);
+    setPeriodPickerOpen(false);
+    runPeriodAnimation();
   };
 
   const syncCalendarOffset = useCallback(() => {
@@ -1187,17 +1580,30 @@ function RecordPage({
                 aria-label="记录日历"
                 style={{ '--calendar-offset-y': `${calendarOffset}px` }}
               >
-                {CALENDAR_DAYS.map((day, i) => (
-                  <CalendarDayButton
-                    key={i}
-                    day={day}
-                    selected={day && day.n === selectedDay}
-                    periodLit={day && litDays.includes(day.n)}
-                    onSelect={handleDaySelect}
-                    isView={false}
-                    activeFilter="all"
-                  />
-                ))}
+                {CALENDAR_DAYS.map((day, i) => {
+                  const flowIndex = day ? PERIOD_DAYS.indexOf(day.n) : -1;
+                  const hasFlowLevel = !!(day && Object.prototype.hasOwnProperty.call(periodFlowLevels, day.n));
+                  const periodFlow = flowIndex >= 0 && hasFlowLevel
+                    ? { ...getPeriodFlowTiming(flowIndex), level: periodFlowLevels[day.n], phase: periodFlowPhase }
+                    : null;
+                  const periodStartSettled = !!(
+                    day
+                    && day.n === 14
+                    && periodYes
+                    && periodFlowPhase === 'settled'
+                  );
+                  return (
+                    <CalendarDayButton
+                      key={i}
+                      day={day ? { ...day, periodFlow, periodStartSettled } : day}
+                      selected={day && day.n === selectedDay}
+                      periodLit={day && litDays.includes(day.n)}
+                      onSelect={handleDaySelect}
+                      isView={false}
+                      activeFilter="all"
+                    />
+                  );
+                })}
               </div>
             </div>
             <div className="calendar-legend" onClick={handleLegendClick}>
@@ -1257,6 +1663,11 @@ function RecordPage({
       <DietAddSheet
         open={dietSheetOpen}
         onClose={() => setDietSheetOpen(false)}
+      />
+      <PeriodRecordPicker
+        open={periodPickerOpen}
+        onCancel={continuePeriodFlow}
+        onConfirm={continuePeriodFlow}
       />
     </div>
   );

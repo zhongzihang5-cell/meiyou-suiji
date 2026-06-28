@@ -562,6 +562,71 @@ function DemoVoiceCard({entry, isNew}){
   );
 }
 
+function PeriodSummaryIcon({type}){
+  const common = {
+    width: 22,
+    height: 22,
+    viewBox: '0 0 22 22',
+    fill: 'none',
+    'aria-hidden': 'true',
+  };
+  if(type === 'flow'){
+    return (
+      <svg {...common}>
+        <path d="M11 2.8c.8 3.2 5.8 6.4 5.8 10.8a5.8 5.8 0 1 1-11.6 0C5.2 9.2 10.2 6 11 2.8Z" fill="#ff6aa0"/>
+        <path d="M7.8 13.2c1.8 1.8 4.5 1.8 6.4 0" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  if(type === 'color'){
+    return (
+      <svg {...common}>
+        <circle cx="11" cy="11" r="8" fill="#ff6aa0"/>
+        <circle cx="7.8" cy="8.2" r="1.3" fill="#fff" opacity=".8"/>
+        <circle cx="13.8" cy="7.8" r="1" fill="#fff" opacity=".74"/>
+        <circle cx="15.2" cy="12.4" r="1.2" fill="#fff" opacity=".68"/>
+        <path d="M8.4 14.3c1.2 1 3.5 1 4.8-.1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  if(type === 'cramps'){
+    return (
+      <svg {...common}>
+        <circle cx="11" cy="11" r="8" fill="#ff6aa0"/>
+        <path d="M12.3 5.8 8.5 11h3.1l-1.8 5.2 4-6h-3.1l1.6-4.4Z" fill="#fff"/>
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <path d="M11 2.8c.8 3.2 5.8 6.4 5.8 10.8a5.8 5.8 0 1 1-11.6 0C5.2 9.2 10.2 6 11 2.8Z" fill="#ff6aa0"/>
+      <path d="M8 14.1c1.7 1.4 4.2 1.4 6 0" stroke="#fff" strokeWidth="1.7" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function PeriodRecordSummary({entry}){
+  const details = entry.periodDetails || [];
+  const rows = [
+    { label: '月经来了', icon: 'period' },
+    ...details,
+  ];
+  return (
+    <section className="tl-period-summary" aria-label="月经记录">
+      {rows.map((row, index) => (
+        <div key={`${row.label}-${index}`} className="tl-period-summary-row">
+          <span className="tl-period-summary-icon">
+            <PeriodSummaryIcon type={row.icon}/>
+          </span>
+          <span className="tl-period-summary-text">
+            {row.value ? `${row.label}： ${row.value}` : row.label}
+          </span>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, typewriterBody, hideBodyUntilDrop, analysisProps}){
   // 演示专用语音卡片
   if(entry._demoTypewriter) return <DemoVoiceCard entry={entry} isNew={isNew}/>;
@@ -572,6 +637,9 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   const hasAnalysis = !!analysisProps;
   const hasVoice = !!entry.voice;
   const isVtLive = !!entry.vtLive;
+  const isPeriodSync = entry.kind === 'sync-card' && (entry.tags || []).some((tag) => (
+    resolveTag(tag).cat === 'period' || tag.cat === '月经' || tag.icon === 'period'
+  ));
   const text = isVtLive ? (entry.liveText || '') : (entry.voiceText || entry.body || '');
   const tagLayout = entry.tagLayout || 't5';
   const aiNoteTypewriter = !!(typewriterAiNote && hasAiNote);
@@ -580,37 +648,41 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   );
 
   return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')} data-entry-id={entry.id}>
+    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')+(isPeriodSync?' has-period-summary':'')} data-entry-id={entry.id}>
       <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind={entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick'} onEdit={window.openEditModal}/>
-      <section className="tl-t5-main">
-        {isVtLive ? (
-          <div className="tl-voice-block tl-vt-live-body">
-            {text ? (
-              <span className="tl-voice-text">{text}<span className="ai-caret" /></span>
-            ) : (
-              <span className="tl-vt-live-placeholder">正在听…</span>
-            )}
-          </div>
-        ) : hasVoice ? (
-          <TlVoiceInline voice={entry.voice} text={text}/>
-        ) : hideBodyUntilDrop ? (
-          <div className="tl-t5-body tl-t5-body--pending" aria-hidden="true"/>
-        ) : text ? (
-          typewriterBody ? (
-            <div className="tl-t5-body">
-              <TypewriterText text={text} active charMs={48} followScroll/>
+      {isPeriodSync ? (
+        <PeriodRecordSummary entry={entry}/>
+      ) : (
+        <section className="tl-t5-main">
+          {isVtLive ? (
+            <div className="tl-voice-block tl-vt-live-body">
+              {text ? (
+                <span className="tl-voice-text">{text}<span className="ai-caret" /></span>
+              ) : (
+                <span className="tl-vt-live-placeholder">正在听…</span>
+              )}
             </div>
-          ) : (
-            <div className="tl-t5-body">{text}</div>
-          )
-        ) : null}
-        <RecordPhoto photo={entry.photo}/>
-        {hasTags && (
-          <div className="tl-t5-tags">
-            <RecordedTags tags={tags} layout={tagLayout}/>
-          </div>
-        )}
-      </section>
+          ) : hasVoice ? (
+            <TlVoiceInline voice={entry.voice} text={text}/>
+          ) : hideBodyUntilDrop ? (
+            <div className="tl-t5-body tl-t5-body--pending" aria-hidden="true"/>
+          ) : text ? (
+            typewriterBody ? (
+              <div className="tl-t5-body">
+                <TypewriterText text={text} active charMs={48} followScroll/>
+              </div>
+            ) : (
+              <div className="tl-t5-body">{text}</div>
+            )
+          ) : null}
+          <RecordPhoto photo={entry.photo}/>
+          {hasTags && (
+            <div className="tl-t5-tags">
+              <RecordedTags tags={tags} layout={tagLayout}/>
+            </div>
+          )}
+        </section>
+      )}
 
       {hasAiNote && (
         <>
@@ -628,6 +700,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
       {hasAnalysis && (
         <SisterAnalysisCollapsible
           {...analysisProps}
+          periodStyle={isPeriodSync}
           animateText={analysisAnimateText}
         />
       )}
@@ -809,7 +882,7 @@ function TlAiChartIcon({size = 10, color = '#FF4D88'}){
   );
 }
 
-function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText}){
+function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false}){
   const [open, setOpen] = React.useState(true);
   const [canCollapse, setCanCollapse] = React.useState(!animateText);
   const [hasSeenAnimation, setHasSeenAnimation] = React.useState(!animateText);
@@ -847,12 +920,14 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText}
       <section className="tl-t5-insight tl-sister-ai-wrap" id="sister-analysis-anchor">
         <button
           type="button"
-          className={'tl-ai-toggle'+(canCollapse ? '' : ' is-locked')}
+          className={'tl-ai-toggle'+(canCollapse ? '' : ' is-locked')+(periodStyle ? ' is-period-style' : '')}
           onClick={handleToggle}
           aria-expanded={open}
         >
-          <span className="tl-ai-badge"><TlAiChartIcon size={10}/></span>
-          <span className="tl-ai-label">AI</span>
+          <span className="tl-ai-badge">
+            {periodStyle ? <span className="tl-period-analysis-spark" aria-hidden="true"/> : <TlAiChartIcon size={10}/>}
+          </span>
+          {!periodStyle ? <span className="tl-ai-label">AI</span> : null}
           <span className="tl-ai-title">本次月经分析</span>
           <span className={'tl-ai-chevron'+(open ? ' is-open' : '')} aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

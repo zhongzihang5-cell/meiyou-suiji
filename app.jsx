@@ -62,6 +62,7 @@ function App(){
   const streamRef = useRef(null);
   const timelineEndRef = useRef(null);
   const recordEnterModeRef = useRef('idle');
+  const periodRecordRef = useRef(null);
   const firstRecordAnimDoneRef = useRef(false);
   const moodGuideQueueRef = useRef(null);
   const dropLandRevealRef = useRef(false);
@@ -168,6 +169,7 @@ function App(){
     setShowPhoto(false);
     setShowSearchPage(false);
     setSearchCriteria(null);
+    periodRecordRef.current = null;
     scheme3FirstVisitRef.current = null;
     setFirstDropAnim(null);
     firstRecordAnimDoneRef.current = false;
@@ -200,11 +202,18 @@ function App(){
     recordEnterModeRef.current = 'analysis';
     setShowAnalysisNotice(false);
 
+    const periodRecord = periodRecordRef.current || {};
+    const periodDetails = [
+      periodRecord.flow ? { label:'流量', value: periodRecord.flow, icon:'flow' } : null,
+      periodRecord.color ? { label:'颜色', value: periodRecord.color, icon:'color' } : null,
+      periodRecord.cramps ? { label:'痛经', value: periodRecord.cramps, icon:'cramps' } : null,
+    ].filter(Boolean);
     const syncEntry = {
       kind:'sync-card', id:'e-period-'+Date.now(), time: window.formatNowTime(),
       cardLabel:'自动同步', cardLabelKind:'sync',
       body:'今天月经来了。', tagLayout:'v3', isNew: true,
-      tags:[{ cat:'月经', val:'', icon:'period' }],
+      tags:[{ label:'月经来了', cat:'period', val:'', icon:'period' }],
+      periodDetails,
     };
     const sisterEntry = {
       kind:'sister-card', id:'e-sister-'+Date.now(), time: window.formatNowTime(), railDot:'ai',
@@ -817,6 +826,7 @@ function App(){
           periodFlowEnabled={scene.calendar.periodFlow}
           onAnalysisReady={()=>setShowAnalysisNotice(true)}
           onPeriodReset={()=>setShowAnalysisNotice(false)}
+          onPeriodRecordSubmit={(value)=>{ periodRecordRef.current = value || null; }}
         />
       )}
 

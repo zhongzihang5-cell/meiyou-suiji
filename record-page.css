@@ -566,6 +566,7 @@
   font-family: inherit;
   cursor: pointer;
   padding: 0;
+  overflow: hidden;
 }
 
 .record-page-root .calendar-day.is-empty {
@@ -592,8 +593,23 @@
   color: #ffffff;
 }
 
+.record-page-root .calendar-day.is-period-flow {
+  background: #ffdbe7;
+  color: #ffffff;
+}
+
+.record-page-root .calendar-day.is-period-flow .calendar-day-number,
+.record-page-root .calendar-day.is-period-flow b {
+  color: #ffffff;
+}
+
 .record-page-root .calendar-day.is-today {
   background: #ff4d88;
+  color: #ffffff;
+}
+
+.record-page-root .calendar-day.is-today:not(.is-period-lit) {
+  background: #ffdbe7;
   color: #ffffff;
 }
 
@@ -709,6 +725,7 @@
   left: 50%;
   display: block;
   transform: translate(-50%, -50%);
+  z-index: 2;
 }
 
 .record-page-root .calendar-day-icons {
@@ -721,7 +738,83 @@
   gap: 2px;
   min-height: 12px;
   transform: translateX(-50%);
+  z-index: 2;
 }
+
+.record-page-root .calendar-liquid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #ff4d88;
+  clip-path: inset(calc(100% - var(--period-liquid-level)) 0 0 0);
+  transition: clip-path var(--period-liquid-duration) cubic-bezier(.16,.86,.28,1);
+}
+
+.record-page-root .calendar-liquid::before {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: calc(100% - var(--period-liquid-level) - 7px);
+  height: 14px;
+  background:
+    radial-gradient(ellipse 18px 7px at 10% 100%, #ff4d88 0 74%, transparent 76%),
+    radial-gradient(ellipse 24px 8px at 38% 100%, #ff4d88 0 74%, transparent 76%),
+    radial-gradient(ellipse 20px 7px at 68% 100%, #ff4d88 0 74%, transparent 76%),
+    radial-gradient(ellipse 18px 7px at 94% 100%, #ff4d88 0 74%, transparent 76%);
+  filter: blur(0.25px);
+  transform: translateY(0) scaleX(1.02);
+  transition:
+    top var(--period-liquid-duration) cubic-bezier(.16,.86,.28,1),
+    transform var(--period-liquid-duration) ease-in-out;
+}
+
+.record-page-root .calendar-day.is-period-flow-filling .calendar-liquid {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 240ms cubic-bezier(.22,.9,.3,1);
+}
+
+.record-page-root .calendar-day.is-period-flow-filling .calendar-liquid::before {
+  top: -7px;
+  transform: translateY(0) scaleX(1);
+}
+
+.record-page-root .calendar-liquid-label {
+  position: absolute;
+  inset: 0;
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.record-page-root .calendar-liquid-label .calendar-day-number,
+.record-page-root .calendar-liquid-label b {
+  color: #ffffff !important;
+}
+
+.record-page-root .period-start-play {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  z-index: 3;
+  width: 13px;
+  height: 13px;
+  display: grid;
+  place-items: center;
+  transform: translateX(-50%);
+  color: #ffd919;
+}
+
+.record-page-root .period-start-play svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+  fill: currentColor;
+  filter: drop-shadow(0 1px 1px rgba(255, 217, 25, 0.35));
+}
+
 
 .record-page-root .calendar-icon {
   display: block;
@@ -1859,6 +1952,288 @@
   display: block;
   flex-shrink: 0;
   background: #f2f2f5;
+}
+
+/* ============ 今日经期记录 Picker ============ */
+.phone.is-period-picker-open {
+  overflow: hidden;
+}
+
+.phone.is-period-picker-open .tabbar,
+.phone.is-period-picker-open .record-page-root {
+  pointer-events: none;
+}
+
+.phone .prp-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 140;
+  background: rgba(0, 0, 0, 0.45);
+  animation: prpMaskIn 0.26s cubic-bezier(0.2, 0, 0, 1);
+  font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+@keyframes prpMaskIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.phone .prp-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 141;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  background: #f2f2f5;
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);
+  animation: prpSheetUp 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes prpSheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.phone .prp-bar {
+  height: 54px;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 72px 1fr 72px;
+  align-items: center;
+  padding: 0 18px;
+  background: #f2f2f5;
+  border-radius: 14px 14px 0 0;
+}
+
+.phone .prp-cancel,
+.phone .prp-confirm {
+  border: 0;
+  background: transparent;
+  padding: 6px 0;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.phone .prp-cancel {
+  justify-self: start;
+  color: #323232;
+}
+
+.phone .prp-confirm {
+  justify-self: end;
+  color: #ff4d88;
+  font-weight: 500;
+}
+
+.phone .prp-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 600;
+  text-align: center;
+  color: #323232;
+}
+
+.phone .prp-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 12px 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.phone .prp-card {
+  margin-bottom: 12px;
+  padding: 18px 16px 16px;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+.phone .prp-sec-title {
+  margin: 0 0 16px;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: #323232;
+}
+
+.phone .prp-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.phone .prp-opt {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.phone .prp-ic {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.phone .prp-ic-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+  background: radial-gradient(72% 72% at 42% 36%, #ffe9f1 0%, #fcd1e0 60%, #f6b9d0 100%);
+  transform-origin: 50% 50%;
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.phone .prp-ic-inner svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.phone .prp-opt:active .prp-ic-inner {
+  transform: scale(0.9);
+}
+
+.phone .prp-opt.sel .prp-ic-inner {
+  animation: prpBounce 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.phone .prp-lb {
+  font-size: 13px;
+  line-height: 18px;
+  color: #666666;
+  white-space: nowrap;
+  transition: color 0.15s, font-weight 0.15s;
+}
+
+.phone .prp-opt.sel .prp-lb {
+  color: #ff4d88;
+  font-weight: 600;
+}
+
+.phone .prp-ck {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #27c46b;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: scale(0);
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.phone .prp-ck svg {
+  width: 13px;
+  height: 13px;
+}
+
+.phone .prp-opt.sel .prp-ck {
+  opacity: 1;
+  transform: scale(1);
+  animation: prpPop 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes prpBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.84); }
+  62% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes prpPop {
+  0% { opacity: 0; transform: scale(0); }
+  60% { opacity: 1; transform: scale(1.22); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.phone .prp-time-card {
+  padding: 14px 16px 16px;
+}
+
+.phone .prp-wheel-wrap {
+  position: relative;
+  height: 54px;
+  margin-top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.phone .prp-fixed-time {
+  width: 214px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  border-radius: 8px;
+  background: #f4f4f6;
+  color: #323232;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 500;
+  user-select: none;
+}
+
+.phone .prp-time-number {
+  min-width: 54px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 44px;
+  text-align: center;
+  padding: 0;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.phone .prp-time-number:active {
+  background: rgba(255, 77, 136, 0.08);
+}
+
+.phone .prp-colon {
+  width: auto;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 500;
+  color: #323232;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone .prp-mask,
+  .phone .prp-sheet,
+  .phone .prp-opt.sel .prp-ic-inner,
+  .phone .prp-opt.sel .prp-ck {
+    animation: none;
+  }
 }
 
 /* ============ 添加饮食弹窗 ============ */
