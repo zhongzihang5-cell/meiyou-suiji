@@ -58,6 +58,7 @@ function App(){
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
   const [periodEndRecordReady, setPeriodEndRecordReady] = useState(false);
   const [periodEndRecordCompleted, setPeriodEndRecordCompleted] = useState(false);
+  const [periodDetailDraft, setPeriodDetailDraft] = useState({});
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState(null);
@@ -300,12 +301,77 @@ function App(){
     else scrollTimelineToLastItem(behavior);
   };
 
+  const buildPeriodDetailEntry = (details)=>{
+    const detailItems = [
+      details.flow ? { label:'流量', value: details.flow, icon:'flow' } : null,
+      details.color ? { label:'颜色', value: details.color, icon:'color' } : null,
+      details.cramps ? { label:'痛经', value: details.cramps, icon:'cramps' } : null,
+    ].filter(Boolean);
+    if(!detailItems.length) return null;
+    return {
+      kind:'record-group',
+      id:'e-period-detail-'+Date.now(),
+      isNew:true,
+      primary:{
+        id:'e-period-detail-primary-'+Date.now(),
+        time: window.formatNowTime(),
+        kind:'period-detail',
+        text:'',
+        periodDetailItems: detailItems,
+        tags: detailItems.map((it)=>({ label:it.label, cat:'period', val:it.value, icon:it.icon })),
+      },
+    };
+  };
+
+  const submitPeriodDetailDraftToTimeline = ()=>{
+    const entry = buildPeriodDetailEntry(periodDetailDraft);
+    if(!entry) return false;
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    setPeriodDetailDraft({});
+    requestAnimationFrame(()=>setTimeout(()=>scrollTimelineToLastItem('smooth'), 160));
+    return true;
+  };
+
+  React.useEffect(()=>{
+    const onEditSave = (event)=>{
+      const entryId = event?.detail?.entryId;
+      const payload = event?.detail?.payload;
+      if(!entryId || payload?.kind !== 'period-detail') return;
+      const detailItems = (payload.periodDetailItems || []).filter(it=>it?.label && it?.value);
+      setTimeline(blocks=>blocks.map(block=>{
+        if(block.type !== 'day') return block;
+        const nextItems = (block.items || []).map(item=>{
+          const primaryId = item?.primary?.id;
+          if(item?.id !== entryId && primaryId !== entryId) return item;
+          return {
+            ...item,
+            primary:{
+              ...item.primary,
+              time: payload.time || item.primary?.time,
+              periodDetailItems: detailItems,
+              tags: detailItems.map((it)=>({ label:it.label, cat:'period', val:it.value, icon:it.icon })),
+            },
+          };
+        });
+        return { ...block, items: nextItems, entries: undefined };
+      }));
+    };
+    window.addEventListener('edit-save', onEditSave);
+    return ()=>window.removeEventListener('edit-save', onEditSave);
+  }, []);
+
   const handleTabChange = (tab)=>{
     if(tab === 'note' && activeTab !== 'note'){
       recordEnterModeRef.current = 'manual';
+      if(periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
     }
     if(tab !== 'note'){
       recordEnterModeRef.current = 'idle';
+    }
+    if(tab === 'cal' && activeTab !== 'cal' && periodEndRecordCompleted){
+      setPeriodDetailDraft({});
     }
     setActiveTab(tab);
   };
@@ -684,6 +750,12 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const submitPeriodDetailRecord = ({ type, value })=>{
+    if(!type || !value) return;
+    markUserRecorded();
+    setPeriodDetailDraft((prev)=>({ ...prev, [type]: value }));
+  };
+
   const submitFoodRecord = (foods)=>{
     markUserRecorded();
     const entry = window.createFoodRecordEntry(foods);
@@ -860,8 +932,12 @@ function App(){
             setAnalysisNoticeKind('period-start');
             setPeriodEndRecordReady(false);
             setPeriodEndRecordCompleted(false);
+            setPeriodDetailDraft({});
           }}
           onPeriodRecordSubmit={(value)=>{ periodRecordRef.current = value || null; }}
+          onPeriodDetailRecordSubmit={submitPeriodDetailRecord}
+          periodDetailValues={periodDetailDraft}
+          periodDetailDemoEnabled={periodEndRecordCompleted}
         />
       )}
 

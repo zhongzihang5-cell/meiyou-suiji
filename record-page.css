@@ -1244,6 +1244,11 @@
   flex-shrink: 0;
 }
 
+.record-page-root .list-add:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
 .record-page-root .list-add svg {
   width: 18px;
   height: 18px;
@@ -1251,6 +1256,23 @@
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
+}
+
+.record-page-root .list-period-detail-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.record-page-root .list-period-detail-value {
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #999999;
+  font-size: 15px;
+  line-height: 24px;
 }
 
 .record-page-root .ios26-segmented {
@@ -2029,6 +2051,11 @@
   justify-self: end;
   color: #ff4d88;
   font-weight: 500;
+}
+
+.phone .prp-confirm:disabled {
+  color: #c8c8cc;
+  cursor: default;
 }
 
 .phone .prp-title {

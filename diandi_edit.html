@@ -421,6 +421,33 @@
     width: 18px;
     height: 18px;
   }
+  .record-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .record-edit {
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: var(--my-brand-red);
+    transition: background 0.15s;
+  }
+  .record-edit:active {
+    background: var(--my-brand-soft);
+  }
+  .record-edit svg {
+    width: 17px;
+    height: 17px;
+  }
 
   /* MVP 不可编辑提示 */
   .records-mvp-tip {
@@ -549,6 +576,31 @@
     pointer-events: none;
     background: rgba(255, 77, 136, 0.03);
   }
+  .option-sheet .sheet-body {
+    padding: 8px 12px 28px;
+  }
+  .option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .option-btn {
+    height: 48px;
+    border: 0;
+    border-radius: var(--my-radius-sm);
+    background: #f7f7f9;
+    color: var(--my-text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    text-align: left;
+    padding: 0 14px;
+    cursor: pointer;
+  }
+  .option-btn.active {
+    background: var(--my-brand-soft);
+    color: var(--my-brand-red);
+    font-weight: 500;
+  }
 
   /* ==== 二次确认对话框 ==== */
   .dialog-mask {
@@ -676,6 +728,7 @@
   <button data-scene="text">文字记录</button>
   <button data-scene="image">饮食图片</button>
   <button data-scene="quick">快捷记录</button>
+  <button data-scene="period-detail">经期细项</button>
 </div>
 
 <div class="phone">
@@ -735,7 +788,7 @@
       <div class="section">
         <div class="section-header">
           <span class="section-title">识别到 2 条记录</span>
-          <span class="section-meta">MVP 仅支持删除</span>
+          <span class="section-meta"></span>
         </div>
         <div class="records-list">
           <div class="record-item" data-record-id="r1">
@@ -807,7 +860,7 @@
       <div class="section">
         <div class="section-header">
           <span class="section-title">识别到 3 条记录</span>
-          <span class="section-meta">MVP 仅支持删除</span>
+          <span class="section-meta"></span>
         </div>
         <div class="records-list">
           <div class="record-item">
@@ -888,7 +941,7 @@
       <div class="section">
         <div class="section-header">
           <span class="section-title">识别到 1 条记录</span>
-          <span class="section-meta">MVP 仅支持删除</span>
+          <span class="section-meta"></span>
         </div>
         <div class="records-list">
           <div class="record-item">
@@ -932,7 +985,7 @@
       <div class="section">
         <div class="section-header">
           <span class="section-title">识别到 1 条记录</span>
-          <span class="section-meta">MVP 仅支持删除</span>
+          <span class="section-meta"></span>
         </div>
         <div class="records-list">
           <div class="record-item">
@@ -957,6 +1010,33 @@
       </div>
     </div>
 
+    <!-- ============ 场景5：经期细项记录 ============ -->
+    <div class="scene" id="scene-period-detail">
+      <div class="section">
+        <div class="time-row" onclick="openTimePicker()">
+          <div class="time-label">
+            <span class="icon-circle">🕐</span>
+            <span>记录时间</span>
+          </div>
+          <div class="time-value">
+            <span id="recordTime-period-detail">今天 09:15</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title" id="periodDetailCount">经期记录项</span>
+        </div>
+        <div class="records-list" id="periodDetailList"></div>
+      </div>
+
+      <div class="danger-zone">
+        <button class="danger-btn" onclick="confirmDeleteEntry('period-detail')">删除这条记录</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- ==== 底部时间选择器 ==== -->
@@ -974,6 +1054,19 @@
         <div class="picker-col" id="hourCol"></div>
         <div class="picker-col" id="minCol"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ==== 记录项单选 picker ==== -->
+  <div class="sheet-mask" id="optionSheetMask" onclick="closeOptionPicker()"></div>
+  <div class="sheet option-sheet" id="optionSheet">
+    <div class="sheet-header">
+      <button class="cancel" onclick="closeOptionPicker()">取消</button>
+      <span class="sheet-title" id="optionSheetTitle">修改记录项</span>
+      <button class="confirm" onclick="confirmOptionPicker()">完成</button>
+    </div>
+    <div class="sheet-body">
+      <div class="option-list" id="optionList"></div>
     </div>
   </div>
 
@@ -999,12 +1092,15 @@
   // ========== URL 参数读取 & 场景初始化 ==========
   (function(){
     const params = new URLSearchParams(window.location.search);
-    const valid = ['mixed','text','image','quick'];
+    const valid = ['mixed','text','image','quick','period-detail'];
     let scene = params.get('scene') || 'mixed';
     if(valid.indexOf(scene) < 0) scene = 'mixed';
     document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
     const target = document.getElementById('scene-' + scene);
     if(target) target.classList.add('active');
+    if(scene === 'period-detail') setTimeout(() => {
+      if(typeof renderPeriodDetailEditor === 'function') renderPeriodDetailEditor();
+    }, 0);
     // 同步切换器按钮 active 态
     document.querySelectorAll('.demo-controls button').forEach(b => {
       b.classList.toggle('active', b.dataset.scene === scene);
@@ -1025,6 +1121,20 @@
   });
 
   const isEmbedded = window.parent !== window;
+  const PERIOD_DETAIL_OPTIONS = {
+    flow: { label: '流量', icon: 'flow', className: 'menstruation', emoji: '💧', options: ['非常少量', '少量', '中量', '大量', '非常大量'] },
+    color: { label: '颜色', icon: 'color', className: 'menstruation', emoji: '🎨', options: ['浅红色', '鲜红色', '深红色', '褐色', '黑色'] },
+    cramps: { label: '痛经', icon: 'cramps', className: 'symptom', emoji: '⚡', options: ['完全不痛', '轻微痛', '比较痛', '非常痛', '痛到极致'] },
+  };
+  let periodDetailState = {
+    time: '今天 09:15',
+    periodDetailItems: [
+      { label: '流量', value: '中量', icon: 'flow' },
+      { label: '颜色', value: '鲜红色', icon: 'color' },
+      { label: '痛经', value: '轻微痛', icon: 'cramps' },
+    ],
+  };
+  let currentOptionTarget = null;
 
   // ========== 改动状态 ==========
   let dirty = false;
@@ -1040,8 +1150,8 @@
   }
 
   // ========== 关闭与保存 ==========
-  function notifyParent(action) {
-    if(isEmbedded) window.parent.postMessage({type:'edit-close', action: action}, '*');
+  function notifyParent(action, payload) {
+    if(isEmbedded) window.parent.postMessage({type:'edit-close', action: action, payload: payload}, '*');
   }
   function handleClose() {
     if (dirty) {
@@ -1060,8 +1170,19 @@
   }
   function handleSave() {
     if (!dirty) return;
+    const payload = getActiveSavePayload();
     resetDirty();
-    setTimeout(() => notifyParent('save'), 200);
+    setTimeout(() => notifyParent('save', payload), 200);
+  }
+
+  function getActiveSavePayload() {
+    const activeScene = document.querySelector('.scene.active');
+    if(activeScene?.id !== 'scene-period-detail') return null;
+    return {
+      kind: 'period-detail',
+      time: normalizePeriodDetailTime(document.getElementById('recordTime-period-detail').textContent),
+      periodDetailItems: periodDetailState.periodDetailItems.map(item => ({ ...item })),
+    };
   }
 
   // ========== 原文编辑 ==========
@@ -1107,6 +1228,10 @@
     const min = getPickerSelected('minCol');
     if (currentTimeTarget) {
       currentTimeTarget.textContent = `${day} ${hour}:${min}`;
+      if(currentTimeTarget.id === 'recordTime-period-detail'){
+        periodDetailState.time = `${hour}:${min}`;
+        renderPeriodDetailEditor();
+      }
       markDirty();
     }
     closeTimePicker();
@@ -1148,6 +1273,108 @@
     return sel ? sel.dataset.value : '';
   }
 
+  function normalizePeriodDetailTime(text) {
+    const match = String(text || '').match(/(\d{2}:\d{2})/);
+    return match ? match[1] : String(text || '').replace(/^今天\s*/, '') || '09:15';
+  }
+
+  function formatPeriodDetailTime(time) {
+    const value = normalizePeriodDetailTime(time);
+    return /^今天\s/.test(String(time || '')) ? time : `今天 ${value}`;
+  }
+
+  function periodDetailKeyFromLabel(label) {
+    if(label === '流量') return 'flow';
+    if(label === '颜色') return 'color';
+    if(label === '痛经') return 'cramps';
+    return 'flow';
+  }
+
+  function renderPeriodDetailEditor() {
+    const list = document.getElementById('periodDetailList');
+    const count = document.getElementById('periodDetailCount');
+    const items = periodDetailState.periodDetailItems || [];
+    count.textContent = `经期记录项 ${items.length} 条`;
+    list.innerHTML = items.map((item, index) => {
+      const key = item.icon || periodDetailKeyFromLabel(item.label);
+      const config = PERIOD_DETAIL_OPTIONS[key] || PERIOD_DETAIL_OPTIONS.flow;
+      return `
+        <div class="record-item" data-index="${index}">
+          <div class="record-icon ${config.className}">${config.emoji}</div>
+          <div class="record-main">
+            <div class="record-type">${item.label}</div>
+            <div class="record-value">${item.value}</div>
+            <div class="record-time">${formatPeriodDetailTime(periodDetailState.time)}</div>
+          </div>
+          <div class="record-actions">
+            <button class="record-edit" onclick="openOptionPicker(${index})" aria-label="编辑${item.label}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+              </svg>
+            </button>
+            <button class="record-delete" onclick="confirmDeleteRecord(this, '${item.label}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openOptionPicker(index) {
+    const item = periodDetailState.periodDetailItems[index];
+    if(!item) return;
+    currentOptionTarget = index;
+    const key = item.icon || periodDetailKeyFromLabel(item.label);
+    const config = PERIOD_DETAIL_OPTIONS[key] || PERIOD_DETAIL_OPTIONS.flow;
+    document.getElementById('optionSheetTitle').textContent = `修改${config.label}`;
+    document.getElementById('optionList').innerHTML = config.options.map(option => `
+      <button type="button" class="option-btn${option === item.value ? ' active' : ''}" data-value="${option}">
+        ${option}
+      </button>
+    `).join('');
+    document.querySelectorAll('#optionList .option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#optionList .option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+    document.getElementById('optionSheetMask').classList.add('show');
+    document.getElementById('optionSheet').classList.add('show');
+  }
+
+  function closeOptionPicker() {
+    currentOptionTarget = null;
+    document.getElementById('optionSheetMask').classList.remove('show');
+    document.getElementById('optionSheet').classList.remove('show');
+  }
+
+  function confirmOptionPicker() {
+    const selected = document.querySelector('#optionList .option-btn.active');
+    if(currentOptionTarget == null || !selected) return;
+    periodDetailState.periodDetailItems[currentOptionTarget].value = selected.dataset.value;
+    renderPeriodDetailEditor();
+    markDirty();
+    closeOptionPicker();
+  }
+
+  window.addEventListener('message', function(event){
+    if(!event.data || event.data.type !== 'edit-init') return;
+    const payload = event.data.payload || {};
+    periodDetailState = {
+      time: payload.time || '09:15',
+      periodDetailItems: (payload.periodDetailItems || []).map(item => ({ ...item })),
+    };
+    document.getElementById('recordTime-period-detail').textContent = formatPeriodDetailTime(periodDetailState.time);
+    renderPeriodDetailEditor();
+    resetDirty();
+  });
+
   // ========== 对话框 ==========
   function showDialog({ title, desc, confirmText, onConfirm }) {
     document.getElementById('dialogTitle').textContent = title;
@@ -1176,7 +1403,15 @@
         item.style.opacity = '0';
         item.style.transform = 'translateX(-20px)';
         setTimeout(() => {
-          item.remove();
+          const activeScene = document.querySelector('.scene.active');
+          if(activeScene?.id === 'scene-period-detail'){
+            const index = Number(item.dataset.index);
+            if(Number.isFinite(index)) periodDetailState.periodDetailItems.splice(index, 1);
+            item.remove();
+            renderPeriodDetailEditor();
+          } else {
+            item.remove();
+          }
           markDirty();
           showToast('已删除');
         }, 240);

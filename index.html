@@ -8,9 +8,9 @@
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
 <link rel="stylesheet" href="cloud.css?v=20260628-symptom-quick">
-<link rel="stylesheet" href="timeline.css?v=20260628-day-header-time-clean">
+<link rel="stylesheet" href="timeline.css?v=20260628-period-detail-edit-remote">
 <link rel="stylesheet" href="calendar.css?v=20260602-v102">
-<link rel="stylesheet" href="record-page.css?v=20260625-diet-sheet3">
+<link rel="stylesheet" href="record-page.css?v=20260628-period-end-detail-demo">
 <link rel="stylesheet" href="record-empty.css?v=20260602-v102">
 <link rel="stylesheet" href="record-blank.css?v=20260602-v102">
 <link rel="stylesheet" href="search.css?v=20260625-push-search9">
@@ -935,9 +935,9 @@ window.__BUILD__ = '20260522-v101-dev';
 <script src="tabbar-icons.js?v=20260624-v1"></script>
 <script type="text/babel" src="components.jsx?v=20260624-review-titlebar"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260628-period-end"></script>
-<script type="text/babel" src="record-page.jsx?v=20260628-period-end"></script>
-<script type="text/babel" src="timeline-sister-cards.jsx?v=20260628-time-edit"></script>
-<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260628-demo-card-labels"></script>
+<script type="text/babel" src="record-page.jsx?v=20260628-period-end-detail-demo"></script>
+<script type="text/babel" src="timeline-sister-cards.jsx?v=20260628-period-detail-edit-remote"></script>
+<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260628-period-detail-edit-remote"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="quick-pickers.jsx?v=20260628-symptom-note"></script>
 <script type="text/babel" src="timeline-modules.jsx?v=20260628-day-header-no-stats"></script>
@@ -962,7 +962,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="path-flyout.jsx?v=20260611"></script>
 <script type="text/babel" src="demo-scenes.jsx?v=20260624-v1"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260628-demo-card-labels"></script>
+<script type="text/babel" src="app.jsx?v=20260628-period-detail-edit-remote"></script>
 
 <!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
 <button id="resetDemo" style="
@@ -994,11 +994,23 @@ if(new URLSearchParams(location.search).get('dev')==='1'){
   var layer = document.getElementById('edit-modal-layer');
   var iframe = document.getElementById('edit-iframe');
   var editingEntryId = null;
+  var editingPayload = null;
 
-  window.openEditModal = function(entryId, entryKind){
+  window.openEditModal = function(entryId, entryKind, editPayload){
     editingEntryId = entryId;
-    var scene = (['mixed','text','image','quick'].indexOf(entryKind) >= 0) ? entryKind : 'text';
-    iframe.src = 'diandi_edit.html?scene=' + scene;
+    editingPayload = editPayload || null;
+    var inferredKind = (editingPayload && editingPayload.periodDetailItems) ? 'period-detail' : entryKind;
+    var scene = (['mixed','text','image','quick','period-detail'].indexOf(inferredKind) >= 0) ? inferredKind : 'text';
+    iframe.src = 'diandi_edit.html?scene=' + scene + '&v=20260628-period-detail-edit2';
+    iframe.onload = function(){
+      if(scene === 'period-detail' && iframe.contentWindow){
+        iframe.contentWindow.postMessage({
+          type:'edit-init',
+          entryId: editingEntryId,
+          payload: editingPayload
+        }, '*');
+      }
+    };
     layer.style.display = 'block';
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
@@ -1021,6 +1033,11 @@ if(new URLSearchParams(location.search).get('dev')==='1'){
     var action = e.data.action;
     closeEditModal(function(){
       if(action === 'save'){
+        if(e.data.payload && editingEntryId){
+          window.dispatchEvent(new CustomEvent('edit-save', {
+            detail: { entryId: editingEntryId, payload: e.data.payload }
+          }));
+        }
         window.__showEditToast && window.__showEditToast('已保存');
       } else if(action === 'delete'){
         // 从 timeline DOM 移除对应卡片
@@ -1035,6 +1052,7 @@ if(new URLSearchParams(location.search).get('dev')==='1'){
         window.__showEditToast && window.__showEditToast('记录已删除');
       }
       editingEntryId = null;
+      editingPayload = null;
     });
   });
 

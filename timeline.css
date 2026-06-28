@@ -2405,6 +2405,79 @@
   color:#323232;
   line-height:1.6;
 }
+.v3-period-detail-record{
+  padding:2px 0 4px;
+}
+.v3-period-detail-icon{
+  position:relative;
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  display:inline-block;
+  border-radius:6px;
+  background:rgba(255,77,136,0.1);
+}
+.v3-period-detail-icon::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:8px;
+  height:11px;
+  border-radius:12px 12px 12px 3px;
+  background:#ff4d88;
+  transform:translate(-50%, -50%) rotate(45deg);
+}
+.v3-period-detail-icon.is-color{
+  background:rgba(141,84,255,0.1);
+}
+.v3-period-detail-icon.is-color::before{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #f08a86 0%, #e94b3f 48%, #7d3a1e 100%);
+  transform:translate(-50%, -50%);
+}
+.v3-period-detail-icon.is-cramps{
+  background:rgba(255,149,0,0.12);
+}
+.v3-period-detail-icon.is-cramps::before{
+  width:8px;
+  height:12px;
+  border-radius:2px;
+  background:#ff9500;
+  clip-path:polygon(58% 0, 18% 52%, 48% 52%, 35% 100%, 82% 42%, 52% 42%);
+  transform:translate(-50%, -50%);
+}
+.v3-period-detail-lines{
+  min-width:0;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.v3-period-detail-line{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  min-height:21px;
+  font-size:14px;
+  line-height:1.5;
+  color:#323232;
+}
+.v3-period-detail-label{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#666666;
+  white-space:nowrap;
+}
+.v3-period-detail-value{
+  color:#323232;
+  text-align:right;
+  overflow-wrap:anywhere;
+}
 .v3-tag{
   display:inline-flex;
   align-items:center;

@@ -615,6 +615,11 @@ function ChevronRightIcon() {
 const PERIOD_PICKER_FLOW = ['非常少量', '少量', '中量', '大量', '非常大量'];
 const PERIOD_PICKER_COLOR = ['浅红色', '鲜红色', '深红色', '褐色', '黑色'];
 const PERIOD_PICKER_CRAMPS = ['完全不痛', '轻微痛', '比较痛', '非常痛', '痛到极致'];
+const PERIOD_DETAIL_PICKERS = {
+  flow: { title: '流量', group: 'flow', options: PERIOD_PICKER_FLOW },
+  color: { title: '颜色', group: 'color', options: PERIOD_PICKER_COLOR },
+  cramps: { title: '痛经', group: 'cramps', options: PERIOD_PICKER_CRAMPS },
+};
 
 function PickerCheckIcon() {
   return (
@@ -903,6 +908,64 @@ function PeriodRecordPicker({ open, onCancel, onConfirm }) {
   return picker;
 }
 
+function PeriodSinglePicker({ open, type, value, onCancel, onConfirm }) {
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+  const [selected, setSelected] = useState(null);
+  const config = PERIOD_DETAIL_PICKERS[type];
+
+  useEffect(() => {
+    if (!open || !config) return;
+    const index = config.options.indexOf(value);
+    setSelected(index >= 0 ? index : null);
+  }, [open, config, value]);
+
+  useEffect(() => {
+    const phone = portalTarget;
+    if (!phone) return undefined;
+    if (open) phone.classList.add('is-period-picker-open');
+    else phone.classList.remove('is-period-picker-open');
+    return () => phone.classList.remove('is-period-picker-open');
+  }, [open, portalTarget]);
+
+  if (!open || !portalTarget || !config) return null;
+
+  const picker = (
+    <div className="prp-mask" onClick={(event) => { if (event.target === event.currentTarget) onCancel(); }}>
+      <div className="prp-sheet prp-sheet-single" role="dialog" aria-modal="true" aria-label={config.title}>
+        <header className="prp-bar">
+          <button type="button" className="prp-cancel" onClick={onCancel}>取消</button>
+          <h2 className="prp-title">{config.title}</h2>
+          <button
+            type="button"
+            className="prp-confirm"
+            disabled={selected == null}
+            onClick={() => {
+              if (selected == null) return;
+              onConfirm({ type, value: config.options[selected] });
+            }}
+          >
+            确定
+          </button>
+        </header>
+        <div className="prp-body">
+          <PeriodPickerOptions
+            title={config.title}
+            group={config.group}
+            options={config.options}
+            value={selected}
+            onChange={setSelected}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(picker, portalTarget);
+  }
+  return picker;
+}
+
 function DietAddSheet({ open, onClose, onDone }) {
   const [mealType, setMealType] = useState('breakfast');
   const [time, setTime] = useState('08:00');
@@ -1138,7 +1201,16 @@ function DietAddSheet({ open, onClose, onDone }) {
   return sheet;
 }
 
-function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
+function HealthMorphRecordPane({
+  item,
+  periodYes,
+  onPeriodYes,
+  onPeriodNo,
+  onDietAdd,
+  onPeriodDetailAdd,
+  periodDetailDemoEnabled,
+  periodDetailValues,
+}) {
   if (item.recordType === 'segment') {
     return (
       <div className="ios26-segmented" role="tablist" aria-label="是否选择">
@@ -1211,6 +1283,24 @@ function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo, onDie
     );
   }
 
+  if (['flow', 'color', 'cramps'].includes(item.id)) {
+    const currentValue = periodDetailValues?.[item.id];
+    return (
+      <div className="list-period-detail-actions">
+        {currentValue ? <span className="list-period-detail-value">{currentValue}</span> : null}
+        <button
+          type="button"
+          className="list-add"
+          disabled={!periodDetailDemoEnabled}
+          onClick={() => onPeriodDetailAdd?.(item.id)}
+          aria-label={'新增' + item.label}
+        >
+          <PlusIcon/>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <button type="button" className="list-add" aria-label={'新增' + item.label}>
       <PlusIcon/>
@@ -1218,7 +1308,18 @@ function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo, onDie
   );
 }
 
-function HealthMorphRow({ item, index, periodYes, periodEndMode, onPeriodYes, onPeriodNo, onDietAdd }) {
+function HealthMorphRow({
+  item,
+  index,
+  periodYes,
+  periodEndMode,
+  onPeriodYes,
+  onPeriodNo,
+  onDietAdd,
+  onPeriodDetailAdd,
+  periodDetailDemoEnabled,
+  periodDetailValues,
+}) {
   const delay = (index * 50) + 'ms';
   const label = item.id === 'period' && periodEndMode ? '月经走喽' : item.label;
 
@@ -1247,6 +1348,9 @@ function HealthMorphRow({ item, index, periodYes, periodEndMode, onPeriodYes, on
             onPeriodYes={onPeriodYes}
             onPeriodNo={onPeriodNo}
             onDietAdd={onDietAdd}
+            onPeriodDetailAdd={onPeriodDetailAdd}
+            periodDetailDemoEnabled={periodDetailDemoEnabled}
+            periodDetailValues={periodDetailValues}
           />
         </div>
       </div>
@@ -1254,7 +1358,16 @@ function HealthMorphRow({ item, index, periodYes, periodEndMode, onPeriodYes, on
   );
 }
 
-function HealthMorphList({ periodYes, periodEndMode, onPeriodYes, onPeriodNo, onDietAdd }) {
+function HealthMorphList({
+  periodYes,
+  periodEndMode,
+  onPeriodYes,
+  onPeriodNo,
+  onDietAdd,
+  onPeriodDetailAdd,
+  periodDetailDemoEnabled,
+  periodDetailValues,
+}) {
   return (
     <div className="health-morph-list" aria-label="健康记录列表">
       {MORPH_ITEMS.map((item, index) => (
@@ -1267,6 +1380,9 @@ function HealthMorphList({ periodYes, periodEndMode, onPeriodYes, onPeriodNo, on
           onPeriodYes={onPeriodYes}
           onPeriodNo={onPeriodNo}
           onDietAdd={onDietAdd}
+          onPeriodDetailAdd={onPeriodDetailAdd}
+          periodDetailDemoEnabled={periodDetailDemoEnabled}
+          periodDetailValues={periodDetailValues}
         />
       ))}
     </div>
@@ -1414,6 +1530,9 @@ function RecordPage({
   onPeriodEndAnalysisReady,
   onPeriodReset,
   onPeriodRecordSubmit,
+  onPeriodDetailRecordSubmit,
+  periodDetailValues,
+  periodDetailDemoEnabled = false,
   periodFlowEnabled = true,
   periodEndRecordReady = false,
   periodEndRecordCompleted = false,
@@ -1433,6 +1552,7 @@ function RecordPage({
   const [calendarOffset, setCalendarOffset] = useState(0);
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
   const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
+  const [singlePickerType, setSinglePickerType] = useState(null);
   const dragAreaRef = useRef(null);
   const gridRef = useRef(null);
   const timersRef = useRef([]);
@@ -1541,6 +1661,16 @@ function RecordPage({
     onPeriodRecordSubmit?.(recordValue);
     setPeriodPickerOpen(false);
     runPeriodAnimation();
+  };
+
+  const openPeriodDetailPicker = (type) => {
+    if (!periodDetailDemoEnabled) return;
+    setSinglePickerType(type);
+  };
+
+  const confirmPeriodDetail = ({ type, value }) => {
+    setSinglePickerType(null);
+    onPeriodDetailRecordSubmit?.({ type, value });
   };
 
   const syncCalendarOffset = useCallback(() => {
@@ -1675,6 +1805,9 @@ function RecordPage({
             onPeriodYes={() => handlePeriodToggle(true)}
             onPeriodNo={() => handlePeriodToggle(false)}
             onDietAdd={() => setDietSheetOpen(true)}
+            onPeriodDetailAdd={openPeriodDetailPicker}
+            periodDetailDemoEnabled={periodDetailDemoEnabled}
+            periodDetailValues={periodDetailValues}
           />
         </div>
       </div>
@@ -1716,6 +1849,13 @@ function RecordPage({
         open={periodPickerOpen}
         onCancel={continuePeriodFlow}
         onConfirm={continuePeriodFlow}
+      />
+      <PeriodSinglePicker
+        open={!!singlePickerType}
+        type={singlePickerType}
+        value={singlePickerType ? periodDetailValues?.[singlePickerType] : null}
+        onCancel={() => setSinglePickerType(null)}
+        onConfirm={confirmPeriodDetail}
       />
     </div>
   );

@@ -632,7 +632,8 @@ function V3Chevron({open}){
   );
 }
 
-function V3v2Header({time, title, isNew, entryId, entryKind}){
+function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
+  const MoreMenu = window.CardMoreMenu;
   const canEdit = !!(time && entryId && window.openEditModal);
   if(!time && !title) return null;
   return (
@@ -640,7 +641,7 @@ function V3v2Header({time, title, isNew, entryId, entryKind}){
       {time && (
         <button
           type="button"
-          onClick={canEdit ? (()=>window.openEditModal(entryId, entryKind)) : undefined}
+          onClick={canEdit ? (()=>window.openEditModal(entryId, entryKind, editPayload)) : undefined}
           aria-label={canEdit ? `编辑 ${time}` : undefined}
           style={{
           fontSize:12, color:'rgba(0,0,0,0.5)', fontWeight:400,
@@ -657,6 +658,7 @@ function V3v2Header({time, title, isNew, entryId, entryKind}){
           flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
         }}>{title}</div>
       )}
+      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} editPayload={editPayload} onEdit={window.openEditModal}/>}
     </div>
   );
 }
@@ -831,6 +833,24 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       </div>
     );
   }
+  if(entry.kind === 'period-detail'){
+    const items = entry.periodDetailItems || [];
+    return (
+      <div className="v3-period-detail-record">
+        <div className="v3-period-detail-lines">
+          {items.map((item, index) => (
+            <div className="v3-period-detail-line" key={item.label + index}>
+              <span className="v3-period-detail-label">
+                <span className={'v3-period-detail-icon is-' + (item.icon || 'period')} aria-hidden="true"/>
+                <span>{item.label}</span>
+              </span>
+              <span className="v3-period-detail-value">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
   if(entry.kind === 'period'){
     return (
       <div className="v3-weight-record">
@@ -950,8 +970,16 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
   const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
-  const derivedKind = primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
+  const derivedKind = p?.kind === 'period-detail'
+    ? 'period-detail'
+    : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
   const derivedId = entryId || primary?.id;
+  const editPayload = p?.kind === 'period-detail'
+    ? {
+        time: p.time,
+        periodDetailItems: p.periodDetailItems || [],
+      }
+    : null;
   const [photoAnalysis, setPhotoAnalysis] = React.useState(()=> !!(isNew && p?.kind === 'image'));
   const handlePhotoAnalysisComplete = React.useCallback(()=> setPhotoAnalysis(false), []);
 
@@ -993,7 +1021,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 12px',
       }}>
-        <V3v2Header time={a.time} title={a.title} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
+        <V3v2Header time={a.time} title={a.title} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>
         <div style={{marginTop:8}}>
           <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>
           {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
@@ -1018,7 +1046,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         padding:'11px 12px 4px', overflow:'hidden',
       }}
     >
-      <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind}/>
+      <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>
       <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : (p.sourceFrom ? 0 : 8)}}>
         <V3v2PrimaryBody
           entry={p}
