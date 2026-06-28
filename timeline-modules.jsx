@@ -774,6 +774,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
         analysisProps={sisterItem ? {
           playAnimation: sisterPlayAnimation,
           onCycleComplete: onSisterCycleComplete,
+          analysisKind: sisterItem.analysisKind || item.analysisKind,
         } : null}
       />
     );

@@ -51,9 +51,13 @@ function App(){
   const [showPhoto, setShowPhoto] = useState(false);
   const [activeTab, setActiveTab] = useState(initial.activeTab);
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
+  const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState('结合近期记录，已为你生成周期状态分析');
+  const [analysisNoticeKind, setAnalysisNoticeKind] = useState('period-start');
   const [sisterPlayAnimation, setSisterPlayAnimation] = useState(initial.sisterPlayAnimation);
   const [sisterCycleDone, setSisterCycleDone] = useState(initial.sisterCycleDone);
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
+  const [periodEndRecordReady, setPeriodEndRecordReady] = useState(false);
+  const [periodEndRecordCompleted, setPeriodEndRecordCompleted] = useState(false);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState(null);
@@ -162,9 +166,13 @@ function App(){
     setDraft(next.draft);
     setTimeline(next.timeline);
     setShowAnalysisNotice(next.showAnalysisNotice);
+    setAnalysisNoticeTitle('结合近期记录，已为你生成周期状态分析');
+    setAnalysisNoticeKind('period-start');
     setSisterPlayAnimation(next.sisterPlayAnimation);
     setSisterCycleDone(next.sisterCycleDone);
     setHideTodayGuide(next.hideTodayGuide);
+    setPeriodEndRecordReady(false);
+    setPeriodEndRecordCompleted(false);
     setActiveTab(next.activeTab);
     setShowPhoto(false);
     setShowSearchPage(false);
@@ -201,9 +209,12 @@ function App(){
     if(scene.record.sisterAnalysis.trigger !== 'float-notice') return;
     recordEnterModeRef.current = 'analysis';
     setShowAnalysisNotice(false);
+    const isPeriodEndAnalysis = analysisNoticeKind === 'period-end';
+    if(!isPeriodEndAnalysis) setPeriodEndRecordReady(true);
+    else setPeriodEndRecordCompleted(true);
 
     const periodRecord = periodRecordRef.current || {};
-    const periodDetails = [
+    const periodDetails = isPeriodEndAnalysis ? [] : [
       periodRecord.flow ? { label:'流量', value: periodRecord.flow, icon:'flow' } : null,
       periodRecord.color ? { label:'颜色', value: periodRecord.color, icon:'color' } : null,
       periodRecord.cramps ? { label:'痛经', value: periodRecord.cramps, icon:'cramps' } : null,
@@ -211,12 +222,16 @@ function App(){
     const syncEntry = {
       kind:'sync-card', id:'e-period-'+Date.now(), time: window.formatNowTime(),
       cardLabel:'自动同步', cardLabelKind:'sync',
-      body:'今天月经来了。', tagLayout:'v3', isNew: true,
-      tags:[{ label:'月经来了', cat:'period', val:'', icon:'period' }],
+      body: isPeriodEndAnalysis ? '今天月经走喽。' : '今天月经来了。',
+      tagLayout:'v3', isNew: true,
+      tags:[{ label: isPeriodEndAnalysis ? '月经走喽' : '月经来了', cat:'period', val:'', icon:'period' }],
       periodDetails,
+      periodSummaryLabel: isPeriodEndAnalysis ? '月经走喽' : '月经来了',
+      analysisKind: isPeriodEndAnalysis ? 'period-end' : 'period-start',
     };
     const sisterEntry = {
       kind:'sister-card', id:'e-sister-'+Date.now(), time: window.formatNowTime(), railDot:'ai',
+      analysisKind: isPeriodEndAnalysis ? 'period-end' : 'period-start',
     };
     const todayId = timeline.find(b=>b.type==='day' && b.isToday)?.id;
     setTimeline(blocks => {
@@ -824,8 +839,25 @@ function App(){
         <RecordPage
           key={scene.id}
           periodFlowEnabled={scene.calendar.periodFlow}
-          onAnalysisReady={()=>setShowAnalysisNotice(true)}
-          onPeriodReset={()=>setShowAnalysisNotice(false)}
+          periodEndRecordReady={periodEndRecordReady}
+          periodEndRecordCompleted={periodEndRecordCompleted}
+          onAnalysisReady={()=>{
+            setAnalysisNoticeTitle('结合近期记录，已为你生成周期状态分析');
+            setAnalysisNoticeKind('period-start');
+            setShowAnalysisNotice(true);
+          }}
+          onPeriodEndAnalysisReady={()=>{
+            setAnalysisNoticeTitle('本次月经长度为8天，较前两次明显延长...');
+            setAnalysisNoticeKind('period-end');
+            setShowAnalysisNotice(true);
+          }}
+          onPeriodReset={()=>{
+            setShowAnalysisNotice(false);
+            setAnalysisNoticeTitle('结合近期记录，已为你生成周期状态分析');
+            setAnalysisNoticeKind('period-start');
+            setPeriodEndRecordReady(false);
+            setPeriodEndRecordCompleted(false);
+          }}
           onPeriodRecordSubmit={(value)=>{ periodRecordRef.current = value || null; }}
         />
       )}
@@ -833,6 +865,7 @@ function App(){
       {scene.floatNotice.enabled && (
         <FloatNotice
           show={showFloatNotice}
+          title={analysisNoticeTitle}
           onOpen={openSisterAnalysis}
           onClose={()=>setShowAnalysisNotice(false)}
         />

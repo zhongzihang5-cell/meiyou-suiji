@@ -255,5 +255,10 @@
   color:rgba(0,0,0,0.75);
   line-height:1.47;
 }
+.float-notice .fn-title{
+  display:block;
+  font-weight:600;
+  color:rgba(0,0,0,0.82);
+}
 
 .app-view-hidden{display:none !important}

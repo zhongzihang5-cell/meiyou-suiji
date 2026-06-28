@@ -47,7 +47,7 @@ const CAL_WEEKS = [
 
 const PERIOD_DAYS = [3, 4, 5, 6, 7];
 
-function FloatNotice({show, onOpen, onClose}){
+function FloatNotice({show, title = '结合近期记录，已为你生成周期状态分析', onOpen, onClose}){
   return (
     <div
       className={'float-notice'+(show?' show':'')}
@@ -55,7 +55,7 @@ function FloatNotice({show, onOpen, onClose}){
       role="button"
       tabIndex={show ? 0 : -1}
       aria-hidden={!show}
-      aria-label="结合近期记录，已为你生成周期状态分析"
+      aria-label={title}
     >
       <button
         type="button"
@@ -64,7 +64,9 @@ function FloatNotice({show, onOpen, onClose}){
         onClick={(e)=>{ e.stopPropagation(); onClose(); }}
       >×</button>
       <div className="fn-avatar" aria-hidden="true"/>
-      <p className="fn-message">结合近期记录，已为你生成周期状态分析</p>
+      <p className="fn-message">
+        <span className="fn-title">{title}</span>
+      </p>
     </div>
   );
 }

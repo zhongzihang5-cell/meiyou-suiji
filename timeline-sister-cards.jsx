@@ -608,7 +608,7 @@ function PeriodSummaryIcon({type}){
 function PeriodRecordSummary({entry}){
   const details = entry.periodDetails || [];
   const rows = [
-    { label: '月经来了', icon: 'period' },
+    { label: entry.periodSummaryLabel || '月经来了', icon: 'period' },
     ...details,
   ];
   return (
@@ -785,6 +785,129 @@ function SisterCycleChart({animated, onComplete, staticView = false}){
   );
 }
 
+const PERIOD_END_CHART_ANIM_MS = 4280;
+
+function PeriodEndCycleChart({animated, onComplete, staticView = false}){
+  const bars = [
+    {date:'上上次', width:'62.5%', label:'5'},
+    {date:'上次', width:'75%', label:'6'},
+    {date:'本次', width:'100%', label:'8', zoom:true, tone:'warning'},
+  ];
+  const done = staticView || !animated;
+  const [headSeen, setHeadSeen] = React.useState(done);
+  const [seenBars, setSeenBars] = React.useState(done ? [0, 1, 2] : []);
+  const [grownBars, setGrownBars] = React.useState(done ? [0, 1, 2] : []);
+  const [zoomPop, setZoomPop] = React.useState(done);
+  const chartRef = React.useRef(null);
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  React.useLayoutEffect(()=>{
+    if(staticView || !animated) return;
+    requestAnimationFrame(()=>scrollFeedContentIntoView(chartRef.current));
+  }, [animated, staticView, headSeen, seenBars, grownBars, zoomPop]);
+
+  React.useEffect(()=>{
+    if(staticView){
+      onCompleteRef.current?.();
+      return;
+    }
+    if(!animated) return;
+    setHeadSeen(false);
+    setSeenBars([]);
+    setGrownBars([]);
+    setZoomPop(false);
+    const timers = [
+      setTimeout(()=>setHeadSeen(true), 60),
+      setTimeout(()=>{ setSeenBars([0]); setGrownBars([0]); }, 320),
+      setTimeout(()=>{ setSeenBars([0, 1]); setGrownBars([0, 1]); }, 1400),
+      setTimeout(()=>{ setSeenBars([0, 1, 2]); setGrownBars([0, 1, 2]); }, 2480),
+      setTimeout(()=>setZoomPop(true), 3580),
+      setTimeout(()=>onCompleteRef.current?.(), PERIOD_END_CHART_ANIM_MS),
+    ];
+    return ()=>timers.forEach(clearTimeout);
+  }, [animated, staticView]);
+
+  return (
+    <div className="chart-block" ref={chartRef} style={{background:'transparent', border:'none', padding:0}}>
+      <div className={'cycle-card period-end-cycle-card'+(!animated?' cycle-card--static':'')}>
+        <div className={'cc-head cc-seg'+(headSeen?' seen':'')}>
+          <span className="cc-title">
+            <img className="cc-icon" src={CC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
+            最近3次经期
+          </span>
+        </div>
+        <div className="cc-bars">
+          {bars.map((b, i) => (
+            <div key={i} className={'cc-bar-row cc-seg'+(seenBars.includes(i)?' seen':'')}>
+              <div className="cc-bar-wrap">
+                <div
+                  className={'cc-bar'+(b.tone === 'warning' ? ' is-warning' : '')+(grownBars.includes(i)?' grow':'')}
+                  style={{'--cc-target': b.width}}
+                >
+                  <span className={'cc-bar-label'+(b.zoom && zoomPop?' cc-zoom-target zoom-pop':'')}>{b.label}</span>
+                </div>
+              </div>
+              <span className="cc-bar-date">{b.date}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PeriodForecastCard({animated, onComplete, staticView = false}){
+  const cardRef = React.useRef(null);
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  React.useLayoutEffect(()=>{
+    if(staticView || !animated) return;
+    requestAnimationFrame(()=>scrollFeedContentIntoView(cardRef.current));
+  }, [animated, staticView]);
+
+  React.useEffect(()=>{
+    onCompleteRef.current?.();
+  }, [animated, staticView]);
+
+  const cards = [
+    {key:'month', label:'MONTH', text:'7月'},
+    {key:'day', label:'DAY', text:'5'},
+    {key:'weekday', label:'DAY OF WEEK', text:'周日'},
+  ];
+
+  return (
+    <div className="chart-block" ref={cardRef} style={{background:'transparent', border:'none', padding:0}}>
+      <div className="forecast-card">
+        <div className="fc-head">
+          <span className="fc-title">
+            <svg className="fc-icon" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="12" cy="13" r="8" fill="#ff4d88"/>
+              <path d="M4 6 L7 4" stroke="#ff4d88" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M20 6 L17 4" stroke="#ff4d88" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M12 9 L12 13 L15 15" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            </svg>
+            下次月经预测
+          </span>
+        </div>
+        <div className="fc-flipboard">
+          {cards.map((card) => (
+            <div
+              key={card.key}
+              className="fc-flip-card"
+              data-flip={card.key}
+            >
+              <div className="fc-flip-value">{card.text}</div>
+              <div className="fc-flip-label">{card.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SisterSignalCard({animated}){
   const lights = [
     {color:'green', label:'稳定', range:'21–35天'},
@@ -859,6 +982,7 @@ function SisterSignalCard({animated}){
 }
 
 const SISTER_LEAD = '以下是本次月经情况的分析。先看一下你最近3个周期的情况：';
+const PERIOD_END_LEAD = '以下是本次月经情况的分析。先看一下你最近3次经期天数变化：';
 
 const SISTER_PARA1 = [
   { text:'你最近三次周期分别是' },
@@ -874,6 +998,22 @@ const SISTER_CLOSING = [
   { text:'内。很棒哦，继续保持现在的健康生活节奏就可以。' },
 ];
 
+const PERIOD_END_PARA = [
+  { text:'最近3次经期天数呈逐渐变长的趋势。本次 ' },
+  { text:'8 天', bold:true },
+  { text:'比平时稍长一点，超过了' },
+  { text:'7天', bold:true },
+  { text:'的正常范围。单次的小波动通常受作息、压力等影响，不用太担心，留意后续几次是否回到平时节奏就好。' },
+];
+
+const PERIOD_END_FORECAST_TEXT = [
+  { text:'按照你的周期规律计算，预计下次月经将' },
+  { text:'7月5日', bold:true },
+  { text:'前后到来，还有' },
+  { text:'25天', bold:true },
+  { text:'，到时记得提前做好准备哦。' },
+];
+
 function TlAiChartIcon({size = 10, color = '#FF4D88'}){
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -882,7 +1022,7 @@ function TlAiChartIcon({size = 10, color = '#FF4D88'}){
   );
 }
 
-function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false}){
+function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false, analysisKind = 'period-start'}){
   const [open, setOpen] = React.useState(true);
   const [canCollapse, setCanCollapse] = React.useState(!animateText);
   const [hasSeenAnimation, setHasSeenAnimation] = React.useState(!animateText);
@@ -945,6 +1085,7 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
               playAnimation={contentAnimateText ? playAnimation : 0}
               onCycleComplete={handleComplete}
               animateText={contentAnimateText}
+              analysisKind={analysisKind}
             />
           </div>
         )}
@@ -953,11 +1094,13 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
   );
 }
 
-function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
+function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, analysisKind = 'period-start'}){
   const [animated, setAnimated] = React.useState(false);
   const [leadDone, setLeadDone] = React.useState(!animateText);
   const [chartDone, setChartDone] = React.useState(!animateText);
   const [para1Done, setPara1Done] = React.useState(!animateText);
+  const [showForecast, setShowForecast] = React.useState(!animateText);
+  const [forecastDone, setForecastDone] = React.useState(!animateText);
   const [showSignal, setShowSignal] = React.useState(!animateText);
   const [showClosing, setShowClosing] = React.useState(!animateText);
   const [closingDone, setClosingDone] = React.useState(!animateText);
@@ -965,6 +1108,9 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   const onCycleCompleteRef = React.useRef(onCycleComplete);
   const bodyRef = React.useRef(null);
   onCycleCompleteRef.current = onCycleComplete;
+  const isPeriodEnd = analysisKind === 'period-end';
+  const leadText = isPeriodEnd ? PERIOD_END_LEAD : SISTER_LEAD;
+  const mainParagraph = isPeriodEnd ? PERIOD_END_PARA : SISTER_PARA1;
 
   React.useLayoutEffect(()=>{
     if(!animateText || !bodyRef.current) return;
@@ -977,6 +1123,8 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
       setLeadDone(true);
       setChartDone(true);
       setPara1Done(true);
+      setShowForecast(true);
+      setForecastDone(true);
       setClosingDone(true);
       setShowSignal(true);
       setShowClosing(true);
@@ -986,6 +1134,8 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
       setLeadDone(false);
       setChartDone(false);
       setPara1Done(false);
+      setShowForecast(false);
+      setForecastDone(false);
       setClosingDone(false);
       setShowSignal(false);
       setShowClosing(false);
@@ -1005,23 +1155,43 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
   }, [animateText]);
 
   React.useEffect(()=>{
+    if(isPeriodEnd){
+      if(!animateText || !para1Done) return;
+      const delay = playAnimation ? 360 : 220;
+      const t = setTimeout(()=>setShowForecast(true), delay);
+      return ()=>clearTimeout(t);
+    }
     if(!animateText || !para1Done) return;
     const delay = playAnimation ? 480 : 320;
     const t = setTimeout(()=>setShowSignal(true), delay);
     return ()=>clearTimeout(t);
-  }, [animateText, para1Done, playAnimation]);
+  }, [animateText, isPeriodEnd, para1Done, playAnimation]);
 
   React.useEffect(()=>{
+    if(!isPeriodEnd) return;
+    if(!animateText || !forecastDone) return;
+    const delay = playAnimation ? 360 : 220;
+    const t = setTimeout(()=>setShowClosing(true), delay);
+    return ()=>clearTimeout(t);
+  }, [animateText, forecastDone, isPeriodEnd, playAnimation]);
+
+  React.useEffect(()=>{
+    if(isPeriodEnd) return;
     if(!animateText || !showSignal) return;
     const delay = playAnimation ? 2400 : 880;
     const t = setTimeout(()=>setShowClosing(true), delay);
     return ()=>clearTimeout(t);
-  }, [animateText, showSignal, playAnimation]);
+  }, [animateText, isPeriodEnd, showSignal, playAnimation]);
 
   React.useEffect(()=>{
+    if(isPeriodEnd){
+      if(!animateText || !showClosing || !closingDone) return;
+      onCycleCompleteRef.current?.();
+      return;
+    }
     if(!animateText || !showClosing || !closingDone) return;
     onCycleCompleteRef.current?.();
-  }, [animateText, showClosing, closingDone]);
+  }, [animateText, isPeriodEnd, para1Done, showClosing, closingDone]);
 
   const showChart = !animateText || (leadDone && animated);
   const showPara1 = !animateText || (leadDone && chartDone);
@@ -1030,37 +1200,52 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
     <div className="tl-t5-analysis-body" ref={bodyRef}>
       <p className="tl-t5-analysis-lead">
         {animateText && !leadDone ? (
-          <TypewriterText text={SISTER_LEAD} active followScroll onComplete={handleLeadComplete}/>
-        ) : SISTER_LEAD}
+          <TypewriterText text={leadText} active followScroll onComplete={handleLeadComplete}/>
+        ) : leadText}
       </p>
       {showChart && (
-        <SisterCycleChart
-          animated={animated}
-          staticView={!animateText}
-          onComplete={()=>setChartDone(true)}
-        />
+        isPeriodEnd ? (
+          <PeriodEndCycleChart
+            animated={animated}
+            staticView={!animateText}
+            onComplete={()=>setChartDone(true)}
+          />
+        ) : (
+          <SisterCycleChart
+            animated={animated}
+            staticView={!animateText}
+            onComplete={()=>setChartDone(true)}
+          />
+        )
       )}
       {showPara1 && (
         <p className="tl-t5-analysis-text">
           {animateText && !para1Done ? (
             <TypewriterText
-              segments={SISTER_PARA1}
+              segments={mainParagraph}
               active
               followScroll
               onComplete={()=>setPara1Done(true)}
             />
           ) : (
-            renderTypedSegments(SISTER_PARA1, segmentsFullText(SISTER_PARA1).length)
+            renderTypedSegments(mainParagraph, segmentsFullText(mainParagraph).length)
           )}
         </p>
       )}
-      {showSignal && (!animateText || para1Done) && (
+      {isPeriodEnd && showForecast && (!animateText || para1Done) && (
+        <PeriodForecastCard
+          animated={animated}
+          staticView={!animateText}
+          onComplete={()=>setForecastDone(true)}
+        />
+      )}
+      {!isPeriodEnd && showSignal && (!animateText || para1Done) && (
         <>
           <div className="tl-t5-chart-divider" role="separator"/>
           <SisterSignalCard animated={animated}/>
         </>
       )}
-      {showClosing && (!animateText || para1Done) && (
+      {!isPeriodEnd && showClosing && (!animateText || para1Done) && (
         <p className="tl-t5-analysis-text">
           {animateText && !closingDone ? (
             <TypewriterText
@@ -1071,6 +1256,20 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText}){
             />
           ) : (
             renderTypedSegments(SISTER_CLOSING, segmentsFullText(SISTER_CLOSING).length)
+          )}
+        </p>
+      )}
+      {isPeriodEnd && showClosing && (!animateText || forecastDone) && (
+        <p className="tl-t5-analysis-text">
+          {animateText && !closingDone ? (
+            <TypewriterText
+              segments={PERIOD_END_FORECAST_TEXT}
+              active
+              followScroll
+              onComplete={()=>setClosingDone(true)}
+            />
+          ) : (
+            renderTypedSegments(PERIOD_END_FORECAST_TEXT, segmentsFullText(PERIOD_END_FORECAST_TEXT).length)
           )}
         </p>
       )}

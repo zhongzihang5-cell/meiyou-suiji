@@ -3,6 +3,7 @@ const { useState, useRef, useEffect, useCallback } = React;
 const MODE_TABS = ['经期', '备孕', '怀孕', '育儿'];
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 const PERIOD_DAYS = [14, 15, 16, 17, 18];
+const PERIOD_END_DAYS = [19, 20, 21];
 const PERIOD_FLOW_LEVELS = [40, 80, 60, 30, 20];
 const PERIOD_FLOW_FILL_AT_MS = 1550;
 const PERIOD_FLOW_SETTLE_AT_MS = 1900;
@@ -1217,8 +1218,9 @@ function HealthMorphRecordPane({ item, periodYes, onPeriodYes, onPeriodNo, onDie
   );
 }
 
-function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
+function HealthMorphRow({ item, index, periodYes, periodEndMode, onPeriodYes, onPeriodNo, onDietAdd }) {
   const delay = (index * 50) + 'ms';
+  const label = item.id === 'period' && periodEndMode ? '月经走喽' : item.label;
 
   return (
     <div className="health-morph-row" style={{ '--row-delay': delay }}>
@@ -1237,7 +1239,7 @@ function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo, onDie
             )}
           </div>
         </div>
-        <div className="health-morph-label">{item.label}</div>
+        <div className="health-morph-label">{label}</div>
         <div className="health-morph-right">
           <HealthMorphRecordPane
             item={item}
@@ -1252,7 +1254,7 @@ function HealthMorphRow({ item, index, periodYes, onPeriodYes, onPeriodNo, onDie
   );
 }
 
-function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
+function HealthMorphList({ periodYes, periodEndMode, onPeriodYes, onPeriodNo, onDietAdd }) {
   return (
     <div className="health-morph-list" aria-label="健康记录列表">
       {MORPH_ITEMS.map((item, index) => (
@@ -1261,6 +1263,7 @@ function HealthMorphList({ periodYes, onPeriodYes, onPeriodNo, onDietAdd }) {
           item={item}
           index={index}
           periodYes={periodYes}
+          periodEndMode={periodEndMode}
           onPeriodYes={onPeriodYes}
           onPeriodNo={onPeriodNo}
           onDietAdd={onDietAdd}
@@ -1301,7 +1304,7 @@ function KitCalendarDayButton({ day, selected, periodLit, periodFlow, periodStar
     'calendar-day',
     day.fertile ? 'is-fertile' : '',
     isPeriod ? 'is-period' : '',
-    periodLit && (day.period || day.predicted) ? 'is-period-lit' : '',
+    periodLit ? 'is-period-lit' : '',
     periodFlow ? 'is-period-flow' : '',
     periodFlow?.phase === 'filling' ? 'is-period-flow-filling' : '',
     periodStartSettled ? 'is-period-start-settled' : '',
@@ -1408,14 +1411,21 @@ function CalendarDayButton({ day, selected, periodLit, onSelect, isView, activeF
 
 function RecordPage({
   onAnalysisReady,
+  onPeriodEndAnalysisReady,
   onPeriodReset,
   onPeriodRecordSubmit,
   periodFlowEnabled = true,
+  periodEndRecordReady = false,
+  periodEndRecordCompleted = false,
 }) {
+  const settledPeriodDays = React.useMemo(
+    () => periodEndRecordCompleted ? [...PERIOD_DAYS, ...PERIOD_END_DAYS] : PERIOD_DAYS,
+    [periodEndRecordCompleted]
+  );
   const [activeMode, setActiveMode] = useState(0);
-  const [selectedDay, setSelectedDay] = useState(14);
+  const [selectedDay, setSelectedDay] = useState(periodEndRecordReady ? 21 : 14);
   const [periodYes, setPeriodYes] = useState(false);
-  const [litDays, setLitDays] = useState([]);
+  const [litDays, setLitDays] = useState(periodEndRecordReady ? settledPeriodDays : []);
   const [periodFlowLevels, setPeriodFlowLevels] = useState({});
   const [periodFlowPhase, setPeriodFlowPhase] = useState('idle');
   const [monthOpen, setMonthOpen] = useState(false);
@@ -1433,6 +1443,17 @@ function RecordPage({
   }, []);
 
   useEffect(() => () => clearTimers(), [clearTimers]);
+
+  useEffect(() => {
+    if (!periodEndRecordReady) return;
+    clearTimers();
+    setSelectedDay(21);
+    setPeriodYes(false);
+    setLitDays(settledPeriodDays);
+    setPeriodFlowLevels({});
+    setPeriodFlowPhase('settled');
+    setPeriodPickerOpen(false);
+  }, [clearTimers, periodEndRecordReady, settledPeriodDays]);
 
   const resetPeriod = useCallback(() => {
     clearTimers();
@@ -1479,9 +1500,32 @@ function RecordPage({
     timersRef.current.push(settleTimer);
   }, [clearTimers, onAnalysisReady, periodFlowEnabled]);
 
+  const runPeriodEndAnimation = useCallback(() => {
+    clearTimers();
+    setPeriodYes(true);
+    setPeriodPickerOpen(false);
+    setPeriodFlowLevels({});
+    setPeriodFlowPhase('settled');
+    setLitDays(PERIOD_DAYS);
+    PERIOD_END_DAYS.forEach((d, i) => {
+      const timer = setTimeout(() => {
+        setLitDays((prev) => prev.includes(d) ? prev : [...prev, d]);
+      }, 220 + i * 260);
+      timersRef.current.push(timer);
+    });
+    const noticeTimer = setTimeout(() => {
+      onPeriodEndAnalysisReady?.();
+    }, 220 + PERIOD_END_DAYS.length * 260 + 220);
+    timersRef.current.push(noticeTimer);
+  }, [clearTimers, onPeriodEndAnalysisReady]);
+
   const handlePeriodToggle = (yes) => {
     if (yes) {
       if (periodYes) return;
+      if (periodEndRecordReady) {
+        runPeriodEndAnimation();
+        return;
+      }
       setPeriodYes(true);
       clearTimers();
       setLitDays([]);
@@ -1581,6 +1625,9 @@ function RecordPage({
                 style={{ '--calendar-offset-y': `${calendarOffset}px` }}
               >
                 {CALENDAR_DAYS.map((day, i) => {
+                  const displayDay = day
+                    ? { ...day, today: periodEndRecordReady ? day.n === 21 : day.today }
+                    : day;
                   const flowIndex = day ? PERIOD_DAYS.indexOf(day.n) : -1;
                   const hasFlowLevel = !!(day && Object.prototype.hasOwnProperty.call(periodFlowLevels, day.n));
                   const periodFlow = flowIndex >= 0 && hasFlowLevel
@@ -1595,9 +1642,9 @@ function RecordPage({
                   return (
                     <CalendarDayButton
                       key={i}
-                      day={day ? { ...day, periodFlow, periodStartSettled } : day}
-                      selected={day && day.n === selectedDay}
-                      periodLit={day && litDays.includes(day.n)}
+                      day={displayDay ? { ...displayDay, periodFlow, periodStartSettled } : displayDay}
+                      selected={displayDay && displayDay.n === selectedDay}
+                      periodLit={displayDay && litDays.includes(displayDay.n)}
                       onSelect={handleDaySelect}
                       isView={false}
                       activeFilter="all"
@@ -1624,6 +1671,7 @@ function RecordPage({
         <div className="record-page-content">
           <HealthMorphList
             periodYes={periodYes}
+            periodEndMode={periodEndRecordReady}
             onPeriodYes={() => handlePeriodToggle(true)}
             onPeriodNo={() => handlePeriodToggle(false)}
             onDietAdd={() => setDietSheetOpen(true)}
