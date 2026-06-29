@@ -1291,6 +1291,178 @@
   min-width: 0;
 }
 
+.record-page-root .list-diet-actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.record-page-root .list-diet-summary {
+  min-width: 0;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #ff4d88;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 400;
+  text-align: right;
+}
+
+.phone .diet-record-page {
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  background: #f4f4f6;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone .diet-record-nav {
+  height: 96px;
+  padding: 44px 16px 0;
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+  background: #f4f4f6;
+  flex-shrink: 0;
+}
+
+.phone .diet-record-back {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone .diet-record-back svg {
+  width: 24px;
+  height: 24px;
+}
+
+.phone .diet-record-title {
+  margin: 0;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.82);
+}
+
+.phone .diet-record-nav-spacer {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.phone .diet-record-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 8px calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.phone .diet-record-list-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.phone .diet-record-item {
+  min-height: 84px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.phone .diet-record-item.is-last {
+  border-bottom: 0;
+}
+
+.phone .diet-record-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.phone .diet-record-item-time {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #a0a0a5;
+  margin-bottom: 6px;
+}
+
+.phone .diet-record-item-foods {
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #323232;
+  margin-bottom: 4px;
+}
+
+.phone .diet-record-item-kcal {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #9b9ba1;
+}
+
+.phone .diet-record-item-photos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.phone .diet-record-item-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  background: #eef0f4;
+}
+
+.phone .diet-record-add-btn {
+  width: 100%;
+  min-height: 64px;
+  border: 0;
+  border-radius: 16px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #ff4d88;
+  font-size: 17px;
+  font-weight: 500;
+  font-family: inherit;
+}
+
+.phone .diet-record-add-icon {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phone .diet-record-add-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 .record-page-root .list-period-detail-value {
   max-width: 96px;
   overflow: hidden;
@@ -2734,7 +2906,7 @@
 .phone .diet-add-mask {
   position: absolute;
   inset: 0;
-  z-index: 120;
+  z-index: 180;
   background: rgba(0, 0, 0, 0.5);
   animation: dietMaskFadeIn 0.18s ease;
 }
@@ -2749,7 +2921,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 130;
+  z-index: 190;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -2847,6 +3019,262 @@
 .phone .diet-meal-chip.is-active {
   color: #ff4d88;
   background: rgba(255, 77, 136, 0.12);
+}
+
+.phone .diet-entry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0;
+}
+
+.phone .diet-entry-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 20px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.phone .diet-entry-card:active {
+  background: #fdf0f4;
+}
+
+.phone .diet-entry-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.phone .diet-entry-label {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+/* ===== Diet Review Mode ===== */
+
+.phone .diet-add-sheet.is-review {
+  max-height: 80%;
+}
+
+.phone .diet-add-sheet.is-review .diet-add-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phone .diet-review-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+  margin: 0 16px;
+  cursor: pointer;
+}
+
+.phone .diet-review-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.phone .diet-review-tag {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 14px;
+  background: #ff4d88;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.phone .diet-review-time-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.phone .diet-review-time-val svg {
+  width: 16px;
+  height: 16px;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+.phone .diet-review-section {
+  padding: 16px 16px 0;
+}
+
+.phone .diet-review-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0 0 12px;
+}
+
+.phone .diet-review-note-row {
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 0;
+  cursor: default;
+}
+
+.phone .diet-review-note-photo-row {
+  margin: 0 16px;
+  padding: 0 0 16px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.phone .diet-review-note-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f4f4f6;
+  flex-shrink: 0;
+}
+
+.phone .diet-review-note-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.phone .diet-review-food {
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.phone .diet-review-food:last-child {
+  border-bottom: 0;
+}
+
+.phone .diet-review-food-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.phone .diet-review-food-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #222;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.phone .diet-review-food-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.phone .diet-review-food-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.phone .diet-review-food-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.phone .diet-review-food-kcal {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.phone .diet-review-food-arrow {
+  width: 20px;
+  height: 20px;
+  color: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.phone .diet-review-food-arrow.is-open {
+  transform: rotate(180deg);
+}
+
+.phone .diet-review-food-detail {
+  padding: 4px 0 12px 60px;
+}
+
+.phone .diet-review-field {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.phone .diet-review-field:last-child {
+  border-bottom: 0;
+}
+
+.phone .diet-review-field-label {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+  width: 60px;
+}
+
+.phone .diet-review-field-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.phone .diet-review-field-input {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  border: 0;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
+  padding: 6px 10px;
+  outline: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.phone .diet-review-field-input:focus {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.phone .diet-review-field-input[type="number"] {
+  width: 70px;
+  flex: 0 0 auto;
+  -moz-appearance: textfield;
+}
+
+.phone .diet-review-field-input[type="number"]::-webkit-inner-spin-button,
+.phone .diet-review-field-input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.phone .diet-review-field-unit {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
 }
 
 .phone .diet-add-form-card {
@@ -3049,6 +3477,584 @@
 
 .phone .diet-photo-file {
   display: none;
+}
+
+/* ===== Food Library Page ===== */
+
+.phone .food-lib-page {
+  position: absolute;
+  inset: 0;
+  z-index: 920;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone .food-lib-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.phone .food-lib-back {
+  border: 0;
+  background: transparent;
+  padding: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone .food-lib-back svg {
+  width: 24px;
+  height: 24px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.phone .food-lib-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f2f2f5;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.phone .food-lib-search-icon {
+  width: 18px;
+  height: 18px;
+  color: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.phone .food-lib-search-input {
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  caret-color: #ff4d88;
+}
+
+.phone .food-lib-search-input::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.phone .food-lib-tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.phone .food-lib-tabs button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  position: relative;
+}
+
+.phone .food-lib-tabs button.is-active {
+  color: #00c48c;
+  font-weight: 500;
+}
+
+.phone .food-lib-tabs button.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: #00c48c;
+}
+
+.phone .food-lib-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+}
+
+.phone .food-lib-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.phone .food-lib-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f8f8f8;
+}
+
+.phone .food-lib-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.phone .food-lib-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.phone .food-lib-name {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.4;
+}
+
+.phone .food-lib-kcal {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.4);
+  line-height: 1.4;
+}
+
+.phone .food-lib-add-btn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: #00c48c;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.phone .food-lib-add-btn:active {
+  transform: scale(0.9);
+}
+
+.phone .food-lib-add-btn.is-added {
+  background: #b0b0b0;
+}
+
+.phone .food-lib-add-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.phone .food-lib-empty {
+  padding: 48px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.phone .food-lib-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.phone .food-lib-footer-kcal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.phone .food-lib-footer-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.phone .food-lib-footer-done {
+  border: 0;
+  border-radius: 20px;
+  padding: 8px 28px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  background: #ccc;
+  cursor: pointer;
+}
+
+.phone .food-lib-footer-done.is-active {
+  background: #00c48c;
+}
+
+/* ===== Food Portion Sheet ===== */
+
+.phone .food-portion-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 930;
+}
+
+.phone .food-portion-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 931;
+  background: #f5f5f5;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 75%;
+  animation: diet-sheet-up 0.28s ease-out;
+}
+
+.phone .food-portion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+
+.phone .food-portion-header-btn {
+  border: 0;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  padding: 0;
+  min-width: 40px;
+}
+
+.phone .food-portion-header-btn.is-primary {
+  color: #00c48c;
+  font-weight: 500;
+}
+
+.phone .food-portion-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0;
+}
+
+.phone .food-portion-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 12px 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.phone .food-portion-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.phone .food-portion-amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.phone .food-portion-label {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.phone .food-portion-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.phone .food-portion-num {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c48c;
+  line-height: 1;
+}
+
+.phone .food-portion-approx {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.phone .food-portion-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.5);
+  line-height: 1.3;
+}
+
+.phone .food-portion-units {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.phone .food-portion-units button {
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.phone .food-portion-units button.is-active {
+  color: #00c48c;
+  font-weight: 600;
+}
+
+.phone .food-portion-slider-wrap {
+  position: relative;
+  padding: 0 4px;
+}
+
+.phone .food-portion-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: #e8e8e8;
+  outline: none;
+  margin: 0;
+}
+
+.phone .food-portion-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00c48c;
+  cursor: pointer;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.phone .food-portion-ruler {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 6px;
+}
+
+.phone .food-portion-tick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.phone .food-portion-tick i {
+  display: block;
+  width: 1px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.phone .food-portion-row-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.phone .food-portion-row-label {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.phone .food-portion-row-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+
+.phone .food-portion-row-value svg {
+  width: 16px;
+  height: 16px;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+.phone .food-portion-row-arrow {
+  width: 16px;
+  height: 16px;
+  color: rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+/* ===== Time Picker Sheet ===== */
+
+.phone .tp-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 940;
+}
+
+.phone .tp-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 941;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  animation: diet-sheet-up 0.28s ease-out;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.phone .tp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.phone .tp-header-btn {
+  border: 0;
+  background: transparent;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  padding: 0;
+  min-width: 40px;
+}
+
+.phone .tp-header-btn.is-primary {
+  color: #ff4d88;
+  font-weight: 500;
+}
+
+.phone .tp-header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0;
+}
+
+.phone .tp-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 32px 32px;
+  gap: 0;
+  background: #f5f5f5;
+  margin: 0 12px 16px;
+  border-radius: 12px;
+}
+
+.phone .tp-highlight {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 50%;
+  height: 48px;
+  transform: translateY(-50%);
+  background: #fff;
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.phone .tp-wheel-col {
+  flex: 1;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
+  scrollbar-width: none;
+}
+
+.phone .tp-wheel-col::-webkit-scrollbar {
+  display: none;
+}
+
+.phone .tp-wheel-item {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.3);
+  scroll-snap-align: center;
+  cursor: pointer;
+  transition: color 0.15s, font-weight 0.15s;
+  user-select: none;
+}
+
+.phone .tp-wheel-item.is-sel {
+  font-size: 22px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.phone .tp-colon {
+  font-size: 22px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
