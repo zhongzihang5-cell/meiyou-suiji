@@ -936,8 +936,8 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="components.jsx?v=20260624-review-titlebar"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260628-period-end"></script>
 <script type="text/babel" src="record-page.jsx?v=20260629-record-icons"></script>
-<script type="text/babel" src="timeline-sister-cards.jsx?v=20260629-card-edit-hit-area"></script>
-<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260629-card-edit-hit-area"></script>
+<script type="text/babel" src="timeline-sister-cards.jsx?v=20260629-symptom-quick-edit"></script>
+<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260629-symptom-quick-edit"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260629-mood-band"></script>
 <script type="text/babel" src="quick-pickers.jsx?v=20260629-analysis-title-unify"></script>
 <script type="text/babel" src="timeline-modules.jsx?v=20260629-mood-band-2"></script>
@@ -962,7 +962,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="path-flyout.jsx?v=20260611"></script>
 <script type="text/babel" src="demo-scenes.jsx?v=20260624-v1"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260629-merge-symptom-edit"></script>
+<script type="text/babel" src="app.jsx?v=20260629-symptom-quick-edit"></script>
 
 <!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
 <button id="resetDemo" style="
@@ -1003,9 +1003,9 @@ if(new URLSearchParams(location.search).get('dev')==='1'){
       : (editingPayload && editingPayload.periodDetailItems) ? 'period-detail'
       : entryKind;
     var scene = (['mixed','text','image','quick','period-detail','daily-record'].indexOf(inferredKind) >= 0) ? inferredKind : 'text';
-    iframe.src = 'diandi_edit.html?scene=' + scene + '&v=20260629-daily-record-edit';
+    iframe.src = 'diandi_edit.html?scene=' + scene + '&v=20260629-symptom-picker-edit';
     iframe.onload = function(){
-      if((scene === 'period-detail' || scene === 'daily-record') && iframe.contentWindow){
+      if((scene === 'period-detail' || scene === 'daily-record' || scene === 'quick') && iframe.contentWindow){
         iframe.contentWindow.postMessage({
           type:'edit-init',
           entryId: editingEntryId,

@@ -653,13 +653,27 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   const analysisAnimateText = hasAnalysis && !entry.instantAnalysis && (
     !!animateAnalysis || (analysisProps.playAnimation > 0)
   );
-  const entryKind = entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick';
+  const entryKind = (isPeriodSync || entry.kind === 'symptom') ? 'quick' : (entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick');
+  const editPayload = isPeriodSync ? {
+    kind: 'quick',
+    time: entry.time,
+    recordLabel: entry.periodSummaryLabel || tagLabel(tags[0]) || (entry.body || '').replace(/[。.\s]+$/g, '') || '月经来了',
+    recordValue: '',
+    detailItems: (entry.periodDetails || []).map(item => ({ ...item })),
+    icon: (entry.periodSummaryLabel || '').indexOf('走') >= 0 ? 'period-end' : 'period',
+  } : entry.kind === 'symptom' ? {
+    kind: 'quick',
+    time: entry.time,
+    recordLabel: entry.symptomLabel || '症状',
+    recordValue: entry.symptomValue || entry.body || '',
+    icon: 'symptom',
+  } : null;
 
   return (
     <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')+(isPeriodSync?' has-period-summary':'')} data-entry-id={entry.id}>
       <TlRecCardHead time={entry.time}/>
       {isPeriodSync ? (
-        <EditableRecordArea entryId={entry.id} entryKind={entryKind}>
+        <EditableRecordArea entryId={entry.id} entryKind={entryKind} editPayload={editPayload}>
           <PeriodRecordSummary entry={entry}/>
         </EditableRecordArea>
       ) : (

@@ -377,6 +377,12 @@
   .record-icon.menstruation { background: var(--my-brand-soft); }
   .record-icon.intimacy { background: rgba(141, 84, 255, 0.1); }
   .record-icon.weight { background: rgba(79, 124, 174, 0.1); }
+  .record-icon img {
+    width: 22px;
+    height: 22px;
+    display: block;
+    object-fit: contain;
+  }
 
   .record-main {
     flex: 1;
@@ -600,6 +606,351 @@
     background: var(--my-brand-soft);
     color: var(--my-brand-red);
     font-weight: 500;
+  }
+  .option-sheet.is-flow-picker {
+    background: #f2f2f5;
+  }
+  .option-sheet.is-flow-picker .sheet-header {
+    height: 54px;
+    padding: 0 18px;
+    border-bottom: 0;
+    background: #f2f2f5;
+    display: grid;
+    grid-template-columns: 72px 1fr 72px;
+  }
+  .option-sheet.is-flow-picker .sheet-header button {
+    padding: 6px 0;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .option-sheet.is-flow-picker .sheet-header .cancel {
+    justify-self: start;
+    color: #323232;
+  }
+  .option-sheet.is-flow-picker .sheet-header .confirm {
+    justify-self: end;
+    color: #ff4d88;
+    font-weight: 500;
+  }
+  .option-sheet.is-flow-picker .sheet-header .confirm:disabled {
+    color: #c8c8cc;
+    cursor: default;
+  }
+  .option-sheet.is-flow-picker .sheet-title {
+    justify-self: center;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 600;
+    color: #323232;
+  }
+  .option-sheet.is-flow-picker .sheet-body {
+    padding: 4px 12px 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .flow-picker-card {
+    margin-bottom: 12px;
+    padding: 18px 16px 16px;
+    background: #fff;
+    border-radius: 12px;
+  }
+  .flow-picker-title {
+    margin: 0 0 16px;
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 600;
+    color: #323232;
+  }
+  .flow-picker-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .flow-picker-option {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .flow-picker-icon {
+    width: 64px;
+    height: 64px;
+    display: block;
+    overflow: hidden;
+    border-radius: 50%;
+    background: radial-gradient(72% 72% at 42% 36%, #ffe9f1 0%, #fcd1e0 60%, #f6b9d0 100%);
+    transition: transform .18s cubic-bezier(.2,0,0,1);
+  }
+  .flow-picker-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .flow-picker-option:active .flow-picker-icon {
+    transform: scale(.9);
+  }
+  .flow-picker-option.active .flow-picker-icon {
+    animation: flowPickerBounce .4s cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes flowPickerBounce {
+    0% { transform: scale(.92); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .flow-picker-label {
+    font-size: 13px;
+    line-height: 18px;
+    color: #666;
+    white-space: nowrap;
+  }
+  .flow-picker-option.active .flow-picker-label {
+    color: #ff4d88;
+    font-weight: 600;
+  }
+  .symptom-picker-mask {
+    position: absolute;
+    inset: 0;
+    z-index: 150;
+    background: rgba(0, 0, 0, 0.42);
+    display: none;
+    animation: symptomPickerMaskIn 0.18s ease;
+  }
+  .symptom-picker-mask.show {
+    display: block;
+  }
+  @keyframes symptomPickerMaskIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .symptom-picker-sheet {
+    --sym-picker-coral: #ff6b9b;
+    --sym-picker-coral-deep: #ff4d88;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 160;
+    max-height: 88%;
+    display: none;
+    flex-direction: column;
+    background: #f2f2f5;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    animation: symptomPickerUp 0.28s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .symptom-picker-sheet.show {
+    display: flex;
+  }
+  @keyframes symptomPickerUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .symptom-picker-nav {
+    height: 52px;
+    flex: 0 0 52px;
+    display: grid;
+    grid-template-columns: 64px 1fr 64px;
+    align-items: center;
+    padding: 0 16px;
+    background: #f2f2f5;
+  }
+  .symptom-picker-nav-btn {
+    border: 0;
+    background: transparent;
+    padding: 6px 0;
+    color: #323232;
+    font: inherit;
+    font-size: 16px;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+  }
+  .symptom-picker-nav-btn.is-primary {
+    color: #ff4d88;
+    text-align: right;
+    font-weight: 500;
+  }
+  .symptom-picker-title {
+    margin: 0;
+    color: #323232;
+    font-size: 17px;
+    line-height: 1.2;
+    font-weight: 500;
+    text-align: center;
+  }
+  .symptom-picker-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 12px 28px;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+  .symptom-picker-card {
+    margin-bottom: 12px;
+    padding: 16px 8px 18px;
+    background: #ffffff;
+    border-radius: 12px;
+  }
+  .symptom-picker-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    margin-bottom: 14px;
+  }
+  .symptom-picker-card-title {
+    margin: 0;
+    color: #323232;
+    font-size: 17px;
+    line-height: 1;
+    font-weight: 600;
+  }
+  .symptom-picker-edit {
+    border: 1px solid #ff4d88;
+    border-radius: 999px;
+    background: transparent;
+    color: #ff4d88;
+    padding: 5px 14px;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .symptom-picker-edit.is-active {
+    background: #ff4d88;
+    color: #ffffff;
+  }
+  .symptom-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+  .symptom-picker-cell {
+    min-width: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .symptom-picker-icon {
+    width: 62px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(120% 120% at 50% 18%, #ffe6ee, #ffd4e1);
+    transition: box-shadow 0.15s, transform 0.12s;
+  }
+  .symptom-picker-icon img,
+  .symptom-picker-icon svg {
+    width: 62px;
+    height: 62px;
+    display: block;
+    object-fit: contain;
+    pointer-events: none;
+  }
+  .symptom-picker-cell:active .symptom-picker-icon {
+    transform: scale(0.94);
+  }
+  .symptom-picker-label {
+    max-width: 100%;
+    color: #323232;
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s;
+  }
+  .symptom-picker-cell.is-selected .symptom-picker-label {
+    color: #ff4d88;
+    font-weight: 500;
+  }
+  .symptom-picker-check {
+    position: absolute;
+    top: 43px;
+    right: 8px;
+    z-index: 2;
+    width: 21px;
+    height: 21px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #27c46b;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  }
+  .symptom-picker-check svg {
+    width: 13px;
+    height: 13px;
+  }
+  .symptom-picker-cell.is-selected .symptom-picker-check {
+    display: flex;
+  }
+  .symptom-picker-del {
+    position: absolute;
+    top: -4px;
+    left: 6px;
+    z-index: 2;
+    width: 18px;
+    height: 18px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #999999;
+  }
+  .symptom-picker-del svg {
+    width: 10px;
+    height: 10px;
+  }
+  .symptom-picker-card.editing .symptom-picker-cell.removable .symptom-picker-del {
+    display: flex;
+  }
+  .symptom-picker-cell.add .symptom-picker-icon {
+    border: 1px dashed #d0d0d4;
+    background: #f4f4f6;
+    box-shadow: none;
+  }
+  .symptom-picker-cell.add .symptom-picker-label {
+    color: #999999;
+  }
+  .symptom-picker-toast {
+    position: absolute;
+    left: 50%;
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    z-index: 170;
+    max-width: 80%;
+    padding: 9px 16px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.3;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(8px);
+    transition: opacity 0.16s, transform 0.16s;
+  }
+  .symptom-picker-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 
   /* ==== 二次确认对话框 ==== */
@@ -984,25 +1335,7 @@
       </div>
 
       <div class="section">
-        <div class="section-header">
-          <span class="section-title">识别到 1 条记录</span>
-          <span class="section-meta"></span>
-        </div>
-        <div class="records-list">
-          <div class="record-item">
-            <div class="record-icon emotion">😊</div>
-            <div class="record-main">
-              <div class="record-type">情绪 · 开心</div>
-              <div class="record-time">今天 09:15</div>
-            </div>
-            <button class="record-delete" onclick="confirmDeleteRecord(this, '情绪 · 开心')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
-              </svg>
-            </button>
-          </div>
-        </div>
+        <div class="records-list" id="quickRecordList"></div>
         <div class="records-mvp-tip">如需修改记录项内容，请先删除再重新记录</div>
       </div>
 
@@ -1091,11 +1424,23 @@
     <div class="sheet-header">
       <button class="cancel" onclick="closeOptionPicker()">取消</button>
       <span class="sheet-title" id="optionSheetTitle">修改记录项</span>
-      <button class="confirm" onclick="confirmOptionPicker()">完成</button>
+      <button class="confirm" id="optionSheetConfirm" onclick="confirmOptionPicker()">完成</button>
     </div>
     <div class="sheet-body">
       <div class="option-list" id="optionList"></div>
     </div>
+  </div>
+
+  <!-- ==== 症状选择 picker ==== -->
+  <div class="symptom-picker-mask" id="symptomPickerMask" onclick="closeSymptomPicker()"></div>
+  <div class="symptom-picker-sheet" id="symptomPickerSheet" role="dialog" aria-modal="true" aria-label="症状">
+    <header class="symptom-picker-nav">
+      <button type="button" class="symptom-picker-nav-btn" onclick="closeSymptomPicker()">取消</button>
+      <h2 class="symptom-picker-title">症状</h2>
+      <button type="button" class="symptom-picker-nav-btn is-primary" onclick="confirmSymptomPicker()">确定</button>
+    </header>
+    <div class="symptom-picker-scroll" id="symptomPickerList"></div>
+    <div class="symptom-picker-toast" id="symptomPickerToast"></div>
   </div>
 
   <!-- ==== 二次确认对话框 ==== -->
@@ -1132,6 +1477,9 @@
     if(scene === 'daily-record') setTimeout(() => {
       if(typeof renderDailyRecordEditor === 'function') renderDailyRecordEditor();
     }, 0);
+    if(scene === 'quick') setTimeout(() => {
+      if(typeof renderQuickRecordEditor === 'function') renderQuickRecordEditor();
+    }, 0);
     // 同步切换器按钮 active 态
     document.querySelectorAll('.demo-controls button').forEach(b => {
       b.classList.toggle('active', b.dataset.scene === scene);
@@ -1164,6 +1512,59 @@
     habit: { label: '好习惯', className: 'diet', emoji: '👍', options: ['早餐', '水果', '喝水', '运动'] },
     stool: { label: '便便', className: 'diet', emoji: '💩', options: ['舒畅', '有残便感', '排便困难', '硬球状', '凹凸香肠状', '裂纹香肠状', '平滑香蕉状', '软块状', '糊状', '水液状', '较少', '适中', '较多'] },
   };
+  const QUICK_SYMPTOM_OPTIONS = [
+    '没有症状', '腰酸', '腹痛', '小腹坠胀', '乳房胀痛', '身体酸痛',
+    '头痛', '眩晕', '失眠', '粉刺', '皮肤干燥', '食欲不振',
+    '贪冷饮', '腹泻', '便秘', '疲惫', '褐色分泌物', '出血',
+    '有血块', '白带增多',
+  ];
+  const SYMPTOM_PICKER_GROUPS = [
+    {
+      id: 'body',
+      title: '身体症状',
+      items: [
+        { id: 'no_symptom', name: '没有症状', imgSrc: 'assets/symptom-picker-none.png', exclusive: true },
+        { id: 'back_ache', name: '腰酸', imgSrc: 'assets/symptom-back.png' },
+        { id: 'cramps', name: '腹痛', imgSrc: 'assets/symptom-cramp.png' },
+        { id: 'bloat_low', name: '小腹坠胀', imgSrc: 'assets/symptom-bloat.png' },
+        { id: 'breast_pain', name: '乳房胀痛', imgSrc: 'assets/symptom-breast.png' },
+        { id: 'body_ache', name: '身体酸痛', imgSrc: 'assets/symptom-sore.png' },
+        { id: 'headache', name: '头痛', imgSrc: 'assets/symptom-picker-headache.png' },
+        { id: 'dizzy', name: '眩晕', imgSrc: 'assets/symptom-picker-dizzy.png' },
+        { id: 'insomnia', name: '失眠', imgSrc: 'assets/symptom-insomnia.png' },
+        { id: 'acne', name: '粉刺', imgSrc: 'assets/symptom-acne.png' },
+        { id: 'dry_skin', name: '皮肤干燥', imgSrc: 'assets/symptom-picker-dry-skin.png' },
+        { id: 'no_appetite', name: '食欲不振', imgSrc: 'assets/symptom-picker-no-appetite.png' },
+        { id: 'cold_crave', name: '贪冷饮', imgSrc: 'assets/symptom-picker-cold-crave.png' },
+        { id: 'diarrhea', name: '腹泻', imgSrc: 'assets/symptom-diarrhea.png' },
+        { id: 'constipation', name: '便秘', imgSrc: 'assets/symptom-picker-constipation.png' },
+        { id: 'fatigue', name: '疲惫', imgSrc: 'assets/symptom-tired.png' },
+      ],
+    },
+    {
+      id: 'discharge',
+      title: '阴道分泌物',
+      items: [
+        { id: 'discharge_brown', name: '褐色分泌物', imgSrc: 'assets/symptom-discharge.png' },
+        { id: 'discharge_blood', name: '出血', imgSrc: 'assets/symptom-picker-bleeding.png' },
+        { id: 'discharge_clot', name: '有血块', imgSrc: 'assets/symptom-picker-blood-clot.png' },
+        { id: 'discharge_more', name: '白带增多', imgSrc: 'assets/symptom-picker-discharge-more.png' },
+      ],
+    },
+    {
+      id: 'more',
+      title: '更多症状',
+      editable: true,
+      items: [
+        { id: 'gas', name: '胃肠胀气', imgSrc: 'assets/symptom-picker-gas.png', removable: true },
+      ],
+    },
+  ];
+  const SYMPTOM_PICKER_ITEMS = SYMPTOM_PICKER_GROUPS.flatMap(group => group.items);
+  const SYMPTOM_PICKER_ITEM_MAP = SYMPTOM_PICKER_ITEMS.reduce((map, item) => {
+    map[item.id] = item;
+    return map;
+  }, {});
   const DAILY_HABIT_ICONS = { 早餐: '🍞', 水果: '🍎', 喝水: '🥤', 运动: '⚾' };
   let periodDetailState = {
     time: '今天 09:15',
@@ -1182,6 +1583,349 @@
     icon: 'love',
     iconText: '',
   };
+  let quickRecordState = {
+    time: '09:15',
+    recordLabel: '情绪 · 开心',
+    recordValue: '',
+    icon: 'emotion',
+    detailItems: [],
+  };
+  let symptomPickerTarget = null;
+  let symptomPickerSelectedIds = new Set();
+  let symptomPickerEditing = false;
+  let symptomPickerRemovedIds = new Set();
+  let symptomPickerToastTimer = null;
+
+  const QUICK_RECORD_ICON_SRC = {
+    period: 'assets/record-period-start.png',
+    'period-end': 'assets/record-period-end.png',
+    flow: 'assets/record-flow.png',
+    color: 'assets/record-color.png',
+    cramps: 'assets/record-cramps.png',
+  };
+
+  function formatQuickTime(time){
+    const raw = time || '09:15';
+    return /^今天\s/.test(raw) ? raw : '今天 ' + raw;
+  }
+
+  function quickIconText(icon, label){
+    if(icon === 'period' || icon === 'period-end' || /月经/.test(label || '')) return '🩸';
+    if(icon === 'diet') return '🍱';
+    if(icon === 'weight') return '⚖️';
+    if(icon === 'symptom') return '🤕';
+    return '😊';
+  }
+
+  function escapeHtml(value){
+    return String(value || '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char]));
+  }
+
+  function symptomIdsFromValue(value){
+    const labels = String(value || '')
+      .split(/[、,，]/)
+      .map(item => item.trim())
+      .filter(Boolean);
+    const ids = labels.map(label => SYMPTOM_PICKER_ITEMS.find(item => item.name === label)?.id).filter(Boolean);
+    return ids.length ? ids : [];
+  }
+
+  function showSymptomPickerToast(text){
+    const toast = document.getElementById('symptomPickerToast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(symptomPickerToastTimer);
+    symptomPickerToastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  function toggleSymptomPickerItem(id){
+    const item = SYMPTOM_PICKER_ITEM_MAP[id];
+    if(!item) return;
+    if(symptomPickerEditing && item.removable){
+      symptomPickerRemovedIds.add(id);
+      symptomPickerSelectedIds.delete(id);
+      renderSymptomPicker();
+      showSymptomPickerToast('已移除「' + item.name + '」');
+      return;
+    }
+    const next = new Set(symptomPickerSelectedIds);
+    const isOn = next.has(id);
+    if(item.exclusive){
+      next.clear();
+      if(!isOn) next.add(id);
+    } else {
+      SYMPTOM_PICKER_ITEMS.filter(candidate => candidate.exclusive).forEach(candidate => next.delete(candidate.id));
+      if(isOn) next.delete(id);
+      else next.add(id);
+    }
+    symptomPickerSelectedIds = next;
+    renderSymptomPicker();
+  }
+
+  function renderSymptomPicker(){
+    const list = document.getElementById('symptomPickerList');
+    list.innerHTML = SYMPTOM_PICKER_GROUPS.map(group => {
+      const items = group.items.filter(item => !symptomPickerRemovedIds.has(item.id));
+      const editButton = group.editable ? `
+        <button type="button" class="symptom-picker-edit${symptomPickerEditing ? ' is-active' : ''}" onclick="toggleSymptomPickerEdit()">
+          ${symptomPickerEditing ? '完成' : '编辑'}
+        </button>
+      ` : '';
+      return `
+        <section class="symptom-picker-card${symptomPickerEditing && group.editable ? ' editing' : ''}">
+          <div class="symptom-picker-card-head">
+            <h3 class="symptom-picker-card-title">${escapeHtml(group.title)}</h3>
+            ${editButton}
+          </div>
+          <div class="symptom-picker-grid">
+            ${items.map(item => {
+              const selected = symptomPickerSelectedIds.has(item.id);
+              return `
+                <button
+                  type="button"
+                  class="symptom-picker-cell${selected ? ' is-selected' : ''}${item.removable ? ' removable' : ''}"
+                  aria-pressed="${selected ? 'true' : 'false'}"
+                  onclick="toggleSymptomPickerItem('${escapeHtml(item.id)}')"
+                >
+                  <span class="symptom-picker-check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  <span class="symptom-picker-del" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M6 12h12" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
+                  </span>
+                  <span class="symptom-picker-icon" aria-hidden="true">
+                    <img src="${escapeHtml(item.imgSrc)}" alt="" draggable="false">
+                  </span>
+                  <span class="symptom-picker-label">${escapeHtml(item.name)}</span>
+                </button>
+              `;
+            }).join('')}
+            ${group.editable ? `
+              <button type="button" class="symptom-picker-cell add" onclick="showSymptomPickerToast('打开「添加自定义症状」')">
+                <span class="symptom-picker-icon" aria-hidden="true">
+                  <svg viewBox="0 0 48 48"><path d="M24 17v14M17 24h14" stroke="#bdbdc2" stroke-width="2.4" stroke-linecap="round"/></svg>
+                </span>
+                <span class="symptom-picker-label">添加症状</span>
+              </button>
+            ` : ''}
+          </div>
+        </section>
+      `;
+    }).join('');
+  }
+
+  function toggleSymptomPickerEdit(){
+    symptomPickerEditing = !symptomPickerEditing;
+    renderSymptomPicker();
+  }
+
+  function openSymptomOptionPicker(item, index){
+    symptomPickerTarget = { kind: 'quick-record', index };
+    symptomPickerSelectedIds = new Set(symptomIdsFromValue(item.value));
+    symptomPickerEditing = false;
+    symptomPickerRemovedIds = new Set();
+    renderSymptomPicker();
+    document.getElementById('symptomPickerMask').classList.add('show');
+    document.getElementById('symptomPickerSheet').classList.add('show');
+  }
+
+  function closeSymptomPicker(){
+    symptomPickerTarget = null;
+    document.getElementById('symptomPickerMask').classList.remove('show');
+    document.getElementById('symptomPickerSheet').classList.remove('show');
+    document.getElementById('symptomPickerToast').classList.remove('show');
+    clearTimeout(symptomPickerToastTimer);
+  }
+
+  function confirmSymptomPicker(){
+    if(!symptomPickerSelectedIds.size){
+      showSymptomPickerToast('未选择任何症状');
+      return;
+    }
+    const nextValue = [...symptomPickerSelectedIds]
+      .map(id => SYMPTOM_PICKER_ITEM_MAP[id]?.name)
+      .filter(Boolean)
+      .join('、');
+    if(symptomPickerTarget?.kind === 'quick-record'){
+      if(symptomPickerTarget.index === -1){
+        quickRecordState.recordValue = nextValue;
+      } else if(quickRecordState.detailItems?.[symptomPickerTarget.index]){
+        quickRecordState.detailItems[symptomPickerTarget.index].value = nextValue;
+      }
+      renderQuickRecordEditor();
+      markDirty();
+    }
+    closeSymptomPicker();
+  }
+
+  function renderQuickIcon(icon, label){
+    const src = QUICK_RECORD_ICON_SRC[icon];
+    if(src) return `<img src="${src}" alt="" draggable="false">`;
+    return escapeHtml(quickIconText(icon, label));
+  }
+
+  function quickIconClass(icon){
+    if(icon === 'period' || icon === 'period-end' || icon === 'flow' || icon === 'color' || icon === 'cramps') return 'menstruation';
+    if(icon === 'diet') return 'diet';
+    if(icon === 'weight') return 'weight';
+    if(icon === 'symptom') return 'symptom';
+    return 'emotion';
+  }
+
+  function quickEditableKey(item){
+    const icon = item?.icon || '';
+    const label = item?.label || '';
+    if(icon === 'flow' || label === '流量') return 'flow';
+    if(icon === 'color' || label === '颜色') return 'color';
+    if(icon === 'cramps' || label === '痛经') return 'cramps';
+    if(icon === 'love' || label === '爱爱') return 'love';
+    if(icon === 'discharge' || label === '白带') return 'discharge';
+    if(icon === 'temp' || label === '体温') return 'temp';
+    if(icon === 'stool' || label === '便便') return 'stool';
+    if(icon === 'symptom' || label === '症状') return 'symptom';
+    return null;
+  }
+
+  function quickPickerConfig(key){
+    if(key === 'symptom') return { label: '症状', options: QUICK_SYMPTOM_OPTIONS };
+    if(PERIOD_DETAIL_OPTIONS[key]) return PERIOD_DETAIL_OPTIONS[key];
+    if(DAILY_RECORD_OPTIONS[key]) return DAILY_RECORD_OPTIONS[key];
+    return null;
+  }
+
+  function flowPickerIconSvg(index){
+    const reds = ['#f4a9bb', '#ef85a0', '#ea5e82', '#e63d6b', '#e01f5b'];
+    const marks = [
+      { rx: 3.4, ry: 5.5, cy: 28 },
+      { rx: 4.6, ry: 8.5, cy: 30 },
+      { rx: 6.2, ry: 11, cy: 31 },
+      { rx: 7.8, ry: 13.5, cy: 32 },
+      { rx: 9.2, ry: 16, cy: 32 },
+    ];
+    const mark = marks[index] || marks[2];
+    const color = reds[index] || reds[2];
+    return `
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="20" y="14" width="24" height="38" rx="12" fill="#fff" stroke="rgba(255,77,136,.16)" stroke-width="1"/>
+        <path
+          d="M32 ${mark.cy - mark.ry} C ${32 + mark.rx * 1.1} ${mark.cy - mark.ry * 0.4}, ${32 + mark.rx * 1.05} ${mark.cy + mark.ry * 0.7}, 32 ${mark.cy + mark.ry} C ${32 - mark.rx * 1.05} ${mark.cy + mark.ry * 0.7}, ${32 - mark.rx * 1.1} ${mark.cy - mark.ry * 0.4}, 32 ${mark.cy - mark.ry} Z"
+          fill="${color}"
+        />
+      </svg>
+    `;
+  }
+
+  function resetOptionSheetMode(){
+    const sheet = document.getElementById('optionSheet');
+    const confirm = document.getElementById('optionSheetConfirm');
+    sheet.classList.remove('is-flow-picker');
+    confirm.textContent = '完成';
+    confirm.disabled = false;
+  }
+
+  function openFlowOptionPicker(item, index, config){
+    const sheet = document.getElementById('optionSheet');
+    const confirm = document.getElementById('optionSheetConfirm');
+    sheet.classList.add('is-flow-picker');
+    confirm.textContent = '确定';
+    confirm.disabled = true;
+    currentOptionTarget = { kind: 'quick-record', index };
+    document.getElementById('optionSheetTitle').textContent = config.label;
+    document.getElementById('optionList').innerHTML = `
+      <section class="flow-picker-card">
+        <h3 class="flow-picker-title">${config.label}</h3>
+        <div class="flow-picker-row">
+          ${config.options.map((option, optionIndex) => `
+            <button
+              type="button"
+              class="flow-picker-option${option === item.value ? ' active' : ''}"
+              data-value="${option}"
+              aria-label="${option}"
+              aria-pressed="${option === item.value ? 'true' : 'false'}"
+            >
+              <span class="flow-picker-icon">${flowPickerIconSvg(optionIndex)}</span>
+              <span class="flow-picker-label">${option}</span>
+            </button>
+          `).join('')}
+        </div>
+      </section>
+    `;
+    document.querySelectorAll('#optionList .flow-picker-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#optionList .flow-picker-option').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        confirm.disabled = false;
+      });
+    });
+    document.getElementById('optionSheetMask').classList.add('show');
+    sheet.classList.add('show');
+  }
+
+  function buildQuickRecordItems(){
+    const baseLabel = quickRecordState.recordLabel || '快捷记录';
+    const items = [{
+      label: baseLabel,
+      value: quickRecordState.recordValue || '',
+      icon: quickRecordState.icon || 'quick',
+      targetIndex: -1,
+    }];
+    (quickRecordState.detailItems || []).forEach((item, index) => {
+      if(!item || !item.label) return;
+      items.push({
+        label: item.label,
+        value: item.value || '',
+        icon: item.icon || 'quick',
+        targetIndex: index,
+      });
+    });
+    return items;
+  }
+
+  function renderQuickRecordEditor(){
+    const timeText = formatQuickTime(quickRecordState.time);
+    const listEl = document.getElementById('quickRecordList');
+    document.getElementById('recordTime-quick').textContent = timeText;
+    if(!listEl) return;
+    listEl.innerHTML = buildQuickRecordItems().map((item) => {
+      const label = item.value ? `${item.label}： ${item.value}` : item.label;
+      const editKey = quickEditableKey(item);
+      const editButton = editKey ? `
+            <button class="record-edit" onclick="openQuickOptionPicker(${item.targetIndex})" aria-label="编辑${escapeHtml(item.label)}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+              </svg>
+            </button>
+      ` : '';
+      return `
+        <div class="record-item">
+          <div class="record-icon ${quickIconClass(item.icon)}">${renderQuickIcon(item.icon, item.label)}</div>
+          <div class="record-main">
+            <div class="record-type">${escapeHtml(label)}</div>
+          </div>
+          <div class="record-actions">
+            ${editButton}
+            <button class="record-delete" aria-label="删除${escapeHtml(label)}" onclick="confirmDeleteRecord(this, '${escapeHtml(label)}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
   let currentOptionTarget = null;
 
   // ========== 改动状态 ==========
@@ -1225,6 +1969,16 @@
 
   function getActiveSavePayload() {
     const activeScene = document.querySelector('.scene.active');
+    if(activeScene?.id === 'scene-quick'){
+      return {
+        kind: 'quick',
+        time: normalizePeriodDetailTime(document.getElementById('recordTime-quick').textContent),
+        recordLabel: quickRecordState.recordLabel,
+        recordValue: quickRecordState.recordValue,
+        icon: quickRecordState.icon,
+        detailItems: (quickRecordState.detailItems || []).map(item => ({ ...item })),
+      };
+    }
     if(activeScene?.id === 'scene-daily-record'){
       return {
         kind: 'daily-record',
@@ -1434,8 +2188,56 @@
     `;
   }
 
+  function getQuickRecordTarget(index){
+    if(index === -1){
+      return {
+        label: quickRecordState.recordLabel,
+        value: quickRecordState.recordValue,
+        icon: quickRecordState.icon,
+      };
+    }
+    return quickRecordState.detailItems?.[index] || null;
+  }
+
+  function openQuickOptionPicker(index) {
+    const item = getQuickRecordTarget(index);
+    if(!item) return;
+    const key = quickEditableKey(item);
+    const config = quickPickerConfig(key);
+    if(!config) return;
+    if(key === 'flow'){
+      openFlowOptionPicker(item, index, config);
+      return;
+    }
+    if(key === 'symptom'){
+      openSymptomOptionPicker(item, index);
+      return;
+    }
+    resetOptionSheetMode();
+    currentOptionTarget = { kind: 'quick-record', index };
+    document.getElementById('optionSheetTitle').textContent = `修改${config.label}`;
+    document.getElementById('optionList').innerHTML = config.options.map(option => {
+      const value = key === 'temp' ? normalizeDailyRecordValue('temp', option) : option;
+      const active = value === item.value || option === item.value;
+      return `
+        <button type="button" class="option-btn${active ? ' active' : ''}" data-value="${value}">
+          ${value}
+        </button>
+      `;
+    }).join('');
+    document.querySelectorAll('#optionList .option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#optionList .option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+    document.getElementById('optionSheetMask').classList.add('show');
+    document.getElementById('optionSheet').classList.add('show');
+  }
+
   function openDailyOptionPicker() {
     const config = getDailyRecordConfig(dailyRecordState.recordType);
+    resetOptionSheetMode();
     currentOptionTarget = { kind: 'daily-record' };
     document.getElementById('optionSheetTitle').textContent = `修改${dailyRecordState.recordLabel || config.label}`;
     document.getElementById('optionList').innerHTML = config.options.map(option => {
@@ -1460,6 +2262,7 @@
   function openOptionPicker(index) {
     const item = periodDetailState.periodDetailItems[index];
     if(!item) return;
+    resetOptionSheetMode();
     currentOptionTarget = index;
     const key = item.icon || periodDetailKeyFromLabel(item.label);
     const config = PERIOD_DETAIL_OPTIONS[key] || PERIOD_DETAIL_OPTIONS.flow;
@@ -1483,11 +2286,24 @@
     currentOptionTarget = null;
     document.getElementById('optionSheetMask').classList.remove('show');
     document.getElementById('optionSheet').classList.remove('show');
+    resetOptionSheetMode();
   }
 
   function confirmOptionPicker() {
-    const selected = document.querySelector('#optionList .option-btn.active');
+    const selected = document.querySelector('#optionList .option-btn.active, #optionList .flow-picker-option.active');
     if(currentOptionTarget == null || !selected) return;
+    if(typeof currentOptionTarget === 'object' && currentOptionTarget.kind === 'quick-record'){
+      const nextValue = selected.dataset.value;
+      if(currentOptionTarget.index === -1){
+        quickRecordState.recordValue = nextValue;
+      } else if(quickRecordState.detailItems?.[currentOptionTarget.index]){
+        quickRecordState.detailItems[currentOptionTarget.index].value = nextValue;
+      }
+      renderQuickRecordEditor();
+      markDirty();
+      closeOptionPicker();
+      return;
+    }
     if(typeof currentOptionTarget === 'object' && currentOptionTarget.kind === 'daily-record'){
       const nextValue = selected.dataset.value;
       dailyRecordState.recordValue = nextValue;
@@ -1509,6 +2325,18 @@
   window.addEventListener('message', function(event){
     if(!event.data || event.data.type !== 'edit-init') return;
     const payload = event.data.payload || {};
+    if(payload.kind === 'quick'){
+      quickRecordState = {
+        time: payload.time || '09:15',
+        recordLabel: payload.recordLabel || payload.label || '快捷记录',
+        recordValue: payload.recordValue || payload.recordDetail || '',
+        icon: payload.icon || 'quick',
+        detailItems: (payload.detailItems || payload.periodDetails || []).map(item => ({ ...item })),
+      };
+      renderQuickRecordEditor();
+      resetDirty();
+      return;
+    }
     if(payload.kind === 'daily-record'){
       const config = getDailyRecordConfig(payload.recordType);
       dailyRecordState = {

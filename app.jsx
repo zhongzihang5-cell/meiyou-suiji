@@ -442,6 +442,68 @@ function App(){
         }));
         return;
       }
+      if(payload.kind === 'quick'){
+        const detailItems = (payload.detailItems || payload.periodDetails || []).filter(it=>it?.label && it?.value);
+        const recordLabel = payload.recordLabel || '快捷记录';
+        const recordIcon = payload.icon || (recordLabel.indexOf('走') >= 0 ? 'period-end' : 'period');
+        const isSymptomQuick = recordIcon === 'symptom' || recordLabel === '症状';
+        setTimeline(blocks=>blocks.map(block=>{
+          if(block.type !== 'day') return block;
+          const nextItems = (block.items || block.entries || []).map(item=>{
+            const primaryId = item?.primary?.id;
+            if(item?.id !== entryId && primaryId !== entryId) return item;
+            if(item?.primary){
+              if(isSymptomQuick){
+                const symptomValue = payload.recordValue || detailItems.map(it=>it.value).filter(Boolean).join('、');
+                return {
+                  ...item,
+                  primary:{
+                    ...item.primary,
+                    time: payload.time || item.primary?.time,
+                    kind:'symptom',
+                    text:'',
+                    symptomLabel: recordLabel,
+                    symptomValue,
+                    tags:[],
+                  },
+                };
+              }
+              return {
+                ...item,
+                primary:{
+                  ...item.primary,
+                  time: payload.time || item.primary?.time,
+                  periodLabel: recordLabel,
+                  text: recordLabel,
+                  tags:[{ label: recordLabel, cat:'period', val:'', icon: recordIcon }],
+                },
+              };
+            }
+            if(isSymptomQuick){
+              const symptomValue = payload.recordValue || detailItems.map(it=>it.value).filter(Boolean).join('、');
+              return {
+                ...item,
+                time: payload.time || item.time,
+                kind:'symptom',
+                body:'',
+                symptomLabel: recordLabel,
+                symptomValue,
+                tags:[],
+              };
+            }
+            return {
+              ...item,
+              time: payload.time || item.time,
+              body: recordLabel,
+              tags:[{ label: recordLabel, cat:'period', val:'', icon: recordIcon }],
+              periodDetails: detailItems,
+              periodSummaryLabel: recordLabel,
+            };
+          });
+          return { ...block, items: nextItems, entries: undefined };
+        }));
+        return;
+      }
       if(payload.kind !== 'period-detail') return;
       const detailItems = (payload.periodDetailItems || []).filter(it=>it?.label && it?.value);
       setTimeline(blocks=>blocks.map(block=>{
