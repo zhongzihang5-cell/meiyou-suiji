@@ -59,6 +59,7 @@ function App(){
   const [periodEndRecordReady, setPeriodEndRecordReady] = useState(false);
   const [periodEndRecordCompleted, setPeriodEndRecordCompleted] = useState(false);
   const [periodDetailDraft, setPeriodDetailDraft] = useState({});
+  const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState(null);
@@ -174,6 +175,7 @@ function App(){
     setHideTodayGuide(next.hideTodayGuide);
     setPeriodEndRecordReady(false);
     setPeriodEndRecordCompleted(false);
+    setHealthRecordDrafts([]);
     setActiveTab(next.activeTab);
     setShowPhoto(false);
     setShowSearchPage(false);
@@ -323,6 +325,52 @@ function App(){
     };
   };
 
+  const buildHealthRecordEntry = (record)=>{
+    if(!record?.type || !record?.label || !record?.value) return null;
+    const now = Date.now();
+    const iconMap = {
+      love: 'love',
+      discharge: 'discharge',
+      temp: 'temp',
+      stool: 'stool',
+      habit: 'habit',
+    };
+    const valueText = record.detail || record.value;
+    return {
+      kind:'record-group',
+      id:'e-health-'+record.type+'-'+now,
+      isNew:true,
+      primary:{
+        id:'e-health-primary-'+record.type+'-'+now,
+        time: window.formatNowTime(),
+        kind:'daily-record',
+        recordType: record.type,
+        recordLabel: record.label,
+        recordValue: record.value,
+        recordDetail: valueText,
+        icon: iconMap[record.type] || 'quick',
+        iconText: record.iconText || '',
+        text: `${record.label}：${valueText}`,
+        tags:[{ label:record.label, cat:record.label, val:record.value, icon:iconMap[record.type] || 'quick' }],
+      },
+    };
+  };
+
+  const submitHealthRecordDraftsToTimeline = ()=>{
+    if(!healthRecordDrafts.length) return false;
+    const entries = healthRecordDrafts.map(buildHealthRecordEntry).filter(Boolean);
+    if(!entries.length) return false;
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>entries.reduce(
+      (nextBlocks, entry)=>window.appendTimelineEntry(nextBlocks, entry, { dayId }),
+      blocks
+    ));
+    setHealthRecordDrafts([]);
+    requestAnimationFrame(()=>setTimeout(()=>scrollTimelineToLastItem('smooth'), 160));
+    return true;
+  };
+
   const submitPeriodDetailDraftToTimeline = ()=>{
     const entry = buildPeriodDetailEntry(periodDetailDraft);
     if(!entry) return false;
@@ -335,10 +383,66 @@ function App(){
   };
 
   React.useEffect(()=>{
+    const removeTimelineEntry = (entryId)=>{
+      if(!entryId) return;
+      setTimeline(blocks=>blocks.map(block=>{
+        if(block.type !== 'day') return block;
+        const items = (block.items || block.entries || []).filter(item=>{
+          const primaryId = item?.primary?.id;
+          return item?.id !== entryId && primaryId !== entryId;
+        });
+        return { ...block, items, entries: undefined };
+      }));
+      window.__showEditToast && window.__showEditToast('记录已删除');
+    };
+    window.deleteTimelineEntry = removeTimelineEntry;
+    const onEditDelete = (event)=>{
+      removeTimelineEntry(event?.detail?.entryId);
+    };
     const onEditSave = (event)=>{
       const entryId = event?.detail?.entryId;
       const payload = event?.detail?.payload;
-      if(!entryId || payload?.kind !== 'period-detail') return;
+      if(!entryId || !payload?.kind) return;
+      if(payload.kind === 'daily-record'){
+        const iconMap = {
+          love: 'love',
+          discharge: 'discharge',
+          temp: 'temp',
+          stool: 'stool',
+          habit: 'habit',
+        };
+        setTimeline(blocks=>blocks.map(block=>{
+          if(block.type !== 'day') return block;
+          const nextItems = (block.items || block.entries || []).map(item=>{
+            const primaryId = item?.primary?.id;
+            if(item?.id !== entryId && primaryId !== entryId) return item;
+            const type = payload.recordType || item.primary?.recordType;
+            const label = payload.recordLabel || item.primary?.recordLabel || '记录';
+            const value = payload.recordValue || item.primary?.recordValue || '';
+            const detail = payload.recordDetail || value;
+            const icon = payload.icon || iconMap[type] || item.primary?.icon || 'quick';
+            return {
+              ...item,
+              primary:{
+                ...item.primary,
+                time: payload.time || item.primary?.time,
+                kind:'daily-record',
+                recordType:type,
+                recordLabel:label,
+                recordValue:value,
+                recordDetail:detail,
+                icon,
+                iconText: payload.iconText || item.primary?.iconText || '',
+                text:`${label}：${detail}`,
+                tags:[{ label, cat:label, val:value, icon }],
+              },
+            };
+          });
+          return { ...block, items: nextItems, entries: undefined };
+        }));
+        return;
+      }
+      if(payload.kind !== 'period-detail') return;
       const detailItems = (payload.periodDetailItems || []).filter(it=>it?.label && it?.value);
       setTimeline(blocks=>blocks.map(block=>{
         if(block.type !== 'day') return block;
@@ -359,13 +463,19 @@ function App(){
       }));
     };
     window.addEventListener('edit-save', onEditSave);
-    return ()=>window.removeEventListener('edit-save', onEditSave);
+    window.addEventListener('edit-delete', onEditDelete);
+    return ()=>{
+      window.removeEventListener('edit-save', onEditSave);
+      window.removeEventListener('edit-delete', onEditDelete);
+      delete window.deleteTimelineEntry;
+    };
   }, []);
 
   const handleTabChange = (tab)=>{
     if(tab === 'note' && activeTab !== 'note'){
       recordEnterModeRef.current = 'manual';
       if(periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
+      submitHealthRecordDraftsToTimeline();
     }
     if(tab !== 'note'){
       recordEnterModeRef.current = 'idle';
@@ -756,6 +866,12 @@ function App(){
     setPeriodDetailDraft((prev)=>({ ...prev, [type]: value }));
   };
 
+  const submitHealthRecord = (payload)=>{
+    if(!payload?.type || !payload?.value) return;
+    markUserRecorded();
+    setHealthRecordDrafts((prev)=>[...prev, payload]);
+  };
+
   const submitFoodRecord = (foods)=>{
     markUserRecorded();
     const entry = window.createFoodRecordEntry(foods);
@@ -936,6 +1052,7 @@ function App(){
           }}
           onPeriodRecordSubmit={(value)=>{ periodRecordRef.current = value || null; }}
           onPeriodDetailRecordSubmit={submitPeriodDetailRecord}
+          onHealthRecordSubmit={submitHealthRecord}
           periodDetailValues={periodDetailDraft}
           periodDetailDemoEnabled={periodEndRecordCompleted}
         />

@@ -635,6 +635,7 @@ function V3Chevron({open}){
 function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
   const MoreMenu = window.CardMoreMenu;
   const canEdit = !!(time && entryId && window.openEditModal);
+  const canDelete = !!(entryId && window.deleteTimelineEntry);
   if(!time && !title) return null;
   return (
     <div style={{display:'flex', alignItems:'center', gap:6, minWidth:0}}>
@@ -658,7 +659,7 @@ function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
           flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
         }}>{title}</div>
       )}
-      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} editPayload={editPayload} onEdit={window.openEditModal}/>}
+      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} editPayload={editPayload} onEdit={window.openEditModal} onDelete={canDelete ? window.deleteTimelineEntry : undefined}/>}
     </div>
   );
 }
@@ -833,6 +834,18 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       </div>
     );
   }
+  if(entry.kind === 'daily-record'){
+    return (
+      <div className="v3-weight-record">
+        <span className={'v3-weight-record-icon v3-daily-record-icon is-' + (entry.icon || entry.recordType || 'quick')} aria-hidden="true">
+          {entry.iconText ? <span className="v3-daily-record-emoji">{entry.iconText}</span> : null}
+        </span>
+        <span className="v3-weight-record-text">
+          {entry.recordLabel || '记录'}：{entry.recordDetail || entry.recordValue || entry.text}
+        </span>
+      </div>
+    );
+  }
   if(entry.kind === 'period-detail'){
     const items = entry.periodDetailItems || [];
     return (
@@ -972,14 +985,28 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
   const a = normalizeV3Entry(ai);
   const derivedKind = p?.kind === 'period-detail'
     ? 'period-detail'
-    : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
+    : p?.kind === 'daily-record'
+      ? 'daily-record'
+      : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
   const derivedId = entryId || primary?.id;
   const editPayload = p?.kind === 'period-detail'
     ? {
+        kind: 'period-detail',
         time: p.time,
         periodDetailItems: p.periodDetailItems || [],
       }
-    : null;
+    : p?.kind === 'daily-record'
+      ? {
+          kind: 'daily-record',
+          time: p.time,
+          recordType: p.recordType,
+          recordLabel: p.recordLabel,
+          recordValue: p.recordValue,
+          recordDetail: p.recordDetail,
+          icon: p.icon,
+          iconText: p.iconText || '',
+        }
+      : null;
   const [photoAnalysis, setPhotoAnalysis] = React.useState(()=> !!(isNew && p?.kind === 'image'));
   const handlePhotoAnalysisComplete = React.useCallback(()=> setPhotoAnalysis(false), []);
 
@@ -1043,7 +1070,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
       data-entry-id={derivedId}
       style={{
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
-        padding:'11px 12px 4px', overflow:'hidden',
+        padding:'11px 12px 4px', overflow:'visible',
       }}
     >
       <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>

@@ -729,6 +729,7 @@
   <button data-scene="image">饮食图片</button>
   <button data-scene="quick">快捷记录</button>
   <button data-scene="period-detail">经期细项</button>
+  <button data-scene="daily-record">日常记录</button>
 </div>
 
 <div class="phone">
@@ -1037,6 +1038,33 @@
       </div>
     </div>
 
+    <!-- ============ 场景6：日常单项记录 ============ -->
+    <div class="scene" id="scene-daily-record">
+      <div class="section">
+        <div class="time-row" onclick="openTimePicker()">
+          <div class="time-label">
+            <span class="icon-circle">🕐</span>
+            <span>记录时间</span>
+          </div>
+          <div class="time-value">
+            <span id="recordTime-daily-record">今天 09:15</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title" id="dailyRecordTitle">记录项</span>
+        </div>
+        <div class="records-list" id="dailyRecordList"></div>
+      </div>
+
+      <div class="danger-zone">
+        <button class="danger-btn" onclick="confirmDeleteEntry('daily-record')">删除这条记录</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- ==== 底部时间选择器 ==== -->
@@ -1092,7 +1120,7 @@
   // ========== URL 参数读取 & 场景初始化 ==========
   (function(){
     const params = new URLSearchParams(window.location.search);
-    const valid = ['mixed','text','image','quick','period-detail'];
+    const valid = ['mixed','text','image','quick','period-detail','daily-record'];
     let scene = params.get('scene') || 'mixed';
     if(valid.indexOf(scene) < 0) scene = 'mixed';
     document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
@@ -1100,6 +1128,9 @@
     if(target) target.classList.add('active');
     if(scene === 'period-detail') setTimeout(() => {
       if(typeof renderPeriodDetailEditor === 'function') renderPeriodDetailEditor();
+    }, 0);
+    if(scene === 'daily-record') setTimeout(() => {
+      if(typeof renderDailyRecordEditor === 'function') renderDailyRecordEditor();
     }, 0);
     // 同步切换器按钮 active 态
     document.querySelectorAll('.demo-controls button').forEach(b => {
@@ -1126,6 +1157,14 @@
     color: { label: '颜色', icon: 'color', className: 'menstruation', emoji: '🎨', options: ['浅红色', '鲜红色', '深红色', '褐色', '黑色'] },
     cramps: { label: '痛经', icon: 'cramps', className: 'symptom', emoji: '⚡', options: ['完全不痛', '轻微痛', '比较痛', '非常痛', '痛到极致'] },
   };
+  const DAILY_RECORD_OPTIONS = {
+    love: { label: '爱爱', className: 'intimacy', emoji: '💕', options: ['无措施', '避孕套', '体外排精', '未射精', '紧急避孕药', '短效避孕药', '长效避孕药', '节育环', '其他措施', '自慰'] },
+    discharge: { label: '白带', className: 'emotion', emoji: '💧', options: ['干燥', '粘稠', '稀糊状', '水状', '蛋清状'] },
+    temp: { label: '体温', className: 'symptom', emoji: '🌡️', options: Array.from({length: 70}, (_, i) => `${(35 + i / 10).toFixed(1)}°C`) },
+    habit: { label: '好习惯', className: 'diet', emoji: '👍', options: ['早餐', '水果', '喝水', '运动'] },
+    stool: { label: '便便', className: 'diet', emoji: '💩', options: ['舒畅', '有残便感', '排便困难', '硬球状', '凹凸香肠状', '裂纹香肠状', '平滑香蕉状', '软块状', '糊状', '水液状', '较少', '适中', '较多'] },
+  };
+  const DAILY_HABIT_ICONS = { 早餐: '🍞', 水果: '🍎', 喝水: '🥤', 运动: '⚾' };
   let periodDetailState = {
     time: '今天 09:15',
     periodDetailItems: [
@@ -1133,6 +1172,15 @@
       { label: '颜色', value: '鲜红色', icon: 'color' },
       { label: '痛经', value: '轻微痛', icon: 'cramps' },
     ],
+  };
+  let dailyRecordState = {
+    time: '今天 09:15',
+    recordType: 'love',
+    recordLabel: '爱爱',
+    recordValue: '无措施',
+    recordDetail: '无措施',
+    icon: 'love',
+    iconText: '',
   };
   let currentOptionTarget = null;
 
@@ -1177,6 +1225,18 @@
 
   function getActiveSavePayload() {
     const activeScene = document.querySelector('.scene.active');
+    if(activeScene?.id === 'scene-daily-record'){
+      return {
+        kind: 'daily-record',
+        time: normalizePeriodDetailTime(document.getElementById('recordTime-daily-record').textContent),
+        recordType: dailyRecordState.recordType,
+        recordLabel: dailyRecordState.recordLabel,
+        recordValue: dailyRecordState.recordValue,
+        recordDetail: dailyRecordState.recordDetail,
+        icon: dailyRecordState.icon,
+        iconText: dailyRecordState.iconText || '',
+      };
+    }
     if(activeScene?.id !== 'scene-period-detail') return null;
     return {
       kind: 'period-detail',
@@ -1231,6 +1291,10 @@
       if(currentTimeTarget.id === 'recordTime-period-detail'){
         periodDetailState.time = `${hour}:${min}`;
         renderPeriodDetailEditor();
+      }
+      if(currentTimeTarget.id === 'recordTime-daily-record'){
+        dailyRecordState.time = `${hour}:${min}`;
+        renderDailyRecordEditor();
       }
       markDirty();
     }
@@ -1326,6 +1390,73 @@
     }).join('');
   }
 
+  function getDailyRecordConfig(type) {
+    return DAILY_RECORD_OPTIONS[type] || DAILY_RECORD_OPTIONS.love;
+  }
+
+  function normalizeDailyRecordValue(type, value) {
+    if(type !== 'temp') return value || '';
+    const raw = String(value || '').replace(/[^\d.]/g, '');
+    return raw ? `${Number(raw).toFixed(1)}°C` : '36.5°C';
+  }
+
+  function renderDailyRecordEditor() {
+    const list = document.getElementById('dailyRecordList');
+    const title = document.getElementById('dailyRecordTitle');
+    const config = getDailyRecordConfig(dailyRecordState.recordType);
+    const label = dailyRecordState.recordLabel || config.label;
+    const value = dailyRecordState.recordDetail || dailyRecordState.recordValue || '';
+    title.textContent = label;
+    list.innerHTML = `
+      <div class="record-item" data-record-kind="daily">
+        <div class="record-icon ${config.className}">${dailyRecordState.iconText || config.emoji}</div>
+        <div class="record-main">
+          <div class="record-type">${label}</div>
+          <div class="record-value">${value}</div>
+          <div class="record-time">${formatPeriodDetailTime(dailyRecordState.time)}</div>
+        </div>
+        <div class="record-actions">
+          <button class="record-edit" onclick="openDailyOptionPicker()" aria-label="编辑${label}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+            </svg>
+          </button>
+          <button class="record-delete" onclick="confirmDeleteEntry('daily-record')" aria-label="删除${label}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function openDailyOptionPicker() {
+    const config = getDailyRecordConfig(dailyRecordState.recordType);
+    currentOptionTarget = { kind: 'daily-record' };
+    document.getElementById('optionSheetTitle').textContent = `修改${dailyRecordState.recordLabel || config.label}`;
+    document.getElementById('optionList').innerHTML = config.options.map(option => {
+      const value = normalizeDailyRecordValue(dailyRecordState.recordType, option);
+      const active = value === dailyRecordState.recordValue || value === dailyRecordState.recordDetail || option === dailyRecordState.recordValue;
+      return `
+        <button type="button" class="option-btn${active ? ' active' : ''}" data-value="${value}">
+          ${value}
+        </button>
+      `;
+    }).join('');
+    document.querySelectorAll('#optionList .option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#optionList .option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+    document.getElementById('optionSheetMask').classList.add('show');
+    document.getElementById('optionSheet').classList.add('show');
+  }
+
   function openOptionPicker(index) {
     const item = periodDetailState.periodDetailItems[index];
     if(!item) return;
@@ -1357,6 +1488,18 @@
   function confirmOptionPicker() {
     const selected = document.querySelector('#optionList .option-btn.active');
     if(currentOptionTarget == null || !selected) return;
+    if(typeof currentOptionTarget === 'object' && currentOptionTarget.kind === 'daily-record'){
+      const nextValue = selected.dataset.value;
+      dailyRecordState.recordValue = nextValue;
+      dailyRecordState.recordDetail = nextValue;
+      if(dailyRecordState.recordType === 'habit'){
+        dailyRecordState.iconText = DAILY_HABIT_ICONS[nextValue] || dailyRecordState.iconText || '';
+      }
+      renderDailyRecordEditor();
+      markDirty();
+      closeOptionPicker();
+      return;
+    }
     periodDetailState.periodDetailItems[currentOptionTarget].value = selected.dataset.value;
     renderPeriodDetailEditor();
     markDirty();
@@ -1366,6 +1509,22 @@
   window.addEventListener('message', function(event){
     if(!event.data || event.data.type !== 'edit-init') return;
     const payload = event.data.payload || {};
+    if(payload.kind === 'daily-record'){
+      const config = getDailyRecordConfig(payload.recordType);
+      dailyRecordState = {
+        time: payload.time || '09:15',
+        recordType: payload.recordType || 'love',
+        recordLabel: payload.recordLabel || config.label,
+        recordValue: payload.recordValue || payload.recordDetail || config.options[0],
+        recordDetail: payload.recordDetail || payload.recordValue || config.options[0],
+        icon: payload.icon || payload.recordType || 'love',
+        iconText: payload.iconText || '',
+      };
+      document.getElementById('recordTime-daily-record').textContent = formatPeriodDetailTime(dailyRecordState.time);
+      renderDailyRecordEditor();
+      resetDirty();
+      return;
+    }
     periodDetailState = {
       time: payload.time || '09:15',
       periodDetailItems: (payload.periodDetailItems || []).map(item => ({ ...item })),

@@ -621,6 +621,60 @@ const PERIOD_DETAIL_PICKERS = {
   cramps: { title: '痛经', group: 'cramps', options: PERIOD_PICKER_CRAMPS },
 };
 
+const HEALTH_RECORD_SHEETS = {
+  love: {
+    title: '第 1 次爱爱记录',
+    sections: [
+      {
+        key: 'measure',
+        title: '爱爱',
+        options: ['无措施', '避孕套', '体外排精', '未射精', '紧急避孕药', '短效避孕药', '长效避孕药', '节育环', '其他措施', '自慰'],
+      },
+    ],
+    defaultValue: '无措施',
+  },
+  discharge: {
+    title: '白带',
+    sections: [
+      {
+        key: 'texture',
+        title: '白带',
+        options: ['干燥', '粘稠', '稀糊状', '水状', '蛋清状'],
+      },
+    ],
+    defaultValue: '干燥',
+  },
+  stool: {
+    title: '便便',
+    sections: [
+      {
+        key: 'feeling',
+        title: '排便感受',
+        options: ['舒畅', '有残便感', '排便困难'],
+      },
+      {
+        key: 'shape',
+        title: '形状',
+        options: ['硬球状', '凹凸香肠状', '裂纹香肠状', '平滑香蕉状', '软块状', '糊状', '水液状'],
+      },
+      {
+        key: 'amount',
+        title: '便便量',
+        options: ['较少', '适中', '较多'],
+      },
+    ],
+    defaultValue: '舒畅',
+  },
+};
+
+const TEMP_DECIMAL_OPTIONS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const HABIT_RECORD_OPTIONS = [
+  { id: 'breakfast', label: '早餐', icon: '🍞' },
+  { id: 'fruit', label: '水果', icon: '🍎' },
+  { id: 'water', label: '喝水', icon: '🥤' },
+  { id: 'sport', label: '运动', icon: '⚾' },
+];
+
 function PickerCheckIcon() {
   return (
     <span className="prp-ck" aria-hidden="true">
@@ -966,6 +1020,170 @@ function PeriodSinglePicker({ open, type, value, onCancel, onConfirm }) {
   return picker;
 }
 
+function HealthRecordOptions({ section, selected, onSelect }) {
+  return (
+    <section className="prp-card hrp-card">
+      <h3 className="prp-sec-title">{section.title}</h3>
+      <div className="hrp-option-grid">
+        {section.options.map((label) => {
+          const isSelected = selected === label;
+          return (
+            <button
+              key={label}
+              type="button"
+              className={'hrp-option' + (isSelected ? ' is-selected' : '')}
+              aria-pressed={isSelected}
+              onClick={() => onSelect(section.key, label)}
+            >
+              <span className="hrp-option-mark" aria-hidden="true">
+                {isSelected ? <PickerCheckIcon/> : null}
+              </span>
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function TempRecordSheet({ open, onCancel, onConfirm }) {
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+  const [whole, setWhole] = useState('36');
+  const [decimal, setDecimal] = useState('5');
+
+  useEffect(() => {
+    if (!open) return;
+    setWhole('36');
+    setDecimal('5');
+  }, [open]);
+
+  useEffect(() => {
+    const phone = portalTarget;
+    if (!phone) return undefined;
+    if (open) phone.classList.add('is-period-picker-open');
+    else phone.classList.remove('is-period-picker-open');
+    return () => phone.classList.remove('is-period-picker-open');
+  }, [open, portalTarget]);
+
+  if (!open || !portalTarget) return null;
+
+  const tempValue = `${whole}.${decimal}°C`;
+  const picker = (
+    <div className="prp-mask" onClick={(event) => { if (event.target === event.currentTarget) onCancel(); }}>
+      <div className="prp-sheet prp-sheet-single" role="dialog" aria-modal="true" aria-label="体温">
+        <header className="prp-bar">
+          <button type="button" className="prp-cancel" onClick={onCancel}>取消</button>
+          <h2 className="prp-title">体温</h2>
+          <button
+            type="button"
+            className="prp-confirm"
+            onClick={() => onConfirm({ type: 'temp', label: '体温', value: tempValue, detail: tempValue })}
+          >
+            确定
+          </button>
+        </header>
+        <div className="prp-body">
+          <section className="prp-card hrp-temp-card">
+            <div className="hrp-temp-value">{tempValue}</div>
+          </section>
+          <section className="prp-card hrp-card">
+            <h3 className="prp-sec-title">输入体温</h3>
+            <div className="hrp-temp-controls">
+              <label>
+                <span>整数</span>
+                <select value={whole} onChange={(event) => setWhole(event.target.value)}>
+                  {['35', '36', '37', '38', '39', '40', '41'].map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+              <span className="hrp-temp-dot">.</span>
+              <label>
+                <span>小数</span>
+                <select value={decimal} onChange={(event) => setDecimal(event.target.value)}>
+                  {TEMP_DECIMAL_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(picker, portalTarget);
+  }
+  return picker;
+}
+
+function HealthRecordSheet({ open, type, onCancel, onConfirm }) {
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+  const config = HEALTH_RECORD_SHEETS[type];
+  const [values, setValues] = useState({});
+
+  useEffect(() => {
+    if (!open || !config) return;
+    const next = {};
+    config.sections.forEach((section, index) => {
+      next[section.key] = index === 0 ? config.defaultValue : null;
+    });
+    setValues(next);
+  }, [open, config]);
+
+  useEffect(() => {
+    const phone = portalTarget;
+    if (!phone) return undefined;
+    if (open) phone.classList.add('is-period-picker-open');
+    else phone.classList.remove('is-period-picker-open');
+    return () => phone.classList.remove('is-period-picker-open');
+  }, [open, portalTarget]);
+
+  if (!open || !portalTarget || !config) return null;
+
+  const selectedValues = config.sections.map((section) => values[section.key]).filter(Boolean);
+  const primaryValue = selectedValues[0] || config.defaultValue;
+  const detail = selectedValues.join(' · ');
+
+  const picker = (
+    <div className="prp-mask" onClick={(event) => { if (event.target === event.currentTarget) onCancel(); }}>
+      <div className="prp-sheet" role="dialog" aria-modal="true" aria-label={config.title}>
+        <header className="prp-bar">
+          <button type="button" className="prp-cancel" onClick={onCancel}>取消</button>
+          <h2 className="prp-title">{config.title}</h2>
+          <button
+            type="button"
+            className="prp-confirm"
+            disabled={!primaryValue}
+            onClick={() => onConfirm({
+              type,
+              label: MORPH_ITEMS.find((item) => item.id === type)?.label || config.title,
+              value: primaryValue,
+              detail,
+            })}
+          >
+            确定
+          </button>
+        </header>
+        <div className="prp-body">
+          {config.sections.map((section) => (
+            <HealthRecordOptions
+              key={section.key}
+              section={section}
+              selected={values[section.key]}
+              onSelect={(key, value) => setValues((prev) => ({ ...prev, [key]: prev[key] === value ? null : value }))}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(picker, portalTarget);
+  }
+  return picker;
+}
+
 function DietAddSheet({ open, onClose, onDone }) {
   const [mealType, setMealType] = useState('breakfast');
   const [time, setTime] = useState('08:00');
@@ -1208,6 +1426,8 @@ function HealthMorphRecordPane({
   onPeriodNo,
   onDietAdd,
   onPeriodDetailAdd,
+  onHealthItemAdd,
+  onHabitRecord,
   periodDetailDemoEnabled,
   periodDetailValues,
 }) {
@@ -1270,7 +1490,23 @@ function HealthMorphRecordPane({
   if (item.recordType === 'habit') {
     return (
       <div className="list-habit-actions">
-        <span className="list-habit-icons" aria-hidden="true">🍞🍎🥤⚾</span>
+        {HABIT_RECORD_OPTIONS.map((habit) => (
+          <button
+            key={habit.id}
+            type="button"
+            className="list-habit-icon-btn"
+            onClick={() => onHabitRecord?.({
+              type: 'habit',
+              label: '好习惯',
+              value: habit.label,
+              detail: habit.label,
+              iconText: habit.icon,
+            })}
+            aria-label={'记录' + habit.label}
+          >
+            {habit.icon}
+          </button>
+        ))}
       </div>
     );
   }
@@ -1302,7 +1538,12 @@ function HealthMorphRecordPane({
   }
 
   return (
-    <button type="button" className="list-add" aria-label={'新增' + item.label}>
+    <button
+      type="button"
+      className="list-add"
+      onClick={() => onHealthItemAdd?.(item.id)}
+      aria-label={'新增' + item.label}
+    >
       <PlusIcon/>
     </button>
   );
@@ -1317,6 +1558,8 @@ function HealthMorphRow({
   onPeriodNo,
   onDietAdd,
   onPeriodDetailAdd,
+  onHealthItemAdd,
+  onHabitRecord,
   periodDetailDemoEnabled,
   periodDetailValues,
 }) {
@@ -1349,6 +1592,8 @@ function HealthMorphRow({
             onPeriodNo={onPeriodNo}
             onDietAdd={onDietAdd}
             onPeriodDetailAdd={onPeriodDetailAdd}
+            onHealthItemAdd={onHealthItemAdd}
+            onHabitRecord={onHabitRecord}
             periodDetailDemoEnabled={periodDetailDemoEnabled}
             periodDetailValues={periodDetailValues}
           />
@@ -1365,6 +1610,8 @@ function HealthMorphList({
   onPeriodNo,
   onDietAdd,
   onPeriodDetailAdd,
+  onHealthItemAdd,
+  onHabitRecord,
   periodDetailDemoEnabled,
   periodDetailValues,
 }) {
@@ -1381,6 +1628,8 @@ function HealthMorphList({
           onPeriodNo={onPeriodNo}
           onDietAdd={onDietAdd}
           onPeriodDetailAdd={onPeriodDetailAdd}
+          onHealthItemAdd={onHealthItemAdd}
+          onHabitRecord={onHabitRecord}
           periodDetailDemoEnabled={periodDetailDemoEnabled}
           periodDetailValues={periodDetailValues}
         />
@@ -1531,6 +1780,7 @@ function RecordPage({
   onPeriodReset,
   onPeriodRecordSubmit,
   onPeriodDetailRecordSubmit,
+  onHealthRecordSubmit,
   periodDetailValues,
   periodDetailDemoEnabled = false,
   periodFlowEnabled = true,
@@ -1553,6 +1803,7 @@ function RecordPage({
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
   const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
   const [singlePickerType, setSinglePickerType] = useState(null);
+  const [healthSheetType, setHealthSheetType] = useState(null);
   const dragAreaRef = useRef(null);
   const gridRef = useRef(null);
   const timersRef = useRef([]);
@@ -1671,6 +1922,17 @@ function RecordPage({
   const confirmPeriodDetail = ({ type, value }) => {
     setSinglePickerType(null);
     onPeriodDetailRecordSubmit?.({ type, value });
+  };
+
+  const openHealthRecordSheet = (type) => {
+    if (['love', 'discharge', 'temp', 'stool'].includes(type)) {
+      setHealthSheetType(type);
+    }
+  };
+
+  const confirmHealthRecord = (payload) => {
+    setHealthSheetType(null);
+    onHealthRecordSubmit?.(payload);
   };
 
   const syncCalendarOffset = useCallback(() => {
@@ -1806,6 +2068,8 @@ function RecordPage({
             onPeriodNo={() => handlePeriodToggle(false)}
             onDietAdd={() => setDietSheetOpen(true)}
             onPeriodDetailAdd={openPeriodDetailPicker}
+            onHealthItemAdd={openHealthRecordSheet}
+            onHabitRecord={(payload) => onHealthRecordSubmit?.(payload)}
             periodDetailDemoEnabled={periodDetailDemoEnabled}
             periodDetailValues={periodDetailValues}
           />
@@ -1856,6 +2120,17 @@ function RecordPage({
         value={singlePickerType ? periodDetailValues?.[singlePickerType] : null}
         onCancel={() => setSinglePickerType(null)}
         onConfirm={confirmPeriodDetail}
+      />
+      <HealthRecordSheet
+        open={!!healthSheetType && healthSheetType !== 'temp'}
+        type={healthSheetType}
+        onCancel={() => setHealthSheetType(null)}
+        onConfirm={confirmHealthRecord}
+      />
+      <TempRecordSheet
+        open={healthSheetType === 'temp'}
+        onCancel={() => setHealthSheetType(null)}
+        onConfirm={confirmHealthRecord}
       />
     </div>
   );
