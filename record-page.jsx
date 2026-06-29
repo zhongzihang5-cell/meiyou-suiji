@@ -228,6 +228,14 @@ const MORPH_ITEMS = [
     recordType: 'add',
   },
   {
+    id: 'diet',
+    label: '饮食',
+    iconBg: '#ffe7d6',
+    iconShape: 'is-circle',
+    iconSrc: 'assets/record-diet.png',
+    recordType: 'diet',
+  },
+  {
     id: 'mood',
     label: '心情',
     iconBg: '#fff3c9',
@@ -290,14 +298,6 @@ const MORPH_ITEMS = [
     iconShape: 'is-bar',
     iconSrc: 'assets/record-todo.png',
     recordType: 'add',
-  },
-  {
-    id: 'diet',
-    label: '饮食',
-    iconBg: '#ffe7d6',
-    iconShape: 'is-circle',
-    iconSrc: 'assets/record-diet.png',
-    recordType: 'diet',
   },
 ];
 
@@ -1241,30 +1241,30 @@ function HealthRecordSheet({ open, type, onCancel, onConfirm }) {
 
 function DietAddSheet({ open, onClose, onDone }) {
   const [mealType, setMealType] = useState('breakfast');
-  const [time, setTime] = useState('08:00');
-  const [foodName, setFoodName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [amountUnit, setAmountUnit] = useState('g');
-  const [calories, setCalories] = useState('');
-  const [photos, setPhotos] = useState([]);
+  const [foodLibOpen, setFoodLibOpen] = useState(false);
   const [portalTarget] = useState(() => document.querySelector('.phone'));
-  const timeInputRef = useRef(null);
-  const photoInputRef = useRef(null);
-  const photosRef = useRef([]);
-
-  useEffect(() => {
-    photosRef.current = photos;
-  }, [photos]);
+  const [addedFoods, setAddedFoods] = useState([]);
+  const [mealTime, setMealTime] = useState('');
+  const [expandedId, setExpandedId] = useState(null);
+  const [timePickerOpen, setTimePickerOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraSourceRect, setCameraSourceRect] = useState(null);
+  const [cameraPhotoUrl, setCameraPhotoUrl] = useState('');
+  const containerRef = useRef(null);
+  const measureElementRect = window.measureElementRect;
+  const CameraTransition = window.CameraTransition;
 
   useEffect(() => {
     if (!open) return;
     setMealType('breakfast');
-    setTime('08:00');
-    setFoodName('');
-    setAmount('');
-    setAmountUnit('g');
-    setCalories('');
-    setPhotos([]);
+    setFoodLibOpen(false);
+    setAddedFoods([]);
+    setMealTime('');
+    setExpandedId(null);
+    setTimePickerOpen(false);
+    setCameraOpen(false);
+    setCameraSourceRect(null);
+    setCameraPhotoUrl('');
   }, [open]);
 
   useEffect(() => {
@@ -1275,196 +1275,252 @@ function DietAddSheet({ open, onClose, onDone }) {
     return () => phone.classList.remove('is-diet-sheet-open');
   }, [open, portalTarget]);
 
-  const releasePhotos = () => {
-    photosRef.current.forEach((url) => URL.revokeObjectURL(url));
-  };
+  const handleClose = () => onClose();
 
-  const handleClose = () => {
-    releasePhotos();
-    onClose();
-  };
-
-  const handleMealTypeChange = (id) => {
-    setMealType(id);
-    setTime(getDietDefaultTime(id));
-    setAmountUnit(id === 'drink' ? 'ml' : 'g');
-  };
-
-  const handlePhotoPick = (event) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) return;
-    const urls = files.map((file) => URL.createObjectURL(file));
-    setPhotos((prev) => [...prev, ...urls]);
-    event.target.value = '';
-  };
-
-  const handleDone = () => {
+  const handleSave = () => {
     onDone?.({
       mealType,
-      time,
-      foodName: foodName.trim(),
-      amount: amount.trim(),
-      amountUnit,
-      calories: calories.trim(),
-      photos,
+      mealTime,
+      foods: addedFoods,
+      photoUrl: cameraPhotoUrl || null,
+      sourceType: cameraPhotoUrl ? 'camera' : 'library',
     });
     handleClose();
+  };
+
+  const hasReview = addedFoods.length > 0;
+  const mealLabel = DIET_MEAL_TYPES.find((m) => m.id === mealType)?.label || '早餐';
+
+  const updateFood = (id, field, value) => {
+    setAddedFoods((prev) => prev.map((f) => f.id === id ? { ...f, [field]: value } : f));
+  };
+
+  const handlePhotoRecognizeTap = (event) => {
+    const buttonEl = event.currentTarget;
+    const phone = buttonEl.closest('.phone');
+    if (!phone) return;
+    containerRef.current = phone;
+    const rect = measureElementRect?.(buttonEl, phone);
+    setCameraSourceRect(rect);
+    setCameraOpen(true);
+  };
+
+  const handleCameraClose = () => {
+    setCameraOpen(false);
+  };
+
+  const handleCameraCaptureSuccess = (payload) => {
+    const captureGroup = window.createDietCaptureGroup?.({ photoUrl: payload?.photoUrl });
+    const recognizedItems = normalizeRecognizedDietItems(captureGroup?.dietData?.items || []);
+    if (recognizedItems.length) {
+      setAddedFoods((prev) => mergeDietFoods(prev, recognizedItems));
+    }
+    if (payload?.photoUrl) {
+      setCameraPhotoUrl(payload.photoUrl);
+    }
+    if (captureGroup?.dietData?.time) {
+      setMealTime(captureGroup.dietData.time);
+    }
+    const recognizedMealType = inferMealTypeFromRecognizedItems(captureGroup?.dietData?.items || []);
+    if (recognizedMealType) {
+      setMealType(recognizedMealType);
+    }
+    setCameraOpen(false);
   };
 
   if (!open || !portalTarget) return null;
 
   const sheet = (
     <>
-      <div className="diet-add-mask" onClick={handleClose} aria-hidden="true"/>
-      <div className="diet-add-sheet" role="dialog" aria-modal="true" aria-label="添加饮食">
-        <header className="diet-add-header">
-          <button type="button" className="diet-add-header-btn" onClick={handleClose}>取消</button>
-          <h2 className="diet-add-title">添加饮食</h2>
-          <button type="button" className="diet-add-header-btn is-primary" onClick={handleDone}>完成</button>
-        </header>
+      {!timePickerOpen && (
+        <>
+          <div className="diet-add-mask" onClick={handleClose} aria-hidden="true"/>
+          <div className={'diet-add-sheet' + (hasReview ? ' is-review' : '')} role="dialog" aria-modal="true" aria-label="添加饮食">
+            <header className="diet-add-header">
+              <button type="button" className="diet-add-header-btn" onClick={handleClose}>取消</button>
+              <h2 className="diet-add-title">添加饮食</h2>
+              <button type="button" className="diet-add-header-btn is-primary" onClick={handleSave}>确定</button>
+            </header>
 
-        <div className="diet-add-body">
-          <section className="diet-add-card">
-            <h3 className="diet-add-card-title">餐式类型</h3>
-            <div className="diet-meal-grid" role="listbox" aria-label="餐式类型">
-              {DIET_MEAL_TYPES.map((meal) => (
-                <button
-                  key={meal.id}
-                  type="button"
-                  role="option"
-                  aria-selected={mealType === meal.id}
-                  className={'diet-meal-chip' + (mealType === meal.id ? ' is-active' : '')}
-                  onClick={() => handleMealTypeChange(meal.id)}
-                >
-                  {meal.label}
-                </button>
-              ))}
-            </div>
-          </section>
+            <div className="diet-add-body">
+              {!hasReview ? (
+                <>
+                  <section className="diet-add-card">
+                    <h3 className="diet-add-card-title">餐式类型</h3>
+                    <div className="diet-meal-grid" role="listbox" aria-label="餐式类型">
+                      {DIET_MEAL_TYPES.map((meal) => (
+                        <button
+                          key={meal.id}
+                          type="button"
+                          role="option"
+                          aria-selected={mealType === meal.id}
+                          className={'diet-meal-chip' + (mealType === meal.id ? ' is-active' : '')}
+                          onClick={() => setMealType(meal.id)}
+                        >
+                          {meal.label}
+                        </button>
+                      ))}
+                    </div>
+                  </section>
 
-          <section className="diet-add-card diet-add-form-card">
-            <div className="diet-add-row is-link">
-              <span className="diet-add-label">时间</span>
-              <button
-                type="button"
-                className="diet-add-time-btn"
-                onClick={() => timeInputRef.current?.showPicker?.() || timeInputRef.current?.click()}
-              >
-                <span>{time}</span>
-                <ChevronRightIcon/>
-                <input
-                  ref={timeInputRef}
-                  type="time"
-                  className="diet-add-time-input"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  aria-label="选择时间"
-                />
-              </button>
-            </div>
-            <div className="diet-add-row">
-              <span className="diet-add-label">食物名称</span>
-              <input
-                type="text"
-                className="diet-add-input"
-                placeholder="请输入"
-                value={foodName}
-                onChange={(e) => setFoodName(e.target.value)}
-                aria-label="食物名称"
-              />
-            </div>
-            <div className="diet-add-row">
-              <span className="diet-add-label">数量</span>
-              <div className="diet-add-row-end">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  className="diet-add-input diet-add-input-short"
-                  placeholder="请输入"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  aria-label="数量"
-                />
-                <div className="diet-unit-toggle" role="group" aria-label="数量单位">
-                  <button
-                    type="button"
-                    className={amountUnit === 'g' ? 'is-active' : ''}
-                    onClick={() => setAmountUnit('g')}
-                  >
-                    克
-                  </button>
-                  <button
-                    type="button"
-                    className={amountUnit === 'ml' ? 'is-active' : ''}
-                    onClick={() => setAmountUnit('ml')}
-                  >
-                    毫升
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="diet-add-row">
-              <span className="diet-add-label">总热量</span>
-              <div className="diet-add-row-end">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  className="diet-add-input diet-add-input-short"
-                  placeholder="请输入"
-                  value={calories}
-                  onChange={(e) => setCalories(e.target.value)}
-                  aria-label="总热量"
-                />
-                <span className="diet-add-unit">千卡</span>
-              </div>
-            </div>
-          </section>
+                  <div className="diet-entry-grid">
+                    <button type="button" className="diet-entry-card" aria-label="拍照识别" onClick={handlePhotoRecognizeTap}>
+                      <svg className="diet-entry-icon" viewBox="0 0 48 48" aria-hidden="true">
+                        <rect x="4" y="14" width="40" height="28" rx="4" fill="none" stroke="#ff4d88" strokeWidth="2.5"/>
+                        <path d="M16 14l2.5-6h11L32 14" fill="none" stroke="#ff4d88" strokeWidth="2.5" strokeLinejoin="round"/>
+                        <circle cx="24" cy="28" r="7.5" fill="none" stroke="#ff4d88" strokeWidth="2.5"/>
+                        <circle cx="24" cy="28" r="3" fill="#ff4d88"/>
+                      </svg>
+                      <span className="diet-entry-label">拍照识别</span>
+                    </button>
+                    <button type="button" className="diet-entry-card" aria-label="从食物库添加" onClick={() => setFoodLibOpen(true)}>
+                      <svg className="diet-entry-icon" viewBox="0 0 48 48" aria-hidden="true">
+                        <circle cx="22" cy="22" r="12" fill="none" stroke="#ff4d88" strokeWidth="2.5"/>
+                        <path d="M31 31l10 10" fill="none" stroke="#ff4d88" strokeWidth="2.5" strokeLinecap="round"/>
+                      </svg>
+                      <span className="diet-entry-label">从食物库添加</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <section className="diet-review-row">
+                    <span className="diet-review-label">餐食类型</span>
+                    <span className="diet-review-time-val">
+                      {mealLabel}
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </span>
+                  </section>
 
-          <section className="diet-add-card diet-add-photo-card">
-            <h3 className="diet-add-card-title">饮食备注</h3>
-            <div className="diet-photo-grid">
-              {photos.map((url, index) => (
-                <div key={url} className="diet-photo-thumb">
-                  <img src={url} alt="" />
-                  <button
-                    type="button"
-                    className="diet-photo-remove"
-                    aria-label="删除照片"
-                    onClick={() => {
-                      const url = photos[index];
-                      if (url) URL.revokeObjectURL(url);
-                      setPhotos((prev) => prev.filter((_, i) => i !== index));
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                className="diet-photo-add"
-                onClick={() => photoInputRef.current?.click()}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M4 8h3l1.5-2h7L17 8h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-                  <circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                  <section className="diet-review-row" onClick={() => setTimePickerOpen(true)}>
+                    <span className="diet-review-label">用餐时间</span>
+                    <span className="diet-review-time-val">
+                      {mealTime || '--:--'}
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </span>
+                  </section>
+
+                  <section className="diet-review-section">
+                    <h3 className="diet-review-section-title">食物详情</h3>
+                    {addedFoods.map((food) => {
+                      const isExpanded = expandedId === food.id;
+                      return React.createElement('div', { key: food.id, className: 'diet-review-food' },
+                        React.createElement('div', {
+                          className: 'diet-review-food-row',
+                          onClick: () => setExpandedId(isExpanded ? null : food.id),
+                        },
+                          React.createElement('div', { className: 'diet-review-food-thumb' },
+                            React.createElement('img', { src: food.img, alt: '', onError: (e) => { e.target.style.display = 'none'; } })
+                          ),
+                          React.createElement('div', { className: 'diet-review-food-info' },
+                            React.createElement('span', { className: 'diet-review-food-name' }, food.name, ' · ', food.gram || 0, 'g'),
+                            React.createElement('span', { className: 'diet-review-food-kcal' }, food.kcal || 0, ' 千卡')
+                          ),
+                          React.createElement('svg', {
+                            className: 'diet-review-food-arrow' + (isExpanded ? ' is-open' : ''),
+                            viewBox: '0 0 24 24',
+                            'aria-hidden': 'true',
+                          },
+                            React.createElement('path', { d: 'M6 9l6 6 6-6', fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' })
+                          )
+                        ),
+                        isExpanded && React.createElement('div', { className: 'diet-review-food-detail' },
+                          React.createElement('div', { className: 'diet-review-field' },
+                            React.createElement('span', { className: 'diet-review-field-label' }, '食物名称'),
+                            React.createElement('input', {
+                              className: 'diet-review-field-input',
+                              value: food.name,
+                              onChange: (e) => updateFood(food.id, 'name', e.target.value),
+                            })
+                          ),
+                          React.createElement('div', { className: 'diet-review-field' },
+                            React.createElement('span', { className: 'diet-review-field-label' }, '数量'),
+                            React.createElement('div', { className: 'diet-review-field-input-wrap' },
+                              React.createElement('input', {
+                                className: 'diet-review-field-input',
+                                type: 'number',
+                                value: food.gram || 0,
+                                onChange: (e) => updateFood(food.id, 'gram', parseInt(e.target.value, 10) || 0),
+                              }),
+                              React.createElement('span', { className: 'diet-review-field-unit' }, '克')
+                            )
+                          ),
+                          React.createElement('div', { className: 'diet-review-field' },
+                            React.createElement('span', { className: 'diet-review-field-label' }, '热量'),
+                            React.createElement('div', { className: 'diet-review-field-input-wrap' },
+                              React.createElement('input', {
+                                className: 'diet-review-field-input',
+                                type: 'number',
+                                value: food.kcal || 0,
+                                onChange: (e) => updateFood(food.id, 'kcal', parseInt(e.target.value, 10) || 0),
+                              }),
+                              React.createElement('span', { className: 'diet-review-field-unit' }, '千卡')
+                            )
+                          )
+                        )
+                      );
+                    })}
+                  </section>
+                  {cameraPhotoUrl ? (
+                    <>
+                      <section className="diet-review-row diet-review-note-row">
+                        <span className="diet-review-label">备注</span>
+                      </section>
+                      <section className="diet-review-note-photo-row">
+                        <div className="diet-review-note-photo">
+                          <img src={cameraPhotoUrl} alt="饮食备注照片" />
+                        </div>
+                      </section>
+                    </>
+                  ) : null}
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {timePickerOpen && (
+        <TimePickerSheet
+          open={true}
+          value={mealTime}
+          onConfirm={(t) => { setMealTime(t); setTimePickerOpen(false); }}
+          onCancel={() => setTimePickerOpen(false)}
+        />
+      )}
+
+      <FoodLibraryPage
+        open={foodLibOpen}
+        onClose={() => setFoodLibOpen(false)}
+        onAddFood={(items, time) => {
+          setAddedFoods(items);
+          if (time) setMealTime(time);
+          setFoodLibOpen(false);
+        }}
+      />
+
+      {CameraTransition && (
+        <CameraTransition
+          active={cameraOpen}
+          sourceRect={cameraSourceRect}
+          containerRef={containerRef}
+          cardContent={
+            <>
+              <span className="quick-menu-item-icon">
+                <svg viewBox="0 0 48 48" aria-hidden="true" width="22" height="22">
+                  <rect x="4" y="14" width="40" height="28" rx="4" fill="none" stroke="currentColor" strokeWidth="2.5"/>
+                  <path d="M16 14l2.5-6h11L32 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/>
+                  <circle cx="24" cy="28" r="7.5" fill="none" stroke="currentColor" strokeWidth="2.5"/>
+                  <circle cx="24" cy="28" r="3" fill="currentColor"/>
                 </svg>
-                <span>添加照片</span>
-              </button>
-              <input
-                ref={photoInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="diet-photo-file"
-                onChange={handlePhotoPick}
-                aria-hidden="true"
-                tabIndex={-1}
-              />
-            </div>
-          </section>
-        </div>
-      </div>
+              </span>
+              <span className="quick-menu-item-label">拍照识别</span>
+            </>
+          }
+          onCaptureSuccess={handleCameraCaptureSuccess}
+          onClose={handleCameraClose}
+        />
+      )}
     </>
   );
 
@@ -1472,6 +1528,608 @@ function DietAddSheet({ open, onClose, onDone }) {
     return window.ReactDOM.createPortal(sheet, portalTarget);
   }
   return sheet;
+}
+
+const FOOD_LIBRARY_ITEMS = [
+  { id: 'egg', name: '鸡蛋', kcal: 139, unit: '100 克', img: 'assets/food/egg.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 60 },
+      { label: '只(中)', baseGram: 60, step: 0.5, max: 10, defaultVal: 1 },
+      { label: '只(大)', baseGram: 75, step: 0.5, max: 10, defaultVal: 1 },
+    ] },
+  { id: 'milk', name: '全脂牛奶', kcal: 54, unit: '100 毫升', img: 'assets/food/milk.png',
+    portions: [
+      { label: '毫升', baseGram: 1, step: 10, max: 1000, defaultVal: 250 },
+      { label: '杯', baseGram: 250, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'yogurt', name: '酸奶', kcal: 70, unit: '100 毫升', img: 'assets/food/yogurt.png',
+    portions: [
+      { label: '毫升', baseGram: 1, step: 10, max: 1000, defaultVal: 200 },
+      { label: '杯', baseGram: 200, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'rice', name: '米饭', kcal: 116, unit: '100 克', img: 'assets/food/rice.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 200 },
+      { label: '碗', baseGram: 200, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'apple', name: '苹果', kcal: 53, unit: '100 克', img: 'assets/food/apple.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 200 },
+      { label: '个(中)', baseGram: 200, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'soymilk', name: '豆浆', kcal: 31, unit: '100 毫升', img: 'assets/food/soymilk.png',
+    portions: [
+      { label: '毫升', baseGram: 1, step: 10, max: 1000, defaultVal: 300 },
+      { label: '杯', baseGram: 300, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'tomato', name: '番茄', kcal: 15, unit: '100 克', img: 'assets/food/tomato.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 150 },
+      { label: '个', baseGram: 150, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'mantou', name: '馒头', kcal: 223, unit: '100 克', img: 'assets/food/mantou.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 100 },
+      { label: '个', baseGram: 100, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'corn', name: '鲜玉米', kcal: 112, unit: '100 克', img: 'assets/food/corn.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 200 },
+      { label: '根', baseGram: 200, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'banana', name: '香蕉', kcal: 89, unit: '100 克', img: 'assets/food/banana.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 120 },
+      { label: '根', baseGram: 120, step: 0.5, max: 5, defaultVal: 1 },
+    ] },
+  { id: 'chicken-breast', name: '鸡胸肉', kcal: 133, unit: '100 克', img: 'assets/food/chicken.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 100 },
+    ] },
+  { id: 'bread', name: '全麦面包', kcal: 247, unit: '100 克', img: 'assets/food/bread.png',
+    portions: [
+      { label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 60 },
+      { label: '片', baseGram: 30, step: 0.5, max: 10, defaultVal: 2 },
+    ] },
+];
+
+/* ── Scroll-wheel Time Picker Sheet ── */
+
+function WheelColumn({ items, selected, onChange, itemHeight }) {
+  const h = itemHeight || 48;
+  const containerRef = useRef(null);
+  const isScrollingRef = useRef(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || isScrollingRef.current) return;
+    el.scrollTop = selected * h;
+  }, [selected, h]);
+
+  const handleScroll = () => {
+    clearTimeout(timerRef.current);
+    isScrollingRef.current = true;
+    timerRef.current = setTimeout(() => {
+      const el = containerRef.current;
+      if (!el) return;
+      const idx = Math.round(el.scrollTop / h);
+      const clamped = Math.max(0, Math.min(items.length - 1, idx));
+      el.scrollTop = clamped * h;
+      isScrollingRef.current = false;
+      if (clamped !== selected) onChange(clamped);
+    }, 80);
+  };
+
+  return React.createElement('div', {
+    className: 'tp-wheel-col',
+    ref: containerRef,
+    onScroll: handleScroll,
+    style: { height: h * 3 },
+  },
+    React.createElement('div', { style: { height: h } }),
+    items.map((item, i) => React.createElement('div', {
+      key: i,
+      className: 'tp-wheel-item' + (i === selected ? ' is-sel' : ''),
+      style: { height: h, lineHeight: h + 'px' },
+      onClick: () => { onChange(i); },
+    }, item)),
+    React.createElement('div', { style: { height: h } })
+  );
+}
+
+function TimePickerSheet({ open, value, onConfirm, onCancel }) {
+  const parsed = (value || '08:00').split(':');
+  const [hour, setHour] = useState(parseInt(parsed[0], 10));
+  const [minute, setMinute] = useState(parseInt(parsed[1], 10));
+
+  useEffect(() => {
+    if (!open) return;
+    const p = (value || '08:00').split(':');
+    setHour(parseInt(p[0], 10));
+    setMinute(parseInt(p[1], 10));
+  }, [open, value]);
+
+  if (!open) return null;
+
+  const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+
+  const handleConfirm = () => {
+    onConfirm(hours[hour] + ':' + minutes[minute]);
+  };
+
+  return React.createElement(React.Fragment, null,
+    React.createElement('div', { className: 'tp-mask', onClick: onCancel }),
+    React.createElement('div', { className: 'tp-sheet' },
+      React.createElement('header', { className: 'tp-header' },
+        React.createElement('button', { type: 'button', className: 'tp-header-btn', onClick: onCancel }, '取消'),
+        React.createElement('h2', { className: 'tp-header-title' }, '用餐时间'),
+        React.createElement('button', { type: 'button', className: 'tp-header-btn is-primary', onClick: handleConfirm }, '确定')
+      ),
+      React.createElement('div', { className: 'tp-body' },
+        React.createElement('div', { className: 'tp-highlight' }),
+        React.createElement(WheelColumn, { items: hours, selected: hour, onChange: setHour }),
+        React.createElement('span', { className: 'tp-colon' }, ':'),
+        React.createElement(WheelColumn, { items: minutes, selected: minute, onChange: setMinute })
+      )
+    )
+  );
+}
+
+function FoodPortionSheet({ food, open, onClose, onConfirm }) {
+  const portions = food?.portions || [{ label: '克', baseGram: 1, step: 10, max: 500, defaultVal: 100 }];
+  const kcalPer100 = food?.kcal || 0;
+
+  const [unitIndex, setUnitIndex] = useState(portions.length > 1 ? 1 : 0);
+  const [amount, setAmount] = useState(portions.length > 1 ? portions[1].defaultVal : portions[0].defaultVal);
+  const [mealTime, setMealTime] = useState('08:00');
+  const [timePickerOpen, setTimePickerOpen] = useState(false);
+
+  useEffect(() => {
+    if (open) setTimePickerOpen(false);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !food) return;
+    const idx = portions.length > 1 ? 1 : 0;
+    setUnitIndex(idx);
+    setAmount(portions[idx].defaultVal);
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    setMealTime(hh + ':' + mm);
+  }, [open, food]);
+
+  if (!open || !food) return null;
+
+  const currentPortion = portions[unitIndex];
+  const gramAmount = amount * currentPortion.baseGram;
+  const computedKcal = Math.round((gramAmount / 100) * kcalPer100);
+  const isGramUnit = currentPortion.baseGram === 1;
+  const displayGram = isGramUnit ? amount : Math.round(gramAmount);
+  const gramUnit = food.unit.includes('毫升') ? '毫升' : '克';
+
+  const handleUnitChange = (idx) => {
+    setUnitIndex(idx);
+    setAmount(portions[idx].defaultVal);
+  };
+
+  const sliderMin = 0;
+  const sliderMax = currentPortion.max;
+  const sliderStep = currentPortion.step;
+
+  const ticks = [];
+  for (let v = sliderMin; v <= sliderMax; v += sliderStep) {
+    const rounded = Math.round(v * 10) / 10;
+    ticks.push(rounded);
+  }
+
+  const handleConfirm = () => {
+    onConfirm?.({
+      food,
+      amount,
+      unitLabel: currentPortion.label,
+      gram: displayGram,
+      kcal: computedKcal,
+      mealTime,
+    });
+  };
+
+  return (
+    <>
+      <div className="food-portion-mask" onClick={onClose}/>
+      <div className="food-portion-sheet">
+        <header className="food-portion-header">
+          <button type="button" className="food-portion-header-btn" onClick={onClose}>取消</button>
+          <h2 className="food-portion-title">{food.name}</h2>
+          <button type="button" className="food-portion-header-btn is-primary" onClick={handleConfirm}>确定</button>
+        </header>
+
+        <div className="food-portion-body">
+          <section className="food-portion-card">
+            <div className="food-portion-amount-row">
+              <span className="food-portion-label">摄入量</span>
+              <div className="food-portion-value">
+                <span className="food-portion-num">{amount}</span>
+                <span className="food-portion-approx">≈</span>
+                <div className="food-portion-detail">
+                  <span>{displayGram} {gramUnit}</span>
+                  <span>{computedKcal} 千卡</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="food-portion-units" role="tablist">
+              {portions.map((p, idx) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={unitIndex === idx}
+                  className={unitIndex === idx ? 'is-active' : ''}
+                  onClick={() => handleUnitChange(idx)}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="food-portion-slider-wrap">
+              <input
+                type="range"
+                className="food-portion-slider"
+                min={sliderMin}
+                max={sliderMax}
+                step={sliderStep}
+                value={amount}
+                onChange={(e) => setAmount(parseFloat(e.target.value))}
+              />
+              <div className="food-portion-ruler">
+                {ticks.filter((_, i) => i % Math.max(1, Math.round(1 / sliderStep)) === 0).map((v) => (
+                  <span key={v} className="food-portion-tick">
+                    <i/>{v % 1 === 0 ? v : v.toFixed(1)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="food-portion-row-card" onClick={() => setTimePickerOpen(true)}>
+            <span className="food-portion-row-label">用餐时间</span>
+            <span className="food-portion-row-value">
+              <span>{mealTime}</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+          </section>
+
+          <TimePickerSheet
+            open={timePickerOpen}
+            value={mealTime}
+            onConfirm={(t) => { setMealTime(t); setTimePickerOpen(false); }}
+            onCancel={() => setTimePickerOpen(false)}
+          />
+
+          <section className="food-portion-row-card">
+            <span className="food-portion-row-label">食物详情</span>
+            <svg className="food-portion-row-arrow" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}
+
+const FOOD_RECENT_ITEMS = [
+  { id: 'rice', name: '米饭', kcal: 116, unit: '100 克', img: 'assets/food/rice.png' },
+  { id: 'egg', name: '鸡蛋', kcal: 139, unit: '100 克', img: 'assets/food/egg.png' },
+  { id: 'chicken-breast', name: '鸡胸肉', kcal: 133, unit: '100 克', img: 'assets/food/chicken.png' },
+];
+
+const DIET_RECOGNIZED_FOOD_ALIASES = [
+  { match: /^杂粮饭$/, targetId: 'rice', displayName: '米饭' },
+  { match: /^米饭(?:（.*）)?$/, targetId: 'rice', displayName: '米饭' },
+  { match: /鸡蛋|煎蛋|番茄蛋汤/, targetId: 'egg', displayName: '鸡蛋' },
+  { match: /鸡胸肉/, targetId: 'chicken-breast', displayName: '鸡胸肉' },
+  { match: /牛奶/, targetId: 'milk', displayName: '牛奶' },
+  { match: /酸奶/, targetId: 'yogurt', displayName: '酸奶' },
+  { match: /苹果/, targetId: 'apple', displayName: '苹果' },
+  { match: /豆浆/, targetId: 'soymilk', displayName: '豆浆' },
+  { match: /番茄/, targetId: 'tomato', displayName: '番茄' },
+  { match: /馒头/, targetId: 'mantou', displayName: '馒头' },
+  { match: /玉米/, targetId: 'corn', displayName: '鲜玉米' },
+  { match: /香蕉/, targetId: 'banana', displayName: '香蕉' },
+  { match: /面包/, targetId: 'bread', displayName: '全麦面包' },
+];
+
+function mapMealLabelToTypeId(mealLabel) {
+  const hit = DIET_MEAL_TYPES.find((item) => item.label === mealLabel);
+  return hit ? hit.id : null;
+}
+
+function inferMealTypeFromRecognizedItems(items) {
+  const names = (items || []).map((item) => item?.name || '').join(' ');
+  if (!names) return 'lunch';
+  if (/奶茶|下午茶/.test(names)) return 'afternoon-snack';
+  if (/牛奶|面包|鸡蛋|豆浆|玉米|馒头/.test(names) && !/米饭|鲈鱼|鸡胸肉|土豆丝/.test(names)) return 'breakfast';
+  if (/鲈鱼|西兰花/.test(names)) return 'dinner';
+  return 'lunch';
+}
+
+function parseDietPortionToGram(portionText, fallbackName) {
+  const text = String(portionText || '').trim();
+  if (!text) {
+    if (/鸡蛋/.test(fallbackName || '')) return 60;
+    if (/米饭|杂粮饭/.test(fallbackName || '')) return 200;
+    if (/牛奶|酸奶|豆浆/.test(fallbackName || '')) return 250;
+    return 100;
+  }
+  const num = parseFloat(text);
+  if (Number.isNaN(num)) return 100;
+  if (/g|克/i.test(text)) return Math.round(num);
+  if (/毫升|ml/i.test(text)) return Math.round(num);
+  if (/碗/.test(text)) return Math.round(num * 200);
+  if (/盘/.test(text)) return Math.round(num * 150);
+  if (/杯/.test(text)) return Math.round(num * 250);
+  if (/个|只|片|份|根/.test(text)) return Math.round(num * 100);
+  return Math.round(num);
+}
+
+function normalizeRecognizedDietItems(items) {
+  return items.map((item, index) => {
+    const alias = DIET_RECOGNIZED_FOOD_ALIASES.find((entry) => entry.match.test(item?.name || ''));
+    const base = alias
+      ? FOOD_LIBRARY_ITEMS.find((food) => food.id === alias.targetId)
+      : FOOD_LIBRARY_ITEMS.find((food) => food.name === item?.name);
+    const displayName = alias?.displayName || item?.name || base?.name || '已识别食物';
+    const gram = parseDietPortionToGram(item?.portion, displayName);
+    const kcal = item?.kcal != null
+      ? item.kcal
+      : base?.kcal != null
+        ? Math.round((gram / 100) * base.kcal)
+        : 0;
+    return {
+      id: (base?.id || 'recognized-food') + '-' + Date.now() + '-' + index,
+      name: displayName,
+      kcal,
+      gram,
+      img: base?.img || '',
+      unit: base?.unit || '100 克',
+      portionLabel: item?.portion || '',
+    };
+  });
+}
+
+function mergeDietFoods(prevFoods, nextFoods) {
+  const existingNames = new Set(prevFoods.map((food) => food.name));
+  const deduped = nextFoods.filter((food) => {
+    if (existingNames.has(food.name)) return false;
+    existingNames.add(food.name);
+    return true;
+  });
+  return [...prevFoods, ...deduped];
+}
+
+function buildDietRecord(record) {
+  const foods = record?.foods || [];
+  const totalKcal = foods.reduce((sum, food) => sum + (food.kcal || 0), 0);
+  return {
+    id: 'diet-record-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    mealType: record?.mealType || 'lunch',
+    mealTime: record?.mealTime || '--:--',
+    foods,
+    foodNames: foods.map((food) => food.name).filter(Boolean),
+    totalKcal,
+    photoUrl: record?.photoUrl || null,
+    sourceType: record?.sourceType || 'library',
+  };
+}
+
+function DietRecordListPage({ open, records = [], onBack, onAdd }) {
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+
+  if (!open || !portalTarget) return null;
+
+  const page = (
+    <div className="diet-record-page" role="dialog" aria-modal="true" aria-label="6月29日 饮食记录">
+      <header className="diet-record-nav">
+        <button type="button" className="diet-record-back" onClick={onBack} aria-label="返回">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h2 className="diet-record-title">6月29日 饮食记录</h2>
+        <span className="diet-record-nav-spacer" aria-hidden="true" />
+      </header>
+
+      <div className="diet-record-scroll">
+        <section className="diet-record-list-card">
+          {records.map((record, index) => (
+            <div key={record.id} className={'diet-record-item' + (index === records.length - 1 ? ' is-last' : '')}>
+              <div className="diet-record-item-main">
+                <div className="diet-record-item-time">{record.mealTime}</div>
+                <div className="diet-record-item-foods">{record.foodNames.join('、')}</div>
+                <div className="diet-record-item-kcal">{record.totalKcal} 千卡</div>
+              </div>
+              {record.photoUrl ? (
+                <div className="diet-record-item-photos">
+                  <img className="diet-record-item-photo" src={record.photoUrl} alt="" />
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </section>
+
+        <button type="button" className="diet-record-add-btn" onClick={onAdd}>
+          <span className="diet-record-add-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 7v10M7 12h10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </span>
+          <span>添加饮食记录</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(page, portalTarget);
+  }
+  return page;
+}
+
+function FoodLibraryPage({ open, onClose, onAddFood }) {
+  const [activeTab, setActiveTab] = useState('hot');
+  const [searchText, setSearchText] = useState('');
+  const [addedItems, setAddedItems] = useState({});
+  const [portionFood, setPortionFood] = useState(null);
+  const [lastMealTime, setLastMealTime] = useState('');
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+
+  useEffect(() => {
+    if (!open) return;
+    setActiveTab('hot');
+    setSearchText('');
+    setAddedItems({});
+    setPortionFood(null);
+  }, [open]);
+
+  const totalKcal = Object.values(addedItems).reduce((sum, item) => sum + item.kcal, 0);
+
+  const handleAdd = (food) => {
+    setAddedItems((prev) => {
+      if (prev[food.id]) return prev;
+      return { ...prev, [food.id]: food };
+    });
+  };
+
+  const handleDone = () => {
+    onAddFood?.(Object.values(addedItems), lastMealTime);
+    onClose();
+  };
+
+  const sourceList = activeTab === 'hot' ? FOOD_LIBRARY_ITEMS : FOOD_RECENT_ITEMS;
+  const displayList = searchText.trim()
+    ? sourceList.filter((f) => f.name.includes(searchText.trim()))
+    : sourceList;
+
+  if (!open || !portalTarget) return null;
+
+  const page = (
+    <div className="food-lib-page">
+      <header className="food-lib-nav">
+        <button type="button" className="food-lib-back" onClick={onClose} aria-label="返回">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <div className="food-lib-search">
+          <svg className="food-lib-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.6"/>
+            <path d="M16 16l3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+          </svg>
+          <input
+            type="text"
+            className="food-lib-search-input"
+            placeholder="输入食物名称"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </div>
+      </header>
+
+      <div className="food-lib-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'recent'}
+          className={activeTab === 'recent' ? 'is-active' : ''}
+          onClick={() => setActiveTab('recent')}
+        >
+          最近添加
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'hot'}
+          className={activeTab === 'hot' ? 'is-active' : ''}
+          onClick={() => setActiveTab('hot')}
+        >
+          热门食物
+        </button>
+      </div>
+
+      <div className="food-lib-list">
+        {displayList.map((food) => {
+          const isAdded = !!addedItems[food.id];
+          return (
+            <div key={food.id} className="food-lib-item">
+              <div className="food-lib-thumb">
+                <img src={food.img} alt="" onError={(e) => { e.target.style.display = 'none'; }}/>
+              </div>
+              <div className="food-lib-info">
+                <span className="food-lib-name">{food.name}</span>
+                <span className="food-lib-kcal">{food.kcal} 千卡/{food.unit}</span>
+              </div>
+              <button
+                type="button"
+                className={'food-lib-add-btn' + (isAdded ? ' is-added' : '')}
+                onClick={() => isAdded ? null : setPortionFood(food)}
+                aria-label={'添加' + food.name}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  {isAdded ? (
+                    <path d="M5 12l5 5L19 7" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  ) : (
+                    <path d="M12 6v12M6 12h12" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
+                  )}
+                </svg>
+              </button>
+            </div>
+          );
+        })}
+        {displayList.length === 0 && (
+          <div className="food-lib-empty">没有找到相关食物</div>
+        )}
+      </div>
+
+      <footer className="food-lib-footer">
+        <div className="food-lib-footer-kcal">
+          <span className="food-lib-footer-ring"/>
+          <span>{totalKcal} 千卡</span>
+        </div>
+        <button
+          type="button"
+          className={'food-lib-footer-done' + (totalKcal > 0 ? ' is-active' : '')}
+          onClick={handleDone}
+          disabled={totalKcal === 0}
+        >
+          完成
+        </button>
+      </footer>
+
+      <FoodPortionSheet
+        food={portionFood}
+        open={!!portionFood}
+        onClose={() => setPortionFood(null)}
+        onConfirm={(result) => {
+          setAddedItems((prev) => ({
+            ...prev,
+            [result.food.id]: { ...result.food, gram: result.gram, kcal: result.kcal, portionLabel: result.amount + ' ' + result.unitLabel },
+          }));
+          if (result.mealTime) setLastMealTime(result.mealTime);
+          setPortionFood(null);
+        }}
+      />
+    </div>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(page, portalTarget);
+  }
+  return page;
 }
 
 function SymptomPickerGlyph({ icon, imgSrc, label }) {
@@ -1641,6 +2299,7 @@ function HealthMorphRecordPane({
   onPeriodYes,
   onPeriodNo,
   onDietAdd,
+  dietValues,
   onSymptomAdd,
   onPeriodDetailAdd,
   onHealthItemAdd,
@@ -1731,9 +2390,16 @@ function HealthMorphRecordPane({
 
   if (item.recordType === 'diet') {
     return (
-      <button type="button" className="list-add" onClick={onDietAdd} aria-label={'新增' + item.label}>
-        <PlusIcon/>
-      </button>
+      <div className="list-diet-actions">
+        {dietValues?.length ? (
+          <span className="list-diet-summary">
+            {dietValues.join('、')}
+          </span>
+        ) : null}
+        <button type="button" className="list-add" onClick={onDietAdd} aria-label={'新增' + item.label}>
+          <PlusIcon/>
+        </button>
+      </div>
     );
   }
 
@@ -1793,6 +2459,7 @@ function HealthMorphRow({
   onPeriodYes,
   onPeriodNo,
   onDietAdd,
+  dietValues,
   onSymptomAdd,
   onPeriodDetailAdd,
   onHealthItemAdd,
@@ -1833,6 +2500,7 @@ function HealthMorphRow({
             onPeriodYes={onPeriodYes}
             onPeriodNo={onPeriodNo}
             onDietAdd={onDietAdd}
+            dietValues={dietValues}
             onSymptomAdd={onSymptomAdd}
             onPeriodDetailAdd={onPeriodDetailAdd}
             onHealthItemAdd={onHealthItemAdd}
@@ -1853,6 +2521,7 @@ function HealthMorphList({
   onPeriodYes,
   onPeriodNo,
   onDietAdd,
+  dietValues,
   onSymptomAdd,
   onPeriodDetailAdd,
   onHealthItemAdd,
@@ -1873,6 +2542,7 @@ function HealthMorphList({
           onPeriodYes={onPeriodYes}
           onPeriodNo={onPeriodNo}
           onDietAdd={onDietAdd}
+          dietValues={dietValues}
           onSymptomAdd={onSymptomAdd}
           onPeriodDetailAdd={onPeriodDetailAdd}
           onHealthItemAdd={onHealthItemAdd}
@@ -2050,6 +2720,9 @@ function RecordPage({
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [calendarOffset, setCalendarOffset] = useState(0);
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
+  const [dietListOpen, setDietListOpen] = useState(false);
+  const [reopenDietListAfterSave, setReopenDietListAfterSave] = useState(false);
+  const [dietRecords, setDietRecords] = useState([]);
   const [symptomSheetOpen, setSymptomSheetOpen] = useState(false);
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
@@ -2211,6 +2884,26 @@ function RecordPage({
     setLegendCollapsed((v) => !v);
   };
 
+  const latestDietFoods = dietRecords.length ? dietRecords[dietRecords.length - 1].foodNames : [];
+
+  const openDietEntry = () => {
+    if (dietRecords.length) {
+      setDietListOpen(true);
+      return;
+    }
+    setReopenDietListAfterSave(false);
+    setDietSheetOpen(true);
+  };
+
+  const handleDietRecordSave = (result) => {
+    const nextRecord = buildDietRecord(result);
+    setDietRecords((prev) => [...prev, nextRecord]);
+    if (reopenDietListAfterSave) {
+      setDietListOpen(true);
+      setReopenDietListAfterSave(false);
+    }
+  };
+
   return (
     <div
       className={
@@ -2317,7 +3010,8 @@ function RecordPage({
             periodEndMode={periodEndRecordReady}
             onPeriodYes={() => handlePeriodToggle(true)}
             onPeriodNo={() => handlePeriodToggle(false)}
-            onDietAdd={() => setDietSheetOpen(true)}
+            onDietAdd={openDietEntry}
+            dietValues={latestDietFoods}
             onSymptomAdd={() => setSymptomSheetOpen(true)}
             onPeriodDetailAdd={openPeriodDetailPicker}
             onHealthItemAdd={openHealthRecordSheet}
@@ -2360,7 +3054,23 @@ function RecordPage({
 
       <DietAddSheet
         open={dietSheetOpen}
-        onClose={() => setDietSheetOpen(false)}
+        onClose={() => {
+          setDietSheetOpen(false);
+          if (reopenDietListAfterSave) {
+            setDietListOpen(true);
+            setReopenDietListAfterSave(false);
+          }
+        }}
+        onDone={handleDietRecordSave}
+      />
+      <DietRecordListPage
+        open={dietListOpen}
+        records={dietRecords}
+        onBack={() => setDietListOpen(false)}
+        onAdd={() => {
+          setReopenDietListAfterSave(true);
+          setDietSheetOpen(true);
+        }}
       />
       <SymptomPickerSheet
         open={symptomSheetOpen}
