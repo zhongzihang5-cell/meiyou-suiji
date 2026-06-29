@@ -234,6 +234,9 @@
   position:relative;
   z-index:1;
 }
+.tl-rail-node:has(.card-more-wrap.is-open){
+  z-index:40;
+}
 .tl-rail-node.is-feed-last{padding-bottom:36.5px}
 .tl-day-section-head + .tl-rail-node{
   margin-top:20.5px;
@@ -1125,10 +1128,14 @@
   opacity:0;
   pointer-events:none;
   transition:opacity .22s ease;
+  z-index:1;
 }
 .card-more-wrap.is-visible{
   opacity:1;
   pointer-events:auto;
+}
+.card-more-wrap.is-open{
+  z-index:80;
 }
 .card-more-btn{
   width:28px;height:28px;
@@ -1141,8 +1148,10 @@
 .card-more-btn:active{background:var(--my-bg)}
 .card-more-menu{
   position:absolute;
-  right:0;top:calc(100% + 4px);
-  z-index:50;
+  right:0;
+  top:auto;
+  bottom:calc(100% + 4px);
+  z-index:90;
   min-width:110px;
   background:#fff;
   border-radius:10px;
@@ -1151,7 +1160,7 @@
   animation:cardMenuIn .16s cubic-bezier(.2,0,0,1) both;
 }
 @keyframes cardMenuIn{
-  from{opacity:0;transform:scale(.92) translateY(-4px)}
+  from{opacity:0;transform:scale(.92) translateY(4px)}
   to{opacity:1;transform:scale(1) translateY(0)}
 }
 .card-more-menu-item{
@@ -2376,6 +2385,84 @@
   display:block;
   border-radius:8px;
 }
+
+.v3-daily-record-icon{
+  position:relative;
+  overflow:hidden;
+  border-radius:8px;
+  background:linear-gradient(135deg, #fff0f6 0%, #ffd8e8 100%);
+}
+
+.v3-daily-record-icon::before{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border-radius:50%;
+  background:#ff4d88;
+}
+
+.v3-daily-record-icon.is-love{
+  background:linear-gradient(135deg, #fff0c9 0%, #ffe1ef 100%);
+}
+
+.v3-daily-record-icon.is-love::before{
+  inset:8px 7px 7px;
+  border-radius:8px 8px 12px 12px;
+  transform:rotate(45deg) scale(0.82);
+}
+
+.v3-daily-record-icon.is-discharge{
+  background:linear-gradient(135deg, #eef9f5 0%, #dff5ec 100%);
+}
+
+.v3-daily-record-icon.is-discharge::before{
+  inset:10px 6px;
+  border-radius:50% 45% 55% 45%;
+  background:#6fd0b0;
+  transform:rotate(-8deg);
+}
+
+.v3-daily-record-icon.is-temp{
+  background:linear-gradient(135deg, #fff0e9 0%, #ffe1d2 100%);
+}
+
+.v3-daily-record-icon.is-temp::before{
+  left:13px;
+  right:11px;
+  top:5px;
+  bottom:8px;
+  border-radius:10px;
+  background:#ff8a62;
+}
+
+.v3-daily-record-icon.is-stool{
+  background:linear-gradient(135deg, #fff2d9 0%, #ffe2a8 100%);
+}
+
+.v3-daily-record-icon.is-stool::before{
+  inset:9px 6px 7px;
+  border-radius:45% 55% 50% 50%;
+  background:#f5a623;
+}
+
+.v3-daily-record-icon.is-habit{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg, #e4f7d9 0%, #d9f2ff 100%);
+}
+
+.v3-daily-record-icon.is-habit::before{
+  display:none;
+}
+
+.v3-daily-record-emoji{
+  position:relative;
+  z-index:1;
+  font-size:17px;
+  line-height:1;
+}
+
 .v3-symptom-record-icon img{
   width:100%;
   height:100%;
