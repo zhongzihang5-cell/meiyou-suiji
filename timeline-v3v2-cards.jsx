@@ -894,26 +894,25 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   if(entry.kind === 'period-detail'){
     const items = entry.periodDetailItems || [];
     return (
-      <div className="v3-period-detail-record">
-        <div className="v3-period-detail-lines">
-          {items.map((item, index) => (
-            <div className="v3-period-detail-line" key={item.label + index}>
-              <span className="v3-period-detail-label">
-                <img
-                  className="v3-period-detail-icon-img"
-                  src={recordIconSrc(item.icon || 'period')}
-                  alt=""
-                  width={20}
-                  height={20}
-                  draggable={false}
-                />
-                <span>{item.label}</span>
-              </span>
-              <span className="v3-period-detail-value">{item.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <section className="tl-period-summary v3-period-detail-record" aria-label="经期细项记录">
+        {items.map((item, index) => (
+          <div className="tl-period-summary-row" key={item.label + index}>
+            <span className="tl-period-summary-icon">
+              <img
+                className="tl-period-summary-icon-img"
+                src={recordIconSrc(item.icon || 'period')}
+                alt=""
+                width={22}
+                height={22}
+                draggable={false}
+              />
+            </span>
+            <span className="tl-period-summary-text">
+              {item.value ? `${item.label}： ${item.value}` : item.label}
+            </span>
+          </div>
+        ))}
+      </section>
     );
   }
   if(entry.kind === 'period'){

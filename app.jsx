@@ -58,6 +58,7 @@ function App(){
   const [hideTodayGuide, setHideTodayGuide] = useState(initial.hideTodayGuide);
   const [periodEndRecordReady, setPeriodEndRecordReady] = useState(false);
   const [periodEndRecordCompleted, setPeriodEndRecordCompleted] = useState(false);
+  const [periodDetailRecordEnabled, setPeriodDetailRecordEnabled] = useState(false);
   const [periodDetailDraft, setPeriodDetailDraft] = useState({});
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [dockExpanded, setDockExpanded] = useState(false);
@@ -474,7 +475,7 @@ function App(){
   const handleTabChange = (tab)=>{
     if(tab === 'note' && activeTab !== 'note'){
       recordEnterModeRef.current = 'manual';
-      if(periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
+      if(periodDetailRecordEnabled || periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
       submitHealthRecordDraftsToTimeline();
     }
     if(tab !== 'note'){
@@ -872,6 +873,7 @@ function App(){
     if(!type || !value) return;
     markUserRecorded();
     setPeriodDetailDraft((prev)=>({ ...prev, [type]: value }));
+    setPeriodDetailRecordEnabled(true);
   };
 
   const submitHealthRecord = (payload)=>{
@@ -1056,14 +1058,18 @@ function App(){
             setAnalysisNoticeKind('period-start');
             setPeriodEndRecordReady(false);
             setPeriodEndRecordCompleted(false);
+            setPeriodDetailRecordEnabled(false);
             setPeriodDetailDraft({});
           }}
-          onPeriodRecordSubmit={(value)=>{ periodRecordRef.current = value || null; }}
+          onPeriodRecordSubmit={(value)=>{
+            periodRecordRef.current = value || null;
+            setPeriodDetailRecordEnabled(true);
+          }}
           onPeriodDetailRecordSubmit={submitPeriodDetailRecord}
           onSymptomRecordSubmit={submitRecordTabSymptomRecord}
           onHealthRecordSubmit={submitHealthRecord}
           periodDetailValues={periodDetailDraft}
-          periodDetailDemoEnabled={periodEndRecordCompleted}
+          periodDetailDemoEnabled={periodDetailRecordEnabled || periodEndRecordCompleted}
         />
       )}
 

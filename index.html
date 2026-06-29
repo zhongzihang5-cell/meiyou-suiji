@@ -1003,7 +1003,7 @@ if(new URLSearchParams(location.search).get('dev')==='1'){
       : (editingPayload && editingPayload.periodDetailItems) ? 'period-detail'
       : entryKind;
     var scene = (['mixed','text','image','quick','period-detail','daily-record'].indexOf(inferredKind) >= 0) ? inferredKind : 'text';
-    iframe.src = 'diandi_edit.html?scene=' + scene + '&v=20260629-daily-record-edit';
+    iframe.src = 'diandi_edit.html?scene=' + scene + '&v=20260629-period-quick-edit';
     iframe.onload = function(){
       if((scene === 'period-detail' || scene === 'daily-record') && iframe.contentWindow){
         iframe.contentWindow.postMessage({
