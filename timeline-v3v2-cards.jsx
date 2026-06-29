@@ -7,6 +7,30 @@ const TL_MUTED = '#8E8E93';
 const TL_LINE = 'rgba(0,0,0,0.06)';
 const TL_HAIR = 'rgba(0,0,0,0.08)';
 
+// 统一调用记录 tab 的图标资源
+const RECORD_ICON_SRC = {
+  period: 'assets/record-period-start.png',
+  'period-end': 'assets/record-period-end.png',
+  'period-time': 'assets/record-period-time.png',
+  flow: 'assets/record-flow.png',
+  color: 'assets/record-color.png',
+  cramps: 'assets/record-cramps.png',
+  love: 'assets/record-love.png',
+  symptom: 'assets/record-symptom.png',
+  mood: 'assets/record-mood.png',
+  discharge: 'assets/record-discharge.png',
+  temp: 'assets/record-temp.png',
+  weight: 'assets/record-weight.png',
+  diary: 'assets/record-diary.png',
+  habit: 'assets/record-habit.png',
+  stool: 'assets/record-stool.png',
+  plan: 'assets/record-todo.png',
+  diet: 'assets/record-diet.png',
+};
+function recordIconSrc(key, fallback){
+  return RECORD_ICON_SRC[key] || fallback || RECORD_ICON_SRC.symptom;
+}
+
 function TLTagIcon({name, color = TL_PRIMARY, size = 12}){
   const sw = 1.6;
   if(name === 'mood'){
@@ -469,15 +493,8 @@ function WeightAnalysisNote({ noteParts, note }){
 function ChartSymptomDots({data}){
   const todayLabels = Array.isArray(data?.todayLabels) ? data.todayLabels : [];
 
-  const COLS = [
-    {key:'6/22', label:'6/22', isToday:false},
-    {key:'6/23', label:'6/23', isToday:false},
-    {key:'6/24', label:'6/24', isToday:false},
-    {key:'6/25', label:'6/25', isToday:false},
-    {key:'6/26', label:'6/26', isToday:false},
-    {key:'6/27', label:'6/27', isToday:false},
-    {key:'today',label:'今天', isToday:true },
-  ];
+  const DAYS = ['6/22','6/23','6/24','6/25','6/26','6/27','today'];
+  const DAY_LABEL = {'6/22':'6/22','6/23':'6/23','6/24':'6/24','6/25':'6/25','6/26':'6/26','6/27':'6/27','today':'今天'};
   const RECORDS = {
     '6/22':['乳房胀痛','失眠','疲惫'],
     '6/23':['乳房胀痛'],
@@ -488,6 +505,14 @@ function ChartSymptomDots({data}){
     'today': todayLabels,
   };
   const BASE_ROWS = ['乳房胀痛','腹泻','失眠','疲惫'];
+  const SCOLOR = {
+    '乳房胀痛':'#ff6fa5',
+    '腹泻':'#ff9500',
+    '失眠':'#4f7cae',
+    '疲惫':'#b972ff',
+    '头痛':'#00cc99',
+    '腰酸':'#ff4d88',
+  };
 
   const rows = [...BASE_ROWS];
   const seen = new Set(rows);
@@ -495,47 +520,47 @@ function ChartSymptomDots({data}){
     if(!seen.has(s)){ rows.push(s); seen.add(s); }
   });
 
-  const VB_W = 320;
-  const PLOT_LEFT = 78;
-  const PLOT_RIGHT = 312;
-  const LABEL_X = 70;
-  const PLOT_TOP = 12;
-  const ROW_H = 30;
-  const DOT_R = 5;
-  const X_LABEL_GAP = 16;
-  const GRID_R = 8;
+  const runsOf = name => {
+    const res = []; let start = -1;
+    DAYS.forEach((d, i)=>{
+      const on = (RECORDS[d] || []).includes(name);
+      if(on && start < 0) start = i;
+      if(!on && start >= 0){ res.push([start, i-1]); start = -1; }
+    });
+    if(start >= 0) res.push([start, DAYS.length-1]);
+    return res;
+  };
 
-  const colW = (PLOT_RIGHT - PLOT_LEFT) / COLS.length;
-  const rowsBottom = PLOT_TOP + ROW_H * rows.length;
-  const xLabelY = rowsBottom + X_LABEL_GAP;
-  const vbH = xLabelY + 10;
+  const VB_W = 320;
+  const PLOT_LEFT = 72;
+  const PLOT_RIGHT = 312;
+  const LABEL_X = 64;
+  const PLOT_TOP = 10;
+  const ROW_H = 30;
+  const CAP_H = 14;
+  const X_LABEL_GAP = 18;
+  const GRID = 'rgba(0,0,0,.05)';
+
+  const colW = (PLOT_RIGHT - PLOT_LEFT) / DAYS.length;
   const colCenter = i => PLOT_LEFT + colW * (i + 0.5);
   const rowCenter = j => PLOT_TOP + ROW_H * (j + 0.5);
-
-  const lutealSoft = 'rgba(255,196,0,.18)';
-  const grid = 'rgba(0,0,0,.05)';
+  const rowsBottom = PLOT_TOP + ROW_H * rows.length;
+  const xLabelY = rowsBottom + X_LABEL_GAP;
+  const vbH = xLabelY + 14;
 
   return (
     <div style={{width:'100%'}}>
       <svg viewBox={`0 0 ${VB_W} ${vbH}`} width="100%" height="auto" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <rect
-          x={PLOT_LEFT}
-          y={PLOT_TOP}
-          width={(PLOT_RIGHT - PLOT_LEFT).toFixed(1)}
-          height={(rowsBottom - PLOT_TOP).toFixed(1)}
-          rx={GRID_R}
-          fill={lutealSoft}
-        />
-        {rows.map((_, j)=>{
-          const y = rowCenter(j);
+        {DAYS.map((_, i)=>{
+          const x = colCenter(i);
           return (
             <line
-              key={'gl-'+j}
-              x1={PLOT_LEFT}
-              y1={y}
-              x2={PLOT_RIGHT}
-              y2={y}
-              stroke={grid}
+              key={'cg-'+i}
+              x1={x.toFixed(1)}
+              y1={PLOT_TOP}
+              x2={x.toFixed(1)}
+              y2={rowsBottom}
+              stroke={GRID}
               strokeWidth="1"
               strokeDasharray="2 3"
               vectorEffect="non-scaling-stroke"
@@ -546,71 +571,71 @@ function ChartSymptomDots({data}){
           <text
             key={'rl-'+j}
             x={LABEL_X}
-            y={rowCenter(j)}
+            y={rowCenter(j).toFixed(1)}
             textAnchor="end"
             dominantBaseline="central"
-            fontSize="11"
+            fontSize="12"
             fontFamily="PingFang SC, -apple-system, sans-serif"
             fill={TL_MUTED}
           >
             {name}
           </text>
         ))}
-        {rows.map((name, j)=>{
-          const y = rowCenter(j);
-          return COLS.map((col, i)=>{
-            const has = (RECORDS[col.key] || []).includes(name);
-            if(!has) return null;
+        {rows.flatMap((name, j)=>{
+          const yc = rowCenter(j);
+          const color = SCOLOR[name] || TL_PRIMARY;
+          return runsOf(name).map(([a, b], k)=>{
+            const x1 = colCenter(a) - CAP_H/2;
+            const x2 = colCenter(b) + CAP_H/2;
+            const w = x2 - x1;
+            const len = b - a + 1;
             return (
-              <circle
-                key={`d-${j}-${i}`}
-                cx={colCenter(i).toFixed(1)}
-                cy={y}
-                r={DOT_R}
-                fill={TL_PRIMARY}
-              />
+              <React.Fragment key={`cap-${j}-${k}`}>
+                <rect
+                  x={x1.toFixed(1)}
+                  y={(yc - CAP_H/2).toFixed(1)}
+                  width={w.toFixed(1)}
+                  height={CAP_H}
+                  rx={CAP_H/2}
+                  fill={color}
+                />
+                {len >= 2 && (
+                  <text
+                    x={colCenter((a+b)/2).toFixed(1)}
+                    y={yc.toFixed(1)}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize="10"
+                    fontWeight="600"
+                    fontFamily="PingFang SC, -apple-system, sans-serif"
+                    fill="#fff"
+                  >
+                    {len}天
+                  </text>
+                )}
+              </React.Fragment>
             );
           });
         })}
-        {COLS.map((col, i)=>(
-          <text
-            key={'cl-'+i}
-            x={colCenter(i).toFixed(1)}
-            y={xLabelY}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fontSize="10"
-            fontFamily="PingFang SC, -apple-system, sans-serif"
-            fontWeight={col.isToday ? 600 : 400}
-            fill={col.isToday ? TL_PRIMARY : TL_MUTED}
-          >
-            {col.label}
-          </text>
-        ))}
+        {DAYS.map((d, i)=>{
+          const isT = d === 'today';
+          return (
+            <text
+              key={'cl-'+i}
+              x={colCenter(i).toFixed(1)}
+              y={xLabelY}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize="11"
+              fontFamily="PingFang SC, -apple-system, sans-serif"
+              fontWeight={isT ? 600 : 400}
+              fill={isT ? TL_PRIMARY : TL_MUTED}
+            >
+              {DAY_LABEL[d]}
+            </text>
+          );
+        })}
       </svg>
-      <div style={{
-        display:'flex', justifyContent:'center', alignItems:'center',
-        flexWrap:'wrap', gap:'6px 12px', marginTop:8,
-      }}>
-        {[
-          {label:'月经期', bg:'rgba(255,77,136,.16)',  bd:'rgba(255,77,136,.55)'},
-          {label:'卵泡期', bg:'rgba(0,204,153,.16)',   bd:'rgba(0,204,153,.55)'},
-          {label:'排卵期', bg:'rgba(185,114,255,.18)', bd:'rgba(185,114,255,.55)'},
-          {label:'黄体期', bg:'rgba(255,196,0,.18)',   bd:'rgba(255,196,0,.55)'},
-        ].map(it=>(
-          <span key={it.label} style={{
-            display:'inline-flex', alignItems:'center', gap:5,
-            fontSize:11, color:TL_MUTED,
-          }}>
-            <span style={{
-              width:12, height:8, borderRadius:3,
-              background:it.bg, border:'0.5px solid '+it.bd,
-              display:'inline-block',
-            }}/>
-            {it.label}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }
@@ -814,7 +839,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     return (
       <div className="v3-weight-record">
         <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src="assets/quick-icon-weight.png" alt="" width={28} height={28} draggable={false}/>
+          <img src={recordIconSrc('weight')} alt="" width={28} height={28} draggable={false}/>
         </span>
         <span className="v3-weight-record-text">
           {entry.weightLabel || '体重'}：{entry.weightValue}
@@ -825,8 +850,8 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   if(entry.kind === 'symptom'){
     return (
       <div className="v3-weight-record">
-        <span className="v3-weight-record-icon v3-symptom-record-icon" aria-hidden="true">
-          <img src="assets/symptom-icon.png" alt="" draggable={false}/>
+        <span className="v3-weight-record-icon" aria-hidden="true">
+          <img src={recordIconSrc('symptom')} alt="" width={28} height={28} draggable={false}/>
         </span>
         <span className="v3-weight-record-text">
           {entry.symptomLabel || '症状'}：{entry.symptomValue}
@@ -835,10 +860,11 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     );
   }
   if(entry.kind === 'daily-record'){
+    const iconKey = entry.icon || entry.recordType;
     return (
       <div className="v3-weight-record">
-        <span className={'v3-weight-record-icon v3-daily-record-icon is-' + (entry.icon || entry.recordType || 'quick')} aria-hidden="true">
-          {entry.iconText ? <span className="v3-daily-record-emoji">{entry.iconText}</span> : null}
+        <span className="v3-weight-record-icon" aria-hidden="true">
+          <img src={recordIconSrc(iconKey)} alt="" width={28} height={28} draggable={false}/>
         </span>
         <span className="v3-weight-record-text">
           {entry.recordLabel || '记录'}：{entry.recordDetail || entry.recordValue || entry.text}
@@ -854,7 +880,14 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
           {items.map((item, index) => (
             <div className="v3-period-detail-line" key={item.label + index}>
               <span className="v3-period-detail-label">
-                <span className={'v3-period-detail-icon is-' + (item.icon || 'period')} aria-hidden="true"/>
+                <img
+                  className="v3-period-detail-icon-img"
+                  src={recordIconSrc(item.icon || 'period')}
+                  alt=""
+                  width={20}
+                  height={20}
+                  draggable={false}
+                />
                 <span>{item.label}</span>
               </span>
               <span className="v3-period-detail-value">{item.value}</span>
@@ -865,10 +898,11 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     );
   }
   if(entry.kind === 'period'){
+    const isEnd = (entry.periodLabel || '').indexOf('走') >= 0;
     return (
       <div className="v3-weight-record">
-        <span className="v3-weight-record-icon v3-period-record-icon" aria-hidden="true">
-          <TLTagIcon name="period" size={28}/>
+        <span className="v3-weight-record-icon" aria-hidden="true">
+          <img src={recordIconSrc(isEnd ? 'period-end' : 'period')} alt="" width={28} height={28} draggable={false}/>
         </span>
         <span className="v3-weight-record-text">
           {entry.periodLabel || '月经来了'}
@@ -877,19 +911,15 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     );
   }
   if(entry.kind === 'mood-face'){
-    const MoodFace = window.MoodFace;
-    const mood = entry.primaryMood;
+    const label = entry.primaryMood?.label || entry.text || '';
     return (
-      <div style={{display:'flex', alignItems:'center', gap:10}}>
-        {MoodFace && mood && (
-          <div style={{width:40, height:40, borderRadius:'50%', overflow:'hidden', flexShrink:0,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(255,77,136,0.06)',
-          }}>
-            <MoodFace face={mood.face} bg={mood.bg}/>
-          </div>
-        )}
-        <span style={{fontSize:18, fontWeight:500, color:TL_TEXT, lineHeight:1.2}}>{entry.text}</span>
+      <div className="v3-weight-record">
+        <span className="v3-weight-record-icon" aria-hidden="true">
+          <img src={recordIconSrc('mood')} alt="" width={28} height={28} draggable={false}/>
+        </span>
+        <span className="v3-weight-record-text">
+          心情：{label}
+        </span>
       </div>
     );
   }

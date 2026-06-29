@@ -174,6 +174,8 @@ const MORPH_ITEMS = [
     label: '月经来了',
     iconBg: '#ffe8f0',
     iconShape: 'is-square',
+    iconSrc: 'assets/record-period-start.png',
+    iconSrcEnd: 'assets/record-period-end.png',
     recordType: 'segment',
     usePeriodIcon: true,
   },
@@ -182,6 +184,7 @@ const MORPH_ITEMS = [
     label: '记下具体时间',
     iconBg: '#ffe8f0',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-period-time.png',
     recordType: 'add',
   },
   {
@@ -189,6 +192,7 @@ const MORPH_ITEMS = [
     label: '流量',
     iconBg: '#ffe8f0',
     iconShape: 'is-square',
+    iconSrc: 'assets/record-flow.png',
     recordType: 'add',
   },
   {
@@ -196,6 +200,7 @@ const MORPH_ITEMS = [
     label: '颜色',
     iconBg: '#ffe8f0',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-color.png',
     recordType: 'add',
   },
   {
@@ -203,6 +208,7 @@ const MORPH_ITEMS = [
     label: '痛经',
     iconBg: '#ffe8f0',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-cramps.png',
     recordType: 'add',
   },
   {
@@ -210,6 +216,7 @@ const MORPH_ITEMS = [
     label: '爱爱',
     iconBg: '#fff0c9',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-love.png',
     recordType: 'add',
   },
   {
@@ -217,7 +224,7 @@ const MORPH_ITEMS = [
     label: '症状',
     iconBg: '#dff3ff',
     iconShape: 'is-square',
-    iconSrc: 'assets/symptom-icon.png',
+    iconSrc: 'assets/record-symptom.png',
     recordType: 'add',
   },
   {
@@ -225,6 +232,7 @@ const MORPH_ITEMS = [
     label: '心情',
     iconBg: '#fff3c9',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-mood.png',
     recordType: 'mood',
   },
   {
@@ -232,6 +240,7 @@ const MORPH_ITEMS = [
     label: '白带',
     iconBg: '#eadfff',
     iconShape: 'is-pill',
+    iconSrc: 'assets/record-discharge.png',
     recordType: 'add',
   },
   {
@@ -239,6 +248,7 @@ const MORPH_ITEMS = [
     label: '体温',
     iconBg: '#e8e0ff',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-temp.png',
     recordType: 'add',
   },
   {
@@ -246,6 +256,7 @@ const MORPH_ITEMS = [
     label: '体重',
     iconBg: '#e2ebff',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-weight.png',
     recordType: 'add',
   },
   {
@@ -253,6 +264,7 @@ const MORPH_ITEMS = [
     label: '日记',
     iconBg: '#fff3c9',
     iconShape: 'is-square',
+    iconSrc: 'assets/record-diary.png',
     recordType: 'diary',
   },
   {
@@ -260,6 +272,7 @@ const MORPH_ITEMS = [
     label: '好习惯',
     iconBg: '#dff3ff',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-habit.png',
     recordType: 'habit',
   },
   {
@@ -267,6 +280,7 @@ const MORPH_ITEMS = [
     label: '便便',
     iconBg: '#ffe7ef',
     iconShape: 'is-diamond',
+    iconSrc: 'assets/record-stool.png',
     recordType: 'add',
   },
   {
@@ -274,6 +288,7 @@ const MORPH_ITEMS = [
     label: '计划',
     iconBg: '#e8eef6',
     iconShape: 'is-bar',
+    iconSrc: 'assets/record-todo.png',
     recordType: 'add',
   },
   {
@@ -281,6 +296,7 @@ const MORPH_ITEMS = [
     label: '饮食',
     iconBg: '#ffe7d6',
     iconShape: 'is-circle',
+    iconSrc: 'assets/record-diet.png',
     recordType: 'diet',
   },
 ];
@@ -403,44 +419,6 @@ function PlusIcon() {
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 7v10M7 12h10"/>
     </svg>
-  );
-}
-
-function PeriodKeyIcon() {
-  return (
-    <svg className="period-keyicon" viewBox="0 0 26 26" aria-hidden="true">
-      <circle cx="13" cy="13" r="12" fill="#ffdbe7"/>
-      <path
-        d="M13 7C10 7 8 9.5 8 12.2 8 15.5 13 21 13 21 18 15.5 18 12.2 18 9.5 16 7 13 7Z"
-        fill="#ff4d88"
-        transform="rotate(180 13 13)"
-      />
-    </svg>
-  );
-}
-
-function DietKeyIcon() {
-  return (
-    <span
-      className="mock-list-icon is-circle diet-keyicon"
-      style={{ '--mock-icon-bg': '#ffe7d6' }}
-      aria-hidden="true"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8 4v6" fill="none" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M6.5 4h3" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M6.5 4V3M8 4V3M9.5 4V3" stroke="#ff9a3c" strokeWidth="1.3" strokeLinecap="round"/>
-        <path d="M8 10v9.5" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
-        <path
-          d="M15 4c0 2.5-1.8 4.5-3 4.5s-3-2-3-4.5"
-          fill="none"
-          stroke="#ff9a3c"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-        <path d="M12 8.5v11" stroke="#ff9a3c" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    </span>
   );
 }
 
@@ -1831,20 +1809,20 @@ function HealthMorphRow({
       <div className="health-morph-body">
         <div className="health-morph-left" aria-hidden="true">
           <div className="health-morph-icon-slot">
-            {item.id === 'period' ? (
-              <PeriodKeyIcon/>
-            ) : item.id === 'diet' ? (
-              <DietKeyIcon/>
-            ) : (
-              item.iconSrc ? (
-                <img className="mock-list-img" src={item.iconSrc} alt="" />
-              ) : (
+            {(() => {
+              const src = item.id === 'period' && periodEndMode && item.iconSrcEnd
+                ? item.iconSrcEnd
+                : item.iconSrc;
+              if (src) {
+                return <img className="mock-list-img" src={src} alt="" />;
+              }
+              return (
                 <span
                   className={'mock-list-icon ' + item.iconShape}
                   style={{ '--mock-icon-bg': item.iconBg }}
                 />
-              )
-            )}
+              );
+            })()}
           </div>
         </div>
         <div className="health-morph-label">{label}</div>

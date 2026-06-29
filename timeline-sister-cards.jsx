@@ -573,53 +573,34 @@ function DemoVoiceCard({entry, isNew}){
   );
 }
 
+const PERIOD_SUMMARY_ICON_SRC = {
+  flow: 'assets/record-flow.png',
+  color: 'assets/record-color.png',
+  cramps: 'assets/record-cramps.png',
+  period: 'assets/record-period-start.png',
+  'period-end': 'assets/record-period-end.png',
+};
 function PeriodSummaryIcon({type}){
-  const common = {
-    width: 22,
-    height: 22,
-    viewBox: '0 0 22 22',
-    fill: 'none',
-    'aria-hidden': 'true',
-  };
-  if(type === 'flow'){
-    return (
-      <svg {...common}>
-        <path d="M11 2.8c.8 3.2 5.8 6.4 5.8 10.8a5.8 5.8 0 1 1-11.6 0C5.2 9.2 10.2 6 11 2.8Z" fill="#ff6aa0"/>
-        <path d="M7.8 13.2c1.8 1.8 4.5 1.8 6.4 0" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
-      </svg>
-    );
-  }
-  if(type === 'color'){
-    return (
-      <svg {...common}>
-        <circle cx="11" cy="11" r="8" fill="#ff6aa0"/>
-        <circle cx="7.8" cy="8.2" r="1.3" fill="#fff" opacity=".8"/>
-        <circle cx="13.8" cy="7.8" r="1" fill="#fff" opacity=".74"/>
-        <circle cx="15.2" cy="12.4" r="1.2" fill="#fff" opacity=".68"/>
-        <path d="M8.4 14.3c1.2 1 3.5 1 4.8-.1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    );
-  }
-  if(type === 'cramps'){
-    return (
-      <svg {...common}>
-        <circle cx="11" cy="11" r="8" fill="#ff6aa0"/>
-        <path d="M12.3 5.8 8.5 11h3.1l-1.8 5.2 4-6h-3.1l1.6-4.4Z" fill="#fff"/>
-      </svg>
-    );
-  }
+  const src = PERIOD_SUMMARY_ICON_SRC[type] || PERIOD_SUMMARY_ICON_SRC.period;
   return (
-    <svg {...common}>
-      <path d="M11 2.8c.8 3.2 5.8 6.4 5.8 10.8a5.8 5.8 0 1 1-11.6 0C5.2 9.2 10.2 6 11 2.8Z" fill="#ff6aa0"/>
-      <path d="M8 14.1c1.7 1.4 4.2 1.4 6 0" stroke="#fff" strokeWidth="1.7" strokeLinecap="round"/>
-    </svg>
+    <img
+      className="tl-period-summary-icon-img"
+      src={src}
+      alt=""
+      width={22}
+      height={22}
+      draggable={false}
+      aria-hidden="true"
+    />
   );
 }
 
 function PeriodRecordSummary({entry}){
   const details = entry.periodDetails || [];
+  const periodLabel = entry.periodSummaryLabel || '月经来了';
+  const isPeriodEnd = periodLabel.indexOf('走') >= 0;
   const rows = [
-    { label: entry.periodSummaryLabel || '月经来了', icon: 'period' },
+    { label: periodLabel, icon: isPeriodEnd ? 'period-end' : 'period' },
     ...details,
   ];
   return (

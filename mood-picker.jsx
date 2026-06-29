@@ -289,6 +289,7 @@ function createMoodRecordEntry(moods){
     primaryMood: primary,
     copy: buildMoodCopy(primary),
     phaseCopy: buildPhaseCopy(primary),
+    analysisCopy: buildMoodAnalysisCopy(primary),
     followUp: buildFollowUp(primary),
     guideText: (()=>{
       const c = buildMoodCopy(primary);
@@ -358,6 +359,24 @@ function buildFollowUp(mood){
   );
   if(!triggered || !label) return '';
   return `是因为什么事${label}呢？可以通过语音告诉我，我帮你记录下来。`;
+}
+
+function buildMoodAnalysisCopy(mood){
+  const id = mood?.id || '';
+  const score = MOOD_SCORE_MAP[id] || 3;
+  if(id === 'super-happy' || id === 'excited' || id === 'heart-flutter') {
+    return '比昨天心情更好了，超开心的感觉很难得，记得把这个瞬间存进心里';
+  }
+  if(id === 'very-sad' || id === 'angry') {
+    return '经期雌激素和孕激素都处于低水平，感到好伤心是正常的生理反应，好好休息就好';
+  }
+  if(score >= 4) {
+    return '近7天心情整体在往好的方向走，状态在慢慢变好，卵泡期雌激素正在回升，身体和情绪一起在向上走';
+  }
+  if(score <= 2) {
+    return '比3天前心情有些低落，感到焦虑时，把担心的事情写下来会清晰很多';
+  }
+  return '近7天情绪整体平稳，是个调整内心节奏的好时段';
 }
 
 function buildPhaseCopy(mood){

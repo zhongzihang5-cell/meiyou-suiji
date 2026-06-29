@@ -548,10 +548,123 @@ function MoodCurveChart({data, animateToday = false, onTodayAnimated}){
   );
 }
 
+function MoodBandChart({data, animateToday = false, onTodayAnimated}){
+  const allData = data || [];
+  const W = 320;
+  const H = 138;
+  const PAD_L = 36;
+  const PAD_R = 14;
+  const PAD_T = 6;
+  const PAD_B = 22;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+  const minV = 1;
+  const maxV = 5;
+  const range = maxV - minV;
+  const DOT_R = 4.2;
+  const INNER_PAD = DOT_R + 1.5;
+  const plotTop = PAD_T + INNER_PAD;
+  const plotBottom = PAD_T + innerH - INNER_PAD;
+  const plotRange = plotBottom - plotTop;
+
+  // 三档分界：积极 v>=3.5, 一般 2.5<=v<3.5, 消极 v<2.5
+  const vToY = v => PAD_T + innerH - ((v - minV) / range) * innerH;
+  // 折线/圆点专用：内缩 DOT_R+ 让圆点不溢出色块
+  const pointVToY = v => plotBottom - ((v - minV) / range) * plotRange;
+  const yPos = vToY(3.5);
+  const yNeu = vToY(2.5);
+  const yBottom = PAD_T + innerH;
+
+  const wrapRef = React.useRef(null);
+  const doneRef = React.useRef(false);
+
+  const points = allData.map((d, i)=>{
+    const x = PAD_L + (innerW * i) / Math.max(1, (allData.length - 1));
+    const y = pointVToY(d.v);
+    return { x, y, d };
+  });
+  const line = points.length
+    ? points.map((p, i)=>(i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ')
+    : '';
+  const revealMs = animateToday ? 900 + points.length * 80 : 0;
+
+  React.useEffect(()=>{
+    if(!animateToday) return;
+    doneRef.current = false;
+    requestAnimationFrame(()=>{
+      window.scrollFeedContentIntoView?.(wrapRef.current);
+    });
+    const t = setTimeout(()=>{
+      if(doneRef.current) return;
+      doneRef.current = true;
+      onTodayAnimated?.();
+    }, revealMs + 80);
+    return ()=>clearTimeout(t);
+  }, [animateToday, onTodayAnimated, revealMs, allData]);
+
+  const labelY = vToY;
+  const bandFill = {
+    positive: '#FFF1C7',
+    neutral:  '#E2ECFB',
+    negative: '#FFD9E1',
+  };
+
+  return (
+    <div
+      ref={wrapRef}
+      className={'tl-mood-band' + (animateToday ? ' is-anim' : '')}
+      style={animateToday ? { '--mood-reveal-ms': revealMs + 'ms' } : undefined}
+      aria-hidden="true"
+    >
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none">
+        <rect x={PAD_L} y={PAD_T} width={innerW} height={yPos - PAD_T} fill={bandFill.positive}/>
+        <rect x={PAD_L} y={yPos} width={innerW} height={yNeu - yPos} fill={bandFill.neutral}/>
+        <rect x={PAD_L} y={yNeu} width={innerW} height={yBottom - yNeu} fill={bandFill.negative}/>
+
+        <text x={PAD_L - 8} y={labelY(4.5)} textAnchor="end" dominantBaseline="central"
+          fontSize="11" fontFamily="PingFang SC, -apple-system, sans-serif" fill="#8E8E93">积极</text>
+        <text x={PAD_L - 8} y={labelY(3)} textAnchor="end" dominantBaseline="central"
+          fontSize="11" fontFamily="PingFang SC, -apple-system, sans-serif" fill="#8E8E93">一般</text>
+        <text x={PAD_L - 8} y={labelY(1.5)} textAnchor="end" dominantBaseline="central"
+          fontSize="11" fontFamily="PingFang SC, -apple-system, sans-serif" fill="#8E8E93">消极</text>
+
+        {line && (
+          <path
+            d={line}
+            fill="none"
+            stroke="#ff4d88"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
+        {points.map((p, i)=>(
+          <circle
+            key={i}
+            cx={p.x.toFixed(1)}
+            cy={p.y.toFixed(1)}
+            r={DOT_R}
+            fill="#ff4d88"
+            stroke="#fff"
+            strokeWidth="1.6"
+          />
+        ))}
+      </svg>
+      <div className="tl-mood-band-axis" style={{ paddingLeft: PAD_L, paddingRight: PAD_R }}>
+        {allData.map((d, i)=>(
+          <span key={i} className={'tl-mood-band-day' + (d.isToday ? ' is-today' : '')}>
+            {d.d}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const MOOD_GUIDE_AFTER_CHART_MS = 900;
 
 function MoodInsightCard({item, isNew}){
-  const MoodFace = window.MoodFace;
   const TypewriterText = window.TypewriterText;
   const scrollFeed = window.scrollFeedContentIntoView;
   const cardRef = React.useRef(null);
@@ -562,8 +675,8 @@ function MoodInsightCard({item, isNew}){
   const primary = item.primaryMood || (item.moods && item.moods[0]);
   const moodLabel = primary?.label || '愉快';
   const chart = item.chart || {};
-  const phaseCopy = item.phaseCopy || '';
-  const hasAi = !!(phaseCopy || chart.data?.length > 0);
+  const analysisCopy = item.analysisCopy || '';
+  const hasAi = !!(analysisCopy || chart.data?.length > 0);
   const hasTodayPoint = !!(chart.data || []).some(d => d.isToday);
   const chartAnimatesToday = isNew && hasTodayPoint;
   const [chartDone, setChartDone] = React.useState(!chartAnimatesToday);
@@ -589,14 +702,10 @@ function MoodInsightCard({item, isNew}){
   }, [isNew, chartAnimatesToday]);
 
   React.useEffect(()=>{
-    if(!isNew || step !== 4 || phaseCopy) return;
+    if(!isNew || step !== 4) return;
     const t = setTimeout(()=>setStep(5), 300);
     return ()=>clearTimeout(t);
-  }, [step, isNew, phaseCopy]);
-
-  const handlePhaseTyped = React.useCallback(()=>{
-    setStep(s => Math.max(s, 5));
-  }, []);
+  }, [step, isNew]);
 
   const handleChartTodayAnimated = React.useCallback(()=>{
     setChartDone(true);
@@ -634,9 +743,9 @@ function MoodInsightCard({item, isNew}){
 
       <div className="tl-mood-insight-user" style={vis(2)}>
         <span className="tl-mood-insight-face">
-          {primary && MoodFace ? <MoodFace face={primary.face} bg={primary.bg}/> : null}
+          <img src="assets/record-mood.png" alt="" width={28} height={28} draggable={false}/>
         </span>
-        <span className="tl-mood-insight-mood-value">{moodLabel}</span>
+        <span className="tl-mood-insight-mood-value">心情：{moodLabel}</span>
       </div>
 
       {hasAi && step >= 3 && (
@@ -651,7 +760,7 @@ function MoodInsightCard({item, isNew}){
             <span className="tl-mood-insight-ai-badge">
               <span className="tl-period-analysis-spark" aria-hidden="true"/>
             </span>
-            <span className="tl-mood-insight-ai-title">近7天心情变化</span>
+            <span className="tl-mood-insight-ai-title">近7天情绪变化曲线</span>
             <svg
               className="tl-mood-insight-ai-chev"
               width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -664,25 +773,20 @@ function MoodInsightCard({item, isNew}){
 
           {aiOpen && step >= 4 && (
             <div className="tl-mood-insight-ai-body">
-              {phaseCopy && (
-                <div className="tl-mood-insight-phase-row">
-                  <span className="tl-mood-insight-phase-pill">卵泡期</span>
-                  <span className="tl-mood-insight-phase-text">
-                    {(isNew && TypewriterText)
-                      ? <TypewriterText text={phaseCopy} active charMs={55} followScroll onComplete={handlePhaseTyped}/>
-                      : phaseCopy}
-                  </span>
-                </div>
-              )}
-              {step >= 5 && chart.data?.length > 0 && (
-                <div className="tl-mood-insight-chart-block" style={vis(5)}>
-                  <div className="tl-mood-insight-inner-sep"/>
-                  <span className="tl-mood-insight-chart-label">{chart.title || '近 1 周情绪波动曲线'}</span>
-                  <MoodCurveChart
+              {chart.data?.length > 0 && (
+                <div className="tl-mood-insight-chart-block">
+                  <MoodBandChart
                     data={chart.data}
                     animateToday={chartAnimatesToday}
                     onTodayAnimated={handleChartTodayAnimated}
                   />
+                </div>
+              )}
+              {analysisCopy && (
+                <div className="tl-mood-insight-analysis-copy">
+                  {(isNew && TypewriterText)
+                    ? <TypewriterText text={analysisCopy} active charMs={55} followScroll/>
+                    : analysisCopy}
                 </div>
               )}
             </div>
@@ -798,5 +902,5 @@ Object.assign(window, {
   CycleDayHeader, TimelineRailNode, TlNodeCaption, summarizeDayItems,
   resolveDayTitleLabel, formatDayMeta,
   ModulePlaceholder, TodayGuideCard, WeeklyTrendCard, TimelineItem,
-  MoodInsightCard, MoodCurveChart,
+  MoodInsightCard, MoodCurveChart, MoodBandChart,
 });

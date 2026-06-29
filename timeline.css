@@ -1234,10 +1234,12 @@
   justify-content:center;
   flex:0 0 auto;
 }
-.tl-period-summary-icon svg{
+.tl-period-summary-icon svg,
+.tl-period-summary-icon-img{
   display:block;
   width:22px;
   height:22px;
+  object-fit:contain;
 }
 .tl-period-summary-text{
   min-width:0;
@@ -2495,6 +2497,13 @@
 .v3-period-detail-record{
   padding:2px 0 4px;
 }
+.v3-period-detail-icon-img{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  display:block;
+  object-fit:contain;
+}
 .v3-period-detail-icon{
   position:relative;
   width:20px;
@@ -2922,20 +2931,26 @@
   min-height:44px;
 }
 .tl-mood-insight-face{
-  width:40px;
-  height:40px;
-  border-radius:50%;
+  width:28px;
+  height:28px;
+  border-radius:8px;
   overflow:hidden;
   flex-shrink:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:rgba(255,77,136,0.06);
+  background:transparent;
 }
 .tl-mood-insight-face .mood-face-svg{
-  width:40px;
-  height:40px;
+  width:28px;
+  height:28px;
   display:block;
+}
+.tl-mood-insight-face img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
 }
 .tl-mood-insight-mood-meta{
   display:flex;
@@ -2948,10 +2963,10 @@
   color:var(--my-text-tertiary);
 }
 .tl-mood-insight-mood-value{
-  font-size:18px;
-  font-weight:500;
+  font-size:16px;
+  font-weight:400;
   color:var(--my-text-primary);
-  line-height:1.2;
+  line-height:1.4;
 }
 /* AI 折叠区 */
 .tl-mood-insight-ai-wrap{
@@ -3061,6 +3076,39 @@
   font-size:13px;
   line-height:1.5;
   color:var(--my-text-primary);
+}
+.tl-mood-insight-analysis-copy{
+  font-size:16px;
+  line-height:1.55;
+  color:var(--my-text-primary);
+  padding:4px 2px 0;
+}
+.tl-mood-band{
+  position:relative;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.tl-mood-band svg{
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius:8px;
+}
+.tl-mood-band-axis{
+  display:flex;
+  justify-content:space-between;
+}
+.tl-mood-band-day{
+  font-size:11px;
+  color:#8E8E93;
+  flex:1;
+  text-align:center;
+}
+.tl-mood-band-day.is-today{
+  color:var(--my-brand-red);
+  font-weight:600;
 }
 /* 曲线图（共用） */
 .tl-mood-curve{
