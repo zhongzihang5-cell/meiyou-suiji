@@ -217,6 +217,7 @@ const MORPH_ITEMS = [
     label: '症状',
     iconBg: '#dff3ff',
     iconShape: 'is-square',
+    iconSrc: 'assets/symptom-icon.png',
     recordType: 'add',
   },
   {
@@ -283,6 +284,82 @@ const MORPH_ITEMS = [
     recordType: 'diet',
   },
 ];
+
+const SYM_ICON_C = 'var(--sym-picker-coral)';
+const SYM_ICON_CD = 'var(--sym-picker-coral-deep)';
+const SYM_ICON_SKIN = '#ffd9c6';
+const SYM_ICON_HAIR = '#5b4a52';
+
+const SYMPTOM_PICKER_ICONS = {
+  none: `<svg viewBox="0 0 48 48"><path d="M16 22h-3a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3V22z" fill="${SYM_ICON_CD}"/><path d="M16 22l5-9c.6-1 2-1.4 3-.8 1 .5 1.4 1.6 1.1 2.7L24 21h7.5a3 3 0 0 1 3 3.4l-1.4 8.5a3 3 0 0 1-3 2.5H16V22z" fill="${SYM_ICON_C}"/></svg>`,
+  yaosuan: `<svg viewBox="0 0 48 48"><path d="M18 12h12c1 0 1.8.8 1.9 1.8l1.6 18c.1 1.2-.8 2.2-2 2.2H18.5c-1.2 0-2.1-1-2-2.2l1.6-18C18.2 12.8 19 12 20 12z" fill="${SYM_ICON_C}"/><path d="M24 12c2.4 0 4.4 1.6 4.4 3.6S26.4 19 24 19s-4.4-1.4-4.4-3.4S21.6 12 24 12z" fill="#fff" opacity=".55"/><path d="M22 27l4 .5-3 3 4 .5" stroke="${SYM_ICON_CD}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  futong: `<svg viewBox="0 0 48 48"><path d="M16 14h16c1 0 1.8.8 1.9 1.8l1.4 16c.1 1.2-.8 2.2-2 2.2H16.7c-1.2 0-2.1-1-2-2.2l1.4-16C16.2 14.8 17 14 18 14z" fill="${SYM_ICON_C}"/><path d="M25 20l-4 6h4l-3 5" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  zhuizhang: `<svg viewBox="0 0 48 48"><path d="M16 14h16c1 0 1.8.8 1.9 1.8l1.4 16c.1 1.2-.8 2.2-2 2.2H16.7c-1.2 0-2.1-1-2-2.2l1.4-16C16.2 14.8 17 14 18 14z" fill="${SYM_ICON_C}"/><circle cx="24" cy="29" r="1.6" fill="#fff"/><path d="M24 19v6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`,
+  ruxiong: `<svg viewBox="0 0 48 48"><path d="M14 17c3-2 7-2.5 10-2.5S31 15 34 17v9c0 5-4.5 8-10 8s-10-3-10-8v-9z" fill="${SYM_ICON_C}"/><circle cx="19.5" cy="25" r="2" fill="#fff" opacity=".7"/><circle cx="28.5" cy="25" r="2" fill="#fff" opacity=".7"/></svg>`,
+  shentisuan: `<svg viewBox="0 0 48 48"><circle cx="24" cy="14" r="3.4" fill="${SYM_ICON_C}"/><path d="M24 18c-3 0-5 1.6-5 4l1 7-1.5 8h3l1.5-7 1.5 7h3L26 29l1-7c0-2.4-2-4-5-4z" fill="${SYM_ICON_C}"/><path d="M14 18l-2-2M34 18l2-2M13 25h-2M35 25h2" stroke="${SYM_ICON_CD}" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  toutong: `<svg viewBox="0 0 48 48"><path d="M24 13c5.5 0 9 3.6 9 9 0 3-1.2 4.8-1.2 7.2 0 2-1.4 3-3 3h-9.6c-1.6 0-3-1-3-3 0-2.4-1.2-4.2-1.2-7.2 0-5.4 3.5-9 10-9z" fill="${SYM_ICON_SKIN}"/><path d="M15.5 19c0-4 4-7 8.5-7s8.5 3 8.5 7c-3-1.5-6-2.2-8.5-2.2S18.5 17.5 15.5 19z" fill="${SYM_ICON_HAIR}"/><path d="M27 20l-3 4h3l-2.5 4" stroke="${SYM_ICON_CD}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  xuanyun: `<svg viewBox="0 0 48 48"><path d="M24 17c5 0 8 3.4 8 8 0 2.8-1 4.4-1 6.6 0 1.8-1.3 2.8-2.8 2.8h-8.4c-1.5 0-2.8-1-2.8-2.8 0-2.2-1-3.8-1-6.6 0-4.6 3-8 8-8z" fill="${SYM_ICON_SKIN}"/><path d="M16.5 23c0-4 3.5-7 7.5-7s7.5 3 7.5 7c-2.6-1.4-5.2-2-7.5-2s-4.9.6-7.5 2z" fill="${SYM_ICON_HAIR}"/><circle cx="21" cy="27" r="1.1" fill="${SYM_ICON_HAIR}"/><circle cx="27" cy="27" r="1.1" fill="${SYM_ICON_HAIR}"/><path d="M15 14c1.5-1.5 4-1.5 5.5 0M27.5 14c1.5-1.5 4-1.5 5.5 0" stroke="${SYM_ICON_CD}" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`,
+  shimian: `<svg viewBox="0 0 48 48"><path d="M24 16c5 0 8 3.4 8 8 0 2.8-1 4.4-1 6.6 0 1.8-1.3 2.8-2.8 2.8h-8.4c-1.5 0-2.8-1-2.8-2.8 0-2.2-1-3.8-1-6.6 0-4.6 3-8 8-8z" fill="${SYM_ICON_SKIN}"/><path d="M16.5 22c0-4 3.5-7 7.5-7s7.5 3 7.5 7c-2.6-1.4-5.2-2-7.5-2s-4.9.6-7.5 2z" fill="${SYM_ICON_HAIR}"/><path d="M19.5 27c.6-1 2.4-1 3 0M25.5 27c.6-1 2.4-1 3 0" stroke="${SYM_ICON_HAIR}" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M30 17l3 0-3 3h3" stroke="${SYM_ICON_CD}" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  fenci: `<svg viewBox="0 0 48 48"><path d="M24 16c5 0 8 3.4 8 8 0 2.8-1 4.4-1 6.6 0 1.8-1.3 2.8-2.8 2.8h-8.4c-1.5 0-2.8-1-2.8-2.8 0-2.2-1-3.8-1-6.6 0-4.6 3-8 8-8z" fill="${SYM_ICON_SKIN}"/><path d="M16.5 22c0-4 3.5-7 7.5-7s7.5 3 7.5 7c-2.6-1.4-5.2-2-7.5-2s-4.9.6-7.5 2z" fill="${SYM_ICON_HAIR}"/><circle cx="20" cy="28" r="1.4" fill="${SYM_ICON_CD}"/><circle cx="28" cy="26" r="1.2" fill="${SYM_ICON_CD}"/><circle cx="26" cy="30" r="1" fill="${SYM_ICON_CD}"/><circle cx="22" cy="24" r="1" fill="${SYM_ICON_CD}"/></svg>`,
+  ganzao: `<svg viewBox="0 0 48 48"><path d="M24 16c5 0 8 3.4 8 8 0 2.8-1 4.4-1 6.6 0 1.8-1.3 2.8-2.8 2.8h-8.4c-1.5 0-2.8-1-2.8-2.8 0-2.2-1-3.8-1-6.6 0-4.6 3-8 8-8z" fill="${SYM_ICON_SKIN}"/><path d="M16.5 22c0-4 3.5-7 7.5-7s7.5 3 7.5 7c-2.6-1.4-5.2-2-7.5-2s-4.9.6-7.5 2z" fill="${SYM_ICON_HAIR}"/><path d="M19 26l2 1.5M27 25l-1.6 1.8M21 30l1.6-1.4M26 30l1.2-1.6" stroke="${SYM_ICON_CD}" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  shiyu: `<svg viewBox="0 0 48 48"><path d="M24 16c5 0 8 3.4 8 8 0 2.8-1 4.4-1 6.6 0 1.8-1.3 2.8-2.8 2.8h-8.4c-1.5 0-2.8-1-2.8-2.8 0-2.2-1-3.8-1-6.6 0-4.6 3-8 8-8z" fill="${SYM_ICON_SKIN}"/><path d="M16.5 22c0-4 3.5-7 7.5-7s7.5 3 7.5 7c-2.6-1.4-5.2-2-7.5-2s-4.9.6-7.5 2z" fill="${SYM_ICON_HAIR}"/><circle cx="20.5" cy="26" r="1.1" fill="${SYM_ICON_HAIR}"/><circle cx="27.5" cy="26" r="1.1" fill="${SYM_ICON_HAIR}"/><path d="M21 31c1.5-1.4 4.5-1.4 6 0" stroke="${SYM_ICON_CD}" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`,
+  lengyin: `<svg viewBox="0 0 48 48"><path d="M18 18h12l-1.4 14a2 2 0 0 1-2 1.8h-5.2a2 2 0 0 1-2-1.8L18 18z" fill="${SYM_ICON_C}"/><path d="M17 18h14" stroke="${SYM_ICON_CD}" stroke-width="2" stroke-linecap="round"/><path d="M24 9v7M24 9l-2.2 2.2M24 9l2.2 2.2M20.8 11.5l3.2 1.8 3.2-1.8" stroke="#7fd4ff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  fuxie: `<svg viewBox="0 0 48 48"><rect x="15" y="15" width="18" height="9" rx="4.5" fill="${SYM_ICON_C}"/><rect x="20" y="24" width="8" height="11" rx="2" fill="#fff" stroke="${SYM_ICON_C}" stroke-width="1.6"/><path d="M24 17v5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="24" cy="19.5" r="1.4" fill="${SYM_ICON_CD}"/></svg>`,
+  bianmi: `<svg viewBox="0 0 48 48"><path d="M16 18h16v5c0 4-3 7-8 7s-8-3-8-7v-5z" fill="${SYM_ICON_C}"/><path d="M19 30l-1.5 5M29 30l1.5 5" stroke="${SYM_ICON_C}" stroke-width="2.4" stroke-linecap="round"/><circle cx="22" cy="23" r="1.3" fill="${SYM_ICON_CD}"/><circle cx="27" cy="22" r="1.1" fill="${SYM_ICON_CD}"/><circle cx="25" cy="26" r="1" fill="${SYM_ICON_CD}"/></svg>`,
+  pibei: `<svg viewBox="0 0 48 48"><path d="M24 16c5 0 8 3.4 8 8 0 2.8-1 4.4-1 6.6 0 1.8-1.3 2.8-2.8 2.8h-8.4c-1.5 0-2.8-1-2.8-2.8 0-2.2-1-3.8-1-6.6 0-4.6 3-8 8-8z" fill="${SYM_ICON_SKIN}"/><path d="M16.5 22c0-4 3.5-7 7.5-7s7.5 3 7.5 7c-2.6-1.4-5.2-2-7.5-2s-4.9.6-7.5 2z" fill="${SYM_ICON_HAIR}"/><path d="M18.5 26l3 1M26.5 27l3-1" stroke="${SYM_ICON_HAIR}" stroke-width="1.3" stroke-linecap="round"/><path d="M21 31c1.5-1 4.5-1 6 0" stroke="${SYM_ICON_CD}" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M32 18c1.5 0 2.4 1.4 1.4 2.6-.9 1-2.6.5-2.6-.8" stroke="#7fc8ff" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`,
+  brown: `<svg viewBox="0 0 48 48"><path d="M24 14c3 3 7 5.5 7 11 0 4.4-3.1 8-7 8s-7-3.6-7-8c0-5.5 4-8 7-11z" fill="#9a5b3a"/><ellipse cx="21.5" cy="24" rx="2.2" ry="3" fill="#fff" opacity=".25"/></svg>`,
+  bleed: `<svg viewBox="0 0 48 48"><path d="M20 15c2 2.2 4 4.2 4 7 0 2.6-1.8 4.6-4 4.6s-4-2-4-4.6c0-2.8 2-4.8 4-7z" fill="#ff4d4d"/><path d="M29 22c1.4 1.6 2.8 3 2.8 5 0 1.9-1.3 3.3-2.8 3.3s-2.8-1.4-2.8-3.3c0-2 1.4-3.4 2.8-5z" fill="#ff6b6b"/><path d="M24 28c1.2 1.4 2.4 2.6 2.4 4.4 0 1.6-1.1 2.8-2.4 2.8s-2.4-1.2-2.4-2.8c0-1.8 1.2-3 2.4-4.4z" fill="#ff4d4d"/></svg>`,
+  clot: `<svg viewBox="0 0 48 48"><path d="M21 16c2.5-1 5 .6 5.4 2.8.4-1.6 2.4-2.4 3.8-1.4 1.6 1.1 1.4 3.2-.2 4 1.8.4 2.6 2.6 1.2 4-1.2 1.2-3 .8-3.8-.6-.4 1.8-2.6 2.6-4.2 1.4-.6 1.4-2.4 1.8-3.6.8-1.4-1.2-1-3.4.8-3.8-1.6-.8-1.8-3 0-4 1.2-.6 2.6-.2 3.2.8-.2-1.6 1-3.4 1.6-4z" fill="#c2334a"/><circle cx="23" cy="24" r="1.4" fill="#8a1f33"/><circle cx="28" cy="26" r="1.2" fill="#8a1f33"/></svg>`,
+  white: `<svg viewBox="0 0 48 48"><path d="M24 14c3 3 7 5.5 7 11 0 4.4-3.1 8-7 8s-7-3.6-7-8c0-5.5 4-8 7-11z" fill="#fbf3e4" stroke="#e7d9c2" stroke-width="1.2"/><ellipse cx="21.5" cy="24" rx="2" ry="2.8" fill="#fff"/></svg>`,
+  zhangqi: `<svg viewBox="0 0 48 48"><path d="M16 16h16c1 0 1.8.8 1.9 1.8l1.2 14c.1 1.2-.8 2.2-2 2.2H16.9c-1.2 0-2.1-1-2-2.2l1.2-14C16.2 16.8 17 16 18 16z" fill="${SYM_ICON_C}"/><circle cx="21" cy="25" r="2.2" fill="#fff" opacity=".7"/><circle cx="27" cy="23" r="1.6" fill="#fff" opacity=".7"/><circle cx="25.5" cy="29" r="1.8" fill="#fff" opacity=".7"/></svg>`,
+};
+
+const SYMPTOM_PICKER_GROUPS = [
+  {
+    id: 'body',
+    title: '身体症状',
+    items: [
+      { id: 'no_symptom', name: '没有症状', icon: 'none', imgSrc: 'assets/symptom-picker-none.png', exclusive: true },
+      { id: 'back_ache', name: '腰酸', icon: 'yaosuan', imgSrc: 'assets/symptom-back.png' },
+      { id: 'cramps', name: '腹痛', icon: 'futong', imgSrc: 'assets/symptom-cramp.png' },
+      { id: 'bloat_low', name: '小腹坠胀', icon: 'zhuizhang', imgSrc: 'assets/symptom-bloat.png' },
+      { id: 'breast_pain', name: '乳房胀痛', icon: 'ruxiong', imgSrc: 'assets/symptom-breast.png' },
+      { id: 'body_ache', name: '身体酸痛', icon: 'shentisuan', imgSrc: 'assets/symptom-sore.png' },
+      { id: 'headache', name: '头痛', icon: 'toutong', imgSrc: 'assets/symptom-picker-headache.png' },
+      { id: 'dizzy', name: '眩晕', icon: 'xuanyun', imgSrc: 'assets/symptom-picker-dizzy.png' },
+      { id: 'insomnia', name: '失眠', icon: 'shimian', imgSrc: 'assets/symptom-insomnia.png' },
+      { id: 'acne', name: '粉刺', icon: 'fenci', imgSrc: 'assets/symptom-acne.png' },
+      { id: 'dry_skin', name: '皮肤干燥', icon: 'ganzao', imgSrc: 'assets/symptom-picker-dry-skin.png' },
+      { id: 'no_appetite', name: '食欲不振', icon: 'shiyu', imgSrc: 'assets/symptom-picker-no-appetite.png' },
+      { id: 'cold_crave', name: '贪冷饮', icon: 'lengyin', imgSrc: 'assets/symptom-picker-cold-crave.png' },
+      { id: 'diarrhea', name: '腹泻', icon: 'fuxie', imgSrc: 'assets/symptom-diarrhea.png' },
+      { id: 'constipation', name: '便秘', icon: 'bianmi', imgSrc: 'assets/symptom-picker-constipation.png' },
+      { id: 'fatigue', name: '疲惫', icon: 'pibei', imgSrc: 'assets/symptom-tired.png' },
+    ],
+  },
+  {
+    id: 'discharge',
+    title: '阴道分泌物',
+    items: [
+      { id: 'discharge_brown', name: '褐色分泌物', icon: 'brown', imgSrc: 'assets/symptom-discharge.png' },
+      { id: 'discharge_blood', name: '出血', icon: 'bleed', imgSrc: 'assets/symptom-picker-bleeding.png' },
+      { id: 'discharge_clot', name: '有血块', icon: 'clot', imgSrc: 'assets/symptom-picker-blood-clot.png' },
+      { id: 'discharge_more', name: '白带增多', icon: 'white', imgSrc: 'assets/symptom-picker-discharge-more.png' },
+    ],
+  },
+  {
+    id: 'more',
+    title: '更多症状',
+    editable: true,
+    items: [
+      { id: 'gas', name: '胃肠胀气', icon: 'zhangqi', imgSrc: 'assets/symptom-picker-gas.png', removable: true },
+    ],
+  },
+];
+
+const SYMPTOM_PICKER_ITEM_MAP = SYMPTOM_PICKER_GROUPS
+  .flatMap((group) => group.items)
+  .reduce((map, item) => ({ ...map, [item.id]: item }), {});
 
 const DIET_MEAL_TYPES = [
   { id: 'breakfast', label: '早餐', defaultTime: '08:00' },
@@ -1201,15 +1278,178 @@ function DietAddSheet({ open, onClose, onDone }) {
   return sheet;
 }
 
+function SymptomPickerGlyph({ icon, imgSrc, label }) {
+  if (imgSrc) return <img src={imgSrc} alt="" draggable={false} />;
+  return <span dangerouslySetInnerHTML={{ __html: SYMPTOM_PICKER_ICONS[icon] || '' }} />;
+}
+
+function SymptomPickerSheet({ open, value = [], onCancel, onConfirm }) {
+  const [portalTarget] = useState(() => document.querySelector('.phone'));
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [editing, setEditing] = useState(false);
+  const [removedIds, setRemovedIds] = useState(new Set());
+  const [toast, setToast] = useState('');
+  const toastTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setSelectedIds(new Set((value || []).map((item) => item.id)));
+    setEditing(false);
+    setRemovedIds(new Set());
+    setToast('');
+  }, [open, value]);
+
+  useEffect(() => {
+    const phone = portalTarget;
+    if (!phone) return undefined;
+    if (open) phone.classList.add('is-symptom-picker-open');
+    else phone.classList.remove('is-symptom-picker-open');
+    return () => phone.classList.remove('is-symptom-picker-open');
+  }, [open, portalTarget]);
+
+  useEffect(() => () => clearTimeout(toastTimerRef.current), []);
+
+  const showToast = (text) => {
+    setToast(text);
+    clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(''), 1800);
+  };
+
+  const toggleItem = (item) => {
+    if (editing && item.removable) {
+      setRemovedIds((prev) => new Set([...prev, item.id]));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+      showToast('已移除「' + item.name + '」');
+      return;
+    }
+
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      const isOn = next.has(item.id);
+      if (item.exclusive) {
+        next.clear();
+        if (!isOn) next.add(item.id);
+        return next;
+      }
+      SYMPTOM_PICKER_GROUPS
+        .flatMap((group) => group.items)
+        .filter((candidate) => candidate.exclusive)
+        .forEach((candidate) => next.delete(candidate.id));
+      if (isOn) next.delete(item.id);
+      else next.add(item.id);
+      return next;
+    });
+  };
+
+  const confirm = () => {
+    if (selectedIds.size === 0) {
+      showToast('未选择任何症状');
+      return;
+    }
+    const selected = [...selectedIds]
+      .map((id) => SYMPTOM_PICKER_ITEM_MAP[id])
+      .filter(Boolean);
+    onConfirm?.(selected);
+  };
+
+  if (!open || !portalTarget) return null;
+
+  const picker = (
+    <>
+      <div className="symptom-picker-mask" onClick={onCancel} aria-hidden="true"/>
+      <div className="symptom-picker-sheet" role="dialog" aria-modal="true" aria-label="症状">
+        <header className="symptom-picker-nav">
+          <button type="button" className="symptom-picker-nav-btn" onClick={onCancel}>取消</button>
+          <h2 className="symptom-picker-title">症状</h2>
+          <button type="button" className="symptom-picker-nav-btn is-primary" onClick={confirm}>确定</button>
+        </header>
+        <div className="symptom-picker-scroll">
+          {SYMPTOM_PICKER_GROUPS.map((group) => {
+            const items = group.items.filter((item) => !removedIds.has(item.id));
+            return (
+              <section
+                key={group.id}
+                className={'symptom-picker-card' + (editing && group.editable ? ' editing' : '')}
+              >
+                <div className="symptom-picker-card-head">
+                  <h3 className="symptom-picker-card-title">{group.title}</h3>
+                  {group.editable ? (
+                    <button
+                      type="button"
+                      className={'symptom-picker-edit' + (editing ? ' is-active' : '')}
+                      onClick={() => setEditing((current) => !current)}
+                    >
+                      {editing ? '完成' : '编辑'}
+                    </button>
+                  ) : null}
+                </div>
+                <div className="symptom-picker-grid">
+                  {items.map((item) => {
+                    const selected = selectedIds.has(item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={
+                          'symptom-picker-cell'
+                          + (selected ? ' is-selected' : '')
+                          + (item.removable ? ' removable' : '')
+                        }
+                        aria-pressed={selected}
+                        onClick={() => toggleItem(item)}
+                      >
+                        <span className="symptom-picker-check" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </span>
+                        <span className="symptom-picker-del" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none"><path d="M6 12h12" stroke="#fff" strokeWidth="3" strokeLinecap="round"/></svg>
+                        </span>
+                        <span className="symptom-picker-icon" aria-hidden="true">
+                          <SymptomPickerGlyph icon={item.icon} imgSrc={item.imgSrc} label={item.name}/>
+                        </span>
+                        <span className="symptom-picker-label">{item.name}</span>
+                      </button>
+                    );
+                  })}
+                  {group.editable ? (
+                    <button type="button" className="symptom-picker-cell add" onClick={() => showToast('打开「添加自定义症状」')}>
+                      <span className="symptom-picker-icon" aria-hidden="true">
+                        <svg viewBox="0 0 48 48"><path d="M24 17v14M17 24h14" stroke="#bdbdc2" strokeWidth="2.4" strokeLinecap="round"/></svg>
+                      </span>
+                      <span className="symptom-picker-label">添加症状</span>
+                    </button>
+                  ) : null}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+        <div className={'symptom-picker-toast' + (toast ? ' show' : '')}>{toast}</div>
+      </div>
+    </>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(picker, portalTarget);
+  }
+  return picker;
+}
+
 function HealthMorphRecordPane({
   item,
   periodYes,
   onPeriodYes,
   onPeriodNo,
   onDietAdd,
+  onSymptomAdd,
   onPeriodDetailAdd,
   periodDetailDemoEnabled,
   periodDetailValues,
+  symptomValues,
 }) {
   if (item.recordType === 'segment') {
     return (
@@ -1283,6 +1523,24 @@ function HealthMorphRecordPane({
     );
   }
 
+  if (item.id === 'symptom') {
+    return (
+      <div className="list-symptom-actions">
+        {symptomValues?.length ? (
+          <div className="list-symptom-tags" aria-label="已选症状">
+            {symptomValues.slice(0, 2).map((symptom) => (
+              <span key={symptom.id}>{symptom.name}</span>
+            ))}
+            {symptomValues.length > 2 ? <span>+{symptomValues.length - 2}</span> : null}
+          </div>
+        ) : null}
+        <button type="button" className="list-add" onClick={onSymptomAdd} aria-label={'新增' + item.label}>
+          <PlusIcon/>
+        </button>
+      </div>
+    );
+  }
+
   if (['flow', 'color', 'cramps'].includes(item.id)) {
     const currentValue = periodDetailValues?.[item.id];
     return (
@@ -1316,9 +1574,11 @@ function HealthMorphRow({
   onPeriodYes,
   onPeriodNo,
   onDietAdd,
+  onSymptomAdd,
   onPeriodDetailAdd,
   periodDetailDemoEnabled,
   periodDetailValues,
+  symptomValues,
 }) {
   const delay = (index * 50) + 'ms';
   const label = item.id === 'period' && periodEndMode ? '月经走喽' : item.label;
@@ -1333,10 +1593,14 @@ function HealthMorphRow({
             ) : item.id === 'diet' ? (
               <DietKeyIcon/>
             ) : (
-              <span
-                className={'mock-list-icon ' + item.iconShape}
-                style={{ '--mock-icon-bg': item.iconBg }}
-              />
+              item.iconSrc ? (
+                <img className="mock-list-img" src={item.iconSrc} alt="" />
+              ) : (
+                <span
+                  className={'mock-list-icon ' + item.iconShape}
+                  style={{ '--mock-icon-bg': item.iconBg }}
+                />
+              )
             )}
           </div>
         </div>
@@ -1348,9 +1612,11 @@ function HealthMorphRow({
             onPeriodYes={onPeriodYes}
             onPeriodNo={onPeriodNo}
             onDietAdd={onDietAdd}
+            onSymptomAdd={onSymptomAdd}
             onPeriodDetailAdd={onPeriodDetailAdd}
             periodDetailDemoEnabled={periodDetailDemoEnabled}
             periodDetailValues={periodDetailValues}
+            symptomValues={symptomValues}
           />
         </div>
       </div>
@@ -1364,9 +1630,11 @@ function HealthMorphList({
   onPeriodYes,
   onPeriodNo,
   onDietAdd,
+  onSymptomAdd,
   onPeriodDetailAdd,
   periodDetailDemoEnabled,
   periodDetailValues,
+  symptomValues,
 }) {
   return (
     <div className="health-morph-list" aria-label="健康记录列表">
@@ -1380,9 +1648,11 @@ function HealthMorphList({
           onPeriodYes={onPeriodYes}
           onPeriodNo={onPeriodNo}
           onDietAdd={onDietAdd}
+          onSymptomAdd={onSymptomAdd}
           onPeriodDetailAdd={onPeriodDetailAdd}
           periodDetailDemoEnabled={periodDetailDemoEnabled}
           periodDetailValues={periodDetailValues}
+          symptomValues={symptomValues}
         />
       ))}
     </div>
@@ -1531,6 +1801,7 @@ function RecordPage({
   onPeriodReset,
   onPeriodRecordSubmit,
   onPeriodDetailRecordSubmit,
+  onSymptomRecordSubmit,
   periodDetailValues,
   periodDetailDemoEnabled = false,
   periodFlowEnabled = true,
@@ -1551,6 +1822,8 @@ function RecordPage({
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [calendarOffset, setCalendarOffset] = useState(0);
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
+  const [symptomSheetOpen, setSymptomSheetOpen] = useState(false);
+  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
   const [singlePickerType, setSinglePickerType] = useState(null);
   const dragAreaRef = useRef(null);
@@ -1805,9 +2078,11 @@ function RecordPage({
             onPeriodYes={() => handlePeriodToggle(true)}
             onPeriodNo={() => handlePeriodToggle(false)}
             onDietAdd={() => setDietSheetOpen(true)}
+            onSymptomAdd={() => setSymptomSheetOpen(true)}
             onPeriodDetailAdd={openPeriodDetailPicker}
             periodDetailDemoEnabled={periodDetailDemoEnabled}
             periodDetailValues={periodDetailValues}
+            symptomValues={selectedSymptoms}
           />
         </div>
       </div>
@@ -1844,6 +2119,19 @@ function RecordPage({
       <DietAddSheet
         open={dietSheetOpen}
         onClose={() => setDietSheetOpen(false)}
+      />
+      <SymptomPickerSheet
+        open={symptomSheetOpen}
+        value={selectedSymptoms}
+        onCancel={() => setSymptomSheetOpen(false)}
+        onConfirm={(symptoms) => {
+          setSelectedSymptoms(symptoms);
+          setSymptomSheetOpen(false);
+          onSymptomRecordSubmit?.(symptoms.map((symptom) => ({
+            ...symptom,
+            label: symptom.label || symptom.name,
+          })));
+        }}
       />
       <PeriodRecordPicker
         open={periodPickerOpen}

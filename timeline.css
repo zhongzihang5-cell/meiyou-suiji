@@ -2636,10 +2636,10 @@
   font-family:inherit;
 }
 .v3-card-ai-badge{
-  width:18px;
-  height:18px;
-  border-radius:9px;
-  background:#FFE0EC;
+  width:24px;
+  height:24px;
+  border-radius:0;
+  background:transparent;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -2651,9 +2651,10 @@
   font-weight:500;
 }
 .v3-card-ai-title{
-  font-size:12.5px;
+  font-size:16px;
+  line-height:1.35;
   color:#323232;
-  font-weight:500;
+  font-weight:600;
   flex:1;
   text-align:left;
   white-space:nowrap;
@@ -2885,14 +2886,13 @@
   font-family:inherit;
 }
 .tl-mood-insight-ai-badge{
-  width:18px;
-  height:18px;
-  border-radius:9px;
-  background:var(--my-brand-soft);
+  width:24px;
+  height:24px;
+  border-radius:0;
+  background:transparent;
   display:flex;
   align-items:center;
   justify-content:center;
-  color:var(--my-brand-red);
   flex-shrink:0;
 }
 .tl-mood-insight-ai-label{
@@ -2901,9 +2901,10 @@
   font-weight:500;
 }
 .tl-mood-insight-ai-title{
-  font-size:12.5px;
+  font-size:16px;
+  line-height:1.35;
   color:var(--my-text-primary);
-  font-weight:500;
+  font-weight:600;
   flex:1;
   text-align:left;
 }

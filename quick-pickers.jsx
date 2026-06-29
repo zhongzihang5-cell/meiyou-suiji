@@ -392,7 +392,7 @@ function buildWeightAiBlock(value, unit){
     time,
     kind:'chart',
     chartType:'weightTrend',
-    title:'近7日体重趋势',
+    title:'近7天体重变化',
     chartData: buildWeightWeekChartData(todayKg, unit),
     weightUnit: unit,
     noteParts: buildWeightAnalysisNote(value, unit),

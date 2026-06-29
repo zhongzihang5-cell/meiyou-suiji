@@ -1104,14 +1104,10 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
               }}
               aria-expanded={open}
             >
-              <div style={{
-                width:18, height:18, borderRadius:9, background:TL_SOFT,
-                display:'flex', alignItems:'center', justifyContent:'center',
-              }}>
-                <TLKindIcon kind="chart" color={TL_PRIMARY} size={10}/>
-              </div>
-              <span style={{fontSize:11, color:TL_PRIMARY, fontWeight:500}}>AI</span>
-              <span style={{fontSize:12.5, color:TL_TEXT, fontWeight:500, flex:1, textAlign:'left'}}>{a.title}</span>
+              <span className="v3-card-ai-badge">
+                <span className="tl-period-analysis-spark" aria-hidden="true"/>
+              </span>
+              <span className="v3-card-ai-title">{a.title}</span>
               <V3Chevron open={open}/>
             </button>
             {open && (

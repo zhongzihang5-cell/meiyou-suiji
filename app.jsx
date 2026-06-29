@@ -731,13 +731,21 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
-  const submitSymptomRecord = (symptoms)=>{
+  const appendSymptomRecord = (symptoms, { allowFirstDrop = false } = {})=>{
     markUserRecorded();
     const entry = window.createSymptomRecordEntry(symptoms);
-    if(recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
+    if(allowFirstDrop && recordFeedback && tryStartFirstDrop(entry, entry.body || '')) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitSymptomRecord = (symptoms)=>{
+    appendSymptomRecord(symptoms, { allowFirstDrop: true });
+  };
+
+  const submitRecordTabSymptomRecord = (symptoms)=>{
+    appendSymptomRecord(symptoms);
   };
 
   const submitWeightRecord = (payload)=>{
@@ -936,6 +944,7 @@ function App(){
           }}
           onPeriodRecordSubmit={(value)=>{ periodRecordRef.current = value || null; }}
           onPeriodDetailRecordSubmit={submitPeriodDetailRecord}
+          onSymptomRecordSubmit={submitRecordTabSymptomRecord}
           periodDetailValues={periodDetailDraft}
           periodDetailDemoEnabled={periodEndRecordCompleted}
         />

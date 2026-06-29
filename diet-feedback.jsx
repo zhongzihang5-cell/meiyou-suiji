@@ -99,16 +99,11 @@ function DietTrendChart({ data, todayKcal }){
   );
 }
 
-function DietSecBHeader({ title = '近 7 日饮食热量' }){
+function DietSecBHeader({ title = '近7天饮食热量' }){
   return (
     <div className="diet-fb-b-header">
       <span className="diet-fb-ai-badge">
-        <svg viewBox="0 0 16 16" fill="none">
-          <rect x="1" y="10" width="3" height="5" rx="1" fill="currentColor" opacity=".4"/>
-          <rect x="6" y="6" width="3" height="9" rx="1" fill="currentColor" opacity=".6"/>
-          <rect x="11" y="2" width="3" height="13" rx="1" fill="currentColor"/>
-        </svg>
-        AI
+        <span className="tl-period-analysis-spark" aria-hidden="true"/>
       </span>
       <span className="diet-fb-b-title">{title}</span>
     </div>
@@ -464,7 +459,7 @@ function DietAiInsightsShell({ displayScenario, isNew, children }){
 }
 
 function DietAiCollapsibleSection({
-  title = '近 7 日饮食热量',
+  title = '近7天饮食热量',
   defaultOpen = true,
   animateIn = false,
   embedded = false,
@@ -483,12 +478,7 @@ function DietAiCollapsibleSection({
           aria-expanded={open}
         >
           <span className="diet-fb-ai-badge">
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <rect x="1" y="10" width="3" height="5" rx="1" fill="currentColor" opacity=".4"/>
-              <rect x="6" y="6" width="3" height="9" rx="1" fill="currentColor" opacity=".6"/>
-              <rect x="11" y="2" width="3" height="13" rx="1" fill="currentColor"/>
-            </svg>
-            AI
+            <span className="tl-period-analysis-spark" aria-hidden="true"/>
           </span>
           <span className="diet-fb-b-title">{title}</span>
           <DietAiChevron open={open}/>
@@ -615,12 +605,7 @@ function DietSecBLoading(){
     <div className="diet-fb-sec-b diet-fb-sec-loading" aria-live="polite">
       <div className="diet-fb-b-header diet-fb-ai-loading-line">
         <span className="diet-fb-ai-badge">
-          <svg viewBox="0 0 16 16" fill="none">
-            <rect x="1" y="10" width="3" height="5" rx="1" fill="currentColor" opacity=".4"/>
-            <rect x="6" y="6" width="3" height="9" rx="1" fill="currentColor" opacity=".6"/>
-            <rect x="11" y="2" width="3" height="13" rx="1" fill="currentColor"/>
-          </svg>
-          AI
+          <span className="tl-period-analysis-spark" aria-hidden="true"/>
         </span>
       </div>
       <div className="diet-fb-recog">

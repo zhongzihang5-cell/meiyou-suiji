@@ -386,7 +386,7 @@
 .diet-fb-b-header{
   display:flex;
   align-items:center;
-  gap:5px;
+  gap:6px;
   margin-bottom:10px;
 }
 
@@ -398,7 +398,7 @@
   width:100%;
   display:flex;
   align-items:center;
-  gap:5px;
+  gap:6px;
   padding:14px 16px;
   border:none;
   background:transparent;
@@ -443,21 +443,18 @@
 }
 
 .diet-fb-ai-badge{
+  width:24px;
+  height:24px;
   display:inline-flex;
   align-items:center;
-  gap:3px;
-  font-size:12px;
-  color:#ff4d88;
-  font-weight:500;
-}
-.diet-fb-ai-badge svg{
-  width:13px;
-  height:13px;
+  justify-content:center;
+  flex-shrink:0;
 }
 .diet-fb-b-title{
-  font-size:14px;
-  color:rgba(0,0,0,0.6);
-  font-weight:400;
+  font-size:16px;
+  line-height:1.35;
+  color:#323232;
+  font-weight:600;
 }
 
 /* 柱状图容器 */

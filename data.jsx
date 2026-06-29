@@ -311,7 +311,7 @@ const TIMELINE_BLOCKS = [
         },
         ai:{
           id:'t6', time:'09:31', kind:'chart', chartType:'weightTrend',
-          title:'近7日体重趋势',
+          title:'近7天体重变化',
           weightUnit:'kg',
           noteParts:{
             prefix:'比昨天 ',
@@ -372,7 +372,7 @@ const TIMELINE_BLOCKS = [
         },
         ai:{
           id:'t4', time:'12:06', kind:'chart', chartType:'caloriePanel',
-          title:'午餐卡路里', note:'日目标 1800 · 已摄入 1126',
+          title:'今日卡路里摄入量', note:'日目标 1800 · 已摄入 1126',
         },
         aiDefaultOpen:true,
       },

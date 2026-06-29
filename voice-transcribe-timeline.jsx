@@ -121,7 +121,7 @@ function MoodCard() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <Sparkle size={14} />
-          <div style={{ fontSize: 13, fontWeight: 600, color: VT_T.ink }}>AI 情绪与周期分析</div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: VT_T.ink }}>近7天心情变化</div>
         </div>
         <ChevDown />
       </div>

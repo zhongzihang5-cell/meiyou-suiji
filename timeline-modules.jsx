@@ -649,12 +649,9 @@ function MoodInsightCard({item, isNew}){
             aria-expanded={aiOpen}
           >
             <span className="tl-mood-insight-ai-badge">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M4 20V6M4 20h16M8 16v-4M12 16V8M16 16v-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
-              </svg>
+              <span className="tl-period-analysis-spark" aria-hidden="true"/>
             </span>
-            <span className="tl-mood-insight-ai-label">AI</span>
-            <span className="tl-mood-insight-ai-title">情绪与周期分析</span>
+            <span className="tl-mood-insight-ai-title">近7天心情变化</span>
             <svg
               className="tl-mood-insight-ai-chev"
               width="14" height="14" viewBox="0 0 24 24" fill="none"
