@@ -1031,11 +1031,12 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
   const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
+  const isPeriodQuick = p?.kind === 'period';
   const derivedKind = p?.kind === 'period-detail'
     ? 'period-detail'
     : p?.kind === 'daily-record'
       ? 'daily-record'
-      : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
+      : (isPeriodQuick || p?.kind === 'symptom') ? 'quick' : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
   const derivedId = entryId || primary?.id;
   const editPayload = p?.kind === 'period-detail'
     ? {
@@ -1054,6 +1055,22 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           icon: p.icon,
           iconText: p.iconText || '',
         }
+      : isPeriodQuick
+        ? {
+            kind: 'quick',
+            time: p.time,
+            recordLabel: p.periodLabel || p.text || '月经来了',
+            recordValue: '',
+            icon: (p.periodLabel || p.text || '').indexOf('走') >= 0 ? 'period-end' : 'period',
+          }
+        : p?.kind === 'symptom'
+          ? {
+              kind: 'quick',
+              time: p.time,
+              recordLabel: p.symptomLabel || '症状',
+              recordValue: p.symptomValue || p.text || '',
+              icon: 'symptom',
+            }
       : null;
   const [photoAnalysis, setPhotoAnalysis] = React.useState(()=> !!(isNew && p?.kind === 'image'));
   const handlePhotoAnalysisComplete = React.useCallback(()=> setPhotoAnalysis(false), []);
