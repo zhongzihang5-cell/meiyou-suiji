@@ -658,25 +658,18 @@ function V3Chevron({open}){
 }
 
 function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
-  const MoreMenu = window.CardMoreMenu;
-  const canEdit = !!(time && entryId && window.openEditModal);
-  const canDelete = !!(entryId && window.deleteTimelineEntry);
   if(!time && !title) return null;
   return (
     <div style={{display:'flex', alignItems:'center', gap:6, minWidth:0}}>
       {time && (
-        <button
-          type="button"
-          onClick={canEdit ? (()=>window.openEditModal(entryId, entryKind, editPayload)) : undefined}
-          aria-label={canEdit ? `编辑 ${time}` : undefined}
+        <span
           style={{
           fontSize:12, color:'rgba(0,0,0,0.5)', fontWeight:400,
           fontVariantNumeric:'tabular-nums', flexShrink:0,
           padding:0, border:0, borderRadius:0,
           lineHeight:1.2, background:'transparent',
-          cursor:canEdit ? 'pointer' : 'default',
           fontFamily:'inherit',
-        }}>{time}</button>
+        }}>{time}</span>
       )}
       {title && (
         <div style={{
@@ -684,7 +677,33 @@ function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
           flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
         }}>{title}</div>
       )}
-      {MoreMenu && <MoreMenu delayMs={isNew ? 600 : 0} entryId={entryId} entryKind={entryKind} editPayload={editPayload} onEdit={window.openEditModal} onDelete={canDelete ? window.deleteTimelineEntry : undefined}/>}
+    </div>
+  );
+}
+
+function V3EditableRecordArea({entryId, entryKind, editPayload, children}){
+  const canEdit = !!(entryId && window.openEditModal);
+  const handleClick = React.useCallback(()=>{
+    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
+  }, [canEdit, entryId, entryKind, editPayload]);
+  const handleKeyDown = React.useCallback((event)=>{
+    if(!canEdit) return;
+    if(event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      window.openEditModal(entryId, entryKind, editPayload);
+    }
+  }, [canEdit, entryId, entryKind, editPayload]);
+
+  return (
+    <div
+      className={canEdit ? 'tl-edit-hit-area' : undefined}
+      role={canEdit ? 'button' : undefined}
+      tabIndex={canEdit ? 0 : undefined}
+      aria-label={canEdit ? '编辑记录' : undefined}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      {children}
     </div>
   );
 }
@@ -1105,6 +1124,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     >
       <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>
       <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : (p.sourceFrom ? 0 : 8)}}>
+        <V3EditableRecordArea entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}>
         <V3v2PrimaryBody
           entry={p}
           showTags={showTags}
@@ -1113,6 +1133,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           isNew={isNew}
           onPhotoAnalysisComplete={handlePhotoAnalysisComplete}
         />
+        </V3EditableRecordArea>
       </div>
       {p.sourceFrom && (
         <div className={primary._sourceNew ? 'tl-demo-source-in' : ''} style={{

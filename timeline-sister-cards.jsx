@@ -121,23 +121,38 @@ function CardMoreMenu({delayMs = 0, entryId, entryKind, onEdit, onDelete, editPa
   );
 }
 
-function TlRecCardHead({time, isNew, entryId, entryKind, onEdit}){
+function TlRecCardHead({time}){
   if(!time) return null;
-  const canEdit = !!(entryId && onEdit);
   return (
     <div className="tl-rec-card-hd">
-      {canEdit ? (
-        <button
-          type="button"
-          className="tl-rec-card-time tl-rec-card-time-action"
-          onClick={()=>onEdit(entryId, entryKind)}
-          aria-label={`编辑 ${time}`}
-        >
-          {time}
-        </button>
-      ) : (
-        <span className="tl-rec-card-time">{time}</span>
-      )}
+      <span className="tl-rec-card-time">{time}</span>
+    </div>
+  );
+}
+
+function EditableRecordArea({entryId, entryKind, editPayload, children, className}){
+  const canEdit = !!(entryId && window.openEditModal);
+  const handleClick = React.useCallback(()=>{
+    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
+  }, [canEdit, entryId, entryKind, editPayload]);
+  const handleKeyDown = React.useCallback((event)=>{
+    if(!canEdit) return;
+    if(event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      window.openEditModal(entryId, entryKind, editPayload);
+    }
+  }, [canEdit, entryId, entryKind, editPayload]);
+
+  return (
+    <div
+      className={(className || '')+(canEdit ? ' tl-edit-hit-area' : '')}
+      role={canEdit ? 'button' : undefined}
+      tabIndex={canEdit ? 0 : undefined}
+      aria-label={canEdit ? '编辑记录' : undefined}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      {children}
     </div>
   );
 }
@@ -551,8 +566,8 @@ function DemoVoiceCard({entry, isNew}){
 
   return (
     <div className={'tl-card tl-t5-card'+(isNew?' tl-demo-expand':'')} data-entry-id={entry.id}>
-      <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind="mixed" onEdit={window.openEditModal}/>
-      <section className="tl-t5-main">
+      <TlRecCardHead time={entry.time}/>
+      <EditableRecordArea entryId={entry.id} entryKind="mixed" className="tl-t5-main">
         <div className="tl-t5-body" style={{minHeight:24, lineHeight:'1.6', fontSize:16}}>
           {fullText.substring(0, typedLen)}
           {!typeDone && <span className="ai-caret"/>}
@@ -568,7 +583,7 @@ function DemoVoiceCard({entry, isNew}){
             ))}
           </div>
         )}
-      </section>
+      </EditableRecordArea>
     </div>
   );
 }
@@ -638,14 +653,17 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   const analysisAnimateText = hasAnalysis && !entry.instantAnalysis && (
     !!animateAnalysis || (analysisProps.playAnimation > 0)
   );
+  const entryKind = entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick';
 
   return (
     <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')+(isPeriodSync?' has-period-summary':'')} data-entry-id={entry.id}>
-      <TlRecCardHead time={entry.time} isNew={isNew} entryId={entry.id} entryKind={entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick'} onEdit={window.openEditModal}/>
+      <TlRecCardHead time={entry.time}/>
       {isPeriodSync ? (
-        <PeriodRecordSummary entry={entry}/>
+        <EditableRecordArea entryId={entry.id} entryKind={entryKind}>
+          <PeriodRecordSummary entry={entry}/>
+        </EditableRecordArea>
       ) : (
-        <section className="tl-t5-main">
+        <EditableRecordArea entryId={entry.id} entryKind={entryKind} className="tl-t5-main">
           {isVtLive ? (
             <div className="tl-voice-block tl-vt-live-body">
               {text ? (
@@ -673,7 +691,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
               <RecordedTags tags={tags} layout={tagLayout}/>
             </div>
           )}
-        </section>
+        </EditableRecordArea>
       )}
 
       {hasAiNote && (

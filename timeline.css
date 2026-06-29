@@ -1195,6 +1195,18 @@
 .tl-rec-card-time-action:active{
   opacity:0.68;
 }
+.tl-edit-hit-area{
+  cursor:pointer;
+  border-radius:10px;
+  outline:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.tl-edit-hit-area:active{
+  opacity:0.72;
+}
+.tl-edit-hit-area:focus-visible{
+  box-shadow:0 0 0 2px rgba(255,77,136,0.24);
+}
 .tl-rec-card-kind{
   display:inline-flex;
   align-items:center;
