@@ -1409,6 +1409,8 @@ function DietAddSheet({ open, onClose, onDone }) {
 
   const hasReview = addedFoods.length > 0;
   const mealLabel = DIET_MEAL_TYPES.find((m) => m.id === mealType)?.label || '早餐';
+  const totalKcal = addedFoods.reduce((sum, food) => sum + (food.kcal || 0), 0);
+  const canConfirm = addedFoods.length > 0;
 
   const updateFood = (id, field, value) => {
     setAddedFoods((prev) => prev.map((f) => f.id === id ? { ...f, [field]: value } : f));
@@ -1458,7 +1460,7 @@ function DietAddSheet({ open, onClose, onDone }) {
             <header className="diet-add-header">
               <button type="button" className="diet-add-header-btn" onClick={handleClose}>取消</button>
               <h2 className="diet-add-title">添加饮食</h2>
-              <button type="button" className="diet-add-header-btn is-primary" onClick={handleSave}>确定</button>
+              <button type="button" className="diet-add-header-btn is-primary" onClick={handleSave} disabled={!canConfirm}>确定</button>
             </header>
 
             <div className="diet-add-body">
@@ -1579,6 +1581,10 @@ function DietAddSheet({ open, onClose, onDone }) {
                         )
                       );
                     })}
+                  </section>
+                  <section className="diet-review-row diet-review-readonly-row">
+                    <span className="diet-review-label">总热量</span>
+                    <span className="diet-review-static-val">{totalKcal} 千卡</span>
                   </section>
                   {cameraPhotoUrl ? (
                     <>
@@ -2067,8 +2073,13 @@ function DietRecordListPage({ open, records = [], onBack, onAdd }) {
         <section className="diet-record-list-card">
           {records.map((record, index) => (
             <div key={record.id} className={'diet-record-item' + (index === records.length - 1 ? ' is-last' : '')}>
-              <div className="diet-record-item-main">
+              <div className="diet-record-item-side">
                 <div className="diet-record-item-time">{record.mealTime}</div>
+                <div className="diet-record-item-meal">
+                  {DIET_MEAL_TYPES.find((item) => item.id === record.mealType)?.label || '早餐'}
+                </div>
+              </div>
+              <div className="diet-record-item-main">
                 <div className="diet-record-item-foods">{record.foodNames.join('、')}</div>
                 <div className="diet-record-item-kcal">{record.totalKcal} 千卡</div>
               </div>
@@ -2511,9 +2522,9 @@ function HealthMorphRecordPane({
   if (item.recordType === 'diet') {
     return (
       <div className="list-diet-actions">
-        {dietValues?.length ? (
+        {dietValues?.mealCount ? (
           <span className="list-diet-summary">
-            {dietValues.join('、')}
+            共{dietValues.mealCount}餐，{dietValues.totalKcal || 0} 千卡
           </span>
         ) : null}
         <button type="button" className="list-add" onClick={onDietAdd} aria-label={'新增' + item.label}>
@@ -3049,7 +3060,10 @@ function RecordPage({
     setLegendCollapsed((v) => !v);
   };
 
-  const latestDietFoods = dietRecords.length ? dietRecords[dietRecords.length - 1].foodNames : [];
+  const dietSummary = dietRecords.length ? {
+    mealCount: dietRecords.length,
+    totalKcal: dietRecords.reduce((sum, record) => sum + (record.totalKcal || 0), 0),
+  } : null;
 
   const openDietEntry = () => {
     if (dietRecords.length) {
@@ -3178,7 +3192,7 @@ function RecordPage({
             onPeriodYes={() => handlePeriodToggle(true)}
             onPeriodNo={() => handlePeriodToggle(false)}
             onDietAdd={openDietEntry}
-            dietValues={latestDietFoods}
+            dietValues={dietSummary}
             onSymptomAdd={() => setSymptomSheetOpen(true)}
             onPeriodDetailAdd={openPeriodDetailPicker}
             onHealthItemAdd={openHealthRecordSheet}

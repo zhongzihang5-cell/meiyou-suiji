@@ -1301,7 +1301,7 @@
 
 .record-page-root .list-diet-summary {
   min-width: 0;
-  max-width: 180px;
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1389,6 +1389,11 @@
   border-bottom: 0;
 }
 
+.phone .diet-record-item-side {
+  width: 82px;
+  flex-shrink: 0;
+}
+
 .phone .diet-record-item-main {
   flex: 1;
   min-width: 0;
@@ -1398,7 +1403,13 @@
   font-size: 14px;
   line-height: 1.4;
   color: #a0a0a5;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
+}
+
+.phone .diet-record-item-meal {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #6f6f74;
 }
 
 .phone .diet-record-item-foods {
@@ -1406,7 +1417,7 @@
   line-height: 1.35;
   font-weight: 600;
   color: #323232;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .phone .diet-record-item-kcal {
@@ -3191,6 +3202,14 @@
   justify-self: end;
 }
 
+.phone .diet-add-header-btn:disabled {
+  cursor: default;
+}
+
+.phone .diet-add-header-btn.is-primary:disabled {
+  color: rgba(0, 0, 0, 0.25);
+}
+
 .phone .diet-add-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -3344,6 +3363,16 @@
   padding-bottom: 10px;
   border-bottom: 0;
   cursor: default;
+}
+
+.phone .diet-review-readonly-row {
+  cursor: default;
+}
+
+.phone .diet-review-static-val {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.6);
+  font-variant-numeric: tabular-nums;
 }
 
 .phone .diet-review-note-photo-row {
