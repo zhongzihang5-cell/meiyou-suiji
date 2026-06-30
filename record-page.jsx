@@ -2698,6 +2698,7 @@ function RecordPage({
   onPeriodReset,
   onPeriodRecordSubmit,
   onPeriodDetailRecordSubmit,
+  onDietRecordSubmit,
   onSymptomRecordSubmit,
   onHealthRecordSubmit,
   periodDetailValues,
@@ -2897,7 +2898,9 @@ function RecordPage({
 
   const handleDietRecordSave = (result) => {
     const nextRecord = buildDietRecord(result);
-    setDietRecords((prev) => [...prev, nextRecord]);
+    const nextRecords = [...dietRecords, nextRecord];
+    setDietRecords(nextRecords);
+    onDietRecordSubmit?.(nextRecord, nextRecords);
     if (reopenDietListAfterSave) {
       setDietListOpen(true);
       setReopenDietListAfterSave(false);
