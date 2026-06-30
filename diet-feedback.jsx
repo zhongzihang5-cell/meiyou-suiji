@@ -552,6 +552,8 @@ function DietFoodResultSummary({
   diversityCount = null,
   compact = false,
   guideBelowTotalDays = null,
+  leadingIconSrc = '',
+  leadingLabel = '',
 }){
   const showDiversity = revealStep >= 1 && diversityCount != null && diversityCount >= 5;
   const showTotal = revealStep >= 1 && totalKcal != null;
@@ -563,7 +565,15 @@ function DietFoodResultSummary({
   return (
     <div className={'diet-fb-sec-a' + (compact ? ' is-compact' : '')}>
       {showFoodList && (
-        <p className="diet-fb-food-list diet-fb-stagger-in">{foodListText}</p>
+        <div className="diet-fb-food-list-row diet-fb-stagger-in">
+          {leadingIconSrc ? (
+            <img className="diet-fb-food-list-icon" src={leadingIconSrc} alt="" aria-hidden="true" />
+          ) : null}
+          <p className="diet-fb-food-list">
+            {leadingLabel ? <span className="diet-fb-food-list-prefix">{leadingLabel}</span> : null}
+            {foodListText}
+          </p>
+        </div>
       )}
       {showTotal && (
         <p className="diet-fb-total-line diet-fb-stagger-in">
@@ -879,6 +889,8 @@ function DietTextFeedbackCard({
   userContext,
   isNew = false,
   displayScenario: displayScenarioProp,
+  leadingIconSrc = '',
+  leadingLabel = '',
 }){
   const {
     time,
@@ -955,6 +967,8 @@ function DietTextFeedbackCard({
           diversityCount={diversityCount}
           compact={!!displayCfg?.useCompactMeal}
           guideBelowTotalDays={guideBelowTotalDays}
+          leadingIconSrc={leadingIconSrc}
+          leadingLabel={leadingLabel}
         />
         {showAiInsights && (
           <DietAiInsightsShell displayScenario={displayScenario} isNew={isNew}>

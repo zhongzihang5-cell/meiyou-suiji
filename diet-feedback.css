@@ -61,6 +61,20 @@
   color:inherit;
   font-weight:400;
 }
+.diet-fb-food-list-row{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+.diet-fb-food-list-icon{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  margin-top:2px;
+}
+.diet-fb-food-list-prefix{
+  margin-right:4px;
+}
 .diet-fb-total-line{
   margin:8px 0 0;
   font-size:inherit;
