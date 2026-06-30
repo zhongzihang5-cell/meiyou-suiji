@@ -379,11 +379,11 @@ const SYMPTOM_PICKER_ITEM_MAP = SYMPTOM_PICKER_GROUPS
 
 const DIET_MEAL_TYPES = [
   { id: 'breakfast', label: '早餐', defaultTime: '08:00' },
-  { id: 'morning-snack', label: '早加餐', defaultTime: '10:30' },
+  { id: 'morning-snack', label: '上午加餐', defaultTime: '10:30' },
   { id: 'lunch', label: '午餐', defaultTime: '12:30' },
-  { id: 'afternoon-snack', label: '午加餐', defaultTime: '15:30' },
+  { id: 'afternoon-snack', label: '下午茶', defaultTime: '15:30' },
   { id: 'dinner', label: '晚餐', defaultTime: '18:30' },
-  { id: 'evening-snack', label: '晚加餐', defaultTime: '22:00' },
+  { id: 'evening-snack', label: '夜宵', defaultTime: '22:00' },
   { id: 'drink', label: '饮品', defaultTime: '15:00' },
   { id: 'other', label: '其他', defaultTime: '12:00' },
 ];
