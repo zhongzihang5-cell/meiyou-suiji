@@ -722,6 +722,55 @@ const HEALTH_RECORD_SHEETS = {
   },
 };
 
+const HEALTH_RECORD_OPTION_META = {
+  love: {
+    layout: 'iconGrid',
+    tone: 'pink',
+    options: {
+      '无措施': { icon: 'assets/health-picker-icons/love-none.png' },
+      '避孕套': { icon: 'assets/health-picker-icons/love-condom.png' },
+      '体外排精': { icon: 'assets/health-picker-icons/love-withdrawal.png' },
+      '未射精': { icon: 'assets/health-picker-icons/love-no-ejaculation.png' },
+      '紧急避孕药': { icon: 'assets/health-picker-icons/love-emergency-pill.png' },
+      '短效避孕药': { icon: 'assets/health-picker-icons/love-short-pill.png' },
+      '长效避孕药': { icon: 'assets/health-picker-icons/love-long-pill.png' },
+      '节育环': { icon: 'assets/health-picker-icons/love-iud.png' },
+      '其他措施': { icon: 'assets/health-picker-icons/love-other.png' },
+      '自慰': { icon: 'assets/health-picker-icons/love-self.png' },
+    },
+  },
+  discharge: {
+    layout: 'list',
+    tone: 'pink',
+    options: {
+      '干燥': { icon: 'assets/health-picker-icons/discharge-dry.png', desc: '内裤干爽、分泌物量少、无水分' },
+      '粘稠': { icon: 'assets/health-picker-icons/discharge-sticky.png', desc: '分泌物稠厚，触感似胶状物' },
+      '稀糊状': { icon: 'assets/health-picker-icons/discharge-paste.png', desc: '含水量偏多偏黄色，触感似乳液' },
+      '水状': { icon: 'assets/health-picker-icons/discharge-watery.png', desc: '呈白色或透明，触摸似水滴' },
+      '蛋清状': { icon: 'assets/health-picker-icons/discharge-eggwhite.png', desc: '呈透明状，两指间可拉丝' },
+    },
+  },
+  stool: {
+    layout: 'iconGrid',
+    tone: 'yellow',
+    options: {
+      '舒畅': { icon: 'assets/health-picker-icons/stool-comfort.png' },
+      '有残便感': { icon: 'assets/health-picker-icons/stool-residual.png' },
+      '排便困难': { icon: 'assets/health-picker-icons/stool-difficult.png' },
+      '硬球状': { icon: 'assets/health-picker-icons/stool-hard-balls.png' },
+      '凹凸香肠状': { icon: 'assets/health-picker-icons/stool-lumpy-sausage.png' },
+      '裂纹香肠状': { icon: 'assets/health-picker-icons/stool-cracked-sausage.png' },
+      '平滑香蕉状': { icon: 'assets/health-picker-icons/stool-smooth-banana.png' },
+      '软块状': { icon: 'assets/health-picker-icons/stool-soft-blobs.png' },
+      '糊状': { icon: 'assets/health-picker-icons/stool-mushy.png' },
+      '水液状': { icon: 'assets/health-picker-icons/stool-watery.png' },
+      '较少': { icon: 'assets/health-picker-icons/stool-less.png' },
+      '适中': { icon: 'assets/health-picker-icons/stool-normal.png' },
+      '较多': { icon: 'assets/health-picker-icons/stool-more.png' },
+    },
+  },
+};
+
 const HABIT_RECORD_OPTIONS = [
   { id: 'breakfast', label: '早餐', icon: '🍞' },
   { id: 'fruit', label: '水果', icon: '🍎' },
@@ -1074,13 +1123,71 @@ function PeriodSinglePicker({ open, type, value, onCancel, onConfirm }) {
   return picker;
 }
 
-function HealthRecordOptions({ section, selected, onSelect }) {
+function HealthRecordIcon({ meta, tone }) {
+  if (meta?.icon?.includes?.('/')) {
+    return <img src={meta.icon} alt="" aria-hidden="true"/>;
+  }
+  return <span aria-hidden="true">{meta?.icon || '•'}</span>;
+}
+
+function HealthRecordTimeCard() {
+  const now = new Date();
+  const hour = String(now.getHours()).padStart(2, '0');
+  const minute = String(now.getMinutes()).padStart(2, '0');
   return (
-    <section className="prp-card hrp-card">
+    <section className="prp-card hrp-time-card">
+      <h3 className="prp-sec-title">时间</h3>
+      <div className="hrp-time-wheel" aria-label={`记录时间 ${hour}:${minute}`}>
+        <span>{String(Math.max(0, Number(hour) - 1)).padStart(2, '0')}</span>
+        <span>{String(Math.max(0, Number(minute) - 1)).padStart(2, '0')}</span>
+        <strong><span>{hour}</span><em>:</em><span>{minute}</span></strong>
+      </div>
+    </section>
+  );
+}
+
+function HealthRecordOptions({ type, section, selected, onSelect }) {
+  const sheetMeta = HEALTH_RECORD_OPTION_META[type] || {};
+  const layout = sheetMeta.layout || 'iconGrid';
+  const tone = sheetMeta.tone || 'pink';
+  if (layout === 'list') {
+    return (
+      <section className="hrp-list-stack" aria-label={section.title}>
+        {section.options.map((label) => {
+          const isSelected = selected === label;
+          const meta = sheetMeta.options?.[label] || {};
+          return (
+            <button
+              key={label}
+              type="button"
+              className={'hrp-list-option' + (isSelected ? ' is-selected' : '')}
+              aria-pressed={isSelected}
+              onClick={() => onSelect(section.key, label)}
+            >
+              <span className={`hrp-option-icon is-${tone}`} aria-hidden="true">
+                <HealthRecordIcon meta={meta} tone={tone}/>
+              </span>
+              <span className="hrp-list-copy">
+                <strong>{label}</strong>
+                {meta.desc ? <em>{meta.desc}</em> : null}
+              </span>
+              <span className="hrp-radio" aria-hidden="true">
+                {isSelected ? <PickerCheckIcon/> : null}
+              </span>
+            </button>
+          );
+        })}
+      </section>
+    );
+  }
+
+  return (
+    <section className={`prp-card hrp-card is-${tone}`}>
       <h3 className="prp-sec-title">{section.title}</h3>
       <div className="hrp-option-grid">
         {section.options.map((label) => {
           const isSelected = selected === label;
+          const meta = sheetMeta.options?.[label] || {};
           return (
             <button
               key={label}
@@ -1089,10 +1196,13 @@ function HealthRecordOptions({ section, selected, onSelect }) {
               aria-pressed={isSelected}
               onClick={() => onSelect(section.key, label)}
             >
+              <span className={`hrp-option-icon is-${tone}`} aria-hidden="true">
+                <HealthRecordIcon meta={meta} tone={tone}/>
+              </span>
+              <span>{label}</span>
               <span className="hrp-option-mark" aria-hidden="true">
                 {isSelected ? <PickerCheckIcon/> : null}
               </span>
-              <span>{label}</span>
             </button>
           );
         })}
@@ -1134,7 +1244,7 @@ function TempRecordSheet({ open, onCancel, onConfirm }) {
   };
   const picker = (
     <div className="prp-mask" onClick={(event) => { if (event.target === event.currentTarget) onCancel(); }}>
-      <div className="prp-sheet prp-sheet-single" role="dialog" aria-modal="true" aria-label="体温">
+      <div className="prp-sheet prp-sheet-single hrp-sheet-mode-temp" role="dialog" aria-modal="true" aria-label="体温">
         <header className="prp-bar">
           <button type="button" className="prp-cancel" onClick={onCancel}>取消</button>
           <h2 className="prp-title">体温</h2>
@@ -1204,10 +1314,11 @@ function HealthRecordSheet({ open, type, onCancel, onConfirm }) {
   const selectedValues = config.sections.map((section) => values[section.key]).filter(Boolean);
   const primaryValue = selectedValues[0] || config.defaultValue;
   const detail = selectedValues.join(' · ');
+  const sheetMeta = HEALTH_RECORD_OPTION_META[type] || {};
 
   const picker = (
     <div className="prp-mask" onClick={(event) => { if (event.target === event.currentTarget) onCancel(); }}>
-      <div className="prp-sheet" role="dialog" aria-modal="true" aria-label={config.title}>
+      <div className={`prp-sheet hrp-sheet-mode-${type || 'default'}`} role="dialog" aria-modal="true" aria-label={config.title}>
         <header className="prp-bar">
           <button type="button" className="prp-cancel" onClick={onCancel}>取消</button>
           <h2 className="prp-title">{config.title}</h2>
@@ -1229,11 +1340,13 @@ function HealthRecordSheet({ open, type, onCancel, onConfirm }) {
           {config.sections.map((section) => (
             <HealthRecordOptions
               key={section.key}
+              type={type}
               section={section}
               selected={values[section.key]}
               onSelect={(key, value) => setValues((prev) => ({ ...prev, [key]: prev[key] === value ? null : value }))}
             />
           ))}
+          {['love', 'stool'].includes(type) ? <HealthRecordTimeCard/> : null}
         </div>
       </div>
     </div>

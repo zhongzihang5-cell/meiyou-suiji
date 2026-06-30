@@ -684,7 +684,7 @@
     color: #323232;
   }
   .option-sheet.is-health-picker .sheet-body {
-    padding: 4px 12px 0;
+    padding: 14px 12px 0;
     background: #f2f2f5;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -704,45 +704,85 @@
   .edit-hrp-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    column-gap: 16px;
+    row-gap: 20px;
+  }
+  .option-sheet.is-health-picker.is-love-picker .edit-hrp-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 12px;
   }
   .edit-hrp-option {
-    min-height: 72px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 14px;
-    background: #fff7fb;
+    min-width: 0;
+    min-height: 96px;
+    border: 0;
+    background: transparent;
     color: #323232;
     font-size: 14px;
+    line-height: 18px;
     font-weight: 500;
     font-family: inherit;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template-rows: 58px auto;
+    justify-items: center;
+    align-content: start;
     gap: 8px;
+    padding: 0 2px;
     cursor: pointer;
-    transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    position: relative;
+    transition: transform 0.16s ease, color 0.16s ease;
   }
   .edit-hrp-option:active {
-    transform: scale(0.97);
+    transform: scale(0.96);
   }
   .edit-hrp-option.active {
-    border-color: rgba(255, 77, 136, 0.36);
-    background: #ffe8f1;
+    color: #323232;
+  }
+  .edit-hrp-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
     color: #ff4d88;
+    font-size: 28px;
+    line-height: 1;
+    background: radial-gradient(72% 72% at 40% 34%, #fff3f7 0%, #ffd8e6 60%, #ffc1d7 100%);
+  }
+  .edit-hrp-icon.is-yellow {
+    color: #f2a900;
+    background: radial-gradient(72% 72% at 40% 34%, #fff8e9 0%, #fff0ce 60%, #ffe2a4 100%);
+  }
+  .edit-hrp-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .edit-hrp-option > span:not(.edit-hrp-icon):not(.edit-hrp-mark) {
+    width: 100%;
+    min-height: 36px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: center;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
   .edit-hrp-mark {
-    width: 22px;
-    height: 22px;
+    position: absolute;
+    right: calc(50% - 36px);
+    top: 38px;
+    width: 23px;
+    height: 23px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 77, 136, 0.22);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
   }
   .edit-hrp-option.active .edit-hrp-mark {
-    border: 0;
     background: #27c46b;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
   }
   .edit-hrp-option.active .edit-hrp-mark::after {
     content: "";
@@ -751,6 +791,114 @@
     border-left: 2px solid #ffffff;
     border-bottom: 2px solid #ffffff;
     transform: rotate(-45deg) translateY(-1px);
+  }
+  .edit-hrp-list {
+    display: grid;
+    gap: 12px;
+  }
+  .edit-hrp-list-option {
+    width: 100%;
+    min-height: 88px;
+    border: 0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #323232;
+    font-family: inherit;
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) 32px;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .edit-hrp-list-copy {
+    min-width: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .edit-hrp-list-copy strong {
+    font-size: 21px;
+    line-height: 1.2;
+    font-weight: 500;
+    color: #323232;
+  }
+  .edit-hrp-list-copy em {
+    font-style: normal;
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 400;
+    color: #999999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .edit-hrp-radio {
+    width: 31px;
+    height: 31px;
+    border: 2px solid #d5d5d8;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+  }
+  .edit-hrp-list-option.active .edit-hrp-radio {
+    border: 0;
+    background: #27c46b;
+  }
+  .edit-hrp-list-option.active .edit-hrp-radio::after {
+    content: "";
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+  .edit-hrp-time-card {
+    min-height: 176px;
+    overflow: hidden;
+  }
+  .edit-hrp-time-wheel {
+    position: relative;
+    min-height: 110px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    color: #323232;
+    font-size: 21px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+  .edit-hrp-time-wheel::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 58px;
+    height: 42px;
+    border-radius: 8px;
+    background: #f1f1f5;
+  }
+  .edit-hrp-time-wheel > span {
+    align-self: start;
+    color: #323232;
+    opacity: 0.88;
+  }
+  .edit-hrp-time-wheel strong {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 58px;
+    z-index: 1;
+    height: 42px;
+    display: grid;
+    grid-template-columns: 1fr 32px 1fr;
+    align-items: center;
+    font-size: 27px;
+    font-weight: 500;
+  }
+  .edit-hrp-time-wheel em {
+    font-style: normal;
   }
   .edit-hrp-temp-card {
     min-height: 132px;
@@ -1719,6 +1867,54 @@
       { key: 'amount', title: '便便量', options: ['较少', '适中', '较多'] },
     ],
   };
+  const DAILY_RECORD_OPTION_META = {
+    love: {
+      layout: 'iconGrid',
+      tone: 'pink',
+      options: {
+        '无措施': { icon: 'assets/health-picker-icons/love-none.png' },
+        '避孕套': { icon: 'assets/health-picker-icons/love-condom.png' },
+        '体外排精': { icon: 'assets/health-picker-icons/love-withdrawal.png' },
+        '未射精': { icon: 'assets/health-picker-icons/love-no-ejaculation.png' },
+        '紧急避孕药': { icon: 'assets/health-picker-icons/love-emergency-pill.png' },
+        '短效避孕药': { icon: 'assets/health-picker-icons/love-short-pill.png' },
+        '长效避孕药': { icon: 'assets/health-picker-icons/love-long-pill.png' },
+        '节育环': { icon: 'assets/health-picker-icons/love-iud.png' },
+        '其他措施': { icon: 'assets/health-picker-icons/love-other.png' },
+        '自慰': { icon: 'assets/health-picker-icons/love-self.png' },
+      },
+    },
+    discharge: {
+      layout: 'list',
+      tone: 'pink',
+      options: {
+        '干燥': { icon: 'assets/health-picker-icons/discharge-dry.png', desc: '内裤干爽、分泌物量少、无水分' },
+        '粘稠': { icon: 'assets/health-picker-icons/discharge-sticky.png', desc: '分泌物稠厚，触感似胶状物' },
+        '稀糊状': { icon: 'assets/health-picker-icons/discharge-paste.png', desc: '含水量偏多偏黄色，触感似乳液' },
+        '水状': { icon: 'assets/health-picker-icons/discharge-watery.png', desc: '呈白色或透明，触摸似水滴' },
+        '蛋清状': { icon: 'assets/health-picker-icons/discharge-eggwhite.png', desc: '呈透明状，两指间可拉丝' },
+      },
+    },
+    stool: {
+      layout: 'iconGrid',
+      tone: 'yellow',
+      options: {
+        '舒畅': { icon: 'assets/health-picker-icons/stool-comfort.png' },
+        '有残便感': { icon: 'assets/health-picker-icons/stool-residual.png' },
+        '排便困难': { icon: 'assets/health-picker-icons/stool-difficult.png' },
+        '硬球状': { icon: 'assets/health-picker-icons/stool-hard-balls.png' },
+        '凹凸香肠状': { icon: 'assets/health-picker-icons/stool-lumpy-sausage.png' },
+        '裂纹香肠状': { icon: 'assets/health-picker-icons/stool-cracked-sausage.png' },
+        '平滑香蕉状': { icon: 'assets/health-picker-icons/stool-smooth-banana.png' },
+        '软块状': { icon: 'assets/health-picker-icons/stool-soft-blobs.png' },
+        '糊状': { icon: 'assets/health-picker-icons/stool-mushy.png' },
+        '水液状': { icon: 'assets/health-picker-icons/stool-watery.png' },
+        '较少': { icon: 'assets/health-picker-icons/stool-less.png' },
+        '适中': { icon: 'assets/health-picker-icons/stool-normal.png' },
+        '较多': { icon: 'assets/health-picker-icons/stool-more.png' },
+      },
+    },
+  };
   const QUICK_SYMPTOM_OPTIONS = [
     '没有症状', '腰酸', '腹痛', '小腹坠胀', '乳房胀痛', '身体酸痛',
     '头痛', '眩晕', '失眠', '粉刺', '皮肤干燥', '食欲不振',
@@ -2033,6 +2229,10 @@
     const confirm = document.getElementById('optionSheetConfirm');
     sheet.classList.remove('is-flow-picker');
     sheet.classList.remove('is-health-picker');
+    sheet.classList.remove('is-love-picker');
+    sheet.classList.remove('is-discharge-picker');
+    sheet.classList.remove('is-stool-picker');
+    sheet.classList.remove('is-temp-picker');
     confirm.textContent = '完成';
     confirm.disabled = false;
   }
@@ -2411,6 +2611,29 @@
     return digits.length > 2 ? `${digits.slice(0, -1)}.${digits.slice(-1)}` : digits;
   }
 
+  function renderEditHrpIcon(meta, tone) {
+    if(meta?.icon && meta.icon.startsWith('assets/')){
+      return `<img src="${meta.icon}" alt="">`;
+    }
+    return `<span>${meta?.icon || '•'}</span>`;
+  }
+
+  function renderEditHealthTimeCard() {
+    const [hourRaw, minuteRaw] = String(dailyRecordState.time || '21:58').split(':');
+    const hour = String(Number(hourRaw || 21)).padStart(2, '0');
+    const minute = String(Number(minuteRaw || 58)).padStart(2, '0');
+    return `
+      <section class="edit-hrp-card edit-hrp-time-card">
+        <h3 class="edit-hrp-title">时间</h3>
+        <div class="edit-hrp-time-wheel" aria-label="记录时间 ${hour}:${minute}">
+          <span>${String(Math.max(0, Number(hour) - 1)).padStart(2, '0')}</span>
+          <span>${String(Math.max(0, Number(minute) - 1)).padStart(2, '0')}</span>
+          <strong><span>${hour}</span><em>:</em><span>${minute}</span></strong>
+        </div>
+      </section>
+    `;
+  }
+
   function renderDailyHealthPicker(type, currentValue) {
     const config = getDailyRecordConfig(type);
     if(type === 'temp'){
@@ -2438,22 +2661,49 @@
 
     const currentValues = splitDailyRecordValues(currentValue);
     const sections = DAILY_RECORD_SHEET_SECTIONS[type] || [{ key: type, title: config.label, options: config.options }];
-    return sections.map((section, sectionIndex) => `
-      <section class="edit-hrp-card">
-        <h3 class="edit-hrp-title">${section.title}</h3>
-        <div class="edit-hrp-grid">
-          ${section.options.map((option, optionIndex) => {
-            const isActive = currentValues.includes(option) || (!currentValues.length && sectionIndex === 0 && optionIndex === 0);
-            return `
-              <button type="button" class="edit-hrp-option${isActive ? ' active' : ''}" data-key="${section.key}" data-value="${option}" aria-pressed="${isActive ? 'true' : 'false'}">
-                <span class="edit-hrp-mark" aria-hidden="true"></span>
-                <span>${option}</span>
-              </button>
-            `;
-          }).join('')}
-        </div>
-      </section>
-    `).join('');
+    const sheetMeta = DAILY_RECORD_OPTION_META[type] || {};
+    const tone = sheetMeta.tone || 'pink';
+    const content = sections.map((section, sectionIndex) => {
+      if(sheetMeta.layout === 'list'){
+        return `
+          <section class="edit-hrp-list" aria-label="${section.title}">
+            ${section.options.map((option, optionIndex) => {
+              const isActive = currentValues.includes(option) || (!currentValues.length && sectionIndex === 0 && optionIndex === 0);
+              const meta = sheetMeta.options?.[option] || {};
+              return `
+                <button type="button" class="edit-hrp-list-option${isActive ? ' active' : ''}" data-key="${section.key}" data-value="${option}" aria-pressed="${isActive ? 'true' : 'false'}">
+                  <span class="edit-hrp-icon is-${tone}" aria-hidden="true">${renderEditHrpIcon(meta, tone)}</span>
+                  <span class="edit-hrp-list-copy">
+                    <strong>${option}</strong>
+                    ${meta.desc ? `<em>${meta.desc}</em>` : ''}
+                  </span>
+                  <span class="edit-hrp-radio" aria-hidden="true"></span>
+                </button>
+              `;
+            }).join('')}
+          </section>
+        `;
+      }
+      return `
+        <section class="edit-hrp-card">
+          <h3 class="edit-hrp-title">${section.title}</h3>
+          <div class="edit-hrp-grid">
+            ${section.options.map((option, optionIndex) => {
+              const isActive = currentValues.includes(option) || (!currentValues.length && sectionIndex === 0 && optionIndex === 0);
+              const meta = sheetMeta.options?.[option] || {};
+              return `
+                <button type="button" class="edit-hrp-option${isActive ? ' active' : ''}" data-key="${section.key}" data-value="${option}" aria-pressed="${isActive ? 'true' : 'false'}">
+                  <span class="edit-hrp-icon is-${tone}" aria-hidden="true">${renderEditHrpIcon(meta, tone)}</span>
+                  <span>${option}</span>
+                  <span class="edit-hrp-mark" aria-hidden="true"></span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </section>
+      `;
+    }).join('');
+    return ['love', 'stool'].includes(type) ? `${content}${renderEditHealthTimeCard()}` : content;
   }
 
   function pressEditTempKey(key) {
@@ -2558,18 +2808,20 @@
     const config = getDailyRecordConfig(dailyRecordState.recordType);
     resetOptionSheetMode();
     currentOptionTarget = { kind: 'daily-record' };
-    document.getElementById('optionSheet').classList.remove('is-period-picker');
-    document.getElementById('optionSheet').classList.add('is-health-picker');
+    const sheet = document.getElementById('optionSheet');
+    sheet.classList.remove('is-period-picker');
+    sheet.classList.add('is-health-picker');
+    sheet.classList.add(`is-${dailyRecordState.recordType}-picker`);
     document.querySelector('#optionSheet .confirm').textContent = '确定';
     document.getElementById('optionSheetTitle').textContent = `修改${dailyRecordState.recordLabel || config.label}`;
     document.getElementById('optionList').innerHTML = renderDailyHealthPicker(
       dailyRecordState.recordType,
       dailyRecordState.recordDetail || dailyRecordState.recordValue
     );
-    document.querySelectorAll('#optionList .edit-hrp-option').forEach(btn => {
+    document.querySelectorAll('#optionList .edit-hrp-option, #optionList .edit-hrp-list-option').forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.dataset.key;
-        document.querySelectorAll(`#optionList .edit-hrp-option[data-key="${key}"]`).forEach(b => {
+        document.querySelectorAll(`#optionList .edit-hrp-option[data-key="${key}"], #optionList .edit-hrp-list-option[data-key="${key}"]`).forEach(b => {
           b.classList.remove('active');
           b.setAttribute('aria-pressed', 'false');
         });
@@ -2653,7 +2905,7 @@
         nextValue = normalizeDailyRecordValue('temp', document.getElementById('editTempValue')?.textContent || '');
         nextDetail = nextValue;
       } else {
-        const selectedValues = [...document.querySelectorAll('#optionList .edit-hrp-option.active')]
+        const selectedValues = [...document.querySelectorAll('#optionList .edit-hrp-option.active, #optionList .edit-hrp-list-option.active')]
           .map(btn => btn.dataset.value)
           .filter(Boolean);
         if(selectedValues.length){
