@@ -831,6 +831,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             userContext={item.userContext}
             isNew={isNew}
             displayScenario={item.displayScenario}
+            leadingIconSrc={item.leadingIconSrc}
+            leadingLabel={item.leadingLabel}
           />
         : null
     );

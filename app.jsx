@@ -968,6 +968,87 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const buildRecordTabDietWeekData = (todayTotalKcal)=>{
+    const seed = [720, 1820, 1960, 1480, 1800];
+    return [...seed, Math.max(620, Math.round(todayTotalKcal * 0.88)), todayTotalKcal];
+  };
+
+  const buildRecordTabDietContext = (record, records)=>{
+    const list = Array.isArray(records) ? records : [record].filter(Boolean);
+    const dayMealCount = list.length;
+    const dayTotalKcal = list.reduce((sum, item)=>sum + (item?.totalKcal || 0), 0);
+    const todayFoodCount = new Set(
+      list.flatMap((item)=>item?.foodNames || [])
+    ).size;
+    const buildDietUserContext = window.buildDietUserContext || ((data, extra = {}) => ({ ...data, ...extra }));
+    const scenarioSeed = {
+      totalKcal: record?.totalKcal || 0,
+      weekData: buildRecordTabDietWeekData(dayTotalKcal),
+      daysWithRecord: 6,
+      avgKcal: 1380,
+      items: record?.foods || [],
+    };
+    return buildDietUserContext(scenarioSeed, {
+      dayMealCount,
+      dayTotalKcal,
+      todayFoodCount,
+      totalRecordDays: 6,
+      weekData: buildRecordTabDietWeekData(dayTotalKcal),
+    });
+  };
+
+  const submitRecordTabDietRecord = (record, records = [])=>{
+    if(!record?.foods?.length) return;
+    markUserRecorded();
+    const time = record.mealTime || window.formatNowTime();
+    const userContext = buildRecordTabDietContext(record, records);
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    let entry = null;
+
+    if(record.sourceType === 'camera' && record.photoUrl){
+      entry = {
+        kind: 'diet-photo-feedback',
+        id: 'e-diet-record-' + Date.now(),
+        time,
+        photoUrl: record.photoUrl,
+        recognitionScenario: 'success',
+        recognitionState: 'ready',
+        displayScenario: window.readDietFeedbackDisplayScenario?.() || 'dim-b',
+        dietData: {
+          time,
+          foods: record.foodNames || [],
+          items: record.foods || [],
+          totalKcal: record.totalKcal || 0,
+          matchStatus: 'all',
+          foodTags: [],
+        },
+        userContext,
+        isNew: true,
+      };
+    } else {
+      entry = {
+        kind: 'diet-text-feedback',
+        id: 'e-diet-record-' + Date.now(),
+        time,
+        displayScenario: window.readDietFeedbackDisplayScenario?.() || 'dim-b',
+        dietData: {
+          time,
+          items: record.foods || [],
+          totalKcal: record.totalKcal || 0,
+          matchStatus: 'all',
+          foodTags: [],
+        },
+        userContext,
+        leadingIconSrc: 'assets/quick-icon-diet.png',
+        leadingLabel: '饮食：',
+        isNew: true,
+      };
+    }
+
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
@@ -1128,6 +1209,7 @@ function App(){
             setPeriodDetailRecordEnabled(true);
           }}
           onPeriodDetailRecordSubmit={submitPeriodDetailRecord}
+          onDietRecordSubmit={submitRecordTabDietRecord}
           onSymptomRecordSubmit={submitRecordTabSymptomRecord}
           onHealthRecordSubmit={submitHealthRecord}
           periodDetailValues={periodDetailDraft}
