@@ -1,4 +1,5 @@
 const { useState, useEffect, useRef } = React;
+const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -51,7 +52,7 @@ function App(){
   const [showPhoto, setShowPhoto] = useState(false);
   const [activeTab, setActiveTab] = useState(initial.activeTab);
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
-  const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState('结合近期记录，已为你生成周期状态分析');
+  const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState(PERIOD_START_NOTICE_TITLE);
   const [analysisNoticeKind, setAnalysisNoticeKind] = useState('period-start');
   const [sisterPlayAnimation, setSisterPlayAnimation] = useState(initial.sisterPlayAnimation);
   const [sisterCycleDone, setSisterCycleDone] = useState(initial.sisterCycleDone);
@@ -170,7 +171,7 @@ function App(){
     setDraft(next.draft);
     setTimeline(next.timeline);
     setShowAnalysisNotice(next.showAnalysisNotice);
-    setAnalysisNoticeTitle('结合近期记录，已为你生成周期状态分析');
+    setAnalysisNoticeTitle(PERIOD_START_NOTICE_TITLE);
     setAnalysisNoticeKind('period-start');
     setSisterPlayAnimation(next.sisterPlayAnimation);
     setSisterCycleDone(next.sisterCycleDone);
@@ -1190,18 +1191,18 @@ function App(){
           periodEndRecordReady={periodEndRecordReady}
           periodEndRecordCompleted={periodEndRecordCompleted}
           onAnalysisReady={()=>{
-            setAnalysisNoticeTitle('结合近期记录，已为你生成周期状态分析');
+            setAnalysisNoticeTitle(PERIOD_START_NOTICE_TITLE);
             setAnalysisNoticeKind('period-start');
             setShowAnalysisNotice(true);
           }}
           onPeriodEndAnalysisReady={()=>{
-            setAnalysisNoticeTitle('本次月经长度为8天，较前两次明显延长...');
+            setAnalysisNoticeTitle('本次月经长度8天，较前两次明显延长，点击查看');
             setAnalysisNoticeKind('period-end');
             setShowAnalysisNotice(true);
           }}
           onPeriodReset={()=>{
             setShowAnalysisNotice(false);
-            setAnalysisNoticeTitle('结合近期记录，已为你生成周期状态分析');
+            setAnalysisNoticeTitle(PERIOD_START_NOTICE_TITLE);
             setAnalysisNoticeKind('period-start');
             setPeriodEndRecordReady(false);
             setPeriodEndRecordCompleted(false);
