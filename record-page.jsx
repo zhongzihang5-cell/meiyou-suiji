@@ -1467,8 +1467,8 @@ function DietAddSheet({ open, onClose, onDone }) {
               {!hasReview ? (
                 <>
                   <section className="diet-add-card">
-                    <h3 className="diet-add-card-title">餐式类型</h3>
-                    <div className="diet-meal-grid" role="listbox" aria-label="餐式类型">
+                    <h3 className="diet-add-card-title">餐次</h3>
+                    <div className="diet-meal-grid" role="listbox" aria-label="餐次">
                       {DIET_MEAL_TYPES.map((meal) => (
                         <button
                           key={meal.id}
