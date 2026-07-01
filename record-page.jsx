@@ -1506,7 +1506,7 @@ function DietAddSheet({ open, onClose, onDone }) {
               ) : (
                 <>
                   <section className="diet-review-row">
-                    <span className="diet-review-label">餐食类型</span>
+                    <span className="diet-review-label">餐次</span>
                     <span className="diet-review-time-val">
                       {mealLabel}
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
