@@ -84,7 +84,7 @@ const DIET_SCENARIOS = {
     foodTags: [],
   },
   milkTea: {
-    mealType: '下午茶',
+    mealType: '午加餐',
     totalKcal: 520,
     dailyTarget: 1800,
     dailyIntake: 520,
@@ -113,7 +113,7 @@ const DIET_SCENARIOS = {
     foodTags: [],
   },
   coldDrinkMeal: {
-    mealType: '下午茶',
+    mealType: '午加餐',
     totalKcal: 180,
     dailyTarget: 1800,
     dailyIntake: 680,
@@ -204,7 +204,7 @@ const DIET_TEXT_FOOD_LEXICON = [
 ];
 
 function textMentionsDiet(text) {
-  return /吃了|喝了|早餐|上午加餐|午餐|下午茶|晚餐|夜宵|加餐|早饭|午饭|晚饭|早上吃|中午吃|晚上吃|记录.*吃/.test(text || '');
+  return /吃了|喝了|早餐|早加餐|上午加餐|午餐|午加餐|下午茶|晚餐|晚加餐|夜宵|加餐|早饭|午饭|晚饭|早上吃|中午吃|晚上吃|记录.*吃/.test(text || '');
 }
 
 function shouldParseAsDietText(text) {
@@ -267,7 +267,7 @@ function splitFoodSegments(clause) {
     .map((s) => s.trim())
     .filter(Boolean)
     .map((s) => s.replace(/^(一点|一些|两个|一份|一碗|一个|今天|早上|上午|中午|下午|晚上|今早)/, '').trim())
-    .filter((s) => s && !/^(早餐|上午加餐|午餐|下午茶|晚餐|夜宵|加餐)$/.test(s));
+    .filter((s) => s && !/^(早餐|早加餐|上午加餐|午餐|午加餐|下午茶|晚餐|晚加餐|夜宵|加餐)$/.test(s));
 }
 
 function matchLexiconFoods(text) {
