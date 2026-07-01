@@ -18332,7 +18332,7 @@ function DietAddSheet({ open, onClose, onDone }) {
               />
             </div>
             <div className="diet-add-row">
-              <span className="diet-add-label">数量</span>
+              <span className="diet-add-label">份量</span>
               <div className="diet-add-row-end">
                 <input
                   type="text"
@@ -18341,9 +18341,9 @@ function DietAddSheet({ open, onClose, onDone }) {
                   placeholder="请输入"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  aria-label="数量"
+                  aria-label="份量"
                 />
-                <div className="diet-unit-toggle" role="group" aria-label="数量单位">
+                <div className="diet-unit-toggle" role="group" aria-label="份量单位">
                   <button
                     type="button"
                     className={amountUnit === 'g' ? 'is-active' : ''}

@@ -1555,7 +1555,7 @@ function DietAddSheet({ open, onClose, onDone }) {
                             })
                           ),
                           React.createElement('div', { className: 'diet-review-field' },
-                            React.createElement('span', { className: 'diet-review-field-label' }, '数量'),
+                            React.createElement('span', { className: 'diet-review-field-label' }, '份量'),
                             React.createElement('div', { className: 'diet-review-field-input-wrap' },
                               React.createElement('input', {
                                 className: 'diet-review-field-input',
