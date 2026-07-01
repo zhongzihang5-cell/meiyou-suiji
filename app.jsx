@@ -61,6 +61,7 @@ function App(){
   const [periodDetailRecordEnabled, setPeriodDetailRecordEnabled] = useState(false);
   const [periodDetailDraft, setPeriodDetailDraft] = useState({});
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
+  const [noteTabUnread, setNoteTabUnread] = useState(false);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState(null);
@@ -539,6 +540,7 @@ function App(){
       recordEnterModeRef.current = 'manual';
       if(periodDetailRecordEnabled || periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
       submitHealthRecordDraftsToTimeline();
+      setNoteTabUnread(false);
     }
     if(tab !== 'note'){
       recordEnterModeRef.current = 'idle';
@@ -919,6 +921,7 @@ function App(){
 
   const submitRecordTabSymptomRecord = (symptoms)=>{
     appendSymptomRecord(symptoms);
+    if(activeTab !== 'note') setNoteTabUnread(true);
   };
 
   const submitWeightRecord = (payload)=>{
@@ -1047,6 +1050,7 @@ function App(){
     }
 
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    if(activeTab !== 'note') setNoteTabUnread(true);
   };
 
   const submitPhoto = ()=>{
@@ -1371,7 +1375,7 @@ function App(){
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      {showBottomTabBar && <TabBar active={activeTab} onChange={handleTabChange}/>}
+      {showBottomTabBar && <TabBar active={activeTab} onChange={handleTabChange} noteUnread={noteTabUnread}/>}
       </div>
 
       {!window.__STANDALONE_LOCKED_SCENE && (

@@ -217,7 +217,7 @@ function CycleReport({item}){
 
 // ============ Tab bar ============
 // Order: 美柚 / 记录 / 点滴(center) / 回顾 / 我
-function TabBar({active='note', onChange}){
+function TabBar({active='note', onChange, noteUnread=false}){
   const I = window.Icon;
   const tabIcons = window.TABBAR_ICONS || {};
   const icon = (id) => (
@@ -226,7 +226,7 @@ function TabBar({active='note', onChange}){
   const tabs = [
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
-    {id:'note', label:'点滴', custom:<I name="mic" size={26} stroke={1.7}/>},
+    {id:'note', label:'点滴', custom:<I name="mic" size={26} stroke={1.7}/>, notif: noteUnread},
     {id:'cash', label:'回顾', custom:<I name="line-chart" size={26} stroke={1.7}/>},
     {id:'me', label:'我', custom:icon('me')},
   ];
