@@ -217,8 +217,49 @@ function CycleReport({item}){
 
 // ============ Tab bar ============
 // Order: 美柚 / 记录 / 点滴(center) / 回顾 / 我
-function TabBar({active='note', onChange, noteUnread=false}){
+function TabBar({
+  active='note',
+  onChange,
+  noteUnread=false,
+  noteLabel='点滴',
+  onNoteVoiceStart,
+  onNoteVoiceMove,
+  onNoteVoiceEnd,
+}){
   const I = window.Icon;
+  const pointerVoiceActiveRef = React.useRef(false);
+  const voiceHoldActiveRef = React.useRef(false);
+  const finishVoiceHoldRef = React.useRef(null);
+  const handleWindowVoiceHoldEnd = React.useCallback(()=>{
+    finishVoiceHoldRef.current?.();
+  }, []);
+  const cleanupVoiceHoldListeners = React.useCallback(()=>{
+    window.removeEventListener('mouseup', handleWindowVoiceHoldEnd);
+    window.removeEventListener('touchend', handleWindowVoiceHoldEnd);
+    window.removeEventListener('touchcancel', handleWindowVoiceHoldEnd);
+    window.removeEventListener('pointerup', handleWindowVoiceHoldEnd);
+    window.removeEventListener('pointercancel', handleWindowVoiceHoldEnd);
+    window.removeEventListener('blur', handleWindowVoiceHoldEnd);
+  }, [handleWindowVoiceHoldEnd]);
+  const finishVoiceHold = React.useCallback(()=>{
+    if(!voiceHoldActiveRef.current) return;
+    voiceHoldActiveRef.current = false;
+    cleanupVoiceHoldListeners();
+    onNoteVoiceEnd?.();
+  }, [cleanupVoiceHoldListeners, onNoteVoiceEnd]);
+  finishVoiceHoldRef.current = finishVoiceHold;
+  const startVoiceHold = React.useCallback((clientY)=>{
+    cleanupVoiceHoldListeners();
+    voiceHoldActiveRef.current = true;
+    window.addEventListener('mouseup', handleWindowVoiceHoldEnd, {once:true});
+    window.addEventListener('touchend', handleWindowVoiceHoldEnd, {once:true});
+    window.addEventListener('touchcancel', handleWindowVoiceHoldEnd, {once:true});
+    window.addEventListener('pointerup', handleWindowVoiceHoldEnd, {once:true});
+    window.addEventListener('pointercancel', handleWindowVoiceHoldEnd, {once:true});
+    window.addEventListener('blur', handleWindowVoiceHoldEnd, {once:true});
+    onNoteVoiceStart?.(clientY);
+  }, [cleanupVoiceHoldListeners, handleWindowVoiceHoldEnd, onNoteVoiceStart]);
+  React.useEffect(()=>cleanupVoiceHoldListeners, [cleanupVoiceHoldListeners]);
   const tabIcons = window.TABBAR_ICONS || {};
   const icon = (id) => (
     <img className="tab-icon-img" src={tabIcons[id]} alt="" aria-hidden="true" />
@@ -226,17 +267,77 @@ function TabBar({active='note', onChange, noteUnread=false}){
   const tabs = [
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
-    {id:'note', label:'点滴', custom:<I name="mic" size={26} stroke={1.7}/>, notif: noteUnread},
+    {id:'note', label:noteLabel, custom:<I name="mic" size={26} stroke={1.7}/>, notif: noteUnread},
     {id:'cash', label:'回顾', custom:<I name="line-chart" size={26} stroke={1.7}/>},
     {id:'me', label:'我', custom:icon('me')},
   ];
   return (
     <div className="tabbar">
-      {tabs.map(t=>(
+      {tabs.map(t=>{
+        const isVoiceHoldTab = t.id === 'note' && !!onNoteVoiceStart;
+        return (
         <div
           key={t.id}
           className={'tab'+(active===t.id?' active':'')}
-          onClick={()=>onChange && onChange(t.id)}
+          onClick={(event)=>{
+            if(isVoiceHoldTab){
+              event.preventDefault();
+              return;
+            }
+            onChange && onChange(t.id);
+          }}
+          onPointerDown={isVoiceHoldTab ? (event)=>{
+            event.preventDefault();
+            pointerVoiceActiveRef.current = true;
+            event.currentTarget.setPointerCapture?.(event.pointerId);
+            startVoiceHold(event.clientY);
+          } : undefined}
+          onPointerMove={isVoiceHoldTab ? (event)=>onNoteVoiceMove?.(event.clientY) : undefined}
+          onPointerUp={isVoiceHoldTab ? (event)=>{
+            event.preventDefault();
+            finishVoiceHold();
+            setTimeout(()=>{ pointerVoiceActiveRef.current = false; }, 0);
+          } : undefined}
+          onPointerCancel={isVoiceHoldTab ? ()=>{
+            finishVoiceHold();
+            setTimeout(()=>{ pointerVoiceActiveRef.current = false; }, 0);
+          } : undefined}
+          onLostPointerCapture={isVoiceHoldTab ? ()=>{
+            finishVoiceHold();
+            setTimeout(()=>{ pointerVoiceActiveRef.current = false; }, 0);
+          } : undefined}
+          onMouseDown={isVoiceHoldTab ? (event)=>{
+            if(pointerVoiceActiveRef.current) return;
+            event.preventDefault();
+            startVoiceHold(event.clientY);
+          } : undefined}
+          onMouseMove={isVoiceHoldTab ? (event)=>{
+            if(pointerVoiceActiveRef.current) return;
+            onNoteVoiceMove?.(event.clientY);
+          } : undefined}
+          onMouseUp={isVoiceHoldTab ? (event)=>{
+            if(pointerVoiceActiveRef.current) return;
+            event.preventDefault();
+            finishVoiceHold();
+          } : undefined}
+          onTouchStart={isVoiceHoldTab ? (event)=>{
+            if(pointerVoiceActiveRef.current) return;
+            const touch = event.touches?.[0];
+            startVoiceHold(touch?.clientY || 0);
+          } : undefined}
+          onTouchMove={isVoiceHoldTab ? (event)=>{
+            if(pointerVoiceActiveRef.current) return;
+            const touch = event.touches?.[0];
+            onNoteVoiceMove?.(touch?.clientY || 0);
+          } : undefined}
+          onTouchEnd={isVoiceHoldTab ? ()=>{
+            if(pointerVoiceActiveRef.current) return;
+            finishVoiceHold();
+          } : undefined}
+          onTouchCancel={isVoiceHoldTab ? ()=>{
+            if(pointerVoiceActiveRef.current) return;
+            finishVoiceHold();
+          } : undefined}
           role="button"
           tabIndex={0}
         >
@@ -244,7 +345,7 @@ function TabBar({active='note', onChange, noteUnread=false}){
           <div className="tab-lbl">{t.label}</div>
           {t.notif && <span className="notif"></span>}
         </div>
-      ))}
+      )})}
     </div>
   );
 }

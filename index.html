@@ -8,7 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
 <link rel="stylesheet" href="cloud.css?v=20260628-symptom-quick">
-<link rel="stylesheet" href="timeline.css?v=20260629-card-edit-hit-area">
+<link rel="stylesheet" href="timeline.css?v=20260703-baby-feeding-card">
 <link rel="stylesheet" href="calendar.css?v=20260701-float-notice-no-icon">
 <link rel="stylesheet" href="record-page.css?v=20260630-health-picker-cropped-icons">
 <link rel="stylesheet" href="record-empty.css?v=20260602-v102">
@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="diet-feedback.css?v=20260629-analysis-title-unify">
 <link rel="stylesheet" href="path-flyout.css?v=20260616-v105">
 <link rel="stylesheet" href="review-page.css?v=20260624-cycle-summary-nested">
-<link rel="stylesheet" href="home-page.css?v=20260703-baby-mom-kit">
+<link rel="stylesheet" href="home-page.css?v=20260703-baby-voice-coach">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;letter-spacing:0}
@@ -830,6 +830,181 @@ html,body{
   position:absolute;top:0;right:calc(50% - 18px);
   min-width:6px;height:6px;background:var(--my-danger);border-radius:50%;
 }
+.baby-voice-overlay{
+  position:absolute;
+  inset:0;
+  z-index:260;
+  background:rgba(20,18,22,0.62);
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.2s ease, visibility 0.2s ease;
+  display:flex;
+  flex-direction:column;
+  pointer-events:none;
+}
+.baby-voice-overlay.is-listening{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+.baby-voice-listening{
+  margin-top:22%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  transform:translateY(8px);
+  opacity:0;
+  transition:transform 0.25s 0.05s, opacity 0.25s 0.05s;
+}
+.baby-voice-overlay.is-listening .baby-voice-listening{
+  transform:translateY(0);
+  opacity:1;
+}
+.baby-listen-dot{
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  background:var(--my-brand-red);
+  box-shadow:0 0 0 0 rgba(255,77,136,0.5);
+  animation:babyListenRing 1.4s ease-out infinite;
+}
+@keyframes babyListenRing{
+  0%{box-shadow:0 0 0 0 rgba(255,77,136,0.55)}
+  100%{box-shadow:0 0 0 16px rgba(255,77,136,0)}
+}
+.baby-listen-text{
+  color:#fff;
+  font-size:15px;
+  letter-spacing:1px;
+  opacity:0.92;
+}
+.baby-voice-text{
+  flex:1;
+  min-height:0;
+  padding:0 32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#fff;
+  font-size:28px;
+  line-height:1.45;
+  font-weight:700;
+}
+.baby-voice-cursor{
+  display:inline-block;
+  width:3px;
+  height:0.95em;
+  margin-left:3px;
+  border-radius:2px;
+  background:#fff;
+  vertical-align:-2px;
+  animation:babyVoiceBlink 1s steps(2) infinite;
+}
+@keyframes babyVoiceBlink{50%{opacity:0}}
+.baby-voice-dock{
+  width:calc(100% - 40px);
+  margin:0 auto 22px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  transform:scaleX(0.22) translateY(20px);
+  transform-origin:bottom center;
+  opacity:0;
+  transition:transform 0.28s cubic-bezier(0.2,0,0,1), opacity 0.2s;
+}
+.baby-voice-overlay.is-listening .baby-voice-dock{
+  transform:scaleX(1) translateY(0);
+  opacity:1;
+}
+.baby-voice-hint{
+  color:rgba(255,255,255,0.85);
+  font-size:13px;
+  letter-spacing:0.5px;
+  transition:color 0.2s;
+}
+.baby-voice-bar{
+  width:100%;
+  height:58px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.22);
+  background:rgba(255,255,255,0.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+}
+.baby-wave{
+  width:3px;
+  border-radius:999px;
+  background:var(--my-brand-red);
+  animation:babyVoiceWave 1s ease-in-out infinite;
+}
+@keyframes babyVoiceWave{
+  0%,100%{height:8px}
+  50%{height:30px}
+}
+.baby-voice-overlay.is-cancel .baby-voice-bar{
+  background:rgba(255,77,77,0.16);
+  border-color:rgba(255,120,120,0.4);
+}
+.baby-voice-overlay.is-cancel .baby-wave{background:#ff8a8a}
+.baby-voice-overlay.is-cancel .baby-voice-hint{color:#ff9d9d}
+.baby-voice-overlay.is-cancel .baby-listen-text,
+.baby-voice-overlay.is-cancel .baby-voice-text{opacity:0.4}
+.baby-voice-success-toast{
+  position:absolute;
+  left:50%;
+  bottom:96px;
+  z-index:270;
+  min-width:180px;
+  max-width:82%;
+  transform:translate(-50%,10px);
+  padding:12px 18px;
+  border-radius:12px;
+  background:rgba(30,28,32,0.94);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.14);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.16s ease, transform 0.2s ease, visibility 0.16s ease;
+  pointer-events:none;
+}
+.baby-voice-success-toast.is-show{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0);
+}
+.baby-voice-toast-check{
+  width:22px;
+  height:22px;
+  flex:0 0 22px;
+  border-radius:999px;
+  background:var(--my-success);
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.baby-voice-toast-title{
+  font-size:15px;
+  font-weight:600;
+  line-height:1.3;
+}
+.baby-voice-toast-sub{
+  margin-top:2px;
+  font-size:12px;
+  color:rgba(255,255,255,0.7);
+}
 
 /* ============ MASCOT 小柚 ============ */
 .mascot{
@@ -951,14 +1126,14 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="icons.jsx?v=20260624-tab-review"></script>
 <script type="text/babel" src="data.jsx?v=20260629-analysis-title-unify"></script>
 <script src="tabbar-icons.js?v=20260624-v1"></script>
-<script type="text/babel" src="components.jsx?v=20260703-center-toast-stack"></script>
+<script type="text/babel" src="components.jsx?v=20260703-baby-voice-global-release"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260701-float-notice-copy-2"></script>
 <script type="text/babel" src="record-page.jsx?v=20260703-baby-mode-persist"></script>
 <script type="text/babel" src="timeline-sister-cards.jsx?v=20260629-symptom-quick-edit"></script>
 <script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260629-symptom-quick-edit"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260629-mood-band"></script>
 <script type="text/babel" src="quick-pickers.jsx?v=20260629-analysis-title-unify"></script>
-<script type="text/babel" src="timeline-modules.jsx?v=20260629-mood-band-2"></script>
+<script type="text/babel" src="timeline-modules.jsx?v=20260703-baby-feeding-card"></script>
 <script type="text/babel" src="timeline.jsx?v=20260628-real-today"></script>
 <script type="text/babel" src="record-empty.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank.jsx?v=20260624-v104"></script>
@@ -967,7 +1142,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="search-filter.jsx?v=20260625-v5"></script>
 <script type="text/babel" src="search-page.jsx?v=20260625-push-search6"></script>
 <script type="text/babel" src="review-page.jsx?v=20260625-review-copy"></script>
-<script type="text/babel" src="home-page.jsx?v=20260703-baby-default-tab"></script>
+<script type="text/babel" src="home-page.jsx?v=20260703-baby-voice-coach-hide"></script>
 <script type="text/babel" src="cloud-publisher.jsx?v=20260628-symptom-quick"></script>
 <script type="text/babel" src="voice-transcribe-recorder.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-interludes.jsx?v=20260602-v102"></script>
@@ -980,7 +1155,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="path-flyout.jsx?v=20260611"></script>
 <script type="text/babel" src="demo-scenes.jsx?v=20260624-v1"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260703-mode-toast-center"></script>
+<script type="text/babel" src="app.jsx?v=20260703-baby-feeding-card"></script>
 
 <!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
 <button id="resetDemo" style="

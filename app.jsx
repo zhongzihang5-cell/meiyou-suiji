@@ -1,5 +1,6 @@
 const { useState, useEffect, useRef } = React;
 const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
+const BABY_VOICE_DEMO_TEXT = '今天早上喂奶喂了60ml';
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -39,6 +40,54 @@ function buildTimelineEntry(text, hits, opts={}){
   return entry;
 }
 
+function BabyVoiceOverlay({session, success}){
+  const waveBars = React.useMemo(()=>Array.from({length:26}, (_, i)=>({
+    delay: (i * 0.05).toFixed(2) + 's',
+    duration: (0.72 + (i % 5) * 0.08).toFixed(2) + 's',
+  })), []);
+  const text = BABY_VOICE_DEMO_TEXT.slice(0, session.textLength || 0);
+  return (
+    <>
+      <div
+        className={
+          'baby-voice-overlay'
+          + (session.active ? ' is-listening' : '')
+          + (session.cancel ? ' is-cancel' : '')
+        }
+        aria-hidden={!session.active}
+      >
+        <div className="baby-voice-listening">
+          <span className="baby-listen-dot"></span>
+          <span className="baby-listen-text">请说，我在听…</span>
+        </div>
+        <div className="baby-voice-text">
+          {text}
+          {session.active ? <span className="baby-voice-cursor"></span> : null}
+        </div>
+        <div className="baby-voice-dock">
+          <div className="baby-voice-hint">{session.cancel ? '松开取消' : '松开发送　　上滑取消'}</div>
+          <div className="baby-voice-bar">
+            {waveBars.map((bar, i)=>(
+              <span
+                key={i}
+                className="baby-wave"
+                style={{animationDelay:bar.delay, animationDuration:bar.duration}}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className={'baby-voice-success-toast' + (success.show ? ' is-show' : '')}>
+        <span className="baby-voice-toast-check">✓</span>
+        <div>
+          <div className="baby-voice-toast-title">记录成功</div>
+          <div className="baby-voice-toast-sub">可以在喂养记录或点滴查看</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const scene = window.getDemoScene(t.demoScene);
@@ -52,6 +101,9 @@ function App(){
   const [showPhoto, setShowPhoto] = useState(false);
   const [activeTab, setActiveTab] = useState(initial.activeTab);
   const [recordLifeMode, setRecordLifeMode] = useState('经期');
+  const [babyVoiceSession, setBabyVoiceSession] = useState({active:false, cancel:false, textLength:0});
+  const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
+  const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
   const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState(PERIOD_START_NOTICE_TITLE);
   const [analysisNoticeKind, setAnalysisNoticeKind] = useState('period-start');
@@ -77,6 +129,13 @@ function App(){
   const moodGuideQueueRef = useRef(null);
   const dropLandRevealRef = useRef(false);
   const [firstDropAnim, setFirstDropAnim] = useState(null);
+  const babyVoiceStartYRef = useRef(0);
+  const babyVoiceActiveRef = useRef(false);
+  const babyVoiceCancelRef = useRef(false);
+  const babyVoiceHoldTimerRef = useRef(null);
+  const babyVoiceTimerRef = useRef(null);
+  const babyVoiceSuccessTimerRef = useRef(null);
+  const babyFeedingCardInsertedRef = useRef(false);
 
   const recordFeedback = !!scene.record.recordFeedback;
 
@@ -190,6 +249,7 @@ function App(){
     firstRecordAnimDoneRef.current = false;
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
+    babyFeedingCardInsertedRef.current = false;
   };
 
   useEffect(()=>{
@@ -607,6 +667,118 @@ function App(){
       pushToast({text:'已切换至经期模式', placement:'center'});
     }
   };
+
+  const stopBabyVoiceTyping = ()=>{
+    if(babyVoiceTimerRef.current){
+      clearInterval(babyVoiceTimerRef.current);
+      babyVoiceTimerRef.current = null;
+    }
+  };
+
+  const activateBabyVoiceHold = ()=>{
+    setBabyVoiceCoachHidden(true);
+    babyVoiceActiveRef.current = true;
+    stopBabyVoiceTyping();
+    clearTimeout(babyVoiceSuccessTimerRef.current);
+    setBabyVoiceSuccess({show:false});
+    setBabyVoiceSession({active:true, cancel:false, textLength:0});
+    babyVoiceTimerRef.current = setInterval(()=>{
+      setBabyVoiceSession((current)=>{
+        if(!current.active){
+          stopBabyVoiceTyping();
+          return current;
+        }
+        if(current.textLength >= BABY_VOICE_DEMO_TEXT.length){
+          stopBabyVoiceTyping();
+          return current;
+        }
+        return {...current, textLength: current.textLength + 1};
+      });
+    }, 62);
+  };
+
+  const startBabyVoiceHold = (clientY)=>{
+    if(recordLifeMode !== '育儿') return;
+    babyVoiceStartYRef.current = clientY || 0;
+    babyVoiceActiveRef.current = false;
+    babyVoiceCancelRef.current = false;
+    stopBabyVoiceTyping();
+    clearTimeout(babyVoiceHoldTimerRef.current);
+    babyVoiceHoldTimerRef.current = setTimeout(()=>{
+      babyVoiceHoldTimerRef.current = null;
+      activateBabyVoiceHold();
+    }, 300);
+  };
+
+  const moveBabyVoiceHold = (clientY)=>{
+    const shouldCancel = (babyVoiceStartYRef.current - (clientY || 0)) > 64;
+    babyVoiceCancelRef.current = shouldCancel;
+    setBabyVoiceSession((current)=>{
+      if(!current.active) return current;
+      return current.cancel === shouldCancel ? current : {...current, cancel: shouldCancel};
+    });
+  };
+
+  const appendBabyFeedingTimelineCard = ()=>{
+    if(babyFeedingCardInsertedRef.current) return;
+    babyFeedingCardInsertedRef.current = true;
+    const entry = {
+      id:'baby-feeding-'+Date.now(),
+      kind:'baby-feeding-card',
+      time:'08:15',
+      text:'今天早上喂了60ml配方奶',
+      voice:{duration:'6″'},
+      feedType:'配方奶',
+      railDot:'baby',
+      isNew:true,
+      chart:{
+        todayLabel:'1200ml',
+        bars:[
+          {d:'周六', v:53},
+          {d:'周日', v:67},
+          {d:'周一', v:59},
+          {d:'周二', v:71},
+          {d:'周三', v:48},
+          {d:'周四', v:63},
+          {d:'今天', v:59, today:true},
+        ],
+      },
+    };
+    setTimeline(blocks=>{
+      const dayId = blocks.find(b=>b.type === 'day' && b.isToday)?.id;
+      return window.appendTimelineEntry(blocks, entry, {dayId});
+    });
+  };
+
+  const endBabyVoiceHold = ()=>{
+    if(babyVoiceHoldTimerRef.current){
+      clearTimeout(babyVoiceHoldTimerRef.current);
+      babyVoiceHoldTimerRef.current = null;
+      babyVoiceCancelRef.current = false;
+      setActiveTab('note');
+      return;
+    }
+    if(!babyVoiceActiveRef.current) return;
+    const cancelled = babyVoiceCancelRef.current;
+    babyVoiceActiveRef.current = false;
+    babyVoiceCancelRef.current = false;
+    setBabyVoiceSession((current)=>({...current, active:false, cancel:false}));
+    stopBabyVoiceTyping();
+    if(!cancelled){
+      appendBabyFeedingTimelineCard();
+      setBabyVoiceSuccess({show:true});
+      clearTimeout(babyVoiceSuccessTimerRef.current);
+      babyVoiceSuccessTimerRef.current = setTimeout(()=>{
+        setBabyVoiceSuccess({show:false});
+      }, 2200);
+    }
+  };
+
+  React.useEffect(()=>()=>{
+    clearTimeout(babyVoiceHoldTimerRef.current);
+    stopBabyVoiceTyping();
+    clearTimeout(babyVoiceSuccessTimerRef.current);
+  }, []);
 
   const markUserRecorded = ()=>{
     if(scene.record.todayGuide) setHideTodayGuide(true);
@@ -1191,7 +1363,11 @@ function App(){
         <StatusBar/>
 
       {showHome && HomePage && (
-        <HomePage mode={recordLifeMode} onDetailOpenChange={setHomeDetailOpen}/>
+        <HomePage
+          mode={recordLifeMode}
+          hideBabyVoiceCoach={babyVoiceCoachHidden}
+          onDetailOpenChange={setHomeDetailOpen}
+        />
       )}
 
       {showRecordTab && (
@@ -1388,7 +1564,20 @@ function App(){
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
 
       <Toast toasts={toasts}/>
-      {showBottomTabBar && <TabBar active={activeTab} onChange={handleTabChange} noteUnread={noteTabUnread}/>}
+      {showBottomTabBar && (
+        <TabBar
+          active={activeTab}
+          onChange={handleTabChange}
+          noteUnread={noteTabUnread}
+          noteLabel={recordLifeMode === '育儿' ? '长按说话' : '点滴'}
+          onNoteVoiceStart={recordLifeMode === '育儿' ? startBabyVoiceHold : undefined}
+          onNoteVoiceMove={recordLifeMode === '育儿' ? moveBabyVoiceHold : undefined}
+          onNoteVoiceEnd={recordLifeMode === '育儿' ? endBabyVoiceHold : undefined}
+        />
+      )}
+      {recordLifeMode === '育儿' && (
+        <BabyVoiceOverlay session={babyVoiceSession} success={babyVoiceSuccess}/>
+      )}
       </div>
 
       {!window.__STANDALONE_LOCKED_SCENE && (

@@ -90,7 +90,7 @@ function CycleDayHeader({day, items, dayBlocks}){
 function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, dropAnim, onDropLand, onDropComplete}){
   const dotCls = railDot === 'ai'
     ? ' ai'
-    : (phaseKind ? ' '+phaseKind : '');
+    : (railDot ? ' '+railDot : (phaseKind ? ' '+phaseKind : ''));
   const RecordBlankAxisDropAnim = window.RecordBlankAxisDropAnim;
   const isDrop = !!dropAnim;
   return (
@@ -797,6 +797,68 @@ function MoodInsightCard({item, isNew}){
   );
 }
 
+function BabyFeedingTimelineCard({item}){
+  const [open, setOpen] = React.useState(item.open !== false);
+  const chart = item.chart || {};
+  const bars = chart.bars || [
+    {d:'周六', v:53}, {d:'周日', v:67}, {d:'周一', v:59},
+    {d:'周二', v:71}, {d:'周三', v:48}, {d:'周四', v:63}, {d:'今天', v:59, today:true},
+  ];
+  return (
+    <article className="tl-baby-feeding-card">
+      <div className="tl-baby-feed-head">
+        <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
+        <span className="tl-baby-feed-voice">{item.voice?.duration || '6″'}</span>
+      </div>
+      <p className="tl-baby-feed-text">{item.text || '今天早上喂了60ml配方奶'}</p>
+      <div className="tl-baby-feed-tags">
+        <span className="tl-baby-feed-tag-main">🍼 小豆苗的喂养记录</span>
+        <span className="tl-baby-feed-chip">{item.feedType || '配方奶'}</span>
+      </div>
+      <div className="tl-baby-feed-divider"/>
+      <button className="tl-baby-feed-feedback-head" type="button" onClick={()=>setOpen(v=>!v)}>
+        <span className="tl-baby-feed-feedback-title">✨ 近7天喂奶量</span>
+        <span className={'tl-baby-feed-chev'+(open ? ' is-open' : '')}>⌄</span>
+      </button>
+      {open && (
+        <div className="tl-baby-feed-feedback-body">
+          <div className="tl-baby-feed-chart" aria-hidden="true">
+            <svg viewBox="0 0 302 138" preserveAspectRatio="none">
+              <line x1="0" y1="26" x2="302" y2="26"/>
+              <line x1="0" y1="58" x2="302" y2="58"/>
+              <line x1="0" y1="90" x2="302" y2="90"/>
+              {bars.map((bar, index)=>{
+                const x = 18 + index * 40;
+                const h = Math.max(18, Math.min(82, Number(bar.v) || 48));
+                const y = 100 - h;
+                return (
+                  <rect
+                    key={bar.d}
+                    className={bar.today ? 'is-today' : ''}
+                    x={x}
+                    y={y}
+                    width="18"
+                    height={h}
+                    rx="9"
+                  />
+                );
+              })}
+              <text className="tl-baby-feed-chart-value" x="244" y="28">{chart.todayLabel || '1200ml'}</text>
+              {bars.map((bar, index)=>(
+                <text key={bar.d+'-label'} x={27 + index * 40} y="130">{bar.d}</text>
+              ))}
+            </svg>
+          </div>
+          <p className="tl-baby-feed-summary">
+            最近 7 天日均喂奶 <strong>6 次</strong>，总喂奶量 <strong>1200ml</strong>，平均间隔 <strong>3 小时</strong>喂一次。
+          </p>
+          <button className="tl-baby-feed-more" type="button">查看更多喂养记录 <span>›</span></button>
+        </div>
+      )}
+    </article>
+  );
+}
+
 function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && !item.noAnimate && (
@@ -842,6 +904,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
     body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
   } else if(item.kind === 'mood-insight'){
     body = item.pendingDrop ? null : <MoodInsightCard item={item} isNew={isNew}/>;
+  } else if(item.kind === 'baby-feeding-card'){
+    body = <BabyFeedingTimelineCard item={item}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card' || item.kind === 'sync-card'){
@@ -904,5 +968,5 @@ Object.assign(window, {
   CycleDayHeader, TimelineRailNode, TlNodeCaption, summarizeDayItems,
   resolveDayTitleLabel, formatDayMeta,
   ModulePlaceholder, TodayGuideCard, WeeklyTrendCard, TimelineItem,
-  MoodInsightCard, MoodCurveChart, MoodBandChart,
+  MoodInsightCard, MoodCurveChart, MoodBandChart, BabyFeedingTimelineCard,
 });

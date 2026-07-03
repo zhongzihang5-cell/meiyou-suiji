@@ -887,6 +887,32 @@
 .baby-child-home{
   padding:0 12px calc(86px + var(--my-safe-bottom));
 }
+.baby-voice-coach{
+  position:fixed;
+  left:50%;
+  bottom:calc(66px + var(--my-safe-bottom));
+  z-index:105;
+  transform:translateX(-50%);
+  padding:6px 12px;
+  border-radius:999px;
+  background:var(--my-text-primary);
+  color:#fff;
+  font-size:12px;
+  line-height:1.2;
+  white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,0.14);
+  pointer-events:none;
+}
+.baby-voice-coach::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-5px;
+  transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:var(--my-text-primary);
+  border-bottom:0;
+}
 .baby-child-home .baby-mode-topbar{
   position:relative;
   z-index:4;
