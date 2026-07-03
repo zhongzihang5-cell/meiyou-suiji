@@ -1,10 +1,6 @@
 ---
-version: 1.0-ai
-name: Meiyou Design Language for AI
-source:
-  - /Users/meiyouchangrui02/Downloads/美柚设计语言V1.0.docx
-  - /Users/meiyouchangrui02/Downloads/美柚设计语言V1.0.md
-  - /Users/meiyouchangrui02/Desktop/Vibe coding
+version: 1.0
+name: Design System-meiyou
 primary_use: 给 Codex、Stitch、Figma Make、Cursor 等 AI 工具生成美柚 App/H5 UI 时使用
 ---
 

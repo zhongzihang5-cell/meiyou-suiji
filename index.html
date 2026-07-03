@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="diet-feedback.css?v=20260629-analysis-title-unify">
 <link rel="stylesheet" href="path-flyout.css?v=20260616-v105">
 <link rel="stylesheet" href="review-page.css?v=20260624-cycle-summary-nested">
-<link rel="stylesheet" href="home-page.css?v=20260625-bar-labels">
+<link rel="stylesheet" href="home-page.css?v=20260703-baby-mom-kit">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;letter-spacing:0}
@@ -618,6 +618,24 @@ html,body{
 .toast.bye{animation:toastOut 0.18s forwards}
 @keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-8px)}}
+.toast-center-stack{
+  position:fixed;
+  inset:0;
+  z-index:10020;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  padding:0 24px;
+}
+.toast.center{
+  position:static;
+  transform:none;
+  animation:toastCenterIn 0.22s ease-out;
+}
+.toast.center.bye{animation:toastCenterOut 0.18s forwards}
+@keyframes toastCenterIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastCenterOut{to{opacity:0;transform:translateY(-8px) scale(.98)}}
 .toast .check{
   width:18px;height:18px;border-radius:50%;background:var(--my-brand-red);
   display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
@@ -933,9 +951,9 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="icons.jsx?v=20260624-tab-review"></script>
 <script type="text/babel" src="data.jsx?v=20260629-analysis-title-unify"></script>
 <script src="tabbar-icons.js?v=20260624-v1"></script>
-<script type="text/babel" src="components.jsx?v=20260701-note-unread-dot"></script>
+<script type="text/babel" src="components.jsx?v=20260703-center-toast-stack"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260701-float-notice-copy-2"></script>
-<script type="text/babel" src="record-page.jsx?v=20260630-health-picker-cropped-icons"></script>
+<script type="text/babel" src="record-page.jsx?v=20260703-baby-mode-persist"></script>
 <script type="text/babel" src="timeline-sister-cards.jsx?v=20260629-symptom-quick-edit"></script>
 <script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260629-symptom-quick-edit"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260629-mood-band"></script>
@@ -949,7 +967,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="search-filter.jsx?v=20260625-v5"></script>
 <script type="text/babel" src="search-page.jsx?v=20260625-push-search6"></script>
 <script type="text/babel" src="review-page.jsx?v=20260625-review-copy"></script>
-<script type="text/babel" src="home-page.jsx?v=20260625-bar-labels"></script>
+<script type="text/babel" src="home-page.jsx?v=20260703-baby-default-tab"></script>
 <script type="text/babel" src="cloud-publisher.jsx?v=20260628-symptom-quick"></script>
 <script type="text/babel" src="voice-transcribe-recorder.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="voice-transcribe-interludes.jsx?v=20260602-v102"></script>
@@ -962,7 +980,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="path-flyout.jsx?v=20260611"></script>
 <script type="text/babel" src="demo-scenes.jsx?v=20260624-v1"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260701-float-notice-copy-2"></script>
+<script type="text/babel" src="app.jsx?v=20260703-mode-toast-center"></script>
 
 <!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
 <button id="resetDemo" style="

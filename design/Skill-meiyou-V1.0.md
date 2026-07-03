@@ -1,15 +1,12 @@
 ---
-name: meiyou-design-system
-description: Use when designing or implementing Meiyou 美柚 App/H5 UI, mobile product screens, business operation pages, membership/ecommerce pages, component libraries, or Figma-to-code work that must follow 美柚设计语言 rather than generic pink mobile UI.
+name: meiyou-design-skill
+description: Use when designing or implementing meiyou 美柚 App/H5 UI, mobile product screens, business operation pages, membership/ecommerce pages, component libraries, or Figma-to-code work that must follow 美柚设计语言 rather than generic pink mobile UI.
 ---
 
-# Meiyou Design System
+# meiyou Design skill
 
-Use this skill whenever the task involves 美柚 product UI, H5, mobile components, business operation cards, or AI-generated interface drafts for Meiyou.
+Use this skill whenever the task involves 美柚 product UI, H5, mobile components, business operation cards, or AI-generated interface drafts for meiyou.
 
-The full project-level guide is available at:
-
-`/Users/meiyouchangrui02/Documents/New project 2/DESIGN.md`
 
 Always apply the guide before generating UI. If the project has a newer local `DESIGN.md`, component library, Figma file, or design token file, prefer the project artifact and treat this skill as the baseline.
 

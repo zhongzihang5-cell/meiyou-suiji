@@ -2864,6 +2864,8 @@ function RecordPage({
   onAnalysisReady,
   onPeriodEndAnalysisReady,
   onPeriodReset,
+  onModeChange,
+  activeModeLabel = '经期',
   onPeriodRecordSubmit,
   onPeriodDetailRecordSubmit,
   onDietRecordSubmit,
@@ -2879,7 +2881,7 @@ function RecordPage({
     () => periodEndRecordCompleted ? [...PERIOD_DAYS, ...PERIOD_END_DAYS] : PERIOD_DAYS,
     [periodEndRecordCompleted]
   );
-  const [activeMode, setActiveMode] = useState(0);
+  const activeMode = Math.max(0, MODE_TABS.indexOf(activeModeLabel));
   const [selectedDay, setSelectedDay] = useState(periodEndRecordReady ? 21 : 14);
   const [periodYes, setPeriodYes] = useState(false);
   const [litDays, setLitDays] = useState(periodEndRecordReady ? settledPeriodDays : []);
@@ -3117,7 +3119,9 @@ function RecordPage({
                     role="tab"
                     aria-selected={activeMode === i}
                     className={activeMode === i ? 'is-active' : ''}
-                    onClick={() => setActiveMode(i)}
+                    onClick={() => {
+                      onModeChange?.(label);
+                    }}
                   >
                     {label}
                   </button>

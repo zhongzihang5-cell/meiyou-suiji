@@ -51,6 +51,7 @@ function App(){
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
   const [activeTab, setActiveTab] = useState(initial.activeTab);
+  const [recordLifeMode, setRecordLifeMode] = useState('经期');
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
   const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState(PERIOD_START_NOTICE_TITLE);
   const [analysisNoticeKind, setAnalysisNoticeKind] = useState('period-start');
@@ -596,6 +597,15 @@ function App(){
       setToasts(ts=>ts.map(x=>x.id===id?{...x,bye:true}:x));
       setTimeout(()=>setToasts(ts=>ts.filter(x=>x.id!==id)), 220);
     }, 2400);
+  };
+
+  const handleRecordModeChange = (mode)=>{
+    setRecordLifeMode(mode);
+    if(mode === '育儿'){
+      pushToast({text:'已切换至育儿模式', placement:'center'});
+    } else if(mode === '经期'){
+      pushToast({text:'已切换至经期模式', placement:'center'});
+    }
   };
 
   const markUserRecorded = ()=>{
@@ -1181,7 +1191,7 @@ function App(){
         <StatusBar/>
 
       {showHome && HomePage && (
-        <HomePage onDetailOpenChange={setHomeDetailOpen}/>
+        <HomePage mode={recordLifeMode} onDetailOpenChange={setHomeDetailOpen}/>
       )}
 
       {showRecordTab && (
@@ -1190,6 +1200,7 @@ function App(){
           periodFlowEnabled={scene.calendar.periodFlow}
           periodEndRecordReady={periodEndRecordReady}
           periodEndRecordCompleted={periodEndRecordCompleted}
+          activeModeLabel={recordLifeMode}
           onAnalysisReady={()=>{
             setAnalysisNoticeTitle(PERIOD_START_NOTICE_TITLE);
             setAnalysisNoticeKind('period-start');
@@ -1209,6 +1220,7 @@ function App(){
             setPeriodDetailRecordEnabled(false);
             setPeriodDetailDraft({});
           }}
+          onModeChange={handleRecordModeChange}
           onPeriodRecordSubmit={(value)=>{
             periodRecordRef.current = value || null;
             setPeriodDetailRecordEnabled(true);

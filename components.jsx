@@ -252,18 +252,26 @@ function TabBar({active='note', onChange, noteUnread=false}){
 // ============ Toast ============
 function Toast({toasts}){
   const I = window.Icon;
-  return (
-    <div className="toast-stack">
-      {toasts.map(t=>(
-        <div key={t.id} className={'toast'+(t.bye?' bye':'')}>
-          <span className="check"><I name="check" size={11} stroke={2.6}/></span>
-          <span>{t.text}</span>
-          {t.tags && t.tags.map((tg,i)=>(
-            <span key={i} className="toast-tag">{tg}</span>
-          ))}
-        </div>
+  const topToasts = toasts.filter(t=>t.placement !== 'center');
+  const centerToasts = toasts.filter(t=>t.placement === 'center');
+  const renderToast = (t)=>(
+    <div key={t.id} className={'toast'+(t.placement === 'center' ? ' center' : '')+(t.bye?' bye':'')}>
+      <span className="check"><I name="check" size={11} stroke={2.6}/></span>
+      <span>{t.text}</span>
+      {t.tags && t.tags.map((tg,i)=>(
+        <span key={i} className="toast-tag">{tg}</span>
       ))}
     </div>
+  );
+  return (
+    <>
+      <div className="toast-stack">
+        {topToasts.map(renderToast)}
+      </div>
+      <div className="toast-center-stack">
+        {centerToasts.map(renderToast)}
+      </div>
+    </>
   );
 }
 
