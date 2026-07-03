@@ -88,6 +88,67 @@ function BabyVoiceOverlay({session, success}){
   );
 }
 
+function BabyFeedingDiscoverCard({onClose}){
+  return (
+    <section className="tl-baby-discover-card" aria-label="点滴育儿记录能力发现">
+      <button
+        type="button"
+        className="tl-baby-discover-close"
+        aria-label="关闭发现卡片"
+        onClick={onClose}
+      >
+        ×
+      </button>
+      <div className="tl-baby-discover-title">
+        ✨ 点滴现在也能记录<span>宝宝喂养</span>了
+      </div>
+      <p className="tl-baby-discover-sub">语音输入，自动识别归档</p>
+      <div className="tl-baby-discover-feedback is-example">
+        <span className="tl-baby-discover-example-badge">示例数据</span>
+        <div className="tl-baby-discover-feedback-text">
+          <button className="tl-voice-pill is-compact tl-baby-discover-voice" type="button" aria-label="播放语音 6秒">
+            <span className="tl-voice-pill-ico" aria-hidden="true">
+              <svg viewBox="0 0 12 12" fill="currentColor"><path d="M4 2.5v7l5-3.5-5-3.5z"/></svg>
+            </span>
+            <span className="tl-voice-pill-dur">6″</span>
+          </button>
+          <span>今天早上喂了60ml配方奶</span>
+        </div>
+        <div className="tl-baby-discover-feedback-tags">
+          <span className="tl-baby-discover-feed-main">🍼 小豆苗的喂养记录</span>
+          <span className="tl-baby-discover-feed-chip">配方奶</span>
+        </div>
+        <div className="tl-baby-discover-feedback-divider"/>
+        <div className="tl-baby-discover-feedback-head">
+          <span>✨ 近7天喂奶量</span>
+          <span aria-hidden="true">⌃</span>
+        </div>
+        <div className="tl-baby-discover-chart" aria-hidden="true">
+          <svg viewBox="0 0 302 138" preserveAspectRatio="none">
+            <line x1="0" y1="42" x2="302" y2="42"/>
+            <line x1="0" y1="86" x2="302" y2="86"/>
+            <rect x="18" y="64" width="18" height="52" rx="9"/>
+            <rect x="58" y="50" width="18" height="66" rx="9"/>
+            <rect x="98" y="58" width="18" height="58" rx="9"/>
+            <rect x="138" y="46" width="18" height="70" rx="9"/>
+            <rect x="178" y="70" width="18" height="46" rx="9"/>
+            <rect x="218" y="56" width="18" height="60" rx="9"/>
+            <rect className="is-today" x="258" y="58" width="18" height="58" rx="9"/>
+            <text className="tl-baby-discover-chart-value" x="246" y="45">1200ml</text>
+            <text x="27" y="132">周六</text>
+            <text x="67" y="132">周日</text>
+            <text x="107" y="132">周一</text>
+            <text x="147" y="132">周二</text>
+            <text x="187" y="132">周三</text>
+            <text x="227" y="132">周四</text>
+            <text x="267" y="132">今天</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const scene = window.getDemoScene(t.demoScene);
@@ -104,6 +165,7 @@ function App(){
   const [babyVoiceSession, setBabyVoiceSession] = useState({active:false, cancel:false, textLength:0});
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
+  const [babyDiscoverVisible, setBabyDiscoverVisible] = useState(true);
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
   const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState(PERIOD_START_NOTICE_TITLE);
   const [analysisNoticeKind, setAnalysisNoticeKind] = useState('period-start');
@@ -250,6 +312,7 @@ function App(){
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
     babyFeedingCardInsertedRef.current = false;
+    setBabyDiscoverVisible(true);
   };
 
   useEffect(()=>{
@@ -626,6 +689,11 @@ function App(){
       const tm = setTimeout(()=>scrollTimelineToBottom('auto'), 80);
       return ()=>clearTimeout(tm);
     }
+    if(recordLifeMode === '育儿' && babyDiscoverVisible){
+      const tm = setTimeout(()=>scrollTimelineToBottom('auto'), 0);
+      recordEnterModeRef.current = 'idle';
+      return ()=>clearTimeout(tm);
+    }
     if(recordEnterModeRef.current === 'analysis'){
       recordEnterModeRef.current = 'idle';
       return;
@@ -633,7 +701,7 @@ function App(){
     const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
     recordEnterModeRef.current = 'idle';
     return ()=>clearTimeout(tm);
-  }, [activeTab, showRecordEmpty, showBlankEmpty]);
+  }, [activeTab, showRecordEmpty, showBlankEmpty, voiceTranscribe, recordLifeMode, babyDiscoverVisible]);
 
   useEffect(()=>{
     if(showRecordEmpty || showBlankEmpty) return;
@@ -752,6 +820,20 @@ function App(){
     });
   };
 
+  const closeBabyFeedingDiscoverCard = ()=>{
+    setBabyDiscoverVisible(false);
+    setTimeout(()=>scrollTimelineToBottom('smooth'), 60);
+  };
+
+  const submitBabyFeedingVoice = ()=>{
+    setBabyDiscoverVisible(false);
+    clearTimeout(babyVoiceSuccessTimerRef.current);
+    setBabyVoiceSuccess({show:false});
+    setNoteTabUnread(false);
+    appendBabyFeedingTimelineCard();
+    setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
+  };
+
   const endBabyVoiceHold = ()=>{
     if(babyVoiceHoldTimerRef.current){
       clearTimeout(babyVoiceHoldTimerRef.current);
@@ -771,6 +853,7 @@ function App(){
     setBabyVoiceSession((current)=>({...current, active:false, cancel:false}));
     stopBabyVoiceTyping();
     if(!cancelled){
+      setBabyDiscoverVisible(false);
       appendBabyFeedingTimelineCard();
       setBabyVoiceSuccess({show:true});
       if(activeTab !== 'note') setNoteTabUnread(true);
@@ -1522,6 +1605,9 @@ function App(){
             onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
           )}
+          {recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && (
+            <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>
+          )}
         </div>
 
         {!voiceTranscribe && (
@@ -1535,7 +1621,7 @@ function App(){
           onWeightConfirm={submitWeightRecord}
           onFoodConfirm={submitFoodRecord}
           onDietCapture={submitDietCapture}
-          onVoiceDone={submitVoice}
+          onVoiceDone={recordLifeMode === '育儿' ? submitBabyFeedingVoice : submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
@@ -1574,7 +1660,7 @@ function App(){
           active={activeTab}
           onChange={handleTabChange}
           noteUnread={noteTabUnread}
-          noteLabel={recordLifeMode === '育儿' ? '长按说话' : '点滴'}
+          noteLabel="点滴"
           onNoteVoiceStart={recordLifeMode === '育儿' ? startBabyVoiceHold : undefined}
           onNoteVoiceMove={recordLifeMode === '育儿' ? moveBabyVoiceHold : undefined}
           onNoteVoiceEnd={recordLifeMode === '育儿' ? endBabyVoiceHold : undefined}

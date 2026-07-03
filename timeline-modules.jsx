@@ -797,31 +797,58 @@ function MoodInsightCard({item, isNew}){
   );
 }
 
-function BabyFeedingTimelineCard({item}){
+function BabyFeedingTimelineCard({item, isNew}){
   const [open, setOpen] = React.useState(item.open !== false);
+  const TypewriterText = window.TypewriterText;
+  const [streamStep, setStreamStep] = React.useState(isNew ? 0 : 4);
   const chart = item.chart || {};
   const bars = chart.bars || [
     {d:'周六', v:53}, {d:'周日', v:67}, {d:'周一', v:59},
     {d:'周二', v:71}, {d:'周三', v:48}, {d:'周四', v:63}, {d:'今天', v:59, today:true},
   ];
+  const text = item.text || '今天早上喂了60ml配方奶';
+
+  React.useEffect(()=>{
+    if(!isNew){
+      setStreamStep(4);
+      return;
+    }
+    setStreamStep(0);
+    const timers = [
+      setTimeout(()=>setStreamStep(1), 220),
+      setTimeout(()=>setStreamStep(2), 520),
+      setTimeout(()=>setStreamStep(3), 820),
+      setTimeout(()=>setStreamStep(4), 1120),
+    ];
+    return ()=>timers.forEach(clearTimeout);
+  }, [item.id, isNew]);
+
   return (
-    <article className="tl-baby-feeding-card">
+    <article className={'tl-baby-feeding-card'+(isNew ? ' is-stream' : '')}>
       <div className="tl-baby-feed-head">
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
         <span className="tl-baby-feed-voice">{item.voice?.duration || '6″'}</span>
       </div>
-      <p className="tl-baby-feed-text">{item.text || '今天早上喂了60ml配方奶'}</p>
-      <div className="tl-baby-feed-tags">
-        <span className="tl-baby-feed-tag-main">🍼 小豆苗的喂养记录</span>
-        <span className="tl-baby-feed-chip">{item.feedType || '配方奶'}</span>
-      </div>
-      <div className="tl-baby-feed-divider"/>
-      <button className="tl-baby-feed-feedback-head" type="button" onClick={()=>setOpen(v=>!v)}>
-        <span className="tl-baby-feed-feedback-title">✨ 近7天喂奶量</span>
-        <span className={'tl-baby-feed-chev'+(open ? ' is-open' : '')}>⌄</span>
-      </button>
-      {open && (
-        <div className="tl-baby-feed-feedback-body">
+      <p className="tl-baby-feed-text">
+        {text}
+      </p>
+      {streamStep >= 1 && (
+        <div className="tl-baby-feed-tags tl-baby-feed-stream-in">
+          <span className="tl-baby-feed-tag-main">🍼 小豆苗的喂养记录</span>
+          <span className="tl-baby-feed-chip">{item.feedType || '配方奶'}</span>
+        </div>
+      )}
+      {streamStep >= 2 && (
+        <div className="tl-baby-feed-analysis tl-baby-feed-stream-in">
+          <div className="tl-baby-feed-divider"/>
+          <button className="tl-baby-feed-feedback-head" type="button" onClick={()=>setOpen(v=>!v)}>
+            <span className="tl-baby-feed-feedback-title">✨ 近7天喂奶量</span>
+            <span className={'tl-baby-feed-chev'+(open ? ' is-open' : '')}>⌄</span>
+          </button>
+        </div>
+      )}
+      {open && streamStep >= 3 && (
+        <div className="tl-baby-feed-feedback-body tl-baby-feed-stream-in">
           <div className="tl-baby-feed-chart" aria-hidden="true">
             <svg viewBox="0 0 302 138" preserveAspectRatio="none">
               <line x1="0" y1="26" x2="302" y2="26"/>
@@ -849,10 +876,33 @@ function BabyFeedingTimelineCard({item}){
               ))}
             </svg>
           </div>
-          <p className="tl-baby-feed-summary">
-            最近 7 天日均喂奶 <strong>6 次</strong>，总喂奶量 <strong>1200ml</strong>，平均间隔 <strong>3 小时</strong>喂一次。
-          </p>
-          <button className="tl-baby-feed-more" type="button">查看更多喂养记录 <span>›</span></button>
+          {streamStep >= 4 && (
+            <>
+              <p className="tl-baby-feed-summary tl-baby-feed-stream-in">
+                {isNew && TypewriterText ? (
+                  <TypewriterText
+                    segments={[
+                      {text:'最近 7 天日均喂奶 '},
+                      {text:'6 次', className:'tl-baby-feed-summary-strong'},
+                      {text:'，总喂奶量 '},
+                      {text:'1200ml', className:'tl-baby-feed-summary-strong'},
+                      {text:'，平均间隔 '},
+                      {text:'3 小时', className:'tl-baby-feed-summary-strong'},
+                      {text:'喂一次。'},
+                    ]}
+                    active
+                    charMs={45}
+                    followScroll
+                  />
+                ) : (
+                  <>
+                    最近 7 天日均喂奶 <strong>6 次</strong>，总喂奶量 <strong>1200ml</strong>，平均间隔 <strong>3 小时</strong>喂一次。
+                  </>
+                )}
+              </p>
+              <button className="tl-baby-feed-more tl-baby-feed-stream-in" type="button">查看更多喂养记录 <span>›</span></button>
+            </>
+          )}
         </div>
       )}
     </article>
@@ -905,7 +955,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   } else if(item.kind === 'mood-insight'){
     body = item.pendingDrop ? null : <MoodInsightCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'baby-feeding-card'){
-    body = <BabyFeedingTimelineCard item={item}/>;
+    body = <BabyFeedingTimelineCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
     body = <WeeklyTrendCard item={item}/>;
   } else if(item.kind === 'voice-card' || item.kind === 'sync-card'){
