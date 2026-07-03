@@ -326,7 +326,7 @@ function BabyHomeContent({active, onChange, hideVoiceCoach=false}){
   return (
     <main className="home-page baby-mode-home baby-child-home" aria-label="育儿模式-宝宝首页">
       <BabyModeTopBar active={active} onChange={onChange}/>
-      {!hideVoiceCoach && <div className="baby-voice-coach">长按点滴，说一句话就能记</div>}
+      {!hideVoiceCoach && <div className="baby-voice-coach">试试用语音记录喂养吧</div>}
       <div className="baby-home-stack">
         <section className="baby-home-hero" aria-label="宝宝档案头图区">
           <div className="baby-hero-profile">

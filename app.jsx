@@ -100,7 +100,7 @@ function App(){
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
   const [activeTab, setActiveTab] = useState(initial.activeTab);
-  const [recordLifeMode, setRecordLifeMode] = useState('经期');
+  const [recordLifeMode, setRecordLifeMode] = useState('育儿');
   const [babyVoiceSession, setBabyVoiceSession] = useState({active:false, cancel:false, textLength:0});
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
@@ -603,6 +603,8 @@ function App(){
       if(periodDetailRecordEnabled || periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
       submitHealthRecordDraftsToTimeline();
       setNoteTabUnread(false);
+      clearTimeout(babyVoiceSuccessTimerRef.current);
+      setBabyVoiceSuccess({show:false});
     }
     if(tab !== 'note'){
       recordEnterModeRef.current = 'idle';
@@ -755,6 +757,10 @@ function App(){
       clearTimeout(babyVoiceHoldTimerRef.current);
       babyVoiceHoldTimerRef.current = null;
       babyVoiceCancelRef.current = false;
+      // 短按点滴 tab：进入点滴并清除记录成功提示与小红点
+      setNoteTabUnread(false);
+      clearTimeout(babyVoiceSuccessTimerRef.current);
+      setBabyVoiceSuccess({show:false});
       setActiveTab('note');
       return;
     }
@@ -767,10 +773,9 @@ function App(){
     if(!cancelled){
       appendBabyFeedingTimelineCard();
       setBabyVoiceSuccess({show:true});
+      if(activeTab !== 'note') setNoteTabUnread(true);
+      // 提示保持展示，直到用户点击进入点滴 tab 时一并消失
       clearTimeout(babyVoiceSuccessTimerRef.current);
-      babyVoiceSuccessTimerRef.current = setTimeout(()=>{
-        setBabyVoiceSuccess({show:false});
-      }, 2200);
     }
   };
 
