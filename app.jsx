@@ -103,8 +103,7 @@ function BabyFeedingDiscoverCard({onClose}){
         ✨ 点滴现在也能记录<span>宝宝喂养</span>了
       </div>
       <p className="tl-baby-discover-sub">语音输入，自动识别归档</p>
-      <div className="tl-baby-discover-feedback is-example">
-        <span className="tl-baby-discover-example-badge">示例数据</span>
+      <div className="tl-baby-discover-feedback">
         <div className="tl-baby-discover-feedback-text">
           <button className="tl-voice-pill is-compact tl-baby-discover-voice" type="button" aria-label="播放语音 6秒">
             <span className="tl-voice-pill-ico" aria-hidden="true">
@@ -117,32 +116,6 @@ function BabyFeedingDiscoverCard({onClose}){
         <div className="tl-baby-discover-feedback-tags">
           <span className="tl-baby-discover-feed-main">🍼 小豆苗的喂养记录</span>
           <span className="tl-baby-discover-feed-chip">配方奶</span>
-        </div>
-        <div className="tl-baby-discover-feedback-divider"/>
-        <div className="tl-baby-discover-feedback-head">
-          <span>✨ 近7天喂奶量</span>
-          <span aria-hidden="true">⌃</span>
-        </div>
-        <div className="tl-baby-discover-chart" aria-hidden="true">
-          <svg viewBox="0 0 302 138" preserveAspectRatio="none">
-            <line x1="0" y1="42" x2="302" y2="42"/>
-            <line x1="0" y1="86" x2="302" y2="86"/>
-            <rect x="18" y="64" width="18" height="52" rx="9"/>
-            <rect x="58" y="50" width="18" height="66" rx="9"/>
-            <rect x="98" y="58" width="18" height="58" rx="9"/>
-            <rect x="138" y="46" width="18" height="70" rx="9"/>
-            <rect x="178" y="70" width="18" height="46" rx="9"/>
-            <rect x="218" y="56" width="18" height="60" rx="9"/>
-            <rect className="is-today" x="258" y="58" width="18" height="58" rx="9"/>
-            <text className="tl-baby-discover-chart-value" x="246" y="45">1200ml</text>
-            <text x="27" y="132">周六</text>
-            <text x="67" y="132">周日</text>
-            <text x="107" y="132">周一</text>
-            <text x="147" y="132">周二</text>
-            <text x="187" y="132">周三</text>
-            <text x="227" y="132">周四</text>
-            <text x="267" y="132">今天</text>
-          </svg>
         </div>
       </div>
     </section>
@@ -395,9 +368,10 @@ function App(){
       setTimeout(()=>{
         const el = streamRef.current;
         if(!el) return;
+        const reserve = el.classList.contains('has-baby-discover') ? 220 : 28;
         const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
         if(anchor){
-          const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 28;
+          const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - reserve;
           if(behavior === 'auto') el.scrollTop = Math.max(0, top);
           else el.scrollTo({ top: Math.max(0, top), behavior });
           return;
@@ -690,7 +664,7 @@ function App(){
       return ()=>clearTimeout(tm);
     }
     if(recordLifeMode === '育儿' && babyDiscoverVisible){
-      const tm = setTimeout(()=>scrollTimelineToBottom('auto'), 0);
+      const tm = setTimeout(()=>scrollTimelineToLastItem('auto'), 0);
       recordEnterModeRef.current = 'idle';
       return ()=>clearTimeout(tm);
     }
@@ -1576,7 +1550,13 @@ function App(){
             </button>
           </div>
         </div>
-        <div className="suiji-stream" ref={streamRef}>
+        <div
+          className={
+            'suiji-stream'
+            + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible ? ' has-baby-discover' : '')
+          }
+          ref={streamRef}
+        >
 
           {scene.record.showHealthCard && (
             <div className="stream-health">
@@ -1604,9 +1584,6 @@ function App(){
             onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}
             onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
-          )}
-          {recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && (
-            <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>
           )}
         </div>
 
@@ -1641,6 +1618,10 @@ function App(){
         </>
         )}
       </div>
+
+      {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && (
+        <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>
+      )}
 
       {voiceTranscribe && showRecordShell && !showRecordEmpty && !showRecordBlank && VoiceTranscribeInputLayer && (
         <VoiceTranscribeInputLayer
