@@ -34,6 +34,7 @@ body.standalone-demo .phone{
 /* fixed → absolute，收进 .phone，避免底部输入框与 Tab 错位 */
 body.standalone-demo .phone .tabbar,
 body.standalone-demo .phone .dock-wrap,
+body.standalone-demo .phone .baby-feeding-quick-strip,
 body.standalone-demo .phone .vt-overlay-root,
 body.standalone-demo .phone .vt-bar-wrap,
 body.standalone-demo .phone .quick-float-wrap,
@@ -54,6 +55,18 @@ body.standalone-demo .phone .tabbar{
 
 body.standalone-demo .phone .dock-wrap{
   bottom:var(--my-tabbar-h);
+}
+body.standalone-demo .phone.is-baby-feeding-entry .dock-wrap,
+body.standalone-demo .phone.is-baby-feeding-entry .dock-wrap.is-mood-expanded{
+  bottom:calc(var(--my-tabbar-h) + var(--baby-feeding-strip-h, 96px));
+}
+body.standalone-demo .phone .baby-feeding-quick-strip{
+  bottom:var(--my-tabbar-h);
+  left:0;
+  right:0;
+  width:100%;
+  max-width:none;
+  transform:none;
 }
 
 body.standalone-demo .phone .vt-overlay-root{

@@ -550,33 +550,29 @@
   padding-bottom:calc(200px + 190px + var(--my-safe-bottom));
 }
 .suiji-stream.has-baby-feeding-strip{
-  padding-bottom:calc(200px + 96px + var(--my-safe-bottom));
+  padding-bottom:calc(200px + var(--baby-feeding-strip-h, 96px) + var(--my-safe-bottom));
 }
-.phone.is-baby-feeding-entry .dock-wrap{
-  bottom:calc(var(--my-tabbar-h) + 92px);
+.phone.is-baby-feeding-entry .dock-wrap,
+.phone.is-baby-feeding-entry .dock-wrap.is-mood-expanded{
+  bottom:calc(var(--my-tabbar-h) + var(--baby-feeding-strip-h, 96px));
+  z-index:90;
 }
 .baby-feeding-quick-strip{
-  position:absolute;
-  left:0;
-  right:0;
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
   bottom:var(--my-tabbar-h);
-  z-index:88;
+  z-index:89;
+  height:var(--baby-feeding-strip-h, 96px);
+  min-height:var(--baby-feeding-strip-h, 96px);
+  box-sizing:border-box;
   padding:10px 0 8px;
   background:#fff;
   border-radius:16px 16px 0 0;
   box-shadow:0 -4px 18px rgba(0,0,0,0.06);
-  transform:translateY(100%);
-  animation:babyFeedingStripUp 0.34s cubic-bezier(0.22,1,0.36,1) forwards;
-}
-@keyframes babyFeedingStripUp{
-  from{
-    transform:translateY(100%);
-    opacity:0;
-  }
-  to{
-    transform:translateY(0);
-    opacity:1;
-  }
+  pointer-events:auto;
 }
 .baby-feeding-quick-scroll{
   display:flex;
@@ -585,6 +581,17 @@
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
+  animation:babyFeedingStripIn 0.34s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes babyFeedingStripIn{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 .baby-feeding-quick-scroll::-webkit-scrollbar{
   display:none;

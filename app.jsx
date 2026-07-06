@@ -222,13 +222,28 @@ function App(){
   const [timeline, setTimeline] = useState(initial.timeline);
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
-  const [activeTab, setActiveTab] = useState(initial.activeTab);
+  const [activeTab, setActiveTab] = useState(()=>{
+    if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
+      return 'note';
+    }
+    return initial.activeTab;
+  });
   const [recordLifeMode, setRecordLifeMode] = useState('育儿');
   const [babyVoiceSession, setBabyVoiceSession] = useState({active:false, cancel:false, textLength:0});
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
-  const [babyDiscoverVisible, setBabyDiscoverVisible] = useState(true);
-  const [babyFeedingEntryActive, setBabyFeedingEntryActive] = useState(false);
+  const [babyDiscoverVisible, setBabyDiscoverVisible] = useState(()=>{
+    if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
+      return false;
+    }
+    return true;
+  });
+  const [babyFeedingEntryActive, setBabyFeedingEntryActive] = useState(()=>{
+    if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
+      return true;
+    }
+    return false;
+  });
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
   const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState(PERIOD_START_NOTICE_TITLE);
   const [analysisNoticeKind, setAnalysisNoticeKind] = useState('period-start');
@@ -462,7 +477,7 @@ function App(){
         const reserve = el.classList.contains('has-baby-discover')
           ? 220
           : el.classList.contains('has-baby-feeding-strip')
-            ? 120
+            ? 176
             : 28;
         const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
         if(anchor){
