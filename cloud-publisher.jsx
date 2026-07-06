@@ -220,7 +220,7 @@ function DockPublisher({
   onFoodConfirm, onDietCapture,
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
-  demoPhase, isDemoRunning,
+  demoPhase, isDemoRunning, hideQuickFan = false,
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -418,6 +418,7 @@ function DockPublisher({
 
   return (
     <>
+      {!hideQuickFan && (
       <div className={'quick-float-wrap'+(isDockExpanded ? ' is-covered' : '')+(isQuickActive ? ' is-quick-active' : '')}>
         <QuickCardFan
           open={quickOpen}
@@ -435,6 +436,7 @@ function DockPublisher({
           weightPickerKey={weightPickerKey}
         />
       </div>
+      )}
 
       {CameraTransition && (
         <CameraTransition

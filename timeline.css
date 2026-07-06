@@ -549,6 +549,73 @@
 .suiji-stream.has-baby-discover{
   padding-bottom:calc(200px + 190px + var(--my-safe-bottom));
 }
+.suiji-stream.has-baby-feeding-strip{
+  padding-bottom:calc(200px + 96px + var(--my-safe-bottom));
+}
+.phone.is-baby-feeding-entry .dock-wrap{
+  bottom:calc(var(--my-tabbar-h) + 92px);
+}
+.baby-feeding-quick-strip{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:var(--my-tabbar-h);
+  z-index:88;
+  padding:10px 0 8px;
+  background:#fff;
+  border-radius:16px 16px 0 0;
+  box-shadow:0 -4px 18px rgba(0,0,0,0.06);
+  transform:translateY(100%);
+  animation:babyFeedingStripUp 0.34s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes babyFeedingStripUp{
+  from{
+    transform:translateY(100%);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
+.baby-feeding-quick-scroll{
+  display:flex;
+  gap:2px;
+  padding:0 8px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.baby-feeding-quick-scroll::-webkit-scrollbar{
+  display:none;
+}
+.baby-feeding-quick-item{
+  flex:0 0 62px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  border:0;
+  background:transparent;
+  padding:0;
+  cursor:pointer;
+}
+.baby-feeding-quick-icon{
+  width:48px;
+  height:48px;
+  display:block;
+}
+.baby-feeding-quick-icon svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.baby-feeding-quick-label{
+  font-size:11px;
+  line-height:1.2;
+  color:rgba(0,0,0,0.65);
+  white-space:nowrap;
+}
 .tl-baby-discover-close{
   position:absolute;
   top:8px;

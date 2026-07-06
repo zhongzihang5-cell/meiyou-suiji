@@ -88,6 +88,95 @@ function BabyVoiceOverlay({session, success}){
   );
 }
 
+const BABY_FEEDING_QUICK_ITEMS = [
+  { id: 'breast', label: '母乳' },
+  { id: 'formula', label: '配方奶' },
+  { id: 'bottle-breast', label: '瓶喂母乳' },
+  { id: 'diaper', label: '换尿布' },
+  { id: 'sleep', label: '睡眠' },
+  { id: 'nutrition', label: '营养' },
+];
+
+function BabyFeedingQuickIcon({type}){
+  if(type === 'breast'){
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="bf-breast" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd6e8"/><stop offset="100%" stopColor="#ff8eb8"/></linearGradient></defs>
+        <rect width="48" height="48" rx="14" fill="url(#bf-breast)"/>
+        <path d="M16 30c0-5 3-9 8-9s8 4 8 9" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"/>
+        <circle cx="24" cy="18" r="5.5" fill="#fff" opacity="0.95"/>
+        <path d="M20 24c1.5 2 5.5 2 8 0" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  if(type === 'formula'){
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="bf-formula" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffe2bf"/><stop offset="100%" stopColor="#ffad5c"/></linearGradient></defs>
+        <rect width="48" height="48" rx="14" fill="url(#bf-formula)"/>
+        <rect x="17" y="12" width="14" height="22" rx="4" fill="#fff" opacity="0.95"/>
+        <path d="M20 16h8M20 20h8" stroke="#ffb36a" strokeWidth="1.8" strokeLinecap="round"/>
+        <circle cx="33" cy="30" r="4" fill="#fff" opacity="0.9"/>
+      </svg>
+    );
+  }
+  if(type === 'bottle-breast'){
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="bf-bottle" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd6e8"/><stop offset="100%" stopColor="#ff8eb8"/></linearGradient></defs>
+        <rect width="48" height="48" rx="14" fill="url(#bf-bottle)"/>
+        <path d="M22 12h4v4h-4z" fill="#fff"/>
+        <path d="M19 16h10v18a5 5 0 0 1-10 0V16z" fill="#fff" opacity="0.95"/>
+        <path d="M21 24h6" stroke="#ffb8d2" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  if(type === 'diaper'){
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="bf-diaper" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fff0c9"/><stop offset="100%" stopColor="#ffc96a"/></linearGradient></defs>
+        <rect width="48" height="48" rx="14" fill="url(#bf-diaper)"/>
+        <path d="M14 24c0-6 4.5-10 10-10s10 4 10 10v8H14v-8z" fill="#fff" opacity="0.95"/>
+        <path d="M18 24h12" stroke="#ffd27f" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  if(type === 'sleep'){
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="bf-sleep" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#e8dcff"/><stop offset="100%" stopColor="#b58cff"/></linearGradient></defs>
+        <rect width="48" height="48" rx="14" fill="url(#bf-sleep)"/>
+        <path d="M30 18a8 8 0 1 0-10 10 10 10 0 0 1 10-10z" fill="#fff" opacity="0.95"/>
+        <circle cx="31" cy="30" r="3" fill="#fff" opacity="0.75"/>
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <defs><linearGradient id="bf-nutrition" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#d8f8ef"/><stop offset="100%" stopColor="#6edfc0"/></linearGradient></defs>
+      <rect width="48" height="48" rx="14" fill="url(#bf-nutrition)"/>
+      <path d="M24 12c3 6 8 9 8 14a8 8 0 1 1-16 0c0-5 5-8 8-14z" fill="#fff" opacity="0.95"/>
+    </svg>
+  );
+}
+
+function BabyFeedingQuickStrip(){
+  return (
+    <section className="baby-feeding-quick-strip" aria-label="宝宝喂养快捷记录">
+      <div className="baby-feeding-quick-scroll">
+        {BABY_FEEDING_QUICK_ITEMS.map((item)=>(
+          <button key={item.id} type="button" className="baby-feeding-quick-item">
+            <span className="baby-feeding-quick-icon">
+              <BabyFeedingQuickIcon type={item.id}/>
+            </span>
+            <span className="baby-feeding-quick-label">{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function BabyFeedingDiscoverCard({onClose}){
   return (
     <section className="tl-baby-discover-card" aria-label="点滴育儿记录能力发现">
@@ -139,6 +228,7 @@ function App(){
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
   const [babyDiscoverVisible, setBabyDiscoverVisible] = useState(true);
+  const [babyFeedingEntryActive, setBabyFeedingEntryActive] = useState(false);
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
   const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState(PERIOD_START_NOTICE_TITLE);
   const [analysisNoticeKind, setAnalysisNoticeKind] = useState('period-start');
@@ -286,6 +376,7 @@ function App(){
     dropLandRevealRef.current = false;
     babyFeedingCardInsertedRef.current = false;
     setBabyDiscoverVisible(true);
+    setBabyFeedingEntryActive(false);
   };
 
   useEffect(()=>{
@@ -368,7 +459,11 @@ function App(){
       setTimeout(()=>{
         const el = streamRef.current;
         if(!el) return;
-        const reserve = el.classList.contains('has-baby-discover') ? 220 : 28;
+        const reserve = el.classList.contains('has-baby-discover')
+          ? 220
+          : el.classList.contains('has-baby-feeding-strip')
+            ? 120
+            : 28;
         const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
         if(anchor){
           const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - reserve;
@@ -645,11 +740,21 @@ function App(){
     }
     if(tab !== 'note'){
       recordEnterModeRef.current = 'idle';
+      setBabyFeedingEntryActive(false);
     }
     if(tab === 'cal' && activeTab !== 'cal' && periodEndRecordCompleted){
       setPeriodDetailDraft({});
     }
     setActiveTab(tab);
+  };
+
+  const handleFeedingRecordEntry = ()=>{
+    if(recordLifeMode !== '育儿') return;
+    setBabyFeedingEntryActive(true);
+    setBabyDiscoverVisible(false);
+    setNoteTabUnread(false);
+    recordEnterModeRef.current = 'feeding-entry';
+    setActiveTab('note');
   };
 
   const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
@@ -663,7 +768,12 @@ function App(){
       const tm = setTimeout(()=>scrollTimelineToBottom('auto'), 80);
       return ()=>clearTimeout(tm);
     }
-    if(recordLifeMode === '育儿' && babyDiscoverVisible){
+    if(recordLifeMode === '育儿' && babyFeedingEntryActive){
+      const tm = setTimeout(()=>scrollTimelineToLastItem('auto'), 0);
+      recordEnterModeRef.current = 'idle';
+      return ()=>clearTimeout(tm);
+    }
+    if(recordLifeMode === '育儿' && babyDiscoverVisible && !babyFeedingEntryActive){
       const tm = setTimeout(()=>scrollTimelineToLastItem('auto'), 0);
       recordEnterModeRef.current = 'idle';
       return ()=>clearTimeout(tm);
@@ -675,7 +785,7 @@ function App(){
     const tm = setTimeout(()=>scrollTimelineToLastItem('smooth'), 220);
     recordEnterModeRef.current = 'idle';
     return ()=>clearTimeout(tm);
-  }, [activeTab, showRecordEmpty, showBlankEmpty, voiceTranscribe, recordLifeMode, babyDiscoverVisible]);
+  }, [activeTab, showRecordEmpty, showBlankEmpty, voiceTranscribe, recordLifeMode, babyDiscoverVisible, babyFeedingEntryActive]);
 
   useEffect(()=>{
     if(showRecordEmpty || showBlankEmpty) return;
@@ -1418,10 +1528,17 @@ function App(){
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
     && scheme3FirstVisitRef.current;
+  const showBabyFeedingQuickStrip = showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && recordLifeMode === '育儿'
+    && babyFeedingEntryActive
+    && !isSearchActive
+    && !voiceTranscribe;
 
   return (
     <>
-      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '')}>
+      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
 
       {showHome && HomePage && (
@@ -1429,6 +1546,7 @@ function App(){
           mode={recordLifeMode}
           hideBabyVoiceCoach={babyVoiceCoachHidden}
           onDetailOpenChange={setHomeDetailOpen}
+          onFeedingRecordClick={handleFeedingRecordEntry}
         />
       )}
 
@@ -1553,7 +1671,8 @@ function App(){
         <div
           className={
             'suiji-stream'
-            + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible ? ' has-baby-discover' : '')
+            + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
+            + (showBabyFeedingQuickStrip ? ' has-baby-feeding-strip' : '')
           }
           ref={streamRef}
         >
@@ -1602,6 +1721,8 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
+          defaultInputMode="voice"
+          hideQuickFan={showBabyFeedingQuickStrip}
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />
@@ -1619,9 +1740,11 @@ function App(){
         )}
       </div>
 
-      {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && (
+      {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
         <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>
       )}
+
+      {showBabyFeedingQuickStrip && <BabyFeedingQuickStrip/>}
 
       {voiceTranscribe && showRecordShell && !showRecordEmpty && !showRecordBlank && VoiceTranscribeInputLayer && (
         <VoiceTranscribeInputLayer

@@ -300,7 +300,7 @@ function BabyChangeCard(){
   );
 }
 
-function BabyQuickEntry(){
+function BabyQuickEntry({onFeedingRecordClick}){
   const entries = [
     ['喂养记录', 'M6 5h12v14H6zM9 8h6M9 12h6M9 16h4'],
     ['发育测评', 'M5 17l4-4 3 3 7-8M5 21h14'],
@@ -311,7 +311,12 @@ function BabyQuickEntry(){
   return (
     <section className="baby-quick-entry" aria-label="育儿快捷入口">
       {entries.map(([label, path])=>(
-        <button type="button" className="baby-quick-entry-item" key={label}>
+        <button
+          type="button"
+          className="baby-quick-entry-item"
+          key={label}
+          onClick={label === '喂养记录' ? onFeedingRecordClick : undefined}
+        >
           <span className="baby-quick-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d={path}/></svg>
           </span>
@@ -322,7 +327,7 @@ function BabyQuickEntry(){
   );
 }
 
-function BabyHomeContent({active, onChange, hideVoiceCoach=false}){
+function BabyHomeContent({active, onChange, hideVoiceCoach=false, onFeedingRecordClick}){
   return (
     <main className="home-page baby-mode-home baby-child-home" aria-label="育儿模式-宝宝首页">
       <BabyModeTopBar active={active} onChange={onChange}/>
@@ -344,7 +349,7 @@ function BabyHomeContent({active, onChange, hideVoiceCoach=false}){
           </div>
         </section>
         <BabyChangeCard/>
-        <BabyQuickEntry/>
+        <BabyQuickEntry onFeedingRecordClick={onFeedingRecordClick}/>
         <section className="baby-invite-card">
           <strong>我这么可爱，不想给好友晒晒吗</strong>
           <button type="button">立即邀请</button>
@@ -467,7 +472,7 @@ function BabyMomHome({active, onChange, onOpenDetail}){
   );
 }
 
-function HomePage({mode='经期', hideBabyVoiceCoach=false, onDetailOpenChange}={}){
+function HomePage({mode='经期', hideBabyVoiceCoach=false, onDetailOpenChange, onFeedingRecordClick}={}){
   const [detailOpen, setDetailOpen] = React.useState(false);
   const [babyHomeType, setBabyHomeType] = React.useState('baby');
 
@@ -482,7 +487,7 @@ function HomePage({mode='经期', hideBabyVoiceCoach=false, onDetailOpenChange}=
 
   if(mode === '育儿'){
     return babyHomeType === 'baby'
-      ? <BabyHomeContent active={babyHomeType} onChange={setBabyHomeType} hideVoiceCoach={hideBabyVoiceCoach}/>
+      ? <BabyHomeContent active={babyHomeType} onChange={setBabyHomeType} hideVoiceCoach={hideBabyVoiceCoach} onFeedingRecordClick={onFeedingRecordClick}/>
       : <BabyMomHome active={babyHomeType} onChange={setBabyHomeType} onOpenDetail={()=>setDetailOpen(true)}/>;
   }
 
