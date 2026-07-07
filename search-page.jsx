@@ -623,4 +623,255 @@ function StreamSearchOverlay({ timeline, onClose, onSearch, onSearchClear, onDat
   );
 }
 
-Object.assign(window, { StreamSearchOverlay, SearchPage: StreamSearchOverlay });
+const BABY_FEEDING_FILTER_ITEMS = [
+  '母乳', '配方奶', '瓶喂母乳', '换尿布', '睡眠', '营养补剂',
+  '喝水', '吸奶', '辅食', '其他事件', '洗澡', '玩耍', '游泳',
+];
+
+const BABY_FEEDING_PERSON_OPTIONS = ['全部', ...BABY_FEEDING_FILTER_ITEMS];
+
+const SELF_PERSON_OPTIONS = ['全部', '爱爱', '心情', '体重', '体温', '症状', '饮食'];
+
+const BABY_FEEDING_PANEL_SECTIONS = [
+  {
+    id: 'self',
+    title: '自己',
+    options: SELF_PERSON_OPTIONS,
+    default: '全部',
+    grid: true,
+  },
+  {
+    id: 'elder',
+    title: '大宝',
+    options: BABY_FEEDING_PERSON_OPTIONS,
+    default: '全部',
+    grid: true,
+  },
+  {
+    id: 'younger',
+    title: '二宝',
+    options: BABY_FEEDING_PERSON_OPTIONS,
+    default: '全部',
+    grid: true,
+  },
+];
+
+const XHS_SEARCH_TABS = ['全部', '用户', '商品', '图片', '视频', '问一问'];
+
+const XHS_FILTER_SECTIONS = [
+  {
+    id: 'sort',
+    title: '排序依据',
+    options: ['综合', '最新', '最多点赞', '最多评论', '最多收藏'],
+    default: '综合',
+  },
+  {
+    id: 'noteType',
+    title: '笔记类型',
+    options: ['不限', '视频', '图文', '直播'],
+    default: '不限',
+  },
+  {
+    id: 'time',
+    title: '发布时间',
+    options: ['不限', '一天内', '一周内', '半年内'],
+    default: '不限',
+  },
+  {
+    id: 'range',
+    title: '搜索范围',
+    options: ['不限', '已看过', '未看过', '已关注'],
+    default: '不限',
+  },
+  {
+    id: 'location',
+    title: '位置距离',
+    options: ['不限', '同城', '附近'],
+    default: '不限',
+  },
+];
+
+function XhsStyleSearchPage({
+  intent = 'search',
+  variant = 'default',
+  activeFilter = null,
+  onClose,
+  onSearch,
+  onFilterSelect,
+  onFilterClear,
+}) {
+  const I = window.Icon;
+  const isBabyFeeding = variant === 'baby-feeding';
+  const isFilterOnly = isBabyFeeding && intent === 'all';
+  const showSearchTop = !isFilterOnly;
+  const tabs = XHS_SEARCH_TABS;
+  const sections = isBabyFeeding ? BABY_FEEDING_PANEL_SECTIONS : XHS_FILTER_SECTIONS;
+  const [query, setQuery] = React.useState(isBabyFeeding ? '' : '已经那个格兰云天');
+  const [activeTab, setActiveTab] = React.useState('全部');
+  const [filtersExpanded, setFiltersExpanded] = React.useState(true);
+  const [selections, setSelections] = React.useState(() => {
+    const init = {};
+    sections.forEach((section) => { init[section.id] = section.default; });
+    if(activeFilter?.personId){
+      init[activeFilter.personId] = activeFilter.option;
+    }
+    return init;
+  });
+  const inputRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if(!showSearchTop || intent !== 'search') return undefined;
+    const tm = setTimeout(() => inputRef.current?.focus(), 80);
+    return () => clearTimeout(tm);
+  }, [intent, showSearchTop]);
+
+  const pickOption = (sectionId, option) => {
+    setSelections((prev) => ({ ...prev, [sectionId]: option }));
+    if(isBabyFeeding && onFilterSelect){
+      onFilterSelect({ personId: sectionId, option });
+    }
+  };
+
+  const resetFilters = () => {
+    const init = {};
+    sections.forEach((section) => { init[section.id] = section.default; });
+    setSelections(init);
+    setActiveTab('全部');
+    if(isBabyFeeding){
+      onFilterClear?.();
+    }
+  };
+
+  const handleSubmit = () => {
+    const payload = {
+      query: query.trim(),
+      filterId: null,
+      xhsFilters: selections,
+      tab: activeTab,
+      variant,
+    };
+    if(isBabyFeeding){
+      onSearch?.(payload);
+      onClose?.();
+      return;
+    }
+    if(!query.trim()) return;
+    onSearch?.(payload);
+  };
+
+  return (
+    <div className={'xhs-search-page' + (isBabyFeeding ? ' is-baby-feeding' : '') + (isFilterOnly ? ' is-filter-only' : '')} role="search">
+      {showSearchTop ? (
+      <div className="xhs-search-top">
+        <button type="button" className="xhs-search-back" aria-label="返回" onClick={onClose}>
+          <I name="arrow-left" size={22} stroke={2}/>
+        </button>
+        <div className="xhs-search-field">
+          <input
+            ref={inputRef}
+            className="xhs-search-input"
+            type="search"
+            enterKeyHint="search"
+            value={query}
+            placeholder={isBabyFeeding ? '搜索喂养记录' : ''}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } }}
+            aria-label="搜索关键词"
+          />
+          {query ? (
+            <button
+              type="button"
+              className="xhs-search-clear"
+              aria-label="清除"
+              onClick={() => setQuery('')}
+            >
+              <I name="close" size={10} stroke={2.4}/>
+            </button>
+          ) : null}
+        </div>
+        <button type="button" className="xhs-search-submit" onClick={handleSubmit}>搜索</button>
+      </div>
+      ) : null}
+
+      {!isBabyFeeding ? (
+      <div className="xhs-search-tabs" role="tablist" aria-label="搜索分类">
+        {tabs.map((tab) => {
+          const active = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              className={'xhs-search-tab' + (active ? ' is-active' : '')}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+              {active && tab === '全部' ? (
+                <span className="xhs-search-tab-filter" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                    <path d="M2 4h12v1.2H2V4zm2.5 3.5h7v1.2h-7V7.5zM6 11h4v1.2H6V11z"/>
+                  </svg>
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+      ) : null}
+
+      {filtersExpanded ? (
+        <div className="xhs-search-body">
+          {sections.map((section) => (
+            <section key={section.id} className="xhs-filter-section">
+              <h3 className={'xhs-filter-title' + (isBabyFeeding ? ' is-person' : '')}>{section.title}</h3>
+              <div className={'xhs-filter-options' + (section.grid ? ' is-grid' : '')}>
+                {section.options.map((option) => {
+                  const active = selections[section.id] === option;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      className={'xhs-filter-chip' + (active ? ' is-active' : '')}
+                      aria-pressed={active}
+                      onClick={() => pickOption(section.id, option)}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="xhs-search-foot">
+        <button type="button" className="xhs-search-foot-btn" onClick={resetFilters}>
+          <span className="xhs-search-foot-ico" aria-hidden="true">↺</span>
+          重置
+        </button>
+        <button
+          type="button"
+          className="xhs-search-foot-btn"
+          onClick={() => {
+            if(isFilterOnly){
+              onClose?.();
+              return;
+            }
+            setFiltersExpanded((v) => !v);
+          }}
+        >
+          <span className="xhs-search-foot-ico" aria-hidden="true">{isFilterOnly ? '⌃' : (filtersExpanded ? '⌃' : '⌄')}</span>
+          收起
+        </button>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  StreamSearchOverlay,
+  SearchPage: StreamSearchOverlay,
+  XhsStyleSearchPage,
+});

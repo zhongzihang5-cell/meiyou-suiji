@@ -102,8 +102,141 @@ function itemMatchesSearch(item, { query = '', filterId = null } = {}) {
   return itemMatchesText(entry.item, primary, query);
 }
 
+function isBabyFeedingEntry(item, primary) {
+  if (item?.kind === 'baby-feeding-card') return true;
+  if (primary?.kind === 'baby-feeding-card') return true;
+  const text = entryText(item, primary);
+  return /喂养|配方奶|母乳|瓶喂|换尿布|小豆苗/.test(text);
+}
+
+function isSelfHealthEntry(item, primary) {
+  if (['guide', 'sister-card', 'gap'].includes(item?.kind)) return false;
+  if (isBabyFeedingEntry(item, primary)) return false;
+  return !!getSearchableEntry(item);
+}
+
+const SELF_PANEL_MATCHERS = {
+  爱爱(item, primary) {
+    if (primary?.kind === 'love') return true;
+    const text = entryText(item, primary);
+    return /爱爱|同房|性生活/.test(text) || tagMatches(primary, item, (t) => /爱爱|love/i.test(t.cat || ''));
+  },
+  心情(item, primary) {
+    return SEARCH_FILTER_MATCHERS.mood(item, primary);
+  },
+  体重(item, primary) {
+    return SEARCH_FILTER_MATCHERS.weight(item, primary);
+  },
+  体温(item, primary) {
+    if (primary?.kind === 'temp') return true;
+    const text = entryText(item, primary);
+    return /体温|°C|℃/.test(text) || tagMatches(primary, item, (t) => /体温|temp/i.test(t.cat || ''));
+  },
+  症状(item, primary) {
+    if (['pain', 'symptom', 'med'].includes(primary?.kind)) return true;
+    if (tagMatches(primary, item, (t) => /症状|痛经|腹胀|腰酸|疲惫|用药/i.test(t.cat || ''))) return true;
+    const text = entryText(item, primary);
+    return /痛经|腹胀|腰酸|疲惫|用药|症状|疼|痛/.test(text);
+  },
+  饮食(item, primary) {
+    return SEARCH_FILTER_MATCHERS.diet(item, primary);
+  },
+};
+
+const BABY_PANEL_MATCHERS = {
+  母乳(item, primary) {
+    const text = entryText(item, primary) + (primary?.feedType || item?.feedType || '');
+    return /母乳/.test(text);
+  },
+  配方奶(item, primary) {
+    const text = entryText(item, primary) + (primary?.feedType || item?.feedType || '');
+    return /配方奶/.test(text);
+  },
+  瓶喂母乳(item, primary) {
+    const text = entryText(item, primary) + (primary?.feedType || item?.feedType || '');
+    return /瓶喂母乳/.test(text);
+  },
+  换尿布(item, primary) {
+    const text = entryText(item, primary) + (primary?.feedType || item?.feedType || '');
+    return /换尿布|尿布/.test(text);
+  },
+  睡眠(item, primary) {
+    const text = entryText(item, primary) + (primary?.feedType || item?.feedType || '');
+    return /睡眠|睡了/.test(text) || SEARCH_FILTER_MATCHERS.sleep(item, primary);
+  },
+  营养补剂(item, primary) {
+    const text = entryText(item, primary) + (primary?.feedType || item?.feedType || '');
+    return /营养/.test(text);
+  },
+  喝水(item, primary) {
+    const text = entryText(item, primary);
+    return /喝水/.test(text);
+  },
+  吸奶(item, primary) {
+    const text = entryText(item, primary);
+    return /吸奶/.test(text);
+  },
+  辅食(item, primary) {
+    const text = entryText(item, primary);
+    return /辅食/.test(text);
+  },
+  其他事件(item, primary) {
+    const text = entryText(item, primary);
+    return /其他事件|其他/.test(text);
+  },
+  洗澡(item, primary) {
+    const text = entryText(item, primary);
+    return /洗澡/.test(text);
+  },
+  玩耍(item, primary) {
+    const text = entryText(item, primary);
+    return /玩耍/.test(text);
+  },
+  游泳(item, primary) {
+    const text = entryText(item, primary);
+    return /游泳/.test(text);
+  },
+};
+
+function itemMatchesPersonPanelFilter(item, { personId, option }) {
+  const entry = getSearchableEntry(item);
+  if (!entry) return false;
+  const { item: row, primary } = entry;
+
+  if (personId === 'self') {
+    if (option === '全部') return isSelfHealthEntry(row, primary);
+    const matcher = SELF_PANEL_MATCHERS[option];
+    return matcher ? matcher(row, primary) : isSelfHealthEntry(row, primary);
+  }
+
+  if (personId === 'elder' || personId === 'younger') {
+    if (!isBabyFeedingEntry(row, primary)) return false;
+    if (option === '全部') return true;
+    const matcher = BABY_PANEL_MATCHERS[option];
+    return matcher ? matcher(row, primary) : entryText(row, primary).includes(option);
+  }
+
+  return true;
+}
+
 function filterTimelineForSearch(blocks, criteria) {
-  if (!criteria || (!criteria.query?.trim() && !criteria.filterId)) {
+  if (!criteria) return blocks;
+
+  if (criteria.personPanelFilter) {
+    const { personId, option } = criteria.personPanelFilter;
+    const next = [];
+    blocks.forEach((block) => {
+      if (block.type !== 'day') return;
+      const items = (block.items || block.entries || []).filter((item) => (
+        itemMatchesPersonPanelFilter(item, { personId, option })
+      ));
+      if (!items.length) return;
+      next.push({ ...block, items, entries: undefined });
+    });
+    return next;
+  }
+
+  if (!criteria.query?.trim() && !criteria.filterId) {
     return blocks;
   }
   const lastMonthWeight = isLastMonthWeightQuery(criteria.query);

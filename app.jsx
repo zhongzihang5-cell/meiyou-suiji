@@ -102,7 +102,7 @@ function BabyFeedingQuickIcon({type}){
     return (
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <defs><linearGradient id="bf-breast" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd6e8"/><stop offset="100%" stopColor="#ff8eb8"/></linearGradient></defs>
-        <rect width="48" height="48" rx="14" fill="url(#bf-breast)"/>
+        <rect width="48" height="48" rx="24" fill="url(#bf-breast)"/>
         <path d="M16 30c0-5 3-9 8-9s8 4 8 9" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"/>
         <circle cx="24" cy="18" r="5.5" fill="#fff" opacity="0.95"/>
         <path d="M20 24c1.5 2 5.5 2 8 0" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
@@ -113,7 +113,7 @@ function BabyFeedingQuickIcon({type}){
     return (
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <defs><linearGradient id="bf-formula" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffe2bf"/><stop offset="100%" stopColor="#ffad5c"/></linearGradient></defs>
-        <rect width="48" height="48" rx="14" fill="url(#bf-formula)"/>
+        <rect width="48" height="48" rx="24" fill="url(#bf-formula)"/>
         <rect x="17" y="12" width="14" height="22" rx="4" fill="#fff" opacity="0.95"/>
         <path d="M20 16h8M20 20h8" stroke="#ffb36a" strokeWidth="1.8" strokeLinecap="round"/>
         <circle cx="33" cy="30" r="4" fill="#fff" opacity="0.9"/>
@@ -124,7 +124,7 @@ function BabyFeedingQuickIcon({type}){
     return (
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <defs><linearGradient id="bf-bottle" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd6e8"/><stop offset="100%" stopColor="#ff8eb8"/></linearGradient></defs>
-        <rect width="48" height="48" rx="14" fill="url(#bf-bottle)"/>
+        <rect width="48" height="48" rx="24" fill="url(#bf-bottle)"/>
         <path d="M22 12h4v4h-4z" fill="#fff"/>
         <path d="M19 16h10v18a5 5 0 0 1-10 0V16z" fill="#fff" opacity="0.95"/>
         <path d="M21 24h6" stroke="#ffb8d2" strokeWidth="2" strokeLinecap="round"/>
@@ -135,7 +135,7 @@ function BabyFeedingQuickIcon({type}){
     return (
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <defs><linearGradient id="bf-diaper" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fff0c9"/><stop offset="100%" stopColor="#ffc96a"/></linearGradient></defs>
-        <rect width="48" height="48" rx="14" fill="url(#bf-diaper)"/>
+        <rect width="48" height="48" rx="24" fill="url(#bf-diaper)"/>
         <path d="M14 24c0-6 4.5-10 10-10s10 4 10 10v8H14v-8z" fill="#fff" opacity="0.95"/>
         <path d="M18 24h12" stroke="#ffd27f" strokeWidth="2" strokeLinecap="round"/>
       </svg>
@@ -145,7 +145,7 @@ function BabyFeedingQuickIcon({type}){
     return (
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <defs><linearGradient id="bf-sleep" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#e8dcff"/><stop offset="100%" stopColor="#b58cff"/></linearGradient></defs>
-        <rect width="48" height="48" rx="14" fill="url(#bf-sleep)"/>
+        <rect width="48" height="48" rx="24" fill="url(#bf-sleep)"/>
         <path d="M30 18a8 8 0 1 0-10 10 10 10 0 0 1 10-10z" fill="#fff" opacity="0.95"/>
         <circle cx="31" cy="30" r="3" fill="#fff" opacity="0.75"/>
       </svg>
@@ -154,7 +154,7 @@ function BabyFeedingQuickIcon({type}){
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true">
       <defs><linearGradient id="bf-nutrition" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#d8f8ef"/><stop offset="100%" stopColor="#6edfc0"/></linearGradient></defs>
-      <rect width="48" height="48" rx="14" fill="url(#bf-nutrition)"/>
+      <rect width="48" height="48" rx="24" fill="url(#bf-nutrition)"/>
       <path d="M24 12c3 6 8 9 8 14a8 8 0 1 1-16 0c0-5 5-8 8-14z" fill="#fff" opacity="0.95"/>
     </svg>
   );
@@ -258,6 +258,7 @@ function App(){
   const [noteTabUnread, setNoteTabUnread] = useState(false);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
+  const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
@@ -1463,11 +1464,57 @@ function App(){
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
   const StreamSearchOverlay = window.StreamSearchOverlay;
+  const XhsStyleSearchPage = window.XhsStyleSearchPage;
   const ReviewPage = window.ReviewPage;
   const HomePage = window.HomePage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
-  const toggleSearchPage = ()=> setShowSearchPage((prev)=> !prev);
+  const toggleSearchPage = ()=>{
+    if(showBabyFeedingHeader){
+      setBabyFeedingPanelMode((prev)=> prev === 'search' ? null : 'search');
+      return;
+    }
+    setShowSearchPage((prev)=> !prev);
+  };
+  const toggleBabyFeedingAllPanel = ()=>{
+    setBabyFeedingPanelMode((prev)=> prev === 'all' ? null : 'all');
+  };
+  const closeBabyFeedingPanel = ()=>{
+    setBabyFeedingPanelMode(null);
+  };
+  const handleBabyFeedingFilterSelect = ({ personId, option })=>{
+    setSearchCriteria({
+      personPanelFilter: { personId, option },
+      query: '',
+      filterId: null,
+    });
+    setBabyFeedingPanelMode(null);
+    requestAnimationFrame(()=>{
+      setTimeout(()=>scrollTimelineToFirstItem('smooth'), 80);
+    });
+  };
+  const handleBabyFeedingFilterClear = ()=>{
+    setSearchCriteria(null);
+  };
+  const scrollTimelineToFirstItem = (behavior='smooth')=>{
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        const el = streamRef.current;
+        if(!el) return;
+        const anchor = el.querySelector('[data-entry-id]');
+        if(!anchor){
+          if(behavior === 'auto') el.scrollTop = 0;
+          else el.scrollTo({ top: 0, behavior });
+          return;
+        }
+        const header = el.parentElement?.querySelector('.stream-header');
+        const headerH = header?.getBoundingClientRect().height || 0;
+        const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - headerH - 12;
+        if(behavior === 'auto') el.scrollTop = Math.max(0, top);
+        else el.scrollTo({ top: Math.max(0, top), behavior });
+      }, 80);
+    });
+  };
   const restoreSearchCloseScroll = React.useCallback(()=>{
     const saved = searchCloseScrollRef.current;
     if(!saved) return;
@@ -1517,7 +1564,11 @@ function App(){
 
   const filterTimelineForSearch = window.filterTimelineForSearch;
   const countTimelineSearchItems = window.countTimelineSearchItems;
-  const isSearchActive = !!(searchCriteria && (searchCriteria.query?.trim() || searchCriteria.filterId));
+  const isSearchActive = !!(searchCriteria && (
+    searchCriteria.query?.trim()
+    || searchCriteria.filterId
+    || searchCriteria.personPanelFilter
+  ));
   const displayTimeline = React.useMemo(()=>{
     if(!isSearchActive || !filterTimelineForSearch) return timeline;
     return filterTimelineForSearch(timeline, searchCriteria);
@@ -1550,6 +1601,12 @@ function App(){
     && babyFeedingEntryActive
     && !isSearchActive
     && !voiceTranscribe;
+  const showBabyFeedingHeader = showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && recordLifeMode === '育儿'
+    && !voiceTranscribe;
+  const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
 
   return (
     <>
@@ -1619,7 +1676,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage?' is-search-open':'')+(isSearchActive?' is-search-filtered':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -1668,21 +1725,53 @@ function App(){
         </>
         ) : (
         <>
-        <div className="stream-header">
-          <div className="stream-header-side"/>
-          <h1 className="stream-title">点滴</h1>
-          <div className="stream-actions">
-            <button
-              className={'stream-action' + (showSearchPage ? ' is-active' : '')}
-              aria-label="搜索"
-              aria-pressed={showSearchPage}
-              type="button"
-              onClick={toggleSearchPage}
-            >
-              <I name="search" size={20} stroke={1.7}/>
-            </button>
-          </div>
+        {showStreamHeader ? (
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '')}>
+          {showBabyFeedingHeader ? (
+            <>
+              <div className="stream-header-side"/>
+              <button
+                type="button"
+                className={'stream-filter-center' + (babyFeedingPanelMode === 'all' ? ' is-open' : '') + (searchCriteria?.personPanelFilter ? ' is-filtered' : '')}
+                aria-expanded={babyFeedingPanelMode === 'all'}
+                onClick={toggleBabyFeedingAllPanel}
+              >
+                <span>全部</span>
+                <svg className="stream-filter-chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <div className="stream-actions">
+                <button
+                  className={'stream-action' + (babyFeedingPanelMode === 'search' ? ' is-active' : '')}
+                  aria-label="搜索"
+                  aria-pressed={babyFeedingPanelMode === 'search'}
+                  type="button"
+                  onClick={toggleSearchPage}
+                >
+                  <I name="search" size={20} stroke={1.7}/>
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="stream-header-side"/>
+              <h1 className="stream-title">点滴</h1>
+              <div className="stream-actions">
+                <button
+                  className={'stream-action' + (showSearchPage ? ' is-active' : '')}
+                  aria-label="搜索"
+                  aria-pressed={showSearchPage}
+                  type="button"
+                  onClick={toggleSearchPage}
+                >
+                  <I name="search" size={20} stroke={1.7}/>
+                </button>
+              </div>
+            </>
+          )}
         </div>
+        ) : null}
         <div
           className={
             'suiji-stream'
@@ -1742,7 +1831,18 @@ function App(){
           isDemoRunning={isDemoRunning}
         />
         )}
-        {showSearchPage && StreamSearchOverlay && (
+        {babyFeedingPanelMode && XhsStyleSearchPage ? (
+          <XhsStyleSearchPage
+            intent={babyFeedingPanelMode}
+            variant="baby-feeding"
+            activeFilter={searchCriteria?.personPanelFilter}
+            onClose={closeBabyFeedingPanel}
+            onSearch={handleTimelineSearch}
+            onFilterSelect={handleBabyFeedingFilterSelect}
+            onFilterClear={handleBabyFeedingFilterClear}
+          />
+        ) : null}
+        {showSearchPage && !showBabyFeedingHeader && StreamSearchOverlay ? (
           <StreamSearchOverlay
             timeline={timeline}
             onClose={closeSearchPage}
@@ -1750,7 +1850,7 @@ function App(){
             onSearchClear={handleTimelineSearchClear}
             onDateSelect={handleTimelineDateSelect}
           />
-        )}
+        ) : null}
         </>
         )}
       </div>
