@@ -798,111 +798,79 @@ function MoodInsightCard({item, isNew}){
 }
 
 function BabyFeedingTimelineCard({item, isNew}){
-  const [open, setOpen] = React.useState(item.open !== false);
   const TypewriterText = window.TypewriterText;
-  const [streamStep, setStreamStep] = React.useState(isNew ? 0 : 4);
-  const chart = item.chart || {};
-  const bars = chart.bars || [
-    {d:'周六', v:53}, {d:'周日', v:67}, {d:'周一', v:59},
-    {d:'周二', v:71}, {d:'周三', v:48}, {d:'周四', v:63}, {d:'今天', v:59, today:true},
-  ];
-  const text = item.text || '今天早上喂了60ml配方奶';
+  const [summaryOpen, setSummaryOpen] = React.useState(item.summaryOpen !== false);
+  const title = item.feedType || '配方奶';
+  const value = item.value || (item.amount ? item.amount + 'ml' : '60ml');
+  const text = item.text || `${title}：${value}`;
+  const icon = item.icon || '🍼';
+  const color = item.color || '#FF7A66';
+  const summary = item.summary;
 
   React.useEffect(()=>{
-    if(!isNew){
-      setStreamStep(4);
-      return;
-    }
-    setStreamStep(0);
-    const timers = [
-      setTimeout(()=>setStreamStep(1), 220),
-      setTimeout(()=>setStreamStep(2), 520),
-      setTimeout(()=>setStreamStep(3), 820),
-      setTimeout(()=>setStreamStep(4), 1120),
-    ];
-    return ()=>timers.forEach(clearTimeout);
-  }, [item.id, isNew]);
+    setSummaryOpen(item.summaryOpen !== false);
+  }, [item.id, item.summaryOpen]);
 
   return (
-    <article className={'tl-baby-feeding-card'+(isNew ? ' is-stream' : '')}>
+    <article className={'tl-baby-feeding-card'+(isNew ? ' is-stream fade-in' : '')}>
       <div className="tl-baby-feed-head">
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
-        <span className="tl-baby-feed-voice">{item.voice?.duration || '6″'}</span>
+        {item.voice?.duration ? <span className="tl-baby-feed-voice">{item.voice.duration}</span> : null}
       </div>
-      <p className="tl-baby-feed-text">
-        {text}
-      </p>
-      {streamStep >= 1 && (
-        <div className="tl-baby-feed-tags tl-baby-feed-stream-in">
-          <span className="tl-baby-feed-tag-main">🍼 小豆苗的喂养记录</span>
-          <span className="tl-baby-feed-chip">{item.feedType || '配方奶'}</span>
+      <div className="tl-baby-feed-main">
+        <span className="tl-baby-feed-icon" style={{background: color}}>{icon}</span>
+        <span className="tl-baby-feed-text">
+          {isNew && TypewriterText ? (
+            <TypewriterText text={text} active charMs={55} followScroll/>
+          ) : text}
+        </span>
+      </div>
+      <div className="tl-baby-feed-tags">
+        <span className="tl-baby-feed-tag-main">小豆苗</span>
+        {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
+      </div>
+      {item.voiceQuote && (
+        <div className="tl-baby-feed-source">
+          <span className="tl-baby-feed-source-mic">🎙</span>
+          <span className="tl-baby-feed-source-text">"{item.voiceQuote}"</span>
         </div>
       )}
-      {streamStep >= 2 && (
-        <div className="tl-baby-feed-analysis tl-baby-feed-stream-in">
-          <div className="tl-baby-feed-divider"/>
-          <button className="tl-baby-feed-feedback-head" type="button" onClick={()=>setOpen(v=>!v)}>
-            <span className="tl-baby-feed-feedback-title">✨ 近7天喂奶量</span>
-            <span className={'tl-baby-feed-chev'+(open ? ' is-open' : '')}>⌄</span>
+      {summary && (
+        <div className={'tl-baby-feed-summary'+(summaryOpen ? ' is-open' : '')}>
+          <button
+            type="button"
+            className="tl-baby-feed-summary-toggle"
+            aria-expanded={summaryOpen}
+            onClick={()=>setSummaryOpen(v=>!v)}
+          >
+            <span className="tl-baby-feed-summary-spark" aria-hidden="true">✦</span>
+            <span className="tl-baby-feed-summary-title">{summary.title || '喂养小结'}</span>
+            <span className={'tl-baby-feed-summary-chev'+(summaryOpen ? ' is-open' : '')} aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <path d="M6 15l6-6 6 6"/>
+              </svg>
+            </span>
           </button>
-        </div>
-      )}
-      {open && streamStep >= 3 && (
-        <div className="tl-baby-feed-feedback-body tl-baby-feed-stream-in">
-          <div className="tl-baby-feed-chart" aria-hidden="true">
-            <svg viewBox="0 0 302 138" preserveAspectRatio="none">
-              <line x1="0" y1="26" x2="302" y2="26"/>
-              <line x1="0" y1="58" x2="302" y2="58"/>
-              <line x1="0" y1="90" x2="302" y2="90"/>
-              {bars.map((bar, index)=>{
-                const x = 18 + index * 40;
-                const h = Math.max(18, Math.min(82, Number(bar.v) || 48));
-                const y = 100 - h;
-                return (
-                  <rect
-                    key={bar.d}
-                    className={bar.today ? 'is-today' : ''}
-                    x={x}
-                    y={y}
-                    width="18"
-                    height={h}
-                    rx="9"
-                  />
-                );
-              })}
-              <text className="tl-baby-feed-chart-value" x="244" y="28">{chart.todayLabel || '1200ml'}</text>
-              {bars.map((bar, index)=>(
-                <text key={bar.d+'-label'} x={27 + index * 40} y="130">{bar.d}</text>
-              ))}
-            </svg>
+          <div className={'tl-baby-feed-summary-panel'+(summaryOpen ? ' is-open' : '')} aria-hidden={!summaryOpen}>
+            {Array.isArray(summary.items) && summary.items.length ? (
+              <div className="tl-baby-feed-summary-grid">
+                {summary.items.map((row, index)=>(
+                  <span
+                    key={row.label || index}
+                    className={'tl-baby-feed-summary-item'+(row.wide ? ' is-wide' : '')}
+                  >
+                    <i style={{background: row.color || '#ff6f91'}} aria-hidden="true"/>
+                    <span className="tl-baby-feed-summary-copy">
+                      <b>{row.label}</b>
+                      <em>{row.value}</em>
+                    </span>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="tl-baby-feed-summary-text">{summary.text}</span>
+            )}
           </div>
-          {streamStep >= 4 && (
-            <>
-              <p className="tl-baby-feed-summary tl-baby-feed-stream-in">
-                {isNew && TypewriterText ? (
-                  <TypewriterText
-                    segments={[
-                      {text:'最近 7 天日均喂奶 '},
-                      {text:'6 次', className:'tl-baby-feed-summary-strong'},
-                      {text:'，总喂奶量 '},
-                      {text:'1200ml', className:'tl-baby-feed-summary-strong'},
-                      {text:'，平均间隔 '},
-                      {text:'3 小时', className:'tl-baby-feed-summary-strong'},
-                      {text:'喂一次。'},
-                    ]}
-                    active
-                    charMs={45}
-                    followScroll
-                  />
-                ) : (
-                  <>
-                    最近 7 天日均喂奶 <strong>6 次</strong>，总喂奶量 <strong>1200ml</strong>，平均间隔 <strong>3 小时</strong>喂一次。
-                  </>
-                )}
-              </p>
-              <button className="tl-baby-feed-more tl-baby-feed-stream-in" type="button">查看更多喂养记录 <span>›</span></button>
-            </>
-          )}
         </div>
       )}
     </article>

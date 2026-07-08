@@ -221,6 +221,7 @@ function DockPublisher({
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
   demoPhase, isDemoRunning, hideQuickFan = false,
+  feedingQuickItems = null, onFeedingQuickSelect,
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -240,9 +241,11 @@ function DockPublisher({
   const [inputFocused, setInputFocused] = React.useState(false);
   const [cameraOpen, setCameraOpen] = React.useState(false);
   const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
+  const [feedingExpanded, setFeedingExpanded] = React.useState(false);
   const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
   const containerRef = React.useRef(null);
+  const feedingDragStartY = React.useRef(null);
 
   React.useEffect(()=>{
     if(containerRef.current){
@@ -413,8 +416,25 @@ function DockPublisher({
   const isDockExpanded = !!dockSheet;
   const isQuickActive = quickOpen || !!quickSelected;
   const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
+  const showFeedingQuick = Array.isArray(feedingQuickItems) && feedingQuickItems.length > 0;
+  const feedingVisibleItems = showFeedingQuick && !feedingExpanded
+    ? feedingQuickItems.slice(0, 6)
+    : (feedingQuickItems || []);
   const MoodOverlay = window.MoodQuickOverlay || (()=>null);
   const SymptomOverlay = window.SymptomQuickOverlay || (()=>null);
+
+  const startFeedingPanelDrag = (clientY)=>{
+    if(!showFeedingQuick) return;
+    feedingDragStartY.current = clientY;
+  };
+
+  const finishFeedingPanelDrag = (clientY)=>{
+    if(!showFeedingQuick || feedingDragStartY.current == null) return;
+    const dy = clientY - feedingDragStartY.current;
+    feedingDragStartY.current = null;
+    if(dy < -18) setFeedingExpanded(true);
+    if(dy > 18) setFeedingExpanded(false);
+  };
 
   return (
     <>
@@ -475,8 +495,17 @@ function DockPublisher({
         document.body
       )}
 
-      <div className={'dock-wrap'+(isDockExpanded?' is-mood-expanded':'')}>
-        <div className={'dock-panel'+(!dockSheet ? ' is-path-dock' : '')+(isDockExpanded?' is-mood-expanded':'')}>
+      <div className={'dock-wrap'+(isDockExpanded?' is-mood-expanded':'')+(showFeedingQuick?' is-feeding-dock':'')+(feedingExpanded?' is-feeding-expanded':'')}>
+        <div
+          className={'dock-panel'
+            +(!dockSheet ? ' is-path-dock' : '')
+            +(isDockExpanded?' is-mood-expanded':'')
+            +(showFeedingQuick?' is-feeding-dock':'')
+            +(feedingExpanded?' is-feeding-expanded':'')}
+          onPointerDown={showFeedingQuick ? (e)=>startFeedingPanelDrag(e.clientY) : undefined}
+          onPointerUp={showFeedingQuick ? (e)=>finishFeedingPanelDrag(e.clientY) : undefined}
+          onPointerCancel={showFeedingQuick ? ()=>{ feedingDragStartY.current = null; } : undefined}
+        >
           {dockSheet === 'mood' ? (
             <DockMoodPicker
               onConfirm={handleMoodConfirm}
@@ -488,7 +517,35 @@ function DockPublisher({
               onCancel={closeDockSheet}
             />
           ) : (
-          <div className="dock-bar is-path-dock">
+          <div className={'dock-bar is-path-dock'+(showFeedingQuick ? ' has-feeding-quick' : '')}>
+            {showFeedingQuick ? (
+              <div className="dock-feeding-quick" aria-label="宝宝喂养快捷记录">
+                <button
+                  type="button"
+                  className="dock-feeding-handle"
+                  aria-label={feedingExpanded ? '收起快捷记录面板' : '展开快捷记录面板'}
+                  aria-expanded={feedingExpanded}
+                  onClick={()=>setFeedingExpanded(v=>!v)}
+                >
+                  <span/>
+                </button>
+                <div className="dock-feeding-quick-scroll">
+                  {feedingVisibleItems.map((item)=>(
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="dock-feeding-quick-item"
+                      onClick={()=>onFeedingQuickSelect?.(item)}
+                    >
+                      <span className="dock-feeding-quick-icon" aria-hidden="true">
+                        {item.iconNode || item.icon || '🍼'}
+                      </span>
+                      <span className="dock-feeding-quick-label">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <div className="dock-input-row dock-input-pill">
               <button
                 type="button"

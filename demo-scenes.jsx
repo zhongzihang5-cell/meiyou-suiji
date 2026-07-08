@@ -7,7 +7,7 @@ const DEMO_SCENES = {
     id: 'note-quick-record',
     label: '场景四 · 记录心情反馈',
     description: '首次记录有轴心水滴动画；点右下角 + 选「心情」可体验洞察卡与 AI 反馈',
-    defaultTab: 'home',
+    defaultTab: 'note',
     identity: 'period',
     getTimeline: ()=>{
       const blocks = JSON.parse(JSON.stringify(window.TIMELINE_BLOCKS));

@@ -89,12 +89,23 @@ function BabyVoiceOverlay({session, success}){
 }
 
 const BABY_FEEDING_QUICK_ITEMS = [
-  { id: 'breast', label: '母乳' },
-  { id: 'formula', label: '配方奶' },
-  { id: 'bottle-breast', label: '瓶喂母乳' },
-  { id: 'diaper', label: '换尿布' },
-  { id: 'sleep', label: '睡眠' },
-  { id: 'nutrition', label: '营养' },
+  { id: 'formula', label: '配方奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/formula.png', color:'#FF7A66', value:'130ml', text:'配方奶：130ml' },
+  { id: 'breast', label: '母乳', cardIcon:'🤱', iconSrc:'assets/baby-feeding-icons/breast.png', color:'#FF8EB8', value:'左 12 分钟', text:'母乳：左侧 12 分钟' },
+  { id: 'bottle-breast', label: '瓶喂母乳', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/bottle-breast.png', color:'#FF8EB8', value:'90ml', text:'瓶喂母乳：90ml' },
+  { id: 'diaper', label: '换尿布', cardIcon:'🧷', iconSrc:'assets/baby-feeding-icons/diaper.png', color:'#E8A23D', value:'尿尿', text:'换尿布：尿尿' },
+  { id: 'sleep', label: '睡眠', cardIcon:'🌙', iconSrc:'assets/baby-feeding-icons/sleep.png', color:'#8E7BD9', value:'45分钟', text:'睡眠：45分钟' },
+  { id: 'nutrition', label: '营养补剂', cardIcon:'💊', iconSrc:'assets/baby-feeding-icons/nutrition.png', color:'#3CB88C', value:'D3', text:'营养补剂：D3' },
+  { id: 'water', label: '喝水', cardIcon:'💧', iconSrc:'assets/baby-feeding-icons/water.png', color:'#5B8DEF', value:'80ml', text:'喝水：80ml' },
+  { id: 'pump', label: '吸奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/pump.png', color:'#7BC7D8', value:'100ml', text:'吸奶：100ml' },
+  { id: 'solid-food', label: '辅食', cardIcon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png', color:'#F2A65A', value:'米粉', text:'辅食：米粉' },
+  { id: 'bath', label: '洗澡', cardIcon:'🛁', iconSrc:'assets/baby-feeding-icons/bath.png', color:'#5FCAD1', value:'已洗澡', text:'洗澡：已完成' },
+  { id: 'play', label: '玩耍', cardIcon:'🧸', iconSrc:'assets/baby-feeding-icons/play.png', color:'#F4B45F', value:'20分钟', text:'玩耍：20分钟' },
+  { id: 'swim', label: '游泳', cardIcon:'🏊', iconSrc:'assets/baby-feeding-icons/swim.png', color:'#4AA9E9', value:'15分钟', text:'游泳：15分钟' },
+  { id: 'mood', label: '心情', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'开心', text:'心情：开心' },
+  { id: 'weight', label: '体重', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'4.6kg', text:'体重：4.6kg' },
+  { id: 'diet', label: '饮食', cardIcon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png', color:'#F2A65A', value:'已记录', text:'饮食：已记录' },
+  { id: 'temperature', label: '体温', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'36.8℃', text:'体温：36.8℃' },
+  { id: 'symptom', label: '症状', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'无异常', text:'症状：无异常' },
 ];
 
 function BabyFeedingQuickIcon({type}){
@@ -236,13 +247,13 @@ function App(){
     if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
       return false;
     }
-    return true;
+    return false;
   });
   const [babyFeedingEntryActive, setBabyFeedingEntryActive] = useState(()=>{
     if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
       return true;
     }
-    return false;
+    return true;
   });
   const [showAnalysisNotice, setShowAnalysisNotice] = useState(initial.showAnalysisNotice);
   const [analysisNoticeTitle, setAnalysisNoticeTitle] = useState(PERIOD_START_NOTICE_TITLE);
@@ -391,8 +402,8 @@ function App(){
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
     babyFeedingCardInsertedRef.current = false;
-    setBabyDiscoverVisible(true);
-    setBabyFeedingEntryActive(false);
+    setBabyDiscoverVisible(false);
+    setBabyFeedingEntryActive(true);
   };
 
   useEffect(()=>{
@@ -889,35 +900,75 @@ function App(){
     });
   };
 
+  const buildBabyFeedingDailySummary = ()=>({
+    title:'今日喂养小计',
+    items:[
+      { label:'母乳', value:'1次 20min（左10min｜右10min）', color:'#ff5b91', wide:true },
+      { label:'配方奶', value:'5次 730ml', color:'#ff6f91' },
+      { label:'睡眠', value:'2次 7h52min', color:'#a56cf4' },
+      { label:'换尿布', value:'2次', color:'#f5a400' },
+    ],
+  });
+
+  const clearBabyFeedingLatestMarks = (blocks)=>blocks.map(block=>{
+    if(block.type !== 'day') return block;
+    const items = (block.items || block.entries || []).map(item=>{
+      if(item.kind !== 'baby-feeding-card' || (!item.summary && !item.relativeTime)) return item;
+      const next = {...item};
+      delete next.summary;
+      delete next.relativeTime;
+      return next;
+    });
+    return {...block, items, entries:undefined};
+  });
+
   const appendBabyFeedingTimelineCard = ()=>{
     if(babyFeedingCardInsertedRef.current) return;
     babyFeedingCardInsertedRef.current = true;
     const entry = {
       id:'baby-feeding-'+Date.now(),
       kind:'baby-feeding-card',
-      time:'08:15',
-      text:'今天早上喂了60ml配方奶',
+      time:window.formatNowTime?.() || '08:15',
+      text:'配方奶：120ml',
       voice:{duration:'6″'},
       feedType:'配方奶',
+      value:'120ml',
+      icon:'🍼',
+      color:'#FF7A66',
+      voiceQuote:'刚刚又喂了120毫升奶粉',
       railDot:'baby',
       isNew:true,
-      chart:{
-        todayLabel:'1200ml',
-        bars:[
-          {d:'周六', v:53},
-          {d:'周日', v:67},
-          {d:'周一', v:59},
-          {d:'周二', v:71},
-          {d:'周三', v:48},
-          {d:'周四', v:63},
-          {d:'今天', v:59, today:true},
-        ],
-      },
+      summary:buildBabyFeedingDailySummary(),
     };
     setTimeline(blocks=>{
       const dayId = blocks.find(b=>b.type === 'day' && b.isToday)?.id;
-      return window.appendTimelineEntry(blocks, entry, {dayId});
+      return window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
     });
+  };
+
+  const handleBabyFeedingQuickSelect = (item)=>{
+    if(!item) return;
+    setBabyDiscoverVisible(false);
+    setNoteTabUnread(false);
+    const entry = {
+      id:'baby-feeding-quick-'+item.id+'-'+Date.now(),
+      kind:'baby-feeding-card',
+      time:window.formatNowTime?.() || '08:15',
+      text:item.text || `${item.label}：${item.value || '已记录'}`,
+      feedType:item.label,
+      value:item.value,
+      icon:item.cardIcon || '🍼',
+      color:item.color || '#FF7A66',
+      voiceQuote:item.voiceQuote,
+      railDot:'baby',
+      isNew:true,
+      summary:buildBabyFeedingDailySummary(),
+    };
+    setTimeline(blocks=>{
+      const dayId = blocks.find(b=>b.type === 'day' && b.isToday)?.id;
+      return window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
+    });
+    setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
   };
 
   const closeBabyFeedingDiscoverCard = ()=>{
@@ -1607,6 +1658,14 @@ function App(){
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
+  const babyFeedingDockItems = showBabyFeedingQuickStrip
+    ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
+        ...item,
+        iconNode:item.iconSrc
+          ? <img src={item.iconSrc} alt="" />
+          : <BabyFeedingQuickIcon type={item.id}/>,
+      }))
+    : null;
 
   return (
     <>
@@ -1827,6 +1886,8 @@ function App(){
           activeTab={activeTab}
           defaultInputMode="voice"
           hideQuickFan={showBabyFeedingQuickStrip}
+          feedingQuickItems={babyFeedingDockItems}
+          onFeedingQuickSelect={handleBabyFeedingQuickSelect}
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />
@@ -1858,8 +1919,6 @@ function App(){
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
         <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>
       )}
-
-      {showBabyFeedingQuickStrip && <BabyFeedingQuickStrip/>}
 
       {voiceTranscribe && showRecordShell && !showRecordEmpty && !showRecordBlank && VoiceTranscribeInputLayer && (
         <VoiceTranscribeInputLayer
