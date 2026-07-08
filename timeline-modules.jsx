@@ -107,6 +107,48 @@ function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, d
   );
 }
 
+function buildDietEditPayload(item){
+  if(!item || (item.kind !== 'diet-photo-feedback' && item.kind !== 'diet-text-feedback')) return null;
+  const data = item.dietData || {};
+  const items = Array.isArray(data.items) ? data.items : [];
+  const foods = data.foods || items.map(food => food?.name).filter(Boolean);
+  const names = foods.length ? foods.join('、') : (item.sourceText || '饮食记录');
+  return {
+    kind: 'daily-record',
+    time: data.time || item.time,
+    recordType: 'diet',
+    recordLabel: '饮食',
+    recordValue: names,
+    recordDetail: names,
+    icon: 'diet',
+    iconText: '',
+    dietItems: items.map(food => ({ ...food })),
+    totalKcal: data.totalKcal || 0,
+    mealType: data.mealType || item.mealType || '',
+    photoUrl: item.photoUrl || null,
+  };
+}
+
+function EditableTimelineBody({item, editPayload, children}){
+  const canEdit = !!(editPayload && item?.id && typeof window.openEditModal === 'function');
+  const open = React.useCallback((event)=>{
+    if(!canEdit) return;
+    if(event.target.closest('button,a,input,textarea,select')) return;
+    window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
+  }, [canEdit, item?.id, item?.kind, editPayload]);
+  const keyOpen = React.useCallback((event)=>{
+    if(!canEdit || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
+  }, [canEdit, item?.id, item?.kind, editPayload]);
+  if(!canEdit) return children;
+  return (
+    <div className="tl-edit-hit-area" role="button" tabIndex={0} onClick={open} onKeyDown={keyOpen}>
+      {children}
+    </div>
+  );
+}
+
 function ModulePlaceholder({mod, cycleDay}){
   const icons = {
     'cycle-card':'🔄',
@@ -886,9 +928,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   let body = null;
   if(item.kind === 'diet-photo-feedback'){
     const DietPhotoFeedbackCard = window.DietPhotoFeedbackCard;
-    body = item.pendingDrop ? null : (
-      DietPhotoFeedbackCard
-        ? <DietPhotoFeedbackCard
+    const card = DietPhotoFeedbackCard
+      ? <DietPhotoFeedbackCard
             photoUrl={item.photoUrl}
             data={item.dietData}
             userContext={item.userContext}
@@ -898,13 +939,16 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             failureCount={item.failureCount}
             displayScenario={item.displayScenario}
           />
-        : null
+      : null;
+    body = item.pendingDrop ? null : (
+      <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)}>
+        {card}
+      </EditableTimelineBody>
     );
   } else if(item.kind === 'diet-text-feedback'){
     const DietTextFeedbackCard = window.DietTextFeedbackCard;
-    body = item.pendingDrop ? null : (
-      DietTextFeedbackCard
-        ? <DietTextFeedbackCard
+    const card = DietTextFeedbackCard
+      ? <DietTextFeedbackCard
             sourceText={item.sourceText}
             sourceVoice={item.sourceVoice}
             data={item.dietData}
@@ -914,7 +958,11 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             leadingIconSrc={item.leadingIconSrc}
             leadingLabel={item.leadingLabel}
           />
-        : null
+      : null;
+    body = item.pendingDrop ? null : (
+      <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)}>
+        {card}
+      </EditableTimelineBody>
     );
   } else if(item.kind === 'record-group'){
     body = item.pendingDrop ? null : <V3RecordGroupCard group={item} isNew={isNew}/>;

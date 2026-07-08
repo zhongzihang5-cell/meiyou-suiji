@@ -711,6 +711,18 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
     column-gap: 12px;
   }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-card {
+    padding: 12px 14px 16px;
+    border-radius: 10px;
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-title {
+    display: none;
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: 12px;
+    row-gap: 18px;
+  }
   .edit-hrp-option {
     min-width: 0;
     min-height: 96px;
@@ -791,6 +803,39 @@
     border-left: 2px solid #ffffff;
     border-bottom: 2px solid #ffffff;
     transform: rotate(-45deg) translateY(-1px);
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option {
+    min-height: 82px;
+    grid-template-rows: 52px auto;
+    gap: 7px;
+    font-size: 13px;
+    line-height: 16px;
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #ffe875;
+    font-size: 27px;
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(3) .edit-hrp-icon,
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(12) .edit-hrp-icon,
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(20) .edit-hrp-icon {
+    background: #65d9e8;
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(4) .edit-hrp-icon,
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(5) .edit-hrp-icon,
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(13) .edit-hrp-icon,
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(14) .edit-hrp-icon,
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(17) .edit-hrp-icon,
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(19) .edit-hrp-icon {
+    background: #ff9fc0;
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(15) .edit-hrp-icon {
+    background: #f45a5a;
+  }
+  .option-sheet.is-health-picker.is-mood-picker .edit-hrp-option:nth-child(16) .edit-hrp-icon {
+    background: #31cdb8;
   }
   .edit-hrp-list {
     display: grid;
@@ -966,6 +1011,123 @@
     color: #ffffff;
     font-size: 28px;
     line-height: 1;
+  }
+  .option-sheet.is-health-picker.is-weight-picker .sheet-body {
+    padding-top: 12px;
+  }
+  .edit-weight-card {
+    min-height: 128px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: #ffffff;
+    display: grid;
+    place-items: center;
+  }
+  .edit-weight-value {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    color: #323232;
+    font-size: 54px;
+    line-height: 1;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .edit-weight-value em {
+    color: #8e8e93;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+  }
+  .option-sheet.is-health-picker.is-diet-picker {
+    max-height: 86%;
+  }
+  .option-sheet.is-health-picker.is-diet-picker .sheet-body {
+    padding-top: 12px;
+  }
+  .edit-diet-card {
+    margin-bottom: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+  .edit-diet-title {
+    margin: 0 0 12px;
+    color: #323232;
+    font-size: 16px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  .edit-diet-meals {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .edit-diet-meal {
+    height: 36px;
+    border: 0;
+    border-radius: 18px;
+    background: #f7f7f9;
+    color: #666666;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .edit-diet-meal.active {
+    background: rgba(255, 77, 136, 0.1);
+    color: #ff4d88;
+    font-weight: 500;
+  }
+  .edit-diet-row {
+    display: grid;
+    grid-template-columns: 1fr 68px 76px 32px;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .edit-diet-input {
+    min-width: 0;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: #f7f7f9;
+    color: #323232;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 0 10px;
+  }
+  .edit-diet-input::placeholder {
+    color: #b7b7bb;
+  }
+  .edit-diet-remove {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 16px;
+    background: #f7f7f9;
+    color: #8e8e93;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .edit-diet-add {
+    width: 100%;
+    height: 40px;
+    margin-top: 12px;
+    border: 0;
+    border-radius: 20px;
+    background: rgba(255, 77, 136, 0.08);
+    color: #ff4d88;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .edit-diet-total {
+    margin-top: 12px;
+    color: #8e8e93;
+    font-size: 13px;
+    text-align: right;
   }
   .symptom-picker-mask {
     position: absolute;
@@ -1846,14 +2008,20 @@
   };
   const DAILY_RECORD_OPTIONS = {
     love: { label: '爱爱', className: 'intimacy', emoji: '💕', options: ['无措施', '避孕套', '体外排精', '未射精', '紧急避孕药', '短效避孕药', '长效避孕药', '节育环', '其他措施', '自慰'] },
+    mood: { label: '心情', className: 'emotion', emoji: '', options: ['超开心', '挺开心', '一般', '不开心', '好伤心', '兴奋', '惊喜', '满足', '心动', '自信', '放松', '平静', '烦躁', '易怒', '生气', '焦虑', '内耗', '压力', '害怕', '冷漠'] },
     discharge: { label: '白带', className: 'emotion', emoji: '💧', options: ['干燥', '粘稠', '稀糊状', '水状', '蛋清状'] },
     temp: { label: '体温', className: 'symptom', emoji: '🌡️', options: Array.from({length: 70}, (_, i) => `${(35 + i / 10).toFixed(1)}°C`) },
     habit: { label: '好习惯', className: 'diet', emoji: '👍', options: ['早餐', '水果', '喝水', '运动'] },
     stool: { label: '便便', className: 'diet', emoji: '💩', options: ['舒畅', '有残便感', '排便困难', '硬球状', '凹凸香肠状', '裂纹香肠状', '平滑香蕉状', '软块状', '糊状', '水液状', '较少', '适中', '较多'] },
+    weight: { label: '体重', className: 'weight', emoji: '', options: [] },
+    diet: { label: '饮食', className: 'diet', emoji: '', options: [] },
   };
   const DAILY_RECORD_SHEET_SECTIONS = {
     love: [
       { key: 'measure', title: '爱爱', options: DAILY_RECORD_OPTIONS.love.options },
+    ],
+    mood: [
+      { key: 'mood', title: '心情', options: DAILY_RECORD_OPTIONS.mood.options },
     ],
     discharge: [
       { key: 'texture', title: '白带', options: DAILY_RECORD_OPTIONS.discharge.options },
@@ -1882,6 +2050,32 @@
         '节育环': { icon: 'assets/health-picker-icons/love-iud.png' },
         '其他措施': { icon: 'assets/health-picker-icons/love-other.png' },
         '自慰': { icon: 'assets/health-picker-icons/love-self.png' },
+      },
+    },
+    mood: {
+      layout: 'moodGrid',
+      tone: 'pink',
+      options: {
+        '超开心': { face: 'super-happy', bg: '#FFE875' },
+        '挺开心': { face: 'happy', bg: '#FFE875' },
+        '一般': { face: 'normal', bg: '#65E5DF' },
+        '不开心': { face: 'unhappy', bg: '#FF9FC0' },
+        '好伤心': { face: 'very-sad', bg: '#FF9FC0' },
+        '兴奋': { face: 'excited', bg: '#FFE875' },
+        '惊喜': { face: 'surprised', bg: '#FFE875' },
+        '满足': { face: 'satisfied', bg: '#FFE875' },
+        '心动': { face: 'heart-flutter', bg: '#FFE875' },
+        '自信': { face: 'confident', bg: '#FFE875' },
+        '放松': { face: 'relaxed', bg: '#FFE875' },
+        '平静': { face: 'calm', bg: '#65D9E8' },
+        '烦躁': { face: 'irritable', bg: '#FF8FB1' },
+        '易怒': { face: 'temper', bg: '#FF8FB1' },
+        '生气': { face: 'angry', bg: '#F45A5A' },
+        '焦虑': { face: 'anxious', bg: '#31CDB8' },
+        '内耗': { face: 'overthink', bg: '#FF8FB1' },
+        '压力': { face: 'stressed', bg: '#FFD551' },
+        '害怕': { face: 'scared', bg: '#FF9FC0' },
+        '冷漠': { face: 'indifferent', bg: '#65D9E8' },
       },
     },
     discharge: {
@@ -2230,9 +2424,12 @@
     sheet.classList.remove('is-flow-picker');
     sheet.classList.remove('is-health-picker');
     sheet.classList.remove('is-love-picker');
+    sheet.classList.remove('is-mood-picker');
     sheet.classList.remove('is-discharge-picker');
     sheet.classList.remove('is-stool-picker');
     sheet.classList.remove('is-temp-picker');
+    sheet.classList.remove('is-weight-picker');
+    sheet.classList.remove('is-diet-picker');
     confirm.textContent = '完成';
     confirm.disabled = false;
   }
@@ -2429,6 +2626,10 @@
         recordDetail: dailyRecordState.recordDetail,
         icon: dailyRecordState.icon,
         iconText: dailyRecordState.iconText || '',
+        dietItems: dailyRecordState.dietItems ? dailyRecordState.dietItems.map(item => ({ ...item })) : undefined,
+        totalKcal: dailyRecordState.totalKcal,
+        mealType: dailyRecordState.mealType,
+        photoUrl: dailyRecordState.photoUrl,
       };
     }
     if(activeScene?.id !== 'scene-period-detail') return null;
@@ -2611,11 +2812,95 @@
     return digits.length > 2 ? `${digits.slice(0, -1)}.${digits.slice(-1)}` : digits;
   }
 
+  function weightDigitsFromValue(value) {
+    return String(value || '').replace(/[^\d]/g, '').slice(0, 4);
+  }
+
+  function weightNumberFromDigits(digits) {
+    if(!digits) return '0';
+    return digits.length > 2 ? `${digits.slice(0, -1)}.${digits.slice(-1)}` : digits;
+  }
+
+  function normalizeWeightValue(value) {
+    const raw = String(value || '').replace(/[^\d.]/g, '');
+    if(!raw) return '50.0kg';
+    return `${Number(raw).toFixed(1)}kg`;
+  }
+
+  function normalizeDietItems(items) {
+    const source = Array.isArray(items) ? items : [];
+    const normalized = source.map((item, index) => ({
+      id: item.id || `food-${index + 1}`,
+      name: item.name || item.title || '',
+      amount: item.amount || item.weight || item.grams || '',
+      kcal: Number(item.kcal) || 0,
+    })).filter(item => item.name);
+    return normalized.length ? normalized : [{ id:'food-1', name:'', amount:'', kcal:0 }];
+  }
+
   function renderEditHrpIcon(meta, tone) {
+    if(meta?.face) return renderEditMoodFace(meta.face, meta.bg);
     if(meta?.icon && meta.icon.startsWith('assets/')){
       return `<img src="${meta.icon}" alt="">`;
     }
     return `<span>${meta?.icon || '•'}</span>`;
+  }
+
+  function renderDailyRecordIconHtml() {
+    if(dailyRecordState.recordType === 'diet'){
+      return '<img src="assets/record-diet.png" alt="" draggable="false">';
+    }
+    if(dailyRecordState.recordType === 'weight'){
+      return '<img src="assets/record-weight.png" alt="" draggable="false">';
+    }
+    if(dailyRecordState.recordType === 'mood'){
+      const value = dailyRecordState.recordDetail || dailyRecordState.recordValue;
+      const moodMeta = DAILY_RECORD_OPTION_META.mood.options[value] || DAILY_RECORD_OPTION_META.mood.options[dailyRecordState.recordValue];
+      if(moodMeta) return renderEditMoodFace(moodMeta.face, moodMeta.bg);
+    }
+    const config = getDailyRecordConfig(dailyRecordState.recordType);
+    return dailyRecordState.iconText || config.emoji;
+  }
+
+  function renderEditMoodFace(face, bg) {
+    const skin = bg || '#FFE875';
+    const eye = '#5A4030';
+    const mouth = '#E06B88';
+    const eyeMarkup = face === 'confident'
+      ? `<rect x="12" y="20" width="24" height="8" rx="4" fill="#3A3A3A"/>`
+      : face === 'calm' || face === 'indifferent'
+        ? `<path d="M15 22h6M27 22h6" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`
+        : face === 'irritable' || face === 'temper' || face === 'angry'
+          ? `<path d="M14 20l5 2M34 20l-5 2" stroke="${eye}" stroke-width="2.2" stroke-linecap="round"/>`
+          : face === 'super-happy'
+            ? `<path d="M12 22c0-3 3-5 6-5s6 2 6 5M24 22c0-3 3-5 6-5s6 2 6 5" stroke="${eye}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
+            : `<circle cx="17" cy="22" r="2.2" fill="${eye}"/><circle cx="31" cy="22" r="2.2" fill="${eye}"/>`;
+    const mouthMarkup = (face === 'super-happy' || face === 'excited' || face === 'heart-flutter')
+      ? `<path d="M14 30c4 6 16 6 20 0" stroke="${mouth}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+      : (face === 'happy' || face === 'satisfied' || face === 'relaxed')
+        ? `<path d="M16 30c3 4 13 4 16 0" stroke="${mouth}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
+        : (face === 'normal' || face === 'calm' || face === 'indifferent')
+          ? `<path d="M18 31h12" stroke="${mouth}" stroke-width="2" stroke-linecap="round"/>`
+          : (face === 'surprised' || face === 'scared')
+            ? `<ellipse cx="24" cy="31" rx="4" ry="5" fill="${mouth}"/>`
+            : `<path d="M16 33c4-4 12-4 16 0" stroke="${mouth}" stroke-width="2.3" fill="none" stroke-linecap="round"/>`;
+    const extra = {
+      'very-sad': `<path d="M14 18v5M34 18v5" stroke="#6BB8FF" stroke-width="2" stroke-linecap="round"/>`,
+      excited: `<path d="M30 10l2 4 4 1-4 1-2 4-2-4-4-1 4-1z" fill="#FF8CB0"/>`,
+      satisfied: `<circle cx="36" cy="16" r="3" fill="#FFB8D0"/>`,
+      'heart-flutter': `<path d="M10 12l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5zM38 10l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#FF8CB0"/>`,
+      temper: `<path d="M18 12l2-3M24 10v-3M30 12l-2-3" stroke="#FF8888" stroke-width="1.8" stroke-linecap="round"/>`,
+      angry: `<rect x="34" y="10" width="6" height="6" rx="1" fill="#555"/>`,
+      indifferent: `<rect x="34" y="18" width="6" height="10" rx="1" fill="#8CC8FF"/>`,
+    }[face] || '';
+    return `
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="22" fill="${skin}"/>
+        ${eyeMarkup}
+        ${mouthMarkup}
+        ${extra}
+      </svg>
+    `;
   }
 
   function renderEditHealthTimeCard() {
@@ -2723,16 +3008,122 @@
     if(display) display.innerHTML = `<span>${value}</span><em>°C</em>`;
   }
 
+  function renderDailyWeightPicker() {
+    const digits = weightDigitsFromValue(dailyRecordState.recordValue || dailyRecordState.recordDetail || '500');
+    return `
+      <input type="hidden" id="editWeightDigits" value="${digits}">
+      <section class="edit-weight-card">
+        <div class="edit-weight-value" id="editWeightValue">
+          <span>${weightNumberFromDigits(digits)}</span>
+          <em>kg</em>
+        </div>
+      </section>
+      <div class="edit-hrp-temp-keypad" aria-label="体重数字键盘">
+        ${['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(key => `
+          <button type="button" class="edit-hrp-temp-key" onclick="pressEditWeightKey('${key}')">${key}</button>
+        `).join('')}
+        <span aria-hidden="true"></span>
+        <button type="button" class="edit-hrp-temp-key" onclick="pressEditWeightKey('0')">0</button>
+        <button type="button" class="edit-hrp-temp-delete" onclick="pressEditWeightKey('delete')" aria-label="删除">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+    `;
+  }
+
+  function pressEditWeightKey(key) {
+    const input = document.getElementById('editWeightDigits');
+    if(!input) return;
+    let digits = input.value || '';
+    if(key === 'delete') digits = digits.slice(0, -1);
+    else if(digits.length < 4 && !(digits === '' && key === '0')) digits += key;
+    input.value = digits;
+    syncEditWeightValue();
+  }
+
+  function syncEditWeightValue() {
+    const digits = document.getElementById('editWeightDigits')?.value || '';
+    const display = document.getElementById('editWeightValue');
+    if(display) display.innerHTML = `<span>${weightNumberFromDigits(digits)}</span><em>kg</em>`;
+  }
+
+  function renderDailyDietPicker() {
+    const items = normalizeDietItems(dailyRecordState.dietItems);
+    const mealType = dailyRecordState.mealType || '午餐';
+    return `
+      <section class="edit-diet-card">
+        <h3 class="edit-diet-title">餐别</h3>
+        <div class="edit-diet-meals">
+          ${['早餐', '午餐', '晚餐', '加餐'].map(meal => `
+            <button type="button" class="edit-diet-meal${meal === mealType ? ' active' : ''}" data-value="${meal}">${meal}</button>
+          `).join('')}
+        </div>
+      </section>
+      <section class="edit-diet-card">
+        <h3 class="edit-diet-title">食物</h3>
+        <div id="editDietRows">
+          ${items.map(renderEditDietRow).join('')}
+        </div>
+        <button type="button" class="edit-diet-add" onclick="addEditDietRow()">添加食物</button>
+        <div class="edit-diet-total" id="editDietTotal"></div>
+      </section>
+    `;
+  }
+
+  function renderEditDietRow(item, index) {
+    return `
+      <div class="edit-diet-row">
+        <input class="edit-diet-input edit-diet-name" value="${escapeHtml(item.name || '')}" placeholder="食物名称" oninput="syncEditDietTotal()">
+        <input class="edit-diet-input edit-diet-amount" value="${escapeHtml(item.amount || '')}" placeholder="份量" oninput="syncEditDietTotal()">
+        <input class="edit-diet-input edit-diet-kcal" value="${Number(item.kcal) || ''}" placeholder="kcal" inputmode="decimal" oninput="syncEditDietTotal()">
+        <button type="button" class="edit-diet-remove" onclick="removeEditDietRow(this)" aria-label="删除食物">×</button>
+      </div>
+    `;
+  }
+
+  function addEditDietRow() {
+    const rows = document.getElementById('editDietRows');
+    rows.insertAdjacentHTML('beforeend', renderEditDietRow({ name:'', amount:'', kcal:0 }, rows.children.length));
+    syncEditDietTotal();
+  }
+
+  function removeEditDietRow(button) {
+    const rows = document.getElementById('editDietRows');
+    if(rows.children.length <= 1) {
+      const row = button.closest('.edit-diet-row');
+      row.querySelectorAll('input').forEach(input => input.value = '');
+    } else {
+      button.closest('.edit-diet-row')?.remove();
+    }
+    syncEditDietTotal();
+  }
+
+  function collectEditDietItems() {
+    return [...document.querySelectorAll('#editDietRows .edit-diet-row')].map((row, index) => {
+      const name = row.querySelector('.edit-diet-name')?.value.trim() || '';
+      const amount = row.querySelector('.edit-diet-amount')?.value.trim() || '';
+      const kcal = Number(String(row.querySelector('.edit-diet-kcal')?.value || '').replace(/[^\d.]/g, '')) || 0;
+      return name ? { id:`food-${index + 1}`, name, amount, kcal } : null;
+    }).filter(Boolean);
+  }
+
+  function syncEditDietTotal() {
+    const total = collectEditDietItems().reduce((sum, item) => sum + (Number(item.kcal) || 0), 0);
+    const target = document.getElementById('editDietTotal');
+    if(target) target.textContent = total ? `合计 ${Math.round(total)} kcal` : '合计 0 kcal';
+  }
+
   function renderDailyRecordEditor() {
     const list = document.getElementById('dailyRecordList');
     const title = document.getElementById('dailyRecordTitle');
     const config = getDailyRecordConfig(dailyRecordState.recordType);
     const label = dailyRecordState.recordLabel || config.label;
     const value = dailyRecordState.recordDetail || dailyRecordState.recordValue || '';
+    const iconHtml = renderDailyRecordIconHtml();
     title.textContent = label;
     list.innerHTML = `
       <div class="record-item" data-record-kind="daily">
-        <div class="record-icon ${config.className}">${dailyRecordState.iconText || config.emoji}</div>
+        <div class="record-icon ${config.className}">${iconHtml}</div>
         <div class="record-main">
           <div class="record-type">${label}</div>
           <div class="record-value">${value}</div>
@@ -2814,10 +3205,23 @@
     sheet.classList.add(`is-${dailyRecordState.recordType}-picker`);
     document.querySelector('#optionSheet .confirm').textContent = '确定';
     document.getElementById('optionSheetTitle').textContent = `修改${dailyRecordState.recordLabel || config.label}`;
-    document.getElementById('optionList').innerHTML = renderDailyHealthPicker(
-      dailyRecordState.recordType,
-      dailyRecordState.recordDetail || dailyRecordState.recordValue
-    );
+    if(dailyRecordState.recordType === 'weight'){
+      document.getElementById('optionList').innerHTML = renderDailyWeightPicker();
+    } else if(dailyRecordState.recordType === 'diet'){
+      document.getElementById('optionList').innerHTML = renderDailyDietPicker();
+      document.querySelectorAll('#optionList .edit-diet-meal').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#optionList .edit-diet-meal').forEach(item => item.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+      syncEditDietTotal();
+    } else {
+      document.getElementById('optionList').innerHTML = renderDailyHealthPicker(
+        dailyRecordState.recordType,
+        dailyRecordState.recordDetail || dailyRecordState.recordValue
+      );
+    }
     document.querySelectorAll('#optionList .edit-hrp-option, #optionList .edit-hrp-list-option').forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.dataset.key;
@@ -2904,6 +3308,19 @@
       if(dailyRecordState.recordType === 'temp'){
         nextValue = normalizeDailyRecordValue('temp', document.getElementById('editTempValue')?.textContent || '');
         nextDetail = nextValue;
+      } else if(dailyRecordState.recordType === 'weight'){
+        nextValue = normalizeWeightValue(document.getElementById('editWeightValue')?.textContent || '');
+        nextDetail = nextValue;
+      } else if(dailyRecordState.recordType === 'diet'){
+        const dietItems = collectEditDietItems();
+        if(!dietItems.length) return;
+        const mealType = document.querySelector('#optionList .edit-diet-meal.active')?.dataset.value || dailyRecordState.mealType || '';
+        const totalKcal = dietItems.reduce((sum, item) => sum + (Number(item.kcal) || 0), 0);
+        nextValue = dietItems.map(item => item.name).join('、');
+        nextDetail = nextValue;
+        dailyRecordState.dietItems = dietItems;
+        dailyRecordState.totalKcal = totalKcal;
+        dailyRecordState.mealType = mealType;
       } else {
         const selectedValues = [...document.querySelectorAll('#optionList .edit-hrp-option.active, #optionList .edit-hrp-list-option.active')]
           .map(btn => btn.dataset.value)
@@ -2952,10 +3369,14 @@
         time: payload.time || '09:15',
         recordType: payload.recordType || 'love',
         recordLabel: payload.recordLabel || config.label,
-        recordValue: payload.recordValue || payload.recordDetail || config.options[0],
-        recordDetail: payload.recordDetail || payload.recordValue || config.options[0],
+        recordValue: payload.recordValue || payload.recordDetail || config.options[0] || '',
+        recordDetail: payload.recordDetail || payload.recordValue || config.options[0] || '',
         icon: payload.icon || payload.recordType || 'love',
         iconText: payload.iconText || '',
+        dietItems: normalizeDietItems(payload.dietItems),
+        totalKcal: Number(payload.totalKcal) || 0,
+        mealType: payload.mealType || '',
+        photoUrl: payload.photoUrl || null,
       };
       document.getElementById('recordTime-daily-record').textContent = formatPeriodDetailTime(dailyRecordState.time);
       renderDailyRecordEditor();

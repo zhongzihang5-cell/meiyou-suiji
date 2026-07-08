@@ -1036,7 +1036,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     ? 'period-detail'
     : p?.kind === 'daily-record'
       ? 'daily-record'
-      : (isPeriodQuick || p?.kind === 'symptom') ? 'quick' : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
+      : (p?.kind === 'weight' || p?.kind === 'weight-text')
+        ? 'daily-record'
+        : (isPeriodQuick || p?.kind === 'symptom') ? 'quick' : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
   const derivedId = entryId || primary?.id;
   const editPayload = p?.kind === 'period-detail'
     ? {
@@ -1055,6 +1057,17 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           icon: p.icon,
           iconText: p.iconText || '',
         }
+    : (p?.kind === 'weight' || p?.kind === 'weight-text')
+        ? {
+            kind: 'daily-record',
+            time: p.time,
+            recordType: 'weight',
+            recordLabel: p.weightLabel || '体重',
+            recordValue: p.weightValue || p.text || '',
+            recordDetail: p.weightValue || p.text || '',
+            icon: 'weight',
+            iconText: '',
+          }
       : isPeriodQuick
         ? {
             kind: 'quick',

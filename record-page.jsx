@@ -676,6 +676,44 @@ const PERIOD_DETAIL_PICKERS = {
   cramps: { title: '痛经', group: 'cramps', options: PERIOD_PICKER_CRAMPS },
 };
 
+const RECORD_MOOD_OPTIONS = [
+  { id: 'super-happy', label: '超开心', face: 'super-happy', bg: '#FFE875' },
+  { id: 'happy', label: '挺开心', face: 'happy', bg: '#FFE875' },
+  { id: 'normal', label: '一般', face: 'normal', bg: '#65E5DF' },
+  { id: 'unhappy', label: '不开心', face: 'unhappy', bg: '#FF9FC0' },
+  { id: 'very-sad', label: '好伤心', face: 'very-sad', bg: '#FF9FC0' },
+  { id: 'excited', label: '兴奋', face: 'excited', bg: '#FFE875' },
+  { id: 'surprised', label: '惊喜', face: 'surprised', bg: '#FFE875' },
+  { id: 'satisfied', label: '满足', face: 'satisfied', bg: '#FFE875' },
+  { id: 'heart-flutter', label: '心动', face: 'heart-flutter', bg: '#FFE875' },
+  { id: 'confident', label: '自信', face: 'confident', bg: '#FFE875' },
+  { id: 'relaxed', label: '放松', face: 'relaxed', bg: '#FFE875' },
+  { id: 'calm', label: '平静', face: 'calm', bg: '#65D9E8' },
+  { id: 'irritable', label: '烦躁', face: 'irritable', bg: '#FF8FB1' },
+  { id: 'temper', label: '易怒', face: 'temper', bg: '#FF8FB1' },
+  { id: 'angry', label: '生气', face: 'angry', bg: '#F45A5A' },
+  { id: 'anxious', label: '焦虑', face: 'anxious', bg: '#31CDB8' },
+  { id: 'overthink', label: '内耗', face: 'overthink', bg: '#FF8FB1' },
+  { id: 'stressed', label: '压力', face: 'stressed', bg: '#FFD551' },
+  { id: 'scared', label: '害怕', face: 'scared', bg: '#FF9FC0' },
+  { id: 'indifferent', label: '冷漠', face: 'indifferent', bg: '#65D9E8' },
+];
+
+const RECORD_MOOD_QUICK_IDS = ['super-happy', 'normal', 'very-sad', 'happy', 'unhappy'];
+
+function getRecordMoodOption(idOrLabel) {
+  return RECORD_MOOD_OPTIONS.find((item) => item.id === idOrLabel || item.label === idOrLabel) || RECORD_MOOD_OPTIONS[0];
+}
+
+function RecordMoodFace({ mood }) {
+  const MoodFace = window.MoodFace;
+  return (
+    <span className="record-mood-face" style={{ '--record-mood-bg': mood.bg }}>
+      {MoodFace ? <MoodFace face={mood.face} bg={mood.bg}/> : null}
+    </span>
+  );
+}
+
 const HEALTH_RECORD_SHEETS = {
   love: {
     title: '第 1 次爱爱记录',
@@ -2430,6 +2468,7 @@ function HealthMorphRecordPane({
   onPeriodNo,
   onDietAdd,
   dietValues,
+  onMoodAdd,
   onSymptomAdd,
   onPeriodDetailAdd,
   onHealthItemAdd,
@@ -2465,16 +2504,23 @@ function HealthMorphRecordPane({
   }
 
   if (item.recordType === 'mood') {
+    const quickMoods = RECORD_MOOD_QUICK_IDS.map(getRecordMoodOption);
     return (
       <div className="list-mood-actions">
-        <span className="list-mood-emojis" aria-hidden="true">
-          <span>🥳</span>
-          <span>👻</span>
-          <span>😐</span>
-          <span>🐼</span>
-          <span>😎</span>
-        </span>
-        <button type="button" className="list-add" aria-label={'新增' + item.label}>
+        <div className="list-mood-emojis" aria-label="快捷记录心情">
+          {quickMoods.map((mood) => (
+            <button
+              key={mood.id}
+              type="button"
+              className="list-mood-icon-btn"
+              onClick={() => onMoodAdd?.(mood)}
+              aria-label={'记录' + mood.label}
+            >
+              <RecordMoodFace mood={mood}/>
+            </button>
+          ))}
+        </div>
+        <button type="button" className="list-add" onClick={() => onMoodAdd?.()} aria-label={'新增' + item.label}>
           <PlusIcon/>
         </button>
       </div>
@@ -2624,6 +2670,7 @@ function HealthMorphRow({
   onPeriodNo,
   onDietAdd,
   dietValues,
+  onMoodAdd,
   onSymptomAdd,
   onPeriodDetailAdd,
   onHealthItemAdd,
@@ -2666,6 +2713,7 @@ function HealthMorphRow({
             onPeriodNo={onPeriodNo}
             onDietAdd={onDietAdd}
             dietValues={dietValues}
+            onMoodAdd={onMoodAdd}
             onSymptomAdd={onSymptomAdd}
             onPeriodDetailAdd={onPeriodDetailAdd}
             onHealthItemAdd={onHealthItemAdd}
@@ -2688,6 +2736,7 @@ function HealthMorphList({
   onPeriodNo,
   onDietAdd,
   dietValues,
+  onMoodAdd,
   onSymptomAdd,
   onPeriodDetailAdd,
   onHealthItemAdd,
@@ -2710,6 +2759,7 @@ function HealthMorphList({
           onPeriodNo={onPeriodNo}
           onDietAdd={onDietAdd}
           dietValues={dietValues}
+          onMoodAdd={onMoodAdd}
           onSymptomAdd={onSymptomAdd}
           onPeriodDetailAdd={onPeriodDetailAdd}
           onHealthItemAdd={onHealthItemAdd}
@@ -2722,6 +2772,67 @@ function HealthMorphList({
       ))}
     </div>
   );
+}
+
+function MoodRecordSheet({ open, value, onCancel, onConfirm }) {
+  const [selectedId, setSelectedId] = useState(value || 'normal');
+
+  useEffect(() => {
+    if (open) setSelectedId(value || 'normal');
+  }, [open, value]);
+
+  if (!open) return null;
+
+  const selectedMood = getRecordMoodOption(selectedId);
+
+  const sheet = (
+    <div className="record-mood-modal" role="dialog" aria-modal="true" aria-label="心情" onClick={onCancel}>
+      <div className="record-mood-modal-sheet" onClick={(event) => event.stopPropagation()}>
+        <div className="record-mood-modal-bar">
+          <button type="button" className="record-mood-modal-cancel" onClick={onCancel}>取消</button>
+          <div className="record-mood-modal-title">心情</div>
+          <button
+            type="button"
+            className="record-mood-modal-confirm"
+            onClick={() => onConfirm?.(selectedMood)}
+          >
+            确定
+          </button>
+        </div>
+        <div className="record-mood-modal-card">
+          {RECORD_MOOD_OPTIONS.map((mood) => {
+            const selected = mood.id === selectedId;
+            return (
+              <button
+                key={mood.id}
+                type="button"
+                className={'record-mood-modal-item' + (selected ? ' is-selected' : '')}
+                onClick={() => setSelectedId(mood.id)}
+                aria-pressed={selected}
+              >
+                <span className="record-mood-modal-face-wrap">
+                  <RecordMoodFace mood={mood}/>
+                  {selected ? (
+                    <span className="record-mood-modal-check" aria-hidden="true">
+                      <svg viewBox="0 0 12 12">
+                        <path d="M2.3 6.2 4.8 8.6 9.8 3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                  ) : null}
+                </span>
+                <span className="record-mood-modal-label">{mood.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (window.ReactDOM?.createPortal) {
+    return window.ReactDOM.createPortal(sheet, document.body);
+  }
+  return sheet;
 }
 
 function CalendarDayLabel({ day }) {
@@ -2870,6 +2981,7 @@ function RecordPage({
   onPeriodDetailRecordSubmit,
   onDietRecordSubmit,
   onSymptomRecordSubmit,
+  onMoodRecordSubmit,
   onHealthRecordSubmit,
   periodDetailValues,
   periodDetailDemoEnabled = false,
@@ -2895,6 +3007,8 @@ function RecordPage({
   const [reopenDietListAfterSave, setReopenDietListAfterSave] = useState(false);
   const [dietRecords, setDietRecords] = useState([]);
   const [symptomSheetOpen, setSymptomSheetOpen] = useState(false);
+  const [moodSheetOpen, setMoodSheetOpen] = useState(false);
+  const [selectedMood, setSelectedMood] = useState(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
   const [singlePickerType, setSinglePickerType] = useState(null);
@@ -3018,6 +3132,31 @@ function RecordPage({
   const confirmPeriodDetail = ({ type, value }) => {
     setSinglePickerType(null);
     onPeriodDetailRecordSubmit?.({ type, value });
+  };
+
+  const submitMoodRecord = (mood) => {
+    if (!mood) {
+      setMoodSheetOpen(true);
+      return;
+    }
+    setSelectedMood(mood);
+    setHealthRecordValues((prev) => ({
+      ...prev,
+      mood: mood.label,
+    }));
+    onMoodRecordSubmit?.({
+      type: 'mood',
+      label: '心情',
+      value: mood.label,
+      detail: mood.label,
+      moodId: mood.id,
+      icon: 'mood',
+    });
+  };
+
+  const confirmMoodRecord = (mood) => {
+    setMoodSheetOpen(false);
+    submitMoodRecord(mood);
   };
 
   const openHealthRecordSheet = (type) => {
@@ -3197,6 +3336,7 @@ function RecordPage({
             onPeriodNo={() => handlePeriodToggle(false)}
             onDietAdd={openDietEntry}
             dietValues={dietSummary}
+            onMoodAdd={(mood) => mood ? submitMoodRecord(mood) : setMoodSheetOpen(true)}
             onSymptomAdd={() => setSymptomSheetOpen(true)}
             onPeriodDetailAdd={openPeriodDetailPicker}
             onHealthItemAdd={openHealthRecordSheet}
@@ -3288,6 +3428,12 @@ function RecordPage({
         type={healthSheetType}
         onCancel={() => setHealthSheetType(null)}
         onConfirm={confirmHealthRecord}
+      />
+      <MoodRecordSheet
+        open={moodSheetOpen}
+        value={selectedMood?.id}
+        onCancel={() => setMoodSheetOpen(false)}
+        onConfirm={confirmMoodRecord}
       />
       <TempRecordSheet
         open={healthSheetType === 'temp'}

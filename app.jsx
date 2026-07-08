@@ -629,10 +629,29 @@ function App(){
       if(payload.kind === 'daily-record'){
         const iconMap = {
           love: 'love',
+          mood: 'mood',
           discharge: 'discharge',
           temp: 'temp',
           stool: 'stool',
           habit: 'habit',
+          weight: 'weight',
+          diet: 'diet',
+        };
+        const normalizeDietItems = (payload)=>{
+          const items = Array.isArray(payload.dietItems) ? payload.dietItems : [];
+          if(items.length){
+            return items.map((food, index)=>({
+              ...food,
+              id: food.id || `food-${index + 1}`,
+              name: food.name || food.title || '食物',
+              kcal: Number(food.kcal) || 0,
+            }));
+          }
+          return String(payload.recordDetail || payload.recordValue || '')
+            .split(/[、,，]/)
+            .map(name=>name.trim())
+            .filter(Boolean)
+            .map((name, index)=>({ id:`food-${index + 1}`, name, amount:'', kcal:0 }));
         };
         setTimeline(blocks=>blocks.map(block=>{
           if(block.type !== 'day') return block;
@@ -644,6 +663,27 @@ function App(){
             const value = payload.recordValue || item.primary?.recordValue || '';
             const detail = payload.recordDetail || value;
             const icon = payload.icon || iconMap[type] || item.primary?.icon || 'quick';
+            if(type === 'diet' && (item.kind === 'diet-photo-feedback' || item.kind === 'diet-text-feedback')){
+              const dietItems = normalizeDietItems(payload);
+              const foods = dietItems.map(food=>food.name).filter(Boolean);
+              const totalKcal = Number(payload.totalKcal) || dietItems.reduce((sum, food)=>sum + (Number(food.kcal) || 0), 0);
+              return {
+                ...item,
+                time: payload.time || item.time,
+                sourceText: item.kind === 'diet-text-feedback' ? (detail || value || item.sourceText) : item.sourceText,
+                leadingLabel: item.kind === 'diet-text-feedback' ? '饮食：' : item.leadingLabel,
+                dietData:{
+                  ...(item.dietData || {}),
+                  time: payload.time || item.dietData?.time || item.time,
+                  items: dietItems,
+                  foods,
+                  totalKcal,
+                  mealType: payload.mealType || item.dietData?.mealType || '',
+                  matchStatus: item.dietData?.matchStatus || 'all',
+                },
+              };
+            }
+            if(!item.primary) return item;
             return {
               ...item,
               primary:{
@@ -1475,6 +1515,34 @@ function App(){
     if(activeTab !== 'note') setNoteTabUnread(true);
   };
 
+  const submitRecordTabMoodRecord = (record)=>{
+    if(!record?.value) return;
+    markUserRecorded();
+    const stamp = Date.now();
+    const entry = {
+      kind:'record-group',
+      id:'e-record-mood-'+stamp,
+      isNew:true,
+      primary:{
+        id:'e-record-mood-primary-'+stamp,
+        time: window.formatNowTime(),
+        kind:'daily-record',
+        recordType:'mood',
+        recordLabel:'心情',
+        recordValue:record.value,
+        recordDetail:record.detail || record.value,
+        icon:'mood',
+        iconText:'',
+        text:`心情：${record.detail || record.value}`,
+        tags:[{ label:'心情', cat:'心情', val:record.value, icon:'mood' }],
+      },
+    };
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    if(activeTab !== 'note') setNoteTabUnread(true);
+  };
+
   const submitPhoto = ()=>{
     setShowPhoto(false);
     markUserRecorded();
@@ -1715,6 +1783,7 @@ function App(){
           onPeriodDetailRecordSubmit={submitPeriodDetailRecord}
           onDietRecordSubmit={submitRecordTabDietRecord}
           onSymptomRecordSubmit={submitRecordTabSymptomRecord}
+          onMoodRecordSubmit={submitRecordTabMoodRecord}
           onHealthRecordSubmit={submitHealthRecord}
           periodDetailValues={periodDetailDraft}
           periodDetailDemoEnabled={periodDetailRecordEnabled || periodEndRecordCompleted}
