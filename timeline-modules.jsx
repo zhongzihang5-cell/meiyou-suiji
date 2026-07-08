@@ -842,12 +842,34 @@ function MoodInsightCard({item, isNew}){
 function BabyFeedingTimelineCard({item, isNew}){
   const TypewriterText = window.TypewriterText;
   const [summaryOpen, setSummaryOpen] = React.useState(item.summaryOpen !== false);
+  const iconSrcByType = {
+    配方奶:'assets/baby-feeding-icons/formula.png',
+    母乳:'assets/baby-feeding-icons/breast.png',
+    瓶喂母乳:'assets/baby-feeding-icons/bottle-breast.png',
+    换尿布:'assets/baby-feeding-icons/diaper.png',
+    睡眠:'assets/baby-feeding-icons/sleep.png',
+    营养补剂:'assets/baby-feeding-icons/nutrition.png',
+    喝水:'assets/baby-feeding-icons/water.png',
+    吸奶:'assets/baby-feeding-icons/pump.png',
+    辅食:'assets/baby-feeding-icons/solid-food.png',
+    洗澡:'assets/baby-feeding-icons/bath.png',
+    玩耍:'assets/baby-feeding-icons/play.png',
+    游泳:'assets/baby-feeding-icons/swim.png',
+    心情:'assets/baby-feeding-icons/other-event.png',
+    体重:'assets/baby-feeding-icons/other-event.png',
+    饮食:'assets/baby-feeding-icons/other-event.png',
+    体温:'assets/baby-feeding-icons/other-event.png',
+    症状:'assets/baby-feeding-icons/other-event.png',
+  };
   const title = item.feedType || '配方奶';
   const value = item.value || (item.amount ? item.amount + 'ml' : '60ml');
   const text = item.text || `${title}：${value}`;
   const icon = item.icon || '🍼';
+  const iconSrc = item.iconSrc || iconSrcByType[title];
   const color = item.color || '#FF7A66';
   const summary = item.summary;
+  const detailLines = Array.isArray(item.detailLines) ? item.detailLines.filter(Boolean) : [];
+  const hasDetail = detailLines.length > 0;
 
   React.useEffect(()=>{
     setSummaryOpen(item.summaryOpen !== false);
@@ -859,13 +881,23 @@ function BabyFeedingTimelineCard({item, isNew}){
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
         {item.voice?.duration ? <span className="tl-baby-feed-voice">{item.voice.duration}</span> : null}
       </div>
-      <div className="tl-baby-feed-main">
-        <span className="tl-baby-feed-icon" style={{background: color}}>{icon}</span>
-        <span className="tl-baby-feed-text">
-          {isNew && TypewriterText ? (
-            <TypewriterText text={text} active charMs={55} followScroll/>
-          ) : text}
+      <div className={'tl-baby-feed-main'+(hasDetail ? ' is-detail' : '')}>
+        <span className={'tl-baby-feed-icon'+(iconSrc ? ' is-image' : '')} style={iconSrc ? undefined : {background: color}}>
+          {iconSrc ? <img src={iconSrc} alt="" /> : icon}
         </span>
+        {hasDetail ? (
+          <span className="tl-baby-feed-detail">
+            {detailLines.map((line, index)=>(
+              <span key={index}>{line}</span>
+            ))}
+          </span>
+        ) : (
+          <span className="tl-baby-feed-text">
+            {isNew && TypewriterText ? (
+              <TypewriterText text={text} active charMs={55} followScroll/>
+            ) : text}
+          </span>
+        )}
       </div>
       <div className="tl-baby-feed-tags">
         <span className="tl-baby-feed-tag-main">小豆苗</span>
