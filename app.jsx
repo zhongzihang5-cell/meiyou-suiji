@@ -1090,6 +1090,7 @@ function App(){
       for(let i = cleaned.length - 1; i >= 0; i -= 1){
         const block = cleaned[i];
         if(block.type !== 'day') continue;
+        if(block.relativeLabel === '昨天') continue;
         const items = block.items || block.entries || [];
         if(items.some(item=>item.kind === 'baby-feeding-card')){
           latestDayId = block.id;
@@ -1120,6 +1121,7 @@ function App(){
   const resolveBabyFeedingTargetDayId = (blocks)=>{
     const days = (blocks || []).filter(block=>block.type === 'day');
     for(let i = days.length - 1; i >= 0; i -= 1){
+      if(days[i].relativeLabel === '昨天') continue;
       const items = days[i].items || days[i].entries || [];
       if(items.some(item=>item.kind === 'baby-feeding-card')) return days[i].id;
     }
@@ -1881,9 +1883,27 @@ function App(){
     || searchCriteria.personPanelFilter
   ));
   const displayTimeline = React.useMemo(()=>{
-    if(!isSearchActive || !filterTimelineForSearch) return timeline;
-    return filterTimelineForSearch(timeline, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch]);
+    const source = (recordLifeMode === '育儿' && babyFeedingEntryActive)
+      ? (timeline || []).map(block=>{
+          if(block.type !== 'day') return block;
+          const items = block.items || block.entries || [];
+          const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
+          if(block.relativeLabel === '昨天') return {...block, isToday:false};
+          if(!hasBabyFeeding && !block.isToday) return block;
+          if(!hasBabyFeeding && block.isToday) return {...block, isToday:false};
+          const now = new Date();
+          const weekday = ['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];
+          return {
+            ...block,
+            date:`${now.getMonth() + 1}/${now.getDate()}`,
+            weekday,
+            isToday:true,
+          };
+        })
+      : timeline;
+    if(!isSearchActive || !filterTimelineForSearch) return source;
+    return filterTimelineForSearch(source, searchCriteria);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);

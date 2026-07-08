@@ -52,18 +52,41 @@ function filterDayItems(items, sisterCycleDone, hideTodayGuide){
   });
 }
 
+function getTimelineItemTime(item){
+  return item?.time || item?.primary?.time || item?.voice?.time || '';
+}
+
+function getTimelineItemMinutes(item){
+  const time = getTimelineItemTime(item);
+  const match = String(time || '').match(/^(\d{1,2}):(\d{2})$/);
+  if(!match) return null;
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function sortDayItemsByTime(items){
+  return (items || []).map((item, index)=>({item, index, minutes:getTimelineItemMinutes(item)}))
+    .sort((a, b)=>{
+      if(a.minutes == null && b.minutes == null) return a.index - b.index;
+      if(a.minutes == null) return 1;
+      if(b.minutes == null) return -1;
+      if(a.minutes !== b.minutes) return a.minutes - b.minutes;
+      return a.index - b.index;
+    })
+    .map(entry=>entry.item);
+}
+
 function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   const ids = [];
   blocks.forEach(block=>{
     if(block.type !== 'day') return;
-    const items = filterDayItems(block.items || block.entries, sisterCycleDone, hideTodayGuide);
+    const items = sortDayItemsByTime(filterDayItems(block.items || block.entries, sisterCycleDone, hideTodayGuide));
     items.forEach(it=>ids.push(it.id));
   });
   return ids[ids.length - 1];
 }
 
 function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
-  const items = filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide);
+  const items = sortDayItemsByTime(filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide));
   const phaseCls = day.phaseKind || '';
   return (
     <>

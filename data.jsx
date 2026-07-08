@@ -391,6 +391,42 @@ const TIMELINE_BLOCKS = [
     ],
   },
   {
+    type:'day', id:'d-yesterday-baby', date:'5/17', weekday:'周二', relativeLabel:'昨天',
+    items:[
+      {
+        kind:'record-group', id:'e-517-fit-g',
+        primary:{
+          id:'e-517-fit', time:'18:10', kind:'text',
+          text:'去健身房练了四十分钟，出了一身汗。',
+          tags:[{ cat:'运动', icon:'run' }],
+        },
+      },
+      {
+        kind:'record-group', id:'baby-sleep-note-g',
+        primary:{
+          id:'baby-sleep-note', time:'19:32', kind:'text',
+          text:'宝宝傍晚闹觉哭了快二十分钟，抱着走了两圈才睡着。',
+          tags:[
+            { cat:'睡眠', icon:'sleep' },
+            { cat:'心情', icon:'mood' },
+          ],
+        },
+      },
+      {
+        kind:'baby-feeding-card', id:'baby-feed-2046',
+        time:'20:46',
+        recordType:'formula',
+        feedType:'配方奶',
+        value:'130ml',
+        text:'配方奶：130ml',
+        icon:'🍼',
+        color:'#FF7A66',
+        railDot:'baby',
+        voiceQuote:'刚喂了130毫升，喝得有点慢',
+      },
+    ],
+  },
+  {
     type:'day', id:'d-5-17', date:'5/17', weekday:'周日',
     items:[
       {
@@ -426,47 +462,6 @@ const TIMELINE_BLOCKS = [
         icon:'🧷',
         color:'#E8A23D',
         railDot:'baby',
-      },
-      {
-        kind:'record-group', id:'baby-sleep-note-g',
-        primary:{
-          id:'baby-sleep-note', time:'19:32', kind:'text',
-          text:'宝宝傍晚闹觉哭了快二十分钟，抱着走了两圈才睡着。',
-          tags:[
-            { cat:'睡眠', icon:'sleep' },
-            { cat:'心情', icon:'mood' },
-          ],
-        },
-      },
-      {
-        kind:'baby-feeding-card', id:'baby-feed-2046',
-        time:'20:46',
-        recordType:'formula',
-        feedType:'配方奶',
-        value:'130ml',
-        text:'配方奶：130ml',
-        relativeTime:'2小时55分钟前',
-        icon:'🍼',
-        color:'#FF7A66',
-        railDot:'baby',
-        voiceQuote:'刚喂了130毫升，喝得有点慢',
-        summary:{
-          title:'今日喂养小计',
-          items:[
-            { label:'母乳', value:'1次 20min（左10min｜右10min）', color:'#ff5b91', wide:true },
-            { label:'配方奶', value:'5次 730ml', color:'#ff6f91' },
-            { label:'睡眠', value:'2次 7h52min', color:'#a56cf4' },
-            { label:'换尿布', value:'2次', color:'#f5a400' },
-          ],
-        },
-      },
-      {
-        kind:'record-group', id:'e-517-fit-g',
-        primary:{
-          id:'e-517-fit', time:'18:10', kind:'text',
-          text:'去健身房练了四十分钟，出了一身汗。',
-          tags:[{ cat:'运动', icon:'run' }],
-        },
       },
     ],
   },

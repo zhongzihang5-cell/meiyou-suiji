@@ -65,6 +65,8 @@ function summarizeDayItems(items, day){
 }
 
 function resolveDayTitleLabel(day){
+  if(day.relativeLabel) return day.relativeLabel;
+  if(day.isToday) return '今天';
   const { month, day: dayNum } = parseDayParts(day.date);
   return `${month}月${dayNum}日`;
 }
