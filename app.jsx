@@ -1888,7 +1888,17 @@ function App(){
           if(block.type !== 'day') return block;
           const items = block.items || block.entries || [];
           const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
-          if(block.relativeLabel === '昨天') return {...block, isToday:false};
+          if(block.relativeLabel === '昨天'){
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const weekday = ['周日','周一','周二','周三','周四','周五','周六'][yesterday.getDay()];
+            return {
+              ...block,
+              date:`${yesterday.getMonth() + 1}/${yesterday.getDate()}`,
+              weekday,
+              isToday:false,
+            };
+          }
           if(!hasBabyFeeding && !block.isToday) return block;
           if(!hasBabyFeeding && block.isToday) return {...block, isToday:false};
           const now = new Date();

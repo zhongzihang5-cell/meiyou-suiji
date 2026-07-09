@@ -416,8 +416,12 @@
   min-width:0;
   color:var(--my-text-primary);
   font-size:16px;
-  font-weight:500;
+  font-weight:400;
   line-height:1.5;
+}
+.tl-baby-feed-text *,
+.tl-baby-feed-detail *{
+  font-weight:400 !important;
 }
 .tl-baby-feed-detail{
   min-width:0;
@@ -426,7 +430,7 @@
   gap:2px;
   color:var(--my-text-primary);
   font-size:16px;
-  font-weight:500;
+  font-weight:400;
   line-height:1.45;
 }
 .tl-baby-feed-detail span{
