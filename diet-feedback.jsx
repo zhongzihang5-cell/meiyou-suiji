@@ -554,17 +554,44 @@ function DietFoodResultSummary({
   guideBelowTotalDays = null,
   leadingIconSrc = '',
   leadingLabel = '',
+  leadingHeadlineOnly = false,
+  photoAboveTotalUrl = '',
 }){
   const showDiversity = revealStep >= 1 && diversityCount != null && diversityCount >= 5;
   const showTotal = revealStep >= 1 && totalKcal != null;
   const showCalorieInsight = revealStep >= 1 && calorieInsight;
-  const showFoodList = (compact ? revealStep >= 1 : revealStep >= 2) && items.length > 0;
+  const showFoodList = items.length > 0 && (
+    leadingHeadlineOnly
+      ? revealStep >= 1
+      : ((compact ? revealStep >= 1 : revealStep >= 2))
+  );
   const showGuideBelowTotal = revealStep >= 1 && guideBelowTotalDays != null;
   const foodListText = items.map(formatFoodItemText).filter(Boolean).join('，');
+  const showLeadingHeadline = leadingHeadlineOnly && (leadingIconSrc || leadingLabel);
 
   return (
-    <div className={'diet-fb-sec-a' + (compact ? ' is-compact' : '')}>
-      {showFoodList && (
+    <div className={'diet-fb-sec-a' + (compact ? ' is-compact' : '') + (leadingHeadlineOnly ? ' has-leading-headline' : '')}>
+      {showLeadingHeadline ? (
+        <div className="diet-fb-food-list-row diet-fb-leading-headline diet-fb-stagger-in">
+          {leadingIconSrc ? (
+            <img className="diet-fb-food-list-icon" src={leadingIconSrc} alt="" aria-hidden="true" />
+          ) : null}
+          <p className="diet-fb-food-list diet-fb-leading-label">
+            <span className="diet-fb-food-list-prefix">{leadingLabel}</span>
+          </p>
+        </div>
+      ) : null}
+      {showTotal && photoAboveTotalUrl ? (
+        <div className="diet-fb-photo-above-total diet-fb-stagger-in">
+          <img src={photoAboveTotalUrl} alt="" />
+        </div>
+      ) : null}
+      {showFoodList && leadingHeadlineOnly ? (
+        <div className="diet-fb-food-list-row diet-fb-stagger-in is-detail">
+          <p className="diet-fb-food-list">{foodListText}</p>
+        </div>
+      ) : null}
+      {showFoodList && !leadingHeadlineOnly ? (
         <div className="diet-fb-food-list-row diet-fb-stagger-in">
           {leadingIconSrc ? (
             <img className="diet-fb-food-list-icon" src={leadingIconSrc} alt="" aria-hidden="true" />
@@ -574,7 +601,7 @@ function DietFoodResultSummary({
             {foodListText}
           </p>
         </div>
-      )}
+      ) : null}
       {showTotal && (
         <p className="diet-fb-total-line diet-fb-stagger-in">
           <span className="diet-fb-total-label">总热量：</span>
@@ -588,6 +615,84 @@ function DietFoodResultSummary({
       {showDiversity && (
         <DietDiversityTip count={diversityCount} placement="meal"/>
       )}
+    </div>
+  );
+}
+
+function DietPhotoStackedPreview({
+  photoUrl,
+  leadingIconSrc = 'assets/quick-icon-diet.png',
+  leadingLabel = '饮食：',
+}){
+  if (!photoUrl) return null;
+  return (
+    <div className="diet-fb-sec-a has-leading-headline">
+      <div className="diet-fb-food-list-row diet-fb-leading-headline">
+        {leadingIconSrc ? (
+          <img className="diet-fb-food-list-icon" src={leadingIconSrc} alt="" aria-hidden="true" />
+        ) : null}
+        <p className="diet-fb-food-list diet-fb-leading-label">
+          <span className="diet-fb-food-list-prefix">{leadingLabel}</span>
+        </p>
+      </div>
+      <div className="diet-fb-photo-above-total">
+        <img src={photoUrl} alt="" />
+      </div>
+    </div>
+  );
+}
+
+function DietRecordSyncPhotoCard({
+  time,
+  photoUrl,
+  items = [],
+  totalKcal = 0,
+  userContext,
+  isNew = false,
+  leadingIconSrc = 'assets/quick-icon-diet.png',
+  leadingLabel = '饮食：',
+  displayScenario: displayScenarioProp,
+}){
+  const ctx = userContext || {};
+  const readDisplayScenario = window.readDietFeedbackDisplayScenario || (() => null);
+  const displayScenario = displayScenarioProp || readDisplayScenario();
+  const displayCfg = displayScenario && window.getDietFeedbackDisplayConfig
+    ? window.getDietFeedbackDisplayConfig(displayScenario)
+    : null;
+  const showAiInsights = resolveShowAiInsights({
+    showAi: true,
+    displayCfg,
+    hasInlineCalorieInsight: !!(displayCfg?.showMealInsight || displayCfg?.showCalorieInsightCard),
+  });
+
+  return (
+    <div className={'diet-fb-card diet-fb-photo-card diet-fb-record-sync' + (isNew ? ' is-new' : '') + ' is-ready'}>
+      {time && <div className="diet-fb-ts">{time}</div>}
+      <DietFoodResultSummary
+        items={items}
+        totalKcal={totalKcal}
+        revealStep={3}
+        leadingIconSrc={leadingIconSrc}
+        leadingLabel={leadingLabel}
+        leadingHeadlineOnly
+        photoAboveTotalUrl={photoUrl}
+      />
+      {showAiInsights ? (
+        <DietAiInsightsShell displayScenario={displayScenario} isNew={isNew}>
+          <DietCalorieAiBody
+            weekData={ctx.weekData || []}
+            todayKcal={ctx.dayTotalKcal || totalKcal}
+            daysWithRecord={ctx.daysWithRecord || 0}
+            avgKcal={ctx.avgKcal}
+            dayMealCount={ctx.dayMealCount || 2}
+            dayTotalKcal={ctx.dayTotalKcal}
+            mealKcal={totalKcal}
+            displayScenario={displayScenario}
+            cycleData={ctx.cycleData}
+            todayFoodCount={ctx.todayFoodCount ?? 0}
+          />
+        </DietAiInsightsShell>
+      ) : null}
     </div>
   );
 }
@@ -658,7 +763,25 @@ function DietPhotoFeedbackCard({
   recognitionState: recognitionStateProp,
   failureCount: failureCountProp = 0,
   displayScenario: displayScenarioProp,
+  leadingIconSrc = '',
+  leadingLabel = '',
 }){
+  if (data?.fromRecordSync) {
+    return (
+      <DietRecordSyncPhotoCard
+        time={data?.time}
+        photoUrl={photoUrl}
+        items={data?.items || []}
+        totalKcal={data?.totalKcal || 0}
+        userContext={userContext}
+        isNew={isNew}
+        leadingIconSrc={leadingIconSrc || 'assets/quick-icon-diet.png'}
+        leadingLabel={leadingLabel || '饮食：'}
+        displayScenario={displayScenarioProp}
+      />
+    );
+  }
+
   const loadingMs = window.PHOTO_ANALYZE_LOADING_MS || 5000;
   const readScenario = window.readDietRecognitionScenario || (() => 'success');
   const readDisplayScenario = window.readDietFeedbackDisplayScenario || (() => null);
@@ -775,15 +898,21 @@ function DietPhotoFeedbackCard({
     runRecognition({ forceSuccess, isRetry: true });
   }, [failureCount, maxFailures, phase, runRecognition]);
 
+  const dietIcon = leadingIconSrc || 'assets/quick-icon-diet.png';
+  const dietLabel = leadingLabel || '饮食：';
+  const useStackedPhoto = !!photoUrl;
+
   if (matchStatus === 'fail') {
     return (
-      <div className={'diet-fb-card diet-fb-photo-card' + (isNew ? ' is-new' : '')}>
+      <div className={'diet-fb-card diet-fb-photo-card' + (useStackedPhoto ? ' is-stacked-photo' : '') + (isNew ? ' is-new' : '')}>
         {time && <div className="diet-fb-ts">{time}</div>}
-        {photoUrl && (
+        {useStackedPhoto ? (
+          <DietPhotoStackedPreview photoUrl={photoUrl} leadingIconSrc={dietIcon} leadingLabel={dietLabel} />
+        ) : photoUrl ? (
           <div className="diet-fb-photo-wrap">
             <img src={photoUrl} alt="" className="diet-fb-photo"/>
           </div>
-        )}
+        ) : null}
         <DietSecFail/>
       </div>
     );
@@ -818,12 +947,15 @@ function DietPhotoFeedbackCard({
 
   return (
     <>
-      <div className={'diet-fb-card diet-fb-photo-card' + (isNew ? ' is-new' : '') + (isLoading ? ' is-loading' : '') + (isError ? ' is-error' : '') + (isExhausted ? ' is-exhausted' : '') + (phase === 'ready' ? ' is-ready' : '')}>
+      <div className={'diet-fb-card diet-fb-photo-card' + (useStackedPhoto ? ' is-stacked-photo' : '') + (isNew ? ' is-new' : '') + (isLoading ? ' is-loading' : '') + (isError ? ' is-error' : '') + (isExhausted ? ' is-exhausted' : '') + (phase === 'ready' ? ' is-ready' : '')}>
         {time && <div className="diet-fb-ts">{time}</div>}
-        {photoUrl && (
+        {!useStackedPhoto && photoUrl && (
           <div className="diet-fb-photo-wrap">
             <img src={photoUrl} alt="" className="diet-fb-photo"/>
           </div>
+        )}
+        {useStackedPhoto && (isLoading || isError) && (
+          <DietPhotoStackedPreview photoUrl={photoUrl} leadingIconSrc={dietIcon} leadingLabel={dietLabel} />
         )}
         {isLoading && <DietSecALoading/>}
         {phase === 'ready' && revealStep >= 1 && (
@@ -835,6 +967,10 @@ function DietPhotoFeedbackCard({
             diversityCount={diversityCount}
             compact={!!displayCfg?.useCompactMeal}
             guideBelowTotalDays={guideBelowTotalDays}
+            leadingIconSrc={dietIcon}
+            leadingLabel={dietLabel}
+            leadingHeadlineOnly={useStackedPhoto}
+            photoAboveTotalUrl={useStackedPhoto ? photoUrl : ''}
           />
         )}
         {isLoading && (
@@ -1520,6 +1656,7 @@ Object.assign(window, {
   DietPhotoFeedbackCard,
   DietTextFeedbackCard,
   DietFoodResultSummary,
+  DietPhotoStackedPreview,
   DietAiInsightsShell,
   DietAiCollapsibleSection,
   DietCalorieAiBody,

@@ -393,6 +393,15 @@ function getDietDefaultTime(mealTypeId) {
   return item ? item.defaultTime : '08:00';
 }
 
+function formatDietDisplayDate(date = new Date()) {
+  const now = new Date();
+  const isToday = date.getFullYear() === now.getFullYear()
+    && date.getMonth() === now.getMonth()
+    && date.getDate() === now.getDate();
+  const label = `${date.getMonth() + 1}月${date.getDate()}日`;
+  return isToday ? `${label} (今天)` : label;
+}
+
 const MONTH_BLOCKS_2025 = [
   { title: '10月', days: [null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31] },
   { title: '11月', days: [null, null, null, null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30] },
@@ -1425,6 +1434,14 @@ function DietAddSheet({ open, onClose, onDone }) {
   }, [open]);
 
   useEffect(() => {
+    if (!open || addedFoods.length === 0 || mealTime) return;
+    const now = new Date();
+    setMealTime(
+      `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    );
+  }, [open, addedFoods.length, mealTime]);
+
+  useEffect(() => {
     const phone = portalTarget;
     if (!phone) return undefined;
     if (open) phone.classList.add('is-diet-sheet-open');
@@ -1446,7 +1463,6 @@ function DietAddSheet({ open, onClose, onDone }) {
   };
 
   const hasReview = addedFoods.length > 0;
-  const mealLabel = DIET_MEAL_TYPES.find((m) => m.id === mealType)?.label || '早餐';
   const totalKcal = addedFoods.reduce((sum, food) => sum + (food.kcal || 0), 0);
   const canConfirm = addedFoods.length > 0;
 
@@ -1504,24 +1520,6 @@ function DietAddSheet({ open, onClose, onDone }) {
             <div className="diet-add-body">
               {!hasReview ? (
                 <>
-                  <section className="diet-add-card">
-                    <h3 className="diet-add-card-title">餐次</h3>
-                    <div className="diet-meal-grid" role="listbox" aria-label="餐次">
-                      {DIET_MEAL_TYPES.map((meal) => (
-                        <button
-                          key={meal.id}
-                          type="button"
-                          role="option"
-                          aria-selected={mealType === meal.id}
-                          className={'diet-meal-chip' + (mealType === meal.id ? ' is-active' : '')}
-                          onClick={() => setMealType(meal.id)}
-                        >
-                          {meal.label}
-                        </button>
-                      ))}
-                    </div>
-                  </section>
-
                   <div className="diet-entry-grid">
                     <button type="button" className="diet-entry-card" aria-label="拍照识别" onClick={handlePhotoRecognizeTap}>
                       <svg className="diet-entry-icon" viewBox="0 0 48 48" aria-hidden="true">
@@ -1543,98 +1541,108 @@ function DietAddSheet({ open, onClose, onDone }) {
                 </>
               ) : (
                 <>
-                  <section className="diet-review-row">
-                    <span className="diet-review-label">餐次</span>
-                    <span className="diet-review-time-val">
-                      {mealLabel}
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </span>
+                  <section className="diet-add-card">
+                    <h3 className="diet-add-card-title">餐次</h3>
+                    <div className="diet-meal-grid" role="listbox" aria-label="餐次">
+                      {DIET_MEAL_TYPES.map((meal) => (
+                        <button
+                          key={meal.id}
+                          type="button"
+                          role="option"
+                          aria-selected={mealType === meal.id}
+                          className={'diet-meal-chip' + (mealType === meal.id ? ' is-active' : '')}
+                          onClick={() => setMealType(meal.id)}
+                        >
+                          {meal.label}
+                        </button>
+                      ))}
+                    </div>
                   </section>
 
-                  <section className="diet-review-row" onClick={() => setTimePickerOpen(true)}>
-                    <span className="diet-review-label">用餐时间</span>
-                    <span className="diet-review-time-val">
+                  <section className="diet-add-card is-row" onClick={() => setTimePickerOpen(true)}>
+                    <span className="diet-review-row-label">用餐时间</span>
+                    <span className="diet-review-row-value">
                       {mealTime || '--:--'}
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </span>
                   </section>
 
-                  <section className="diet-review-section">
-                    <h3 className="diet-review-section-title">食物详情</h3>
-                    {addedFoods.map((food) => {
-                      const isExpanded = expandedId === food.id;
-                      return React.createElement('div', { key: food.id, className: 'diet-review-food' },
-                        React.createElement('div', {
-                          className: 'diet-review-food-row',
-                          onClick: () => setExpandedId(isExpanded ? null : food.id),
-                        },
-                          React.createElement('div', { className: 'diet-review-food-thumb' },
-                            React.createElement('img', { src: food.img, alt: '', onError: (e) => { e.target.style.display = 'none'; } })
-                          ),
-                          React.createElement('div', { className: 'diet-review-food-info' },
-                            React.createElement('span', { className: 'diet-review-food-name' }, food.name, ' · ', food.gram || 0, 'g'),
-                            React.createElement('span', { className: 'diet-review-food-kcal' }, food.kcal || 0, ' 千卡')
-                          ),
-                          React.createElement('svg', {
-                            className: 'diet-review-food-arrow' + (isExpanded ? ' is-open' : ''),
-                            viewBox: '0 0 24 24',
-                            'aria-hidden': 'true',
+                  <section className="diet-add-card">
+                    <h3 className="diet-add-card-title">食物详情</h3>
+                    <div className="diet-review-foods">
+                      {addedFoods.map((food) => {
+                        const isExpanded = expandedId === food.id;
+                        return React.createElement('div', { key: food.id, className: 'diet-review-food' },
+                          React.createElement('div', {
+                            className: 'diet-review-food-row',
+                            onClick: () => setExpandedId(isExpanded ? null : food.id),
                           },
-                            React.createElement('path', { d: 'M6 9l6 6 6-6', fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' })
-                          )
-                        ),
-                        isExpanded && React.createElement('div', { className: 'diet-review-food-detail' },
-                          React.createElement('div', { className: 'diet-review-field' },
-                            React.createElement('span', { className: 'diet-review-field-label' }, '食物名称'),
-                            React.createElement('input', {
-                              className: 'diet-review-field-input',
-                              value: food.name,
-                              onChange: (e) => updateFood(food.id, 'name', e.target.value),
-                            })
-                          ),
-                          React.createElement('div', { className: 'diet-review-field' },
-                            React.createElement('span', { className: 'diet-review-field-label' }, '份量'),
-                            React.createElement('div', { className: 'diet-review-field-input-wrap' },
-                              React.createElement('input', {
-                                className: 'diet-review-field-input',
-                                type: 'number',
-                                value: food.gram || 0,
-                                onChange: (e) => updateFood(food.id, 'gram', parseInt(e.target.value, 10) || 0),
-                              }),
-                              React.createElement('span', { className: 'diet-review-field-unit' }, '克')
+                            React.createElement('div', { className: 'diet-review-food-thumb' },
+                              React.createElement('img', { src: food.img, alt: '', onError: (e) => { e.target.style.display = 'none'; } })
+                            ),
+                            React.createElement('div', { className: 'diet-review-food-info' },
+                              React.createElement('span', { className: 'diet-review-food-name' }, food.name, ' · ', food.gram || 0, 'g'),
+                              React.createElement('span', { className: 'diet-review-food-kcal' }, food.kcal || 0, ' 千卡')
+                            ),
+                            React.createElement('svg', {
+                              className: 'diet-review-food-arrow' + (isExpanded ? ' is-open' : ''),
+                              viewBox: '0 0 24 24',
+                              'aria-hidden': 'true',
+                            },
+                              React.createElement('path', { d: 'M6 9l6 6 6-6', fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' })
                             )
                           ),
-                          React.createElement('div', { className: 'diet-review-field' },
-                            React.createElement('span', { className: 'diet-review-field-label' }, '热量'),
-                            React.createElement('div', { className: 'diet-review-field-input-wrap' },
+                          isExpanded && React.createElement('div', { className: 'diet-review-food-detail' },
+                            React.createElement('div', { className: 'diet-review-field' },
+                              React.createElement('span', { className: 'diet-review-field-label' }, '食物名称'),
                               React.createElement('input', {
                                 className: 'diet-review-field-input',
-                                type: 'number',
-                                value: food.kcal || 0,
-                                onChange: (e) => updateFood(food.id, 'kcal', parseInt(e.target.value, 10) || 0),
-                              }),
-                              React.createElement('span', { className: 'diet-review-field-unit' }, '千卡')
+                                value: food.name,
+                                onChange: (e) => updateFood(food.id, 'name', e.target.value),
+                              })
+                            ),
+                            React.createElement('div', { className: 'diet-review-field' },
+                              React.createElement('span', { className: 'diet-review-field-label' }, '份量'),
+                              React.createElement('div', { className: 'diet-review-field-input-wrap' },
+                                React.createElement('input', {
+                                  className: 'diet-review-field-input',
+                                  type: 'number',
+                                  value: food.gram || 0,
+                                  onChange: (e) => updateFood(food.id, 'gram', parseInt(e.target.value, 10) || 0),
+                                }),
+                                React.createElement('span', { className: 'diet-review-field-unit' }, '克')
+                              )
+                            ),
+                            React.createElement('div', { className: 'diet-review-field' },
+                              React.createElement('span', { className: 'diet-review-field-label' }, '热量'),
+                              React.createElement('div', { className: 'diet-review-field-input-wrap' },
+                                React.createElement('input', {
+                                  className: 'diet-review-field-input',
+                                  type: 'number',
+                                  value: food.kcal || 0,
+                                  onChange: (e) => updateFood(food.id, 'kcal', parseInt(e.target.value, 10) || 0),
+                                }),
+                                React.createElement('span', { className: 'diet-review-field-unit' }, '千卡')
+                              )
                             )
                           )
-                        )
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </section>
-                  <section className="diet-review-row diet-review-readonly-row">
-                    <span className="diet-review-label">总热量</span>
-                    <span className="diet-review-static-val">{totalKcal} 千卡</span>
+
+                  <section className="diet-add-card is-row is-readonly">
+                    <span className="diet-review-row-label">总热量</span>
+                    <span className="diet-review-row-value is-static">{totalKcal} 千卡</span>
                   </section>
+
                   {cameraPhotoUrl ? (
-                    <>
-                      <section className="diet-review-row diet-review-note-row">
-                        <span className="diet-review-label">备注</span>
-                      </section>
-                      <section className="diet-review-note-photo-row">
-                        <div className="diet-review-note-photo">
-                          <img src={cameraPhotoUrl} alt="饮食备注照片" />
-                        </div>
-                      </section>
-                    </>
+                    <section className="diet-add-card">
+                      <h3 className="diet-add-card-title">备注</h3>
+                      <div className="diet-review-note-photo">
+                        <img src={cameraPhotoUrl} alt="饮食备注照片" />
+                      </div>
+                    </section>
                   ) : null}
                 </>
               )}
@@ -1847,11 +1855,6 @@ function FoodPortionSheet({ food, open, onClose, onConfirm }) {
   const [unitIndex, setUnitIndex] = useState(portions.length > 1 ? 1 : 0);
   const [amount, setAmount] = useState(portions.length > 1 ? portions[1].defaultVal : portions[0].defaultVal);
   const [mealTime, setMealTime] = useState('08:00');
-  const [timePickerOpen, setTimePickerOpen] = useState(false);
-
-  useEffect(() => {
-    if (open) setTimePickerOpen(false);
-  }, [open]);
 
   useEffect(() => {
     if (!open || !food) return;
@@ -1865,6 +1868,8 @@ function FoodPortionSheet({ food, open, onClose, onConfirm }) {
   }, [open, food]);
 
   if (!open || !food) return null;
+
+  const mealDateLabel = formatDietDisplayDate(new Date());
 
   const currentPortion = portions[unitIndex];
   const gramAmount = amount * currentPortion.baseGram;
@@ -1958,20 +1963,10 @@ function FoodPortionSheet({ food, open, onClose, onConfirm }) {
             </div>
           </section>
 
-          <section className="food-portion-row-card" onClick={() => setTimePickerOpen(true)}>
-            <span className="food-portion-row-label">用餐时间</span>
-            <span className="food-portion-row-value">
-              <span>{mealTime}</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </span>
+          <section className="food-portion-row-card is-readonly">
+            <span className="food-portion-row-label">用餐日期</span>
+            <span className="food-portion-row-value is-static">{mealDateLabel}</span>
           </section>
-
-          <TimePickerSheet
-            open={timePickerOpen}
-            value={mealTime}
-            onConfirm={(t) => { setMealTime(t); setTimePickerOpen(false); }}
-            onCancel={() => setTimePickerOpen(false)}
-          />
 
           <section className="food-portion-row-card">
             <span className="food-portion-row-label">食物详情</span>

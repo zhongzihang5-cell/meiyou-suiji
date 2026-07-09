@@ -1681,8 +1681,11 @@ function App(){
           totalKcal: record.totalKcal || 0,
           matchStatus: 'all',
           foodTags: [],
+          fromRecordSync: true,
         },
         userContext,
+        leadingIconSrc: 'assets/quick-icon-diet.png',
+        leadingLabel: '饮食：',
         isNew: true,
       };
     } else {
@@ -1697,6 +1700,7 @@ function App(){
           totalKcal: record.totalKcal || 0,
           matchStatus: 'all',
           foodTags: [],
+          fromRecordSync: true,
         },
         userContext,
         leadingIconSrc: 'assets/quick-icon-diet.png',

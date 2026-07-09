@@ -968,6 +968,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             data={item.dietData}
             userContext={item.userContext}
             isNew={isNew}
+            leadingIconSrc={item.leadingIconSrc}
+            leadingLabel={item.leadingLabel}
             recognitionScenario={item.recognitionScenario}
             recognitionState={item.recognitionState}
             failureCount={item.failureCount}
