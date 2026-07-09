@@ -130,6 +130,37 @@
 .diet-fb-sec-a.is-compact .diet-fb-meal-insight{
   margin-top:8px;
 }
+
+.diet-fb-leading-headline{
+  margin-bottom:8px;
+}
+.diet-fb-leading-label{
+  margin:0;
+  color:rgba(0,0,0,0.8);
+}
+.diet-fb-leading-label .diet-fb-food-list-prefix{
+  margin-right:4px;
+}
+.diet-fb-sec-a.has-leading-headline .diet-fb-food-list-row.is-detail{
+  margin:0 0 8px;
+}
+.diet-fb-photo-card.is-stacked-photo .diet-fb-photo-wrap{
+  display:none;
+}
+.diet-fb-photo-above-total{
+  margin:0 0 8px;
+}
+.diet-fb-photo-above-total img{
+  width:128px;
+  height:128px;
+  border-radius:10px;
+  object-fit:cover;
+  display:block;
+  background:#f2f2f5;
+}
+.diet-fb-record-sync .diet-fb-sec-a{
+  padding-top:10px;
+}
 .diet-fb-sec-a.is-compact .diet-fb-diversity-tip--meal{
   margin-top:8px;
 }

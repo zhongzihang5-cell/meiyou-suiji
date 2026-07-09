@@ -708,10 +708,28 @@ function V3EditableRecordArea({entryId, entryKind, editPayload, children}){
   );
 }
 
-function V3FoodListStatic({ items, totalKcal, revealStep = 3 }) {
+function V3FoodListStatic({
+  items,
+  totalKcal,
+  revealStep = 3,
+  leadingIconSrc,
+  leadingLabel,
+  leadingHeadlineOnly = false,
+  photoAboveTotalUrl = '',
+}) {
   const DietFoodResultSummary = window.DietFoodResultSummary;
   if (DietFoodResultSummary) {
-    return <DietFoodResultSummary items={items} totalKcal={totalKcal} revealStep={revealStep}/>;
+    return (
+      <DietFoodResultSummary
+        items={items}
+        totalKcal={totalKcal}
+        revealStep={revealStep}
+        leadingIconSrc={leadingIconSrc}
+        leadingLabel={leadingLabel}
+        leadingHeadlineOnly={leadingHeadlineOnly}
+        photoAboveTotalUrl={photoAboveTotalUrl}
+      />
+    );
   }
   const listStyle = { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 };
   const rowStyle = { fontSize: 13, color: TL_TEXT, lineHeight: 1.45, display: 'flex', alignItems: 'baseline', gap: 6 };
@@ -737,7 +755,16 @@ function V3FoodListStatic({ items, totalKcal, revealStep = 3 }) {
   );
 }
 
-function V3PhotoFoodAnalysis({ items, totalKcal, isNew, onComplete }) {
+function V3PhotoFoodAnalysis({
+  items,
+  totalKcal,
+  isNew,
+  onComplete,
+  leadingIconSrc,
+  leadingLabel,
+  leadingHeadlineOnly = false,
+  photoAboveTotalUrl = '',
+}) {
   const TypewriterText = window.TypewriterText;
   const loadingMs = window.PHOTO_ANALYZE_LOADING_MS || 5000;
   const animate = !!isNew;
@@ -780,7 +807,16 @@ function V3PhotoFoodAnalysis({ items, totalKcal, isNew, onComplete }) {
   }, [activeLine, foodItems.length, totalKcal, finishAnalysis]);
 
   if (!animate || finished) {
-    return <V3FoodListStatic items={foodItems} totalKcal={totalKcal}/>;
+    return (
+      <V3FoodListStatic
+        items={foodItems}
+        totalKcal={totalKcal}
+        leadingIconSrc={leadingIconSrc}
+        leadingLabel={leadingLabel}
+        leadingHeadlineOnly={leadingHeadlineOnly}
+        photoAboveTotalUrl={photoAboveTotalUrl}
+      />
+    );
   }
 
   if (loading) {
@@ -795,7 +831,16 @@ function V3PhotoFoodAnalysis({ items, totalKcal, isNew, onComplete }) {
   }
 
   if (!TypewriterText) {
-    return <V3FoodListStatic items={foodItems} totalKcal={totalKcal}/>;
+    return (
+      <V3FoodListStatic
+        items={foodItems}
+        totalKcal={totalKcal}
+        leadingIconSrc={leadingIconSrc}
+        leadingLabel={leadingLabel}
+        leadingHeadlineOnly={leadingHeadlineOnly}
+        photoAboveTotalUrl={photoAboveTotalUrl}
+      />
+    );
   }
 
   return (
@@ -967,6 +1012,46 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   if(entry.kind === 'image'){
     const items = entry.foodItems || (entry.text || entry.body || '').split(/[；;]\s*/).filter(Boolean);
     const imgSrc = entry.useRealImage ? (entry.photo?.src || entry.imageSrc) : null;
+    const DietFoodResultSummary = window.DietFoodResultSummary;
+    const DietPhotoStackedPreview = window.DietPhotoStackedPreview;
+    const dietIcon = 'assets/quick-icon-diet.png';
+    const dietLabel = '饮食：';
+    const stackedLayout = !!(DietFoodResultSummary && imgSrc);
+
+    if (stackedLayout && !photoAnalysis) {
+      return (
+        <DietFoodResultSummary
+          items={items}
+          totalKcal={entry.totalKcal}
+          revealStep={3}
+          leadingIconSrc={dietIcon}
+          leadingLabel={dietLabel}
+          leadingHeadlineOnly
+          photoAboveTotalUrl={imgSrc}
+        />
+      );
+    }
+
+    if (stackedLayout && photoAnalysis) {
+      return (
+        <div style={{display:'flex', flexDirection:'column', gap:10}}>
+          {DietPhotoStackedPreview ? (
+            <DietPhotoStackedPreview photoUrl={imgSrc} leadingIconSrc={dietIcon} leadingLabel={dietLabel} />
+          ) : null}
+          <V3PhotoFoodAnalysis
+            items={items}
+            totalKcal={entry.totalKcal}
+            isNew={isNew}
+            onComplete={onPhotoAnalysisComplete}
+            leadingIconSrc={dietIcon}
+            leadingLabel={dietLabel}
+            leadingHeadlineOnly
+            photoAboveTotalUrl={imgSrc}
+          />
+        </div>
+      );
+    }
+
     return (
       <div style={{display:'flex', flexDirection:'column', gap:10}}>
         <div style={{width:'100%', aspectRatio:'4/3', borderRadius:10, overflow:'hidden', background:'#eee'}}>

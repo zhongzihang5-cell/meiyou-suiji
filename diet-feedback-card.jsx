@@ -396,6 +396,8 @@ function createDietCaptureGroup({ photoUrl, scenario } = {}) {
     id: id + '-fb',
     time,
     photoUrl: photo,
+    leadingIconSrc: 'assets/quick-icon-diet.png',
+    leadingLabel: '饮食：',
     recognitionScenario: readDietRecognitionScenario(),
     displayScenario: readDietFeedbackDisplayScenario(),
     dietData: {

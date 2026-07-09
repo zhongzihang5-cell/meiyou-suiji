@@ -3359,6 +3359,20 @@
   margin-bottom: 12px;
 }
 
+.phone .diet-add-card.is-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.phone .diet-add-card.is-row.is-readonly {
+  cursor: default;
+}
+
 .phone .diet-add-card-title {
   margin: 0 0 12px;
   font-size: 17px;
@@ -3438,16 +3452,41 @@
 .phone .diet-add-sheet.is-review .diet-add-body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding-top: 4px;
 }
 
-.phone .diet-review-row {
-  display: flex;
+.phone .diet-review-row-label {
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+  flex-shrink: 0;
+}
+
+.phone .diet-review-row-value {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 0;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
-  margin: 0 16px;
-  cursor: pointer;
+  gap: 4px;
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
+.phone .diet-review-row-value svg {
+  width: 16px;
+  height: 16px;
+  color: rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.phone .diet-review-row-value.is-static {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.phone .diet-review-foods {
+  margin: 0 -4px;
 }
 
 .phone .diet-review-label {
@@ -3519,7 +3558,7 @@
   height: 72px;
   border-radius: 12px;
   overflow: hidden;
-  background: #f4f4f6;
+  background: #fff;
   flex-shrink: 0;
 }
 
@@ -3541,7 +3580,7 @@
 .phone .diet-review-food-row {
   display: flex;
   align-items: center;
-  padding: 12px 0;
+  padding: 10px 4px;
   cursor: pointer;
   gap: 12px;
 }
@@ -3593,7 +3632,7 @@
 }
 
 .phone .diet-review-food-detail {
-  padding: 4px 0 12px 60px;
+  padding: 4px 4px 8px 64px;
 }
 
 .phone .diet-review-field {
@@ -3620,23 +3659,28 @@
   align-items: center;
   gap: 6px;
   flex: 1;
+  justify-content: flex-end;
 }
 
 .phone .diet-review-field-input {
   font-size: 15px;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  border: 0;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 6px;
+  color: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 77, 136, 0.24);
+  background: rgba(255, 77, 136, 0.06);
+  border-radius: 8px;
   padding: 6px 10px;
   outline: none;
   min-width: 0;
   flex: 1;
+  text-align: right;
+  caret-color: #ff4d88;
+  transition: border-color 0.18s ease, background 0.18s ease;
 }
 
 .phone .diet-review-field-input:focus {
-  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(255, 77, 136, 0.65);
+  background: rgba(255, 77, 136, 0.1);
 }
 
 .phone .diet-review-field-input[type="number"] {
@@ -4288,6 +4332,10 @@
   cursor: pointer;
 }
 
+.phone .food-portion-row-card.is-readonly {
+  cursor: default;
+}
+
 .phone .food-portion-row-label {
   font-size: 16px;
   font-weight: 400;
@@ -4305,6 +4353,10 @@
   cursor: pointer;
   padding: 0;
   position: relative;
+}
+
+.phone .food-portion-row-value.is-static {
+  cursor: default;
 }
 
 .phone .food-portion-row-value svg {
