@@ -2656,6 +2656,48 @@ function HealthMorphRecordPane({
   );
 }
 
+function EmptyPreviewSchemeSheet({ open, onClose, onSelect }) {
+  if (!open) return null;
+
+  const sheet = (
+    <div
+      className="record-empty-preview-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="选择空值页方案"
+      onClick={onClose}
+    >
+      <div className="record-empty-preview-sheet" onClick={(event) => event.stopPropagation()}>
+        <div className="record-empty-preview-bar">
+          <button type="button" className="record-empty-preview-cancel" onClick={onClose}>取消</button>
+          <div className="record-empty-preview-title">空值页方案</div>
+          <span className="record-empty-preview-spacer" aria-hidden="true"/>
+        </div>
+        <div className="record-empty-preview-body">
+          <button
+            type="button"
+            className="record-empty-preview-option"
+            onClick={() => onSelect?.('no-data')}
+          >
+            无数据
+          </button>
+          <button
+            type="button"
+            className="record-empty-preview-option"
+            onClick={() => onSelect?.('with-data')}
+          >
+            有数据
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return window.ReactDOM?.createPortal
+    ? window.ReactDOM.createPortal(sheet, document.body)
+    : sheet;
+}
+
 function HealthMorphRow({
   item,
   index,
@@ -2674,6 +2716,8 @@ function HealthMorphRow({
   periodDetailValues,
   symptomValues,
   healthRecordValues,
+  onPlanEmptyPreview,
+  showPlanEmptyPreviewLink = false,
 }) {
   const delay = (index * 50) + 'ms';
   const label = item.id === 'period' && periodEndMode ? '月经走喽' : item.label;
@@ -2699,7 +2743,20 @@ function HealthMorphRow({
             })()}
           </div>
         </div>
-        <div className="health-morph-label">{label}</div>
+        {item.id === 'plan' && showPlanEmptyPreviewLink ? (
+          <div className="health-morph-label health-morph-label--plan">
+            <span>{label}</span>
+            <button
+              type="button"
+              className="health-morph-plan-link"
+              onClick={onPlanEmptyPreview}
+            >
+              （跳转空值页方案）
+            </button>
+          </div>
+        ) : (
+          <div className="health-morph-label">{label}</div>
+        )}
         <div className="health-morph-right">
           <HealthMorphRecordPane
             item={item}
@@ -2740,6 +2797,8 @@ function HealthMorphList({
   periodDetailValues,
   symptomValues,
   healthRecordValues,
+  onPlanEmptyPreview,
+  showPlanEmptyPreviewLink = false,
 }) {
   return (
     <div className="health-morph-list" aria-label="健康记录列表">
@@ -2763,6 +2822,8 @@ function HealthMorphList({
           periodDetailValues={periodDetailValues}
           symptomValues={symptomValues}
           healthRecordValues={healthRecordValues}
+          onPlanEmptyPreview={onPlanEmptyPreview}
+          showPlanEmptyPreviewLink={showPlanEmptyPreviewLink}
         />
       ))}
     </div>
@@ -2983,6 +3044,7 @@ function RecordPage({
   periodFlowEnabled = true,
   periodEndRecordReady = false,
   periodEndRecordCompleted = false,
+  onEmptyPreviewEnter,
 }) {
   const settledPeriodDays = React.useMemo(
     () => periodEndRecordCompleted ? [...PERIOD_DAYS, ...PERIOD_END_DAYS] : PERIOD_DAYS,
@@ -3009,6 +3071,7 @@ function RecordPage({
   const [singlePickerType, setSinglePickerType] = useState(null);
   const [healthSheetType, setHealthSheetType] = useState(null);
   const [healthRecordValues, setHealthRecordValues] = useState({});
+  const [emptyPreviewOpen, setEmptyPreviewOpen] = useState(false);
   const dragAreaRef = useRef(null);
   const gridRef = useRef(null);
   const timersRef = useRef([]);
@@ -3340,6 +3403,8 @@ function RecordPage({
             periodDetailValues={periodDetailValues}
             symptomValues={selectedSymptoms}
             healthRecordValues={healthRecordValues}
+            showPlanEmptyPreviewLink={activeModeLabel === '经期'}
+            onPlanEmptyPreview={() => setEmptyPreviewOpen(true)}
           />
         </div>
       </div>
@@ -3434,6 +3499,14 @@ function RecordPage({
         open={healthSheetType === 'temp'}
         onCancel={() => setHealthSheetType(null)}
         onConfirm={confirmHealthRecord}
+      />
+      <EmptyPreviewSchemeSheet
+        open={emptyPreviewOpen}
+        onClose={() => setEmptyPreviewOpen(false)}
+        onSelect={(mode) => {
+          setEmptyPreviewOpen(false);
+          onEmptyPreviewEnter?.(mode);
+        }}
       />
     </div>
   );

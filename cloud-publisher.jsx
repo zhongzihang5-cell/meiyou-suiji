@@ -90,7 +90,7 @@ function DockWavePlaceholder({show, focused}){
 
 function QuickCardFan({
   open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onSymptomPick, onDietPick, onClose,
-  onSymptomSubmit, onWeightSubmit, onFoodSubmit, weightPickerKey,
+  onSymptomSubmit, onWeightSubmit, onFoodSubmit, weightPickerKey, fabGuidePulse = false,
 }){
   const QuickCardIcon = window.QuickCardIcon;
   const QuickSymptomPicker = window.QuickSymptomPicker;
@@ -203,11 +203,12 @@ function QuickCardFan({
 
       <button
         type="button"
-        className={'quick-card-fab'+(open ? ' is-open' : '')+(selected ? ' is-covered' : '')}
+        className={'quick-card-fab'+(open ? ' is-open' : '')+(selected ? ' is-covered' : '')+(fabGuidePulse ? ' is-guide-pulse' : '')}
         onClick={onFabTap}
         aria-expanded={open}
         aria-label={open ? '收起快捷记录' : '快捷记录'}
       >
+        {fabGuidePulse ? <span className="quick-card-fab-pulse-ring" aria-hidden="true"/> : null}
         <span className="quick-card-fab-gray" aria-hidden="true"/>
         <span className="quick-card-fab-plus" aria-hidden="true"/>
       </button>
@@ -222,6 +223,7 @@ function DockPublisher({
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
   demoPhase, isDemoRunning, hideQuickFan = false,
   feedingQuickItems = null, onFeedingQuickSelect,
+  emptyPreviewGuideStep = 0, onEmptyPreviewGuideAdvance, onEmptyPreviewGuideDismiss, fabGuidePulse = false,
 }){
   const I = window.Icon;
   const DockMoodPicker = window.DockMoodPicker;
@@ -330,8 +332,17 @@ function DockPublisher({
   };
 
   const handleFabTap = ()=>{
+    if(emptyPreviewGuideStep === 2) onEmptyPreviewGuideAdvance?.();
     if(quickOpen) closeQuick();
     else setQuickOpen(true);
+  };
+
+  const notifyGuideDockInteract = ()=>{
+    if(emptyPreviewGuideStep === 1) onEmptyPreviewGuideAdvance?.();
+  };
+
+  const dismissGuideForVoice = ()=>{
+    if(emptyPreviewGuideStep === 1 || emptyPreviewGuideStep === 2) onEmptyPreviewGuideDismiss?.();
   };
 
 
@@ -454,6 +465,7 @@ function DockPublisher({
           onWeightSubmit={handleQuickWeightSubmit}
           onFoodSubmit={handleQuickFoodSubmit}
           weightPickerKey={weightPickerKey}
+          fabGuidePulse={fabGuidePulse}
         />
       </div>
       )}
@@ -550,7 +562,10 @@ function DockPublisher({
               <button
                 type="button"
                 className="dock-mode-btn"
-                onClick={toggleMode}
+                onClick={()=>{
+                  notifyGuideDockInteract();
+                  toggleMode();
+                }}
                 aria-label={inputMode==='text'?'切换语音':'切换键盘'}
               >
                 {inputMode==='text'
@@ -581,7 +596,10 @@ function DockPublisher({
                       e.target.style.height='auto';
                       e.target.style.height = Math.min(e.target.scrollHeight, 72)+'px';
                     }}
-                    onFocus={()=>setInputFocused(true)}
+                    onFocus={()=>{
+                      notifyGuideDockInteract();
+                      setInputFocused(true);
+                    }}
                     onBlur={()=>setInputFocused(false)}
                     onKeyDown={(e)=>{
                       if(e.key==='Enter' && !e.shiftKey && draft.trim()){
@@ -610,7 +628,7 @@ function DockPublisher({
                   <button
                     type="button"
                     className={'dock-voice-btn'+(recording?' recording':'')}
-                    onPointerDown={(e)=>{ e.preventDefault(); if(isDemoRunning) return; startRec(); }}
+                    onPointerDown={(e)=>{ e.preventDefault(); if(isDemoRunning) return; dismissGuideForVoice(); startRec(); }}
                     onPointerUp={stopRec}
                     onPointerLeave={recording ? stopRec : undefined}
                   >

@@ -224,7 +224,42 @@ function BabyFeedingDiscoverCard({onClose}){
 
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
+  const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
+  const [emptyPreviewGuideStep, setEmptyPreviewGuideStep] = useState(0);
   const scene = window.getDemoScene(t.demoScene);
+  const noteScene = React.useMemo(() => {
+    if (!emptyPreviewMode) return scene;
+    return {
+      ...scene,
+      record: {
+        ...scene.record,
+        blankState: true,
+        blankScheme: 1,
+        blankScheme1Preview: emptyPreviewMode === 'no-data',
+        emptyPreviewWithData: emptyPreviewMode === 'with-data',
+        emptyPreview: true,
+        emptyState: false,
+        todayGuide: false,
+      },
+    };
+  }, [scene, emptyPreviewMode]);
+
+  React.useEffect(() => {
+    if (!emptyPreviewMode) {
+      setEmptyPreviewGuideStep(0);
+      return undefined;
+    }
+    const tm = setTimeout(() => setEmptyPreviewGuideStep(1), 600);
+    return () => clearTimeout(tm);
+  }, [emptyPreviewMode]);
+
+  const advanceEmptyPreviewGuide = React.useCallback(() => {
+    setEmptyPreviewGuideStep((step) => (step === 1 ? 2 : step === 2 ? 3 : step));
+  }, []);
+
+  const dismissEmptyPreviewGuide = React.useCallback(() => {
+    setEmptyPreviewGuideStep(3);
+  }, []);
   const voiceTranscribe = !!scene.record?.voiceTranscribe;
   const ctx = window.SCENE_CONTEXT[scene.identity] || window.SCENE_CONTEXT.period;
 
@@ -406,6 +441,8 @@ function App(){
     babyFeedingQuickGuardRef.current = {id:null, at:0};
     setBabyDiscoverVisible(false);
     setBabyFeedingEntryActive(true);
+    setEmptyPreviewMode(null);
+    setEmptyPreviewGuideStep(0);
   };
 
   useEffect(()=>{
@@ -826,8 +863,25 @@ function App(){
     setActiveTab('note');
   };
 
-  const showRecordEmpty = !!(scene.record.emptyState && window.isTimelineEmpty(timeline));
-  const showRecordBlank = !!scene.record.blankState;
+  const handleEmptyPreviewEnter = React.useCallback((mode) => {
+    setEmptyPreviewGuideStep(0);
+    const withData = mode === 'with-data';
+    setEmptyPreviewMode(withData ? 'with-data' : 'no-data');
+    const blocks = withData
+      ? (window.getEmptyPreviewWithDataTimeline?.() || [])
+      : (window.getTimelineEmpty?.(ctx) || []);
+    setTimeline(blocks);
+    setDraft('');
+    setShowSearchPage(false);
+    setSearchCriteria(null);
+    setDockExpanded(false);
+    setHideTodayGuide(true);
+    recordEnterModeRef.current = 'manual';
+    setActiveTab('note');
+  }, [ctx]);
+
+  const showRecordEmpty = !!(noteScene.record.emptyState && window.isTimelineEmpty(timeline));
+  const showRecordBlank = !!noteScene.record.blankState;
   const showBlankEmpty = showRecordBlank && window.isTimelineEmpty(timeline);
 
   useEffect(()=>{
@@ -1298,9 +1352,9 @@ function App(){
     if(scene.record.todayGuide) setHideTodayGuide(true);
   };
 
-  const isScheme3 = scene.record.blankScheme === 3;
-  const isScheme1 = scene.record.blankScheme === 1;
-  const showScheme1Hints = isScheme1 && showBlankEmpty;
+  const isScheme3 = noteScene.record.blankScheme === 3;
+  const isScheme1 = noteScene.record.blankScheme === 1;
+  const showScheme1Hints = isScheme1 && showBlankEmpty && !emptyPreviewMode;
   if(isScheme3 && scheme3FirstVisitRef.current === null){
     scheme3FirstVisitRef.current = !!window.shouldShowScheme3Bubble?.();
   }
@@ -1811,7 +1865,7 @@ function App(){
   const showReview = activeTab === 'cash';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
-  const showTodayGuide = scene.record.todayGuide && !hideTodayGuide;
+  const showTodayGuide = noteScene.record.todayGuide && !hideTodayGuide;
 
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
@@ -1821,6 +1875,7 @@ function App(){
   const DietFeedbackComboScenarioBar = window.DietFeedbackComboScenarioBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
   const RecordBlankStream = window.RecordBlankStream;
+  const EmptyPreviewGuideLayer = window.EmptyPreviewGuideLayer;
   const StreamSearchOverlay = window.StreamSearchOverlay;
   const XhsStyleSearchPage = window.XhsStyleSearchPage;
   const ReviewPage = window.ReviewPage;
@@ -2054,6 +2109,7 @@ function App(){
           onHealthRecordSubmit={submitHealthRecord}
           periodDetailValues={periodDetailDraft}
           periodDetailDemoEnabled={periodDetailRecordEnabled || periodEndRecordCompleted}
+          onEmptyPreviewEnter={handleEmptyPreviewEnter}
         />
       )}
 
@@ -2082,18 +2138,26 @@ function App(){
           streamRef={streamRef}
           timelineEndRef={timelineEndRef}
           timeline={timeline}
-          scene={scene}
+          scene={noteScene}
           onOpenCalendar={()=>setActiveTab('cal')}
           onOpenSearch={toggleSearchPage}
           sisterPlayAnimation={sisterPlayAnimation}
           sisterCycleDone={sisterCycleDone}
           hideTodayGuide={!showTodayGuide}
           onSisterCycleComplete={handleSisterCycleComplete}
+          emptyPreviewGuideStep={emptyPreviewGuideStep}
+          onEmptyPreviewGuideAdvance={advanceEmptyPreviewGuide}
         />
         {showScheme1Hints ? (
           <div className="rb-s1-curly-arrow" aria-hidden="true">
             <img src="assets/curly-arrow-pink.png" alt=""/>
           </div>
+        ) : null}
+        {emptyPreviewMode && EmptyPreviewGuideLayer ? (
+          <EmptyPreviewGuideLayer
+            step={emptyPreviewGuideStep}
+            onAdvance={advanceEmptyPreviewGuide}
+          />
         ) : null}
         {!voiceTranscribe && (
         <DockPublisher
@@ -2110,11 +2174,15 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          defaultInputMode={showScheme1Hints ? 'voice' : 'text'}
+          defaultInputMode={(showScheme1Hints || emptyPreviewMode) ? 'voice' : 'text'}
           showScheme3Bubble={showScheme3Bubble}
           highlightScheme3Input={highlightScheme3Input}
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
+          emptyPreviewGuideStep={emptyPreviewGuideStep}
+          onEmptyPreviewGuideAdvance={advanceEmptyPreviewGuide}
+          onEmptyPreviewGuideDismiss={dismissEmptyPreviewGuide}
+          fabGuidePulse={emptyPreviewGuideStep === 2}
         />
         )}
         </>
