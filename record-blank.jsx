@@ -380,9 +380,71 @@ function RecordBlankEmptyState() {
   );
 }
 
+function RecordBlankScheme1PreviewCard() {
+  return (
+    <div className="rb-s1-preview-stage" aria-label="无数据空值页预览">
+      <div className="rb-s1-preview-card">
+        <img src="assets/empty-preview-no-data-card.png" alt="无数据空值页示例" />
+      </div>
+    </div>
+  );
+}
+
+function EmptyPreviewGuideLayer({ step, onAdvance }) {
+  if (step < 1 || step > 2) return null;
+
+  const layer = (
+    <div className="ep-guide-layer" aria-live="polite">
+      {step === 1 ? (
+        <button
+          type="button"
+          className="ep-guide-bubble ep-guide-bubble--voice"
+          onClick={onAdvance}
+        >
+          今天想记点什么？试试说出来
+        </button>
+      ) : null}
+      {step === 2 ? (
+        <button
+          type="button"
+          className="ep-guide-bubble ep-guide-bubble--fab"
+          onClick={onAdvance}
+        >
+          不止语音，点这里看看
+        </button>
+      ) : null}
+    </div>
+  );
+
+  return window.ReactDOM?.createPortal
+    ? window.ReactDOM.createPortal(layer, document.body)
+    : layer;
+}
+
 function RecordBlankScheme1Empty({ exiting }){
   return (
     <RecordBlankScheme1 ceremonyEntry={null}/>
+  );
+}
+
+function EmptyPreviewDiscoverCard({ onClose }) {
+  return (
+    <section className="ep-discover-card" aria-label="语音记录发现">
+      <button
+        type="button"
+        className="ep-discover-card-close"
+        aria-label="关闭发现卡片"
+        onClick={onClose}
+      >
+        ×
+      </button>
+      <div className="ep-discover-card-title">
+        ✨ 说句话，为你自动整理生活点滴
+      </div>
+      <p className="ep-discover-card-sub">
+        你的历史记录已同步到时间轴，开口说一句，省去手动记录的琐碎
+      </p>
+    </section>
   );
 }
 
@@ -416,14 +478,34 @@ function RecordBlankStream({
   sisterCycleDone,
   hideTodayGuide,
   onSisterCycleComplete,
+  emptyPreviewGuideStep = 0,
+  onEmptyPreviewGuideAdvance,
 }){
   const I = window.Icon;
   const TimelineStream = window.TimelineStream;
   const showBlank = window.isTimelineEmpty(timeline);
   const scheme = scene.record.blankScheme || 1;
   const previewBlocks = scheme === 2 && showBlank ? window.getBlankScheme2PreviewTimeline() : null;
+  const showEmptyPreviewWithData = !!(scene.record.emptyPreview && scene.record.emptyPreviewWithData);
+  const [discoverDismissed, setDiscoverDismissed] = useState(false);
+
+  useEffect(() => {
+    setDiscoverDismissed(false);
+  }, [scene.record.emptyPreview, scene.record.emptyPreviewWithData]);
+
+  const handleBlankGuideClick = (event) => {
+    if (emptyPreviewGuideStep !== 1 && emptyPreviewGuideStep !== 2) return;
+    if (event.target.closest('.stream-header, .ep-discover-card, button, a, input, textarea')) return;
+    onEmptyPreviewGuideAdvance?.();
+  };
 
   const renderBlankBody = ()=>{
+    if(scene.record.emptyPreview){
+      if(scene.record.blankScheme1Preview){
+        return <RecordBlankScheme1PreviewCard />;
+      }
+      return <div className="record-blank-plain record-blank-plain--empty-preview" aria-hidden="true"/>;
+    }
     if(scheme === 2 && previewBlocks){
       return <RecordBlankScheme2Stack previewBlocks={previewBlocks}/>;
     }
@@ -440,54 +522,226 @@ function RecordBlankStream({
     return <div className="record-blank-plain" aria-hidden="true"/>;
   };
 
-  const schemeCls = scheme === 1 && showBlank ? ' is-scheme1'
-    : (scheme === 2 && showBlank ? ' is-scheme2'
-    : (scheme === 3 && showBlank ? ' is-scheme3' : ''));
+  const schemeCls = [
+    !scene.record.emptyPreview && scheme === 1 && showBlank ? ' is-scheme1' : '',
+    !scene.record.emptyPreview && scheme === 2 && showBlank ? ' is-scheme2' : '',
+    !scene.record.emptyPreview && scheme === 3 && showBlank ? ' is-scheme3' : '',
+    scene.record.blankScheme1Preview ? ' is-scheme1-preview' : '',
+    scene.record.emptyPreview ? ' is-empty-preview' : '',
+  ].join('');
+
+  const emptyPreviewHeader = (
+    <div className={'stream-header is-baby-feeding-header'}>
+      <div className="stream-header-side"/>
+      <button
+        type="button"
+        className="stream-filter-center"
+        aria-expanded="false"
+      >
+        <span>全部</span>
+        <svg className="stream-filter-chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+          <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      <div className="stream-actions">
+        <button
+          className="stream-action"
+          aria-label="搜索"
+          type="button"
+          onClick={onOpenSearch}
+        >
+          <I name="search" size={20} stroke={1.7}/>
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className={'suiji-stream record-blank-stream' + schemeCls} ref={streamRef}>
-      <div className="stream-header">
-        <div>
-          <h1 className="stream-title">点滴</h1>
+    <div
+      className={'suiji-stream record-blank-stream' + schemeCls}
+      ref={streamRef}
+      onClick={scene.record.emptyPreview ? handleBlankGuideClick : undefined}
+    >
+      {scene.record.emptyPreview ? (
+        <div className={'ep-empty-preview-sticky' + (showEmptyPreviewWithData && !discoverDismissed ? ' has-discover' : '')}>
+          {emptyPreviewHeader}
+          {showEmptyPreviewWithData && !discoverDismissed ? (
+            <EmptyPreviewDiscoverCard onClose={() => setDiscoverDismissed(true)} />
+          ) : null}
         </div>
-        <div className="stream-actions">
-          {scene.calendar.enabled && (
+      ) : (
+        <div className="stream-header">
+          <div>
+            <h1 className="stream-title">点滴</h1>
+          </div>
+          <div className="stream-actions">
+            {scene.calendar.enabled && (
+              <button
+                className="stream-action"
+                aria-label="日历"
+                type="button"
+                onClick={onOpenCalendar}
+              >
+                <I name="calendar" size={20} stroke={1.7}/>
+              </button>
+            )}
             <button
               className="stream-action"
-              aria-label="日历"
+              aria-label="搜索"
               type="button"
-              onClick={onOpenCalendar}
+              onClick={onOpenSearch}
             >
-              <I name="calendar" size={20} stroke={1.7}/>
+              <I name="search" size={20} stroke={1.7}/>
             </button>
-          )}
-          <button
-            className="stream-action"
-            aria-label="搜索"
-            type="button"
-            onClick={onOpenSearch}
-          >
-            <I name="search" size={20} stroke={1.7}/>
-          </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {showBlank ? renderBlankBody() : (
-        <TimelineStream
-          blocks={timeline}
-          endRef={timelineEndRef}
-          sisterPlayAnimation={sisterPlayAnimation}
-          sisterCycleDone={sisterCycleDone}
-          hideTodayGuide={hideTodayGuide}
-          onSisterCycleComplete={onSisterCycleComplete}
-        />
+        <>
+          <TimelineStream
+            blocks={timeline}
+            endRef={timelineEndRef}
+            sisterPlayAnimation={sisterPlayAnimation}
+            sisterCycleDone={sisterCycleDone}
+            hideTodayGuide={hideTodayGuide}
+            onSisterCycleComplete={onSisterCycleComplete}
+          />
+        </>
       )}
     </div>
   );
+}
+
+function getEmptyPreviewWithDataTimeline() {
+  return [
+    { type: 'gap', id: 'gap-ep-with-data-top' },
+    {
+      type: 'day',
+      id: 'd-ep-5-13',
+      date: '5/13',
+      weekday: '周二',
+      items: [
+        {
+          kind: 'record-group',
+          id: 'ep-513-sleep-g',
+          primary: {
+            id: 'ep-513-sleep',
+            time: '23:20',
+            kind: 'text',
+            text: '昨晚翻来覆去到一点才睡着，今天起来还是有点昏。',
+            tags: [
+              { cat: '睡眠', icon: 'sym' },
+              { cat: '失眠', icon: 'sym' },
+            ],
+          },
+        },
+        {
+          kind: 'record-group',
+          id: 'ep-513-w-g',
+          primary: {
+            id: 'ep-513-w',
+            time: '07:10',
+            kind: 'weight',
+            text: '',
+            weightLabel: '体重',
+            weightValue: '53.1 公斤',
+            tags: [],
+          },
+        },
+      ],
+    },
+    {
+      type: 'day',
+      id: 'd-ep-5-12',
+      date: '5/12',
+      weekday: '周一',
+      items: [
+        {
+          kind: 'record-group',
+          id: 'ep-512-mood-g',
+          primary: {
+            id: 'ep-512-mood',
+            time: '20:15',
+            kind: 'mood-face',
+            primaryMood: { label: '还不错' },
+            text: '还不错',
+            tags: [],
+          },
+        },
+      ],
+    },
+  ];
+}
+
+function getBlankScheme2PreviewTimeline(){
+  return [
+    { type: 'gap', id: 'gap-preview-top' },
+    {
+      type: 'day',
+      id: 'd-preview-yesterday',
+      date: '昨天',
+      weekday: '',
+      items: [
+        {
+          kind: 'record-group',
+          id: 'preview-voice-g',
+          primary: {
+            id: 'preview-voice',
+            time: '22:10',
+            kind: 'voice',
+            text: '今天有点焦虑，可能是工作压力',
+            duration: '0:12',
+            tags: [
+              { cat: '情绪', icon: 'mood' },
+              { cat: '症状', icon: 'sym' },
+            ],
+          },
+        },
+        {
+          kind: 'record-group',
+          id: 'preview-diet-g',
+          primary: {
+            id: 'preview-diet',
+            time: '12:45',
+            kind: 'text',
+            text: '中午吃了麻辣烫，有点辣',
+            tags: [{ cat: '饮食', icon: 'food' }],
+          },
+        },
+      ],
+    },
+    {
+      type: 'day',
+      id: 'd-preview-today',
+      date: '今天',
+      weekday: '',
+      isToday: true,
+      items: [
+        {
+          kind: 'record-group',
+          id: 'preview-weight-g',
+          primary: {
+            id: 'preview-weight',
+            time: '09:15',
+            kind: 'weight',
+            text: '',
+            weightLabel: '体重',
+            weightValue: '52.3公斤',
+            tags: [],
+          },
+        },
+      ],
+    },
+  ];
 }
 
 Object.assign(window, {
   RecordBlankStream,
   RecordBlankEmptyState,
   RecordBlankAxisDropAnim,
+  EmptyPreviewGuideLayer,
+  EmptyPreviewDiscoverCard,
+  getBlankScheme2PreviewTimeline,
+  getEmptyPreviewWithDataTimeline,
 });
