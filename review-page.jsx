@@ -37,6 +37,399 @@ function ReviewDietIcon(){
   return <svg viewBox="0 0 24 24"><path d="M6 3v7a3 3 0 0 0 6 0V3"/><path d="M9 3v18"/><path d="M17 3c-1.5 1-2.5 3-2.5 5.5S15.5 13 17 14v7"/></svg>;
 }
 
+function ReviewBabyIcon({kind}){
+  if(kind === 'sleep') return <svg viewBox="0 0 24 24"><path d="M20 15.2A8 8 0 0 1 8.8 4 8 8 0 1 0 20 15.2z"/></svg>;
+  if(kind === 'diaper') return <svg viewBox="0 0 24 24"><path d="M5 5.5h14v5.8c0 4.5-2.7 7.2-7 7.2s-7-2.7-7-7.2z"/><path d="M5 9.5c2.2.2 3.8 1.2 4.8 3M19 9.5c-2.2.2-3.8 1.2-4.8 3"/></svg>;
+  if(kind === 'food') return <svg viewBox="0 0 24 24"><path d="M5 13h14a7 7 0 0 1-14 0z"/><path d="M4 13h16M8 19.5h8"/><path d="M15.5 4.5l-4 8"/></svg>;
+  return <svg viewBox="0 0 24 24"><path d="M9 3h6v3l2 2v10a3 3 0 0 1-3 3h-4a3 3 0 0 1-3-3V8l2-2z"/><path d="M9 9h6M9 14h3"/></svg>;
+}
+
+function ReviewFormulaRecordIcon(){
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v3l1.8 2.2v9.3A3.5 3.5 0 0 1 14.3 21h-4.6a3.5 3.5 0 0 1-3.5-3.5V8.2L8 6z"/><path d="M8 9h8M9 14h3.5M17.8 12.5h1.1a2.1 2.1 0 0 1 0 4.2h-1.1"/></svg>;
+}
+
+function ReviewPlaceholderChart(){
+  return (
+    <div className="review-placeholder-chart" aria-label="图表占位">
+      <span className="review-placeholder-grid is-top"></span>
+      <span className="review-placeholder-grid is-middle"></span>
+      <span className="review-placeholder-grid is-bottom"></span>
+      <svg viewBox="0 0 340 150" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M10 112 C55 98 75 107 112 78 S176 92 213 59 S278 73 330 35"/>
+      </svg>
+    </div>
+  );
+}
+
+function ReviewPlaceholderMetrics(){
+  return (
+    <>
+      {['最近记录', '近期平均', '数据变化'].map((label)=>(
+        <div className="review-metric review-placeholder-metric" key={label}>
+          <span className="review-placeholder-value"></span>
+          <div className="review-metric-label">{label}</div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function SleepReviewChart(){
+  const days = [
+    {date:'10.15', hours:16, minutes:44},
+    {date:'10.16', hours:15, minutes:12},
+    {date:'10.17', hours:14, minutes:24},
+    {date:'10.18', hours:15, minutes:19},
+    {date:'10.19', hours:15, minutes:40},
+    {date:'10.20', hours:14, minutes:37},
+    {date:'今天', hours:7, minutes:37, highlight:true},
+  ];
+  const W = 340, H = 168, padL = 28, padR = 12, padT = 14, padB = 27;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = 18;
+  const band = (x1 - x0) / days.length;
+  const barWidth = 22;
+  const X = i => x0 + band * i + band / 2;
+  const Y = hours => y1 - hours / yMax * (y1 - y0);
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天睡眠总时长柱状图">
+      {[8,12,16].map(tick=>(
+        <React.Fragment key={tick}>
+          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}h</text>
+        </React.Fragment>
+      ))}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+      {days.map((day, i)=>{
+        const totalHours = day.hours + day.minutes / 60;
+        const barY = Y(totalHours);
+        return (
+          <React.Fragment key={day.date}>
+            <rect x={X(i) - barWidth / 2} y={barY} width={barWidth} height={y1 - barY} rx="10" fill="#b263e8"/>
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#a85ee0' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+          </React.Fragment>
+        );
+      })}
+    </svg>
+  );
+}
+
+function SleepReviewMetric({major, majorUnit, minor, minorUnit, label, trend}){
+  return (
+    <div className="review-metric">
+      <div className={'review-sleep-metric-value' + (trend ? ' is-trend' : '')}>
+        {trend ? <><span className="review-sleep-trend-arrow">→</span><span>平稳</span></> : (
+          <>
+            <span className="review-sleep-metric-number">{major}</span><span className="review-sleep-metric-unit">{majorUnit}</span>
+            <span className="review-sleep-metric-number is-secondary">{minor}</span><span className="review-sleep-metric-unit">{minorUnit}</span>
+          </>
+        )}
+      </div>
+      <div className="review-metric-label">{label}</div>
+    </div>
+  );
+}
+
+function SleepReviewCard(){
+  return (
+    <ReviewCard
+      title="睡眠"
+      iconClass="is-sleep"
+      icon={<ReviewBabyIcon kind="sleep"/>}
+      chart={<SleepReviewChart/>}
+      legend={<span className="review-legend-item is-sleep"><i></i>睡眠总时长</span>}
+      metrics={(
+        <>
+          <SleepReviewMetric major="1" majorUnit="小时" minor="2" minorUnit="分" label="最近记录"/>
+          <SleepReviewMetric major="15" majorUnit="小时" minor="10" minorUnit="分钟" label="近7天平均"/>
+          <SleepReviewMetric label="整体趋势" trend/>
+        </>
+      )}
+      more="查看完整睡眠变化"
+    />
+  );
+}
+
+function DiaperReviewChart(){
+  const days = [
+    {date:'10.15', records:['pee','pee','poop','pee','both']},
+    {date:'10.16', records:['pee','poop','pee','pee','pee']},
+    {date:'10.17', records:['both','pee','pee','poop','pee','pee']},
+    {date:'10.18', records:['pee','pee','both','pee','poop']},
+    {date:'10.19', records:['poop','pee','pee','pee','both']},
+    {date:'10.20', records:['pee','both','pee','poop','pee']},
+    {date:'今天', records:['both','pee','pee','poop','pee','pee'], highlight:true},
+  ];
+  const W = 340, H = 168, padL = 28, padR = 12, padT = 14, padB = 27;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = 6.8;
+  const band = (x1 - x0) / days.length;
+  const X = i => x0 + band * i + band / 2;
+  const Y = count => y1 - count / yMax * (y1 - y0);
+  const colors = {pee:'#f5b335', poop:'#45c978', both:'#4b91ed'};
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天换尿布分类次数图">
+      {[2,4,6].map(tick=>(
+        <React.Fragment key={tick}>
+          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}次</text>
+        </React.Fragment>
+      ))}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+      {days.map((day, i)=>{
+        const segments = ['pee','poop','both'].map(type=>(
+          {type, count:day.records.filter(record=>record === type).length}
+        )).filter(segment=>segment.count > 0);
+        let stackedCount = 0;
+        return (
+          <React.Fragment key={day.date}>
+            {segments.map(segment=>{
+              const segmentBottom = Y(stackedCount);
+              stackedCount += segment.count;
+              const segmentTop = Y(stackedCount);
+              return <rect key={segment.type} x={X(i) - 10} y={segmentTop + 1.5} width="20" height={segmentBottom - segmentTop - 3} rx="7" fill={colors[segment.type]}/>;
+            })}
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e8930f' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+          </React.Fragment>
+        );
+      })}
+    </svg>
+  );
+}
+
+function DiaperReviewMetric({kind, label}){
+  return (
+    <div className="review-metric">
+      {kind === 'empty' ? <div className="review-diaper-text-value">未记录</div> : null}
+      {kind === 'average' ? (
+        <div className="review-diaper-average-value"><b>5</b><span>次</span></div>
+      ) : null}
+      {kind === 'trend' ? (
+        <div className="review-diaper-trend-value"><span>→</span><b>平稳</b></div>
+      ) : null}
+      <div className="review-metric-label">{label}</div>
+    </div>
+  );
+}
+
+function DiaperReviewCard(){
+  return (
+    <ReviewCard
+      title="换尿布"
+      iconClass="is-diaper"
+      icon={<ReviewBabyIcon kind="diaper"/>}
+      chart={<DiaperReviewChart/>}
+      legend={(
+        <>
+          <span className="review-legend-item is-diaper-pee"><i></i>嘘嘘</span>
+          <span className="review-legend-item is-diaper-poop"><i></i>臭臭</span>
+          <span className="review-legend-item is-diaper-both"><i></i>嘘嘘+臭臭</span>
+        </>
+      )}
+      metrics={(
+        <>
+          <DiaperReviewMetric kind="empty" label="最近记录"/>
+          <DiaperReviewMetric kind="average" label="近7天平均"/>
+          <DiaperReviewMetric kind="trend" label="整体趋势"/>
+        </>
+      )}
+      more="查看完整换尿布变化"
+    />
+  );
+}
+
+function FoodReviewChart(){
+  const days = [
+    {date:'10.15', grams:600},
+    {date:'10.16', grams:500},
+    {date:'10.17', grams:600},
+    {date:'10.18', grams:500},
+    {date:'10.19', grams:600},
+    {date:'10.20', grams:600},
+    {date:'今天', grams:600, highlight:true},
+  ];
+  const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = 700;
+  const band = (x1 - x0) / days.length;
+  const barWidth = 22;
+  const X = i => x0 + band * i + band / 2;
+  const Y = grams => y1 - grams / yMax * (y1 - y0);
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天辅食总量柱状图">
+      {[200,400,600].map(tick=>(
+        <React.Fragment key={tick}>
+          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}g</text>
+        </React.Fragment>
+      ))}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+      {days.map((day, i)=>{
+        const barY = Y(day.grams);
+        return (
+          <React.Fragment key={day.date}>
+            <rect x={X(i) - barWidth / 2} y={barY} width={barWidth} height={y1 - barY} rx="10" fill="#ff8a4c"/>
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e87635' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+          </React.Fragment>
+        );
+      })}
+    </svg>
+  );
+}
+
+function FoodReviewMetric({kind, label}){
+  return (
+    <div className="review-metric">
+      {kind === 'recent' ? <div className="review-food-amount-value"><b>600</b><span>g</span></div> : null}
+      {kind === 'average' ? <div className="review-food-average-value"><b>600</b><span>g</span></div> : null}
+      {kind === 'trend' ? <div className="review-food-trend-value"><span>→</span><b>平稳</b></div> : null}
+      <div className="review-metric-label">{label}</div>
+    </div>
+  );
+}
+
+function FoodReviewCard(){
+  return (
+    <ReviewCard
+      title="辅食"
+      iconClass="is-food-review"
+      icon={<ReviewBabyIcon kind="food"/>}
+      chart={<FoodReviewChart/>}
+      legend={<span className="review-legend-item is-food-review"><i></i>辅食总量</span>}
+      metrics={(
+        <>
+          <FoodReviewMetric kind="recent" label="最近记录"/>
+          <FoodReviewMetric kind="average" label="近7天平均"/>
+          <FoodReviewMetric kind="trend" label="整体趋势"/>
+        </>
+      )}
+      more="查看完整辅食变化"
+    />
+  );
+}
+
+function FeedingReviewChart(){
+  const days = [
+    {date:'10.15', breast:220, formula:300, minutes:48},
+    {date:'10.16', breast:260, formula:350, minutes:42},
+    {date:'10.17', breast:190, formula:280, minutes:37},
+    {date:'10.18', breast:300, formula:380, minutes:50},
+    {date:'10.19', breast:240, formula:300, minutes:44},
+    {date:'10.20', breast:293, formula:380, minutes:39},
+    {date:'今天', breast:580, formula:120, minutes:42, highlight:true},
+  ];
+  const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const amountMax = 720;
+  const durationMax = 60;
+  const band = (x1 - x0) / days.length;
+  const barWidth = 22;
+  const X = i => x0 + band * i + band / 2;
+  const YAmount = amount => y1 - amount / amountMax * (y1 - y0);
+  const YDuration = minutes => y1 - minutes / durationMax * (y1 - y0);
+  const durationPoints = days.map((day, i)=>[X(i), YDuration(day.minutes)]);
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天喂奶总量与亲喂时长组合图">
+      {[200,400,600].map(tick=>(
+        <React.Fragment key={tick}>
+          <line x1={x0} y1={YAmount(tick)} x2={x1} y2={YAmount(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={YAmount(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}ml</text>
+        </React.Fragment>
+      ))}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+      {days.map((day, i)=>{
+        const formulaTop = YAmount(day.formula);
+        const totalTop = YAmount(day.formula + day.breast);
+        return (
+          <React.Fragment key={day.date}>
+            <rect x={X(i) - barWidth / 2} y={formulaTop} width={barWidth} height={y1 - formulaTop} rx="9" fill="#ff9a45"/>
+            <rect x={X(i) - barWidth / 2} y={totalTop} width={barWidth} height={formulaTop - totalTop - 2} rx="9" fill="#ff8fb3"/>
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff4d88' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+          </React.Fragment>
+        );
+      })}
+      <path d={reviewSmoothPath(durationPoints)} fill="none" stroke="#ff4d88" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {days.map((day, i)=>{
+        const isHighest = day.minutes === 50;
+        return (
+          <React.Fragment key={day.date}>
+            <circle cx={X(i)} cy={YDuration(day.minutes)} r={day.highlight ? 4 : 3.2} fill={day.highlight ? '#ff4d88' : '#fff'} stroke="#ff4d88" strokeWidth="2"/>
+            {isHighest ? (
+              <>
+                <rect x={X(i) - 15} y={YDuration(day.minutes) - 22} width="30" height="15" rx="7.5" fill="rgba(255,255,255,0.96)" stroke="#ff8fb3" strokeWidth="0.8"/>
+                <text x={X(i)} y={YDuration(day.minutes) - 12} textAnchor="middle" fontSize="9" fontWeight="600" fill="#c72f68" fontFamily="PingFang SC">50分</text>
+              </>
+            ) : null}
+            {day.highlight ? (
+              <>
+                <rect x={X(i) - 15} y={YDuration(day.minutes) - 22} width="30" height="15" rx="7.5" fill="rgba(255,255,255,0.96)" stroke="#ff8fb3" strokeWidth="0.8"/>
+                <text x={X(i)} y={YDuration(day.minutes) - 12} textAnchor="middle" fontSize="9" fontWeight="600" fill="#c72f68" fontFamily="PingFang SC">42分</text>
+              </>
+            ) : null}
+          </React.Fragment>
+        );
+      })}
+    </svg>
+  );
+}
+
+function FeedingReviewMetric({kind, label}){
+  return (
+    <div className="review-metric review-feeding-metric">
+      {kind === 'recent' ? (
+        <div className="review-feeding-recent-value"><span className="review-feeding-formula-icon" aria-label="瓶喂配方奶"><ReviewFormulaRecordIcon/></span><div><b>120</b><i>ml</i></div></div>
+      ) : null}
+      {kind === 'average' ? (
+        <div className="review-feeding-average-value"><b>599</b><i>ml</i></div>
+      ) : null}
+      {kind === 'trend' ? (
+        <div className="review-feeding-trend-value"><span>↕</span><b>波动</b></div>
+      ) : null}
+      <div className="review-metric-label">{label}</div>
+    </div>
+  );
+}
+
+function FeedingReviewCard(){
+  return (
+    <ReviewCard
+      title="喂奶"
+      iconClass="is-feeding"
+      icon={<ReviewBabyIcon kind="feeding"/>}
+      chart={<FeedingReviewChart/>}
+      legend={(
+        <>
+          <span className="review-legend-item is-feeding-breast"><i></i>瓶喂母乳</span>
+          <span className="review-legend-item is-feeding-formula"><i></i>瓶喂配方奶</span>
+          <span className="review-legend-item is-feeding-direct"><i></i>亲喂时长</span>
+        </>
+      )}
+      metrics={(
+        <>
+          <FeedingReviewMetric kind="recent" label="最近记录"/>
+          <FeedingReviewMetric kind="average" label="近7天平均"/>
+          <FeedingReviewMetric kind="trend" label="整体趋势"/>
+        </>
+      )}
+      more="查看完整喂奶变化"
+    />
+  );
+}
+
+function BabyReviewCard({title, kind}){
+  return (
+    <ReviewCard
+      title={title}
+      iconClass="is-placeholder"
+      icon={<ReviewBabyIcon kind={kind}/>}
+      chart={<ReviewPlaceholderChart/>}
+      legend={<span className="review-legend-item is-placeholder"><i></i>记录变化</span>}
+      metrics={<ReviewPlaceholderMetrics/>}
+      more={'查看完整' + title + '分析'}
+    />
+  );
+}
+
 function ReviewChevron(){
   return <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>;
 }
@@ -571,6 +964,11 @@ function ReviewPage(){
           </div>
         )}
       />
+
+      <FeedingReviewCard/>
+      <SleepReviewCard/>
+      <DiaperReviewCard/>
+      <FoodReviewCard/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
     </main>
