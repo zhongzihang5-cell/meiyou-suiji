@@ -483,6 +483,10 @@
   font-size:12.5px;
   line-height:1.5;
 }
+.tl-baby-feed-source.is-linked{
+  margin-top:10px;
+  align-items:center;
+}
 .tl-baby-feed-source-mic{
   flex:0 0 auto;
   font-size:12px;
@@ -491,6 +495,20 @@
 .tl-baby-feed-source-text{
   flex:1;
   min-width:0;
+}
+.tl-baby-feed-source.is-linked .tl-baby-feed-source-text{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.tl-baby-feed-source-count{
+  flex:0 0 auto;
+  padding:2px 6px;
+  border-radius:6px;
+  background:#fff;
+  color:#ff4d88;
+  font-size:11px;
+  font-weight:500;
 }
 .tl-baby-feed-summary{
   margin:12px -15px -14px;
