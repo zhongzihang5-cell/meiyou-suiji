@@ -10,6 +10,34 @@ const DIET_FB_ORANGE = '#ff8c42';
 // ===== 工具函数 =====
 function formatKcal(n){ return n != null ? n.toLocaleString() : '—'; }
 
+function parseDietTimeToMinutes(timeStr){
+  const match = String(timeStr || '').trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+  return hours * 60 + minutes;
+}
+
+function resolveMealTypeFromTime(timeStr){
+  const mins = parseDietTimeToMinutes(timeStr);
+  if (mins == null) return '';
+  if (mins >= 5 * 60 && mins <= 9 * 60) return '早餐';
+  if (mins >= 9 * 60 + 1 && mins <= 10 * 60 + 30) return '早加餐';
+  if (mins >= 10 * 60 + 31 && mins <= 13 * 60 + 30) return '午餐';
+  if (mins >= 13 * 60 + 31 && mins <= 16 * 60) return '午加餐';
+  if (mins >= 16 * 60 + 1 && mins <= 20 * 60) return '晚餐';
+  if (mins >= 20 * 60 + 1) return '晚加餐';
+  if (mins <= 4 * 60 + 59) return '其他';
+  return '其他';
+}
+
+function formatDietLeadingLabel(leadingLabel = '', mealTypeLabel = ''){
+  const base = String(leadingLabel || '饮食：').replace(/：$/, '');
+  if (!mealTypeLabel) return leadingLabel || '饮食：';
+  return `${base}（${mealTypeLabel}）：`;
+}
+
 // ===== 7日热量柱状图 =====
 function DietTrendChart({ data, todayKcal }){
   const days = ['周一','周二','周三','周四','周五','周六','今天'];
@@ -556,6 +584,7 @@ function DietFoodResultSummary({
   leadingLabel = '',
   leadingHeadlineOnly = false,
   photoAboveTotalUrl = '',
+  time = '',
 }){
   const showDiversity = revealStep >= 1 && diversityCount != null && diversityCount >= 5;
   const showTotal = revealStep >= 1 && totalKcal != null;
@@ -567,7 +596,9 @@ function DietFoodResultSummary({
   );
   const showGuideBelowTotal = revealStep >= 1 && guideBelowTotalDays != null;
   const foodListText = items.map(formatFoodItemText).filter(Boolean).join('，');
-  const showLeadingHeadline = leadingHeadlineOnly && (leadingIconSrc || leadingLabel);
+  const mealTypeLabel = resolveMealTypeFromTime(time);
+  const resolvedLeadingLabel = formatDietLeadingLabel(leadingLabel, mealTypeLabel);
+  const showLeadingHeadline = leadingHeadlineOnly && (leadingIconSrc || resolvedLeadingLabel);
 
   return (
     <div className={'diet-fb-sec-a' + (compact ? ' is-compact' : '') + (leadingHeadlineOnly ? ' has-leading-headline' : '')}>
@@ -577,7 +608,7 @@ function DietFoodResultSummary({
             <img className="diet-fb-food-list-icon" src={leadingIconSrc} alt="" aria-hidden="true" />
           ) : null}
           <p className="diet-fb-food-list diet-fb-leading-label">
-            <span className="diet-fb-food-list-prefix">{leadingLabel}</span>
+            <span className="diet-fb-food-list-prefix">{resolvedLeadingLabel}</span>
           </p>
         </div>
       ) : null}
@@ -597,7 +628,7 @@ function DietFoodResultSummary({
             <img className="diet-fb-food-list-icon" src={leadingIconSrc} alt="" aria-hidden="true" />
           ) : null}
           <p className="diet-fb-food-list">
-            {leadingLabel ? <span className="diet-fb-food-list-prefix">{leadingLabel}</span> : null}
+            {resolvedLeadingLabel ? <span className="diet-fb-food-list-prefix">{resolvedLeadingLabel}</span> : null}
             {foodListText}
           </p>
         </div>
@@ -623,8 +654,10 @@ function DietPhotoStackedPreview({
   photoUrl,
   leadingIconSrc = 'assets/quick-icon-diet.png',
   leadingLabel = '饮食：',
+  time = '',
 }){
   if (!photoUrl) return null;
+  const displayLabel = formatDietLeadingLabel(leadingLabel, resolveMealTypeFromTime(time));
   return (
     <div className="diet-fb-sec-a has-leading-headline">
       <div className="diet-fb-food-list-row diet-fb-leading-headline">
@@ -632,7 +665,7 @@ function DietPhotoStackedPreview({
           <img className="diet-fb-food-list-icon" src={leadingIconSrc} alt="" aria-hidden="true" />
         ) : null}
         <p className="diet-fb-food-list diet-fb-leading-label">
-          <span className="diet-fb-food-list-prefix">{leadingLabel}</span>
+          <span className="diet-fb-food-list-prefix">{displayLabel}</span>
         </p>
       </div>
       <div className="diet-fb-photo-above-total">
@@ -676,6 +709,7 @@ function DietRecordSyncPhotoCard({
         leadingLabel={leadingLabel}
         leadingHeadlineOnly
         photoAboveTotalUrl={photoUrl}
+        time={time}
       />
       {showAiInsights ? (
         <DietAiInsightsShell displayScenario={displayScenario} isNew={isNew}>
@@ -907,7 +941,7 @@ function DietPhotoFeedbackCard({
       <div className={'diet-fb-card diet-fb-photo-card' + (useStackedPhoto ? ' is-stacked-photo' : '') + (isNew ? ' is-new' : '')}>
         {time && <div className="diet-fb-ts">{time}</div>}
         {useStackedPhoto ? (
-          <DietPhotoStackedPreview photoUrl={photoUrl} leadingIconSrc={dietIcon} leadingLabel={dietLabel} />
+          <DietPhotoStackedPreview photoUrl={photoUrl} leadingIconSrc={dietIcon} leadingLabel={dietLabel} time={time} />
         ) : photoUrl ? (
           <div className="diet-fb-photo-wrap">
             <img src={photoUrl} alt="" className="diet-fb-photo"/>
@@ -955,7 +989,7 @@ function DietPhotoFeedbackCard({
           </div>
         )}
         {useStackedPhoto && (isLoading || isError) && (
-          <DietPhotoStackedPreview photoUrl={photoUrl} leadingIconSrc={dietIcon} leadingLabel={dietLabel} />
+          <DietPhotoStackedPreview photoUrl={photoUrl} leadingIconSrc={dietIcon} leadingLabel={dietLabel} time={time} />
         )}
         {isLoading && <DietSecALoading/>}
         {phase === 'ready' && revealStep >= 1 && (
@@ -971,6 +1005,7 @@ function DietPhotoFeedbackCard({
             leadingLabel={dietLabel}
             leadingHeadlineOnly={useStackedPhoto}
             photoAboveTotalUrl={useStackedPhoto ? photoUrl : ''}
+            time={time}
           />
         )}
         {isLoading && (
@@ -1105,6 +1140,7 @@ function DietTextFeedbackCard({
           guideBelowTotalDays={guideBelowTotalDays}
           leadingIconSrc={leadingIconSrc}
           leadingLabel={leadingLabel}
+          time={time}
         />
         {showAiInsights && (
           <DietAiInsightsShell displayScenario={displayScenario} isNew={isNew}>
@@ -1657,6 +1693,7 @@ Object.assign(window, {
   DietTextFeedbackCard,
   DietFoodResultSummary,
   DietPhotoStackedPreview,
+  resolveMealTypeFromTime,
   DietAiInsightsShell,
   DietAiCollapsibleSection,
   DietCalorieAiBody,
