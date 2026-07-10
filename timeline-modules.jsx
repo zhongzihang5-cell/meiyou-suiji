@@ -906,11 +906,20 @@ function BabyFeedingTimelineCard({item, isNew}){
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
       </div>
       {item.voiceQuote && (
-        <div className="tl-baby-feed-source">
+        <div className={'tl-baby-feed-source'+(item.sourceGroupRole === 'anchor' ? ' is-anchor' : '')}>
           <span className="tl-baby-feed-source-mic">🎙</span>
           <span className="tl-baby-feed-source-text">"{item.voiceQuote}"</span>
+          {item.sourceGroupCount ? (
+            <span className="tl-baby-feed-source-count">共{item.sourceGroupCount}条</span>
+          ) : null}
         </div>
       )}
+      {!item.voiceQuote && item.sourceGroupHint ? (
+        <div className="tl-baby-feed-source is-linked">
+          <span className="tl-baby-feed-source-mic">🎙</span>
+          <span className="tl-baby-feed-source-text">{item.sourceGroupHint}</span>
+        </div>
+      ) : null}
       {summary && (
         <div className={'tl-baby-feed-summary'+(summaryOpen ? ' is-open' : '')}>
           <button

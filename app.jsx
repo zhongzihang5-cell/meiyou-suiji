@@ -1146,25 +1146,66 @@ function App(){
   const appendBabyFeedingTimelineCard = ()=>{
     if(babyFeedingCardInsertedRef.current) return;
     babyFeedingCardInsertedRef.current = true;
-    const time = window.formatNowTime?.() || '08:15';
-    const entry = {
-      id:'baby-feeding-'+Date.now(),
-      kind:'baby-feeding-card',
-      time,
-      text:'配方奶：120ml',
-      voice:{duration:'6″'},
-      feedType:'配方奶',
-      value:'120ml',
-      icon:'🍼',
-      color:'#FF7A66',
-      voiceQuote:'刚刚又喂了120毫升奶粉',
-      railDot:'baby',
-      isNew:true,
-    };
+    const sourceQuote = '昨晚3点喝了100ml奶，然后换了1片尿布，早上7点又喝了120ml奶';
+    const sourceGroupId = 'baby-feeding-source-'+Date.now();
+    const sourceGroupHint = '来自语音「昨晚3点喝100ml奶...」· 共3条';
+    const entries = [
+      {
+        id:'baby-feeding-batch-formula-night-'+Date.now(),
+        kind:'baby-feeding-card',
+        time:'03:00',
+        text:'配方奶：100ml',
+        feedType:'配方奶',
+        value:'100ml',
+        icon:'🍼',
+        color:'#FF7A66',
+        sourceGroupId,
+        sourceGroupHint,
+        railDot:'baby',
+        isNew:true,
+      },
+      {
+        id:'baby-feeding-batch-diaper-'+Date.now(),
+        kind:'baby-feeding-card',
+        time:'03:05',
+        text:'换尿布：1片',
+        feedType:'换尿布',
+        value:'1片',
+        icon:'🧷',
+        color:'#E8A23D',
+        sourceGroupId,
+        sourceGroupHint,
+        railDot:'baby',
+        isNew:true,
+      },
+      {
+        id:'baby-feeding-batch-formula-morning-'+Date.now(),
+        kind:'baby-feeding-card',
+        time:'07:00',
+        text:'配方奶：120ml',
+        voice:{duration:'8″'},
+        feedType:'配方奶',
+        value:'120ml',
+        icon:'🍼',
+        color:'#FF7A66',
+        voiceQuote:sourceQuote,
+        sourceGroupId,
+        sourceGroupRole:'anchor',
+        sourceGroupCount:3,
+        railDot:'baby',
+        isNew:true,
+      },
+    ];
     setTimeline(blocks=>{
-      const dayId = resolveBabyFeedingTargetDayId(blocks);
-      const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
-      return refreshBabyFeedingLatestMarks(next, dayId);
+      const cleaned = clearBabyFeedingLatestMarks(blocks);
+      const yesterdayDayId = cleaned.find(block=>block.type === 'day' && block.relativeLabel === '昨天')?.id;
+      const todayDayId = cleaned.find(block=>block.type === 'day' && block.isToday)?.id
+        || resolveBabyFeedingTargetDayId(cleaned);
+      let next = cleaned;
+      next = window.appendTimelineEntry(next, entries[0], {dayId:yesterdayDayId || todayDayId});
+      next = window.appendTimelineEntry(next, entries[1], {dayId:yesterdayDayId || todayDayId});
+      next = window.appendTimelineEntry(next, entries[2], {dayId:todayDayId});
+      return refreshBabyFeedingLatestMarks(next, todayDayId);
     });
   };
 
