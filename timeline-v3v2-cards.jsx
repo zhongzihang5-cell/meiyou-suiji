@@ -716,6 +716,7 @@ function V3FoodListStatic({
   leadingLabel,
   leadingHeadlineOnly = false,
   photoAboveTotalUrl = '',
+  time = '',
 }) {
   const DietFoodResultSummary = window.DietFoodResultSummary;
   if (DietFoodResultSummary) {
@@ -728,6 +729,7 @@ function V3FoodListStatic({
         leadingLabel={leadingLabel}
         leadingHeadlineOnly={leadingHeadlineOnly}
         photoAboveTotalUrl={photoAboveTotalUrl}
+        time={time}
       />
     );
   }
@@ -764,6 +766,7 @@ function V3PhotoFoodAnalysis({
   leadingLabel,
   leadingHeadlineOnly = false,
   photoAboveTotalUrl = '',
+  time = '',
 }) {
   const TypewriterText = window.TypewriterText;
   const loadingMs = window.PHOTO_ANALYZE_LOADING_MS || 5000;
@@ -815,6 +818,7 @@ function V3PhotoFoodAnalysis({
         leadingLabel={leadingLabel}
         leadingHeadlineOnly={leadingHeadlineOnly}
         photoAboveTotalUrl={photoAboveTotalUrl}
+        time={time}
       />
     );
   }
@@ -839,6 +843,7 @@ function V3PhotoFoodAnalysis({
         leadingLabel={leadingLabel}
         leadingHeadlineOnly={leadingHeadlineOnly}
         photoAboveTotalUrl={photoAboveTotalUrl}
+        time={time}
       />
     );
   }
@@ -1028,6 +1033,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
           leadingLabel={dietLabel}
           leadingHeadlineOnly
           photoAboveTotalUrl={imgSrc}
+          time={entry.time}
         />
       );
     }
@@ -1036,7 +1042,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       return (
         <div style={{display:'flex', flexDirection:'column', gap:10}}>
           {DietPhotoStackedPreview ? (
-            <DietPhotoStackedPreview photoUrl={imgSrc} leadingIconSrc={dietIcon} leadingLabel={dietLabel} />
+            <DietPhotoStackedPreview photoUrl={imgSrc} leadingIconSrc={dietIcon} leadingLabel={dietLabel} time={entry.time} />
           ) : null}
           <V3PhotoFoodAnalysis
             items={items}
@@ -1047,6 +1053,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
             leadingLabel={dietLabel}
             leadingHeadlineOnly
             photoAboveTotalUrl={imgSrc}
+            time={entry.time}
           />
         </div>
       );
@@ -1069,7 +1076,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
             onComplete={onPhotoAnalysisComplete}
           />
         ) : (
-          <V3FoodListStatic items={items} totalKcal={entry.totalKcal}/>
+          <V3FoodListStatic items={items} totalKcal={entry.totalKcal} time={entry.time}/>
         )}
       </div>
     );
