@@ -1,6 +1,10 @@
 const { useState, useEffect, useRef } = React;
 const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
-const BABY_VOICE_DEMO_TEXT = '今天早上喂奶喂了60ml';
+const BABY_VOICE_DEMO_TEXT = '刚刚喝了120毫升奶粉';
+const IS_BABY_FEEDING_DEMO = typeof window !== 'undefined' && (
+  window.__BABY_FEEDING_MODE === true
+  || new URLSearchParams(location.search).get('feeding') === '1'
+);
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -222,6 +226,61 @@ function BabyFeedingDiscoverCard({onClose}){
   );
 }
 
+function BabyFormulaDetailPage({entry, onClose, onSave}){
+  const initialAmount = Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130;
+  const [amount, setAmount] = useState(initialAmount);
+  const [noteOpen, setNoteOpen] = useState(true);
+  const [note, setNote] = useState(entry?.voiceQuote || entry?.noteText || '');
+  const now = new Date();
+  const options = [amount - 15, amount - 10, amount - 5, amount, amount + 5, amount + 10, amount + 15].filter(value=>value > 0);
+  useEffect(()=>{ setAmount(Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130); setNote(entry?.voiceQuote || entry?.noteText || ''); setNoteOpen(true); }, [entry?.id]);
+  return <section className="baby-formula-detail" role="dialog" aria-modal="true" aria-label="配方奶记录详情">
+    <header className="baby-formula-detail-nav"><button type="button" className="baby-formula-close" aria-label="关闭" onClick={onClose}>×</button><div><h1>配方奶</h1><p>上次：{entry?.lastRecordLabel || '3小时47分钟前'}</p></div><span/></header>
+    <main className="baby-formula-detail-body"><section className="baby-formula-form">
+      <div className="baby-formula-row"><span>开始时间</span><button type="button" className="baby-formula-value">{now.getMonth()+1}月{now.getDate()}日 {entry?.time || '13:35'}<b>›</b></button></div>
+      <div className="baby-formula-amount-head"><span>奶量</span><button type="button" className="baby-formula-keyboard"><span>⠿</span>键盘输入</button></div>
+      <div className="baby-formula-picker"><div className="baby-formula-bottle"/><div className="baby-formula-values">{options.map(value=><button key={value} type="button" className={value===amount?'is-selected':''} onClick={()=>setAmount(value)}>{value} ml</button>)}</div></div>
+      <div className="baby-formula-row"><span>结束时间</span><button type="button" className="baby-formula-value is-placeholder">请选择<b>›</b></button></div>
+      <div className="baby-formula-note"><button type="button" className="baby-formula-note-toggle" aria-expanded={noteOpen} onClick={()=>setNoteOpen(open=>!open)}><span>备注</span><b>{noteOpen?'⌃':'⌄'}</b></button>{noteOpen?<textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/>:null}</div>
+    </section></main>
+    <footer className="baby-formula-detail-foot"><button type="button" onClick={()=>onSave({amount,note})}>保存</button></footer>
+  </section>;
+}
+
+function BabyBreastDetailPage({entry, onClose, onSave}){
+  const lockedManual = !entry?.isQuickDraft;
+  const [mode, setMode] = useState(lockedManual ? 'manual' : 'timer');
+  const [left, setLeft] = useState(entry?.leftMinutes || 10);
+  const [right, setRight] = useState(entry?.rightMinutes || 10);
+  const [running, setRunning] = useState('');
+  const [seconds, setSeconds] = useState({left:0,right:0});
+  const [note, setNote] = useState(entry?.noteText || entry?.voiceQuote || '');
+  useEffect(()=>{ setMode(lockedManual ? 'manual' : 'timer'); setLeft(entry?.leftMinutes || 10); setRight(entry?.rightMinutes || 10); setRunning(''); setSeconds({left:0,right:0}); setNote(entry?.noteText || entry?.voiceQuote || ''); }, [entry?.id]);
+  useEffect(()=>{
+    if(!running) return undefined;
+    const timer=setInterval(()=>setSeconds(value=>({...value,[running]:value[running]+1})),1000);
+    return ()=>clearInterval(timer);
+  },[running]);
+  const format=(value)=>`${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;
+  const now=new Date();
+  const manual=mode==='manual';
+  return <section className="baby-breast-detail" role="dialog" aria-modal="true" aria-label="母乳记录详情">
+    <header className="baby-breast-nav"><button type="button" aria-label="关闭" onClick={onClose}>×</button><div><h1>母乳</h1><p>上次：3小时47分钟前</p></div><span/></header>
+    <main className="baby-breast-body"><section className="baby-breast-form">
+      {!lockedManual ? <div className="baby-breast-mode"><button type="button" className={!manual?'is-active':''} onClick={()=>setMode('timer')}>计时</button><button type="button" className={manual?'is-active':''} onClick={()=>setMode('manual')}>手动输入</button></div> : null}
+      {!manual ? <div className="baby-breast-timer">
+        {['left','right'].map(side=><button key={side} type="button" className={'baby-breast-timer-side'+(running===side?' is-running':'')} onClick={()=>setRunning(running===side?'':side)}><b>{side==='left'?'左':'右'}</b><i>▶</i><span>{format(seconds[side])}</span></button>)}
+      </div> : <div className="baby-breast-manual">
+        <div className="baby-breast-row"><span>开始时间</span><em>{now.getMonth()+1}月{now.getDate()}日 {entry?.time || '12:32'} ›</em></div>
+        <div className="baby-breast-duration"><div className="baby-breast-duration-head"><span>喂奶时长</span><small>⠿<br/>键盘输入</small></div><div className="baby-breast-wheels"><label>左侧<button type="button" onClick={()=>setLeft(value=>Math.max(1,value-1))}>−</button><strong>{left}</strong><button type="button" onClick={()=>setLeft(value=>value+1)}>＋</button><em>分钟</em></label><label>右侧<button type="button" onClick={()=>setRight(value=>Math.max(1,value-1))}>−</button><strong>{right}</strong><button type="button" onClick={()=>setRight(value=>value+1)}>＋</button><em>分钟</em></label></div></div>
+        <div className="baby-breast-row"><span>最后使用</span><div className="baby-breast-side-chips"><b>左</b><b>右</b></div></div><div className="baby-breast-row"><span>结束时间</span><em>请选择 ›</em></div>
+      </div>}
+      <div className="baby-breast-note"><label>备注</label><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/></div>
+    </section></main>
+    <footer className="baby-breast-foot"><button type="button" onClick={()=>onSave({left:manual?left:Math.max(1,Math.ceil(seconds.left/60)),right:manual?right:Math.max(1,Math.ceil(seconds.right/60)),note})}>保存</button></footer>
+  </section>;
+}
+
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
@@ -268,8 +327,10 @@ function App(){
   const [timeline, setTimeline] = useState(initial.timeline);
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
+  const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
+  const [breastDetailEntry, setBreastDetailEntry] = useState(null);
   const [activeTab, setActiveTab] = useState(()=>{
-    if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
+    if(IS_BABY_FEEDING_DEMO){
       return 'note';
     }
     return initial.activeTab;
@@ -279,13 +340,13 @@ function App(){
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
   const [babyDiscoverVisible, setBabyDiscoverVisible] = useState(()=>{
-    if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
+    if(IS_BABY_FEEDING_DEMO){
       return false;
     }
     return false;
   });
   const [babyFeedingEntryActive, setBabyFeedingEntryActive] = useState(()=>{
-    if(typeof location !== 'undefined' && new URLSearchParams(location.search).get('feeding') === '1'){
+    if(IS_BABY_FEEDING_DEMO){
       return true;
     }
     return true;
@@ -322,8 +383,16 @@ function App(){
   const babyVoiceHoldTimerRef = useRef(null);
   const babyVoiceTimerRef = useRef(null);
   const babyVoiceSuccessTimerRef = useRef(null);
-  const babyFeedingCardInsertedRef = useRef(false);
   const babyFeedingQuickGuardRef = useRef({id:null, at:0});
+  useEffect(()=>{
+    const openFeedingDetail = event=>{
+      const entry=event.detail || null;
+      if(entry?.feedType === '母乳') setBreastDetailEntry(entry);
+      else setFormulaDetailEntry(entry);
+    };
+    window.addEventListener('open-baby-feeding-detail', openFeedingDetail);
+    return ()=>window.removeEventListener('open-baby-feeding-detail', openFeedingDetail);
+  }, []);
 
   const recordFeedback = !!scene.record.recordFeedback;
 
@@ -437,7 +506,6 @@ function App(){
     firstRecordAnimDoneRef.current = false;
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
-    babyFeedingCardInsertedRef.current = false;
     babyFeedingQuickGuardRef.current = {id:null, at:0};
     setBabyDiscoverVisible(false);
     setBabyFeedingEntryActive(true);
@@ -1137,8 +1205,32 @@ function App(){
     return {...block, items, entries:undefined};
   });
 
+  const getBabyFeedingTimeScore = (block, item, blockIndex, itemIndex)=>{
+    const match = String(item.time || '').match(/^(\d{1,2}):(\d{2})$/);
+    const minutes = match ? Number(match[1]) * 60 + Number(match[2]) : 0;
+    const dayRank = block.isToday ? 2 : (block.relativeLabel === '昨天' ? 1 : 0);
+    return dayRank * 10000000 + minutes * 1000 + blockIndex * 100 + itemIndex;
+  };
+
+  const getLatestBabyFeedingIdsByType = (blocks)=>{
+    const latestByType = new Map();
+    (blocks || []).forEach((block, blockIndex)=>{
+      if(block.type !== 'day') return;
+      (block.items || block.entries || []).forEach((item, itemIndex)=>{
+        if(item.kind !== 'baby-feeding-card') return;
+        const type = item.feedType || String(item.text || '').split('：')[0];
+        if(!type) return;
+        const score = getBabyFeedingTimeScore(block, item, blockIndex, itemIndex);
+        const current = latestByType.get(type);
+        if(!current || score > current.score) latestByType.set(type, {id:item.id, score});
+      });
+    });
+    return new Set([...latestByType.values()].map(item=>item.id));
+  };
+
   const refreshBabyFeedingLatestMarks = (blocks, targetDayId)=>{
     const cleaned = clearBabyFeedingLatestMarks(blocks);
+    const latestIdsByType = getLatestBabyFeedingIdsByType(cleaned);
     let latestDayId = targetDayId;
     if(!latestDayId){
       for(let i = cleaned.length - 1; i >= 0; i -= 1){
@@ -1153,18 +1245,22 @@ function App(){
       }
     }
     return cleaned.map(block=>{
-      if(block.type !== 'day' || block.id !== latestDayId) return block;
+      if(block.type !== 'day') return block;
       const items = block.items || block.entries || [];
+      const itemsWithRelativeTime = items.map(item=>latestIdsByType.has(item.id) ? {
+        ...item,
+        relativeTime:formatBabyFeedingRelativeTime(item.time, block),
+      } : item);
+      if(block.id !== latestDayId) return {...block, items:itemsWithRelativeTime, entries:undefined};
       const latestIndex = items.reduce((found, item, index)=>(
         item.kind === 'baby-feeding-card' ? index : found
       ), -1);
-      if(latestIndex < 0) return {...block, items, entries:undefined};
+      if(latestIndex < 0) return {...block, items:itemsWithRelativeTime, entries:undefined};
       const summary = buildBabyFeedingDailySummary(items);
       return {
         ...block,
-        items:items.map((item, index)=>index === latestIndex ? {
+        items:itemsWithRelativeTime.map((item, index)=>index === latestIndex ? {
           ...item,
-          relativeTime:formatBabyFeedingRelativeTime(item.time),
           summary,
         } : item),
         entries:undefined,
@@ -1182,14 +1278,15 @@ function App(){
     return days.find(day=>day.isToday)?.id;
   };
 
-  const formatBabyFeedingRelativeTime = (timeText)=>{
+  const formatBabyFeedingRelativeTime = (timeText, dayBlock)=>{
     const match = String(timeText || '').match(/^(\d{1,2}):(\d{2})$/);
     if(!match) return '刚刚';
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
     const recordMinutes = Number(match[1]) * 60 + Number(match[2]);
     let diff = nowMinutes - recordMinutes;
-    if(diff < 0) diff += 24 * 60;
+    if(dayBlock?.relativeLabel === '昨天') diff += 24 * 60;
+    else if(diff < 0) diff += 24 * 60;
     if(diff < 1) return '刚刚';
     if(diff < 60) return diff + '分钟前';
     const hours = Math.floor(diff / 60);
@@ -1198,68 +1295,26 @@ function App(){
   };
 
   const appendBabyFeedingTimelineCard = ()=>{
-    if(babyFeedingCardInsertedRef.current) return;
-    babyFeedingCardInsertedRef.current = true;
-    const sourceQuote = '昨晚3点喝了100ml奶，然后换了1片尿布，早上7点又喝了120ml奶';
-    const sourceGroupId = 'baby-feeding-source-'+Date.now();
-    const sourceGroupHint = '来自语音「昨晚3点喝100ml奶...」· 共3条';
-    const entries = [
-      {
-        id:'baby-feeding-batch-formula-night-'+Date.now(),
-        kind:'baby-feeding-card',
-        time:'03:00',
-        text:'配方奶：100ml',
-        feedType:'配方奶',
-        value:'100ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        sourceGroupId,
-        sourceGroupHint,
-        railDot:'baby',
-        isNew:true,
-      },
-      {
-        id:'baby-feeding-batch-diaper-'+Date.now(),
-        kind:'baby-feeding-card',
-        time:'03:05',
-        text:'换尿布：1片',
-        feedType:'换尿布',
-        value:'1片',
-        icon:'🧷',
-        color:'#E8A23D',
-        sourceGroupId,
-        sourceGroupHint,
-        railDot:'baby',
-        isNew:true,
-      },
-      {
-        id:'baby-feeding-batch-formula-morning-'+Date.now(),
-        kind:'baby-feeding-card',
-        time:'07:00',
-        text:'配方奶：120ml',
-        voice:{duration:'8″'},
-        feedType:'配方奶',
-        value:'120ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        voiceQuote:sourceQuote,
-        sourceGroupId,
-        sourceGroupRole:'anchor',
-        sourceGroupCount:3,
-        railDot:'baby',
-        isNew:true,
-      },
-    ];
+    const timestamp = Date.now();
+    const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
+    const entry = {
+      id:"baby-feeding-voice-formula-"+timestamp+"-"+Math.random().toString(36).slice(2,6),
+      kind:"baby-feeding-card",
+      time,
+      text:"配方奶：120ml",
+      voice:{duration:"8″"},
+      feedType:"配方奶",
+      value:"120ml",
+      icon:"🍼",
+      color:"#FF7A66",
+      voiceQuote:BABY_VOICE_DEMO_TEXT,
+      railDot:"baby",
+      isNew:true,
+    };
     setTimeline(blocks=>{
-      const cleaned = clearBabyFeedingLatestMarks(blocks);
-      const yesterdayDayId = cleaned.find(block=>block.type === 'day' && block.relativeLabel === '昨天')?.id;
-      const todayDayId = cleaned.find(block=>block.type === 'day' && block.isToday)?.id
-        || resolveBabyFeedingTargetDayId(cleaned);
-      let next = cleaned;
-      next = window.appendTimelineEntry(next, entries[0], {dayId:yesterdayDayId || todayDayId});
-      next = window.appendTimelineEntry(next, entries[1], {dayId:yesterdayDayId || todayDayId});
-      next = window.appendTimelineEntry(next, entries[2], {dayId:todayDayId});
-      return refreshBabyFeedingLatestMarks(next, todayDayId);
+      const dayId = resolveBabyFeedingTargetDayId(blocks);
+      const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
+      return refreshBabyFeedingLatestMarks(next, dayId);
     });
   };
 
@@ -1288,6 +1343,14 @@ function App(){
       railDot:'baby',
       isNew:true,
     };
+    if(item.id === 'formula'){
+      setFormulaDetailEntry({...entry, isQuickDraft:true, noteText:''});
+      return;
+    }
+    if(item.id === 'breast'){
+      setBreastDetailEntry({...entry, isQuickDraft:true});
+      return;
+    }
     setTimeline(blocks=>{
       const dayId = resolveBabyFeedingTargetDayId(blocks);
       const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
@@ -2319,6 +2382,55 @@ function App(){
         </>
         )}
       </div>
+
+      {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note})=>{
+        if(formulaDetailEntry.isQuickDraft){
+          const {isQuickDraft, ...draftEntry}=formulaDetailEntry;
+          const entry={
+            ...draftEntry,
+            value:`${amount}ml`,
+            text:`配方奶：${amount}ml`,
+            voiceQuote:note || undefined,
+            noteText:note || undefined,
+          };
+          setTimeline(blocks=>{
+            const dayId=resolveBabyFeedingTargetDayId(blocks);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
+            return refreshBabyFeedingLatestMarks(next,dayId);
+          });
+          setFormulaDetailEntry(null);
+          pushToast({text:'已保存',placement:'center'});
+          setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+          return;
+        }
+        setTimeline(blocks=>blocks.map(block=>{
+          if(block.type !=='day') return block;
+          const items=(block.items||block.entries||[]).map(item=>item.id===formulaDetailEntry.id?{...item,value:`${amount}ml`,text:`配方奶：${amount}ml`,voiceQuote:note,noteText:note}:item);
+          return {...block,items,entries:undefined};
+        }));
+        setFormulaDetailEntry(null);
+        pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
+      {breastDetailEntry ? <BabyBreastDetailPage entry={breastDetailEntry} onClose={()=>setBreastDetailEntry(null)} onSave={({left,right,note})=>{
+        const total=left+right;
+        const detailLines=[`母乳：左${left}分钟，右${right}分钟`, `${breastDetailEntry.time || '12:32'}–${breastDetailEntry.time || '12:32'}`];
+        if(breastDetailEntry.isQuickDraft){
+          const {isQuickDraft,...draftEntry}=breastDetailEntry;
+          const entry={...draftEntry,value:`${total}分钟`,text:'母乳',leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined};
+          setTimeline(blocks=>{
+            const dayId=resolveBabyFeedingTargetDayId(blocks);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
+            return refreshBabyFeedingLatestMarks(next,dayId);
+          });
+          setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});setTimeout(()=>scrollTimelineToBottom('smooth'),80);return;
+        }
+        setTimeline(blocks=>blocks.map(block=>{
+          if(block.type!=='day') return block;
+          const items=(block.items||block.entries||[]).map(item=>item.id===breastDetailEntry.id?{...item,value:`${total}分钟`,text:'母乳',leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined}:item);
+          return {...block,items,entries:undefined};
+        }));
+        setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
         <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>

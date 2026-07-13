@@ -250,6 +250,15 @@ const BUILDS = [
     comment: '异步转写：按住聆听环，松手流式吐字 + 句尾语音条',
   },
   {
+    outfile: 'meiyou-scene6-babylog-1.html',
+    pagesName: null,
+    title: '美柚 · 场景六 · 宝宝喂养记录 · 方案一',
+    demoScene: 'note-quick-record',
+    locked: true,
+    babyFeedingMode: true,
+    comment: '宝宝喂养记录：点滴时间轴与快捷记录面板',
+  },
+  {
     outfile: 'meiyou-record-standalone.html',
     pagesName: null,
     title: '美柚 · 记录 · 场景原型',
@@ -306,13 +315,14 @@ function writeLegacyRedirects() {
   });
 }
 
-function buildHtml({ title, demoScene, locked, comment, builtAt }) {
+function buildHtml({ title, demoScene, locked, babyFeedingMode = false, comment, builtAt }) {
   const extraCss = locked ? STANDALONE_DEMO_CSS : '';
   const bodyClass = locked ? ' class="standalone-demo"' : '';
   const buildId = `${builtAt}-nomask`;
   const lockedScript = locked
     ? `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = true;`
     : `window.__BUILD__ = "${buildId}";\nwindow.__STANDALONE_LOCKED_SCENE = false;`;
+  const babyFeedingScript = babyFeedingMode ? 'window.__BABY_FEEDING_MODE = true;' : '';
 
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -353,6 +363,7 @@ const TWEAK_DEFAULTS = {
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 ${lockedScript}
+${babyFeedingScript}
 </script>
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
@@ -371,10 +382,18 @@ ${scripts.join('\n\n')}
 }
 
 const builtAt = new Date().toISOString().slice(0, 10);
+const buildOnly = process.env.BUILD_ONLY || '';
+const selectedBuilds = buildOnly
+  ? BUILDS.filter((cfg) => cfg.outfile === buildOnly)
+  : BUILDS;
+
+if (buildOnly && !selectedBuilds.length) {
+  throw new Error(`Unknown standalone build target: ${buildOnly}`);
+}
 
 fs.mkdirSync(DOCS, { recursive: true });
 
-BUILDS.forEach((cfg) => {
+selectedBuilds.forEach((cfg) => {
   const html = buildHtml({ ...cfg, builtAt });
   const outPath = path.join(ROOT, cfg.outfile);
   fs.writeFileSync(outPath, html, 'utf8');
@@ -410,19 +429,21 @@ function copyDirSync(src, dest) {
   }
 }
 
-const assetsSrc = path.join(ROOT, 'assets');
-const assetsDest = path.join(DOCS, 'assets');
-if (fs.existsSync(assetsSrc)) {
-  copyDirSync(assetsSrc, assetsDest);
-  console.log(`Copied assets → ${assetsDest}`);
+if (!buildOnly) {
+  const assetsSrc = path.join(ROOT, 'assets');
+  const assetsDest = path.join(DOCS, 'assets');
+  if (fs.existsSync(assetsSrc)) {
+    copyDirSync(assetsSrc, assetsDest);
+    console.log(`Copied assets → ${assetsDest}`);
+  }
+
+  fs.writeFileSync(
+    path.join(DOCS, 'scene3.html'),
+    buildRedirectPage('./scene3-1.html', '场景三 · 方案一'),
+    'utf8',
+  );
+  console.log('Wrote docs/scene3.html (redirect → scene3-1.html)');
+
+  writeLegacyRedirects();
+  console.log(`Wrote legacy redirects under ${path.join(DOCS, 'docs')}`);
 }
-
-fs.writeFileSync(
-  path.join(DOCS, 'scene3.html'),
-  buildRedirectPage('./scene3-1.html', '场景三 · 方案一'),
-  'utf8',
-);
-console.log('Wrote docs/scene3.html (redirect → scene3-1.html)');
-
-writeLegacyRedirects();
-console.log(`Wrote legacy redirects under ${path.join(DOCS, 'docs')}`);

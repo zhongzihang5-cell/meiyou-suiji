@@ -872,16 +872,33 @@ function BabyFeedingTimelineCard({item, isNew}){
   const summary = item.summary;
   const detailLines = Array.isArray(item.detailLines) ? item.detailLines.filter(Boolean) : [];
   const hasDetail = detailLines.length > 0;
+  const notePreview = item.noteText || item.voiceQuote || '';
 
   React.useEffect(()=>{
     setSummaryOpen(item.summaryOpen !== false);
   }, [item.id, item.summaryOpen]);
 
+  const canOpenFeedingDetail = title === '配方奶' || title === '母乳';
+  const openFeedingDetail = ()=>{
+    if(!canOpenFeedingDetail) return;
+    window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {detail:item}));
+  };
+
   return (
-    <article className={'tl-baby-feeding-card'+(isNew ? ' is-stream fade-in' : '')}>
+    <article
+      className={'tl-baby-feeding-card'+(isNew ? ' is-stream fade-in' : '')+(canOpenFeedingDetail ? ' is-clickable' : '')}
+      role={canOpenFeedingDetail ? 'button' : undefined}
+      tabIndex={canOpenFeedingDetail ? 0 : undefined}
+      onClick={openFeedingDetail}
+      onKeyDown={(event)=>{
+        if(canOpenFeedingDetail && (event.key === 'Enter' || event.key === ' ')){
+          event.preventDefault();
+          openFeedingDetail();
+        }
+      }}
+    >
       <div className="tl-baby-feed-head">
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
-        {item.voice?.duration ? <span className="tl-baby-feed-voice">{item.voice.duration}</span> : null}
       </div>
       <div className={'tl-baby-feed-main'+(hasDetail ? ' is-detail' : '')}>
         <span className={'tl-baby-feed-icon'+(iconSrc ? ' is-image' : '')} style={iconSrc ? undefined : {background: color}}>
@@ -901,32 +918,23 @@ function BabyFeedingTimelineCard({item, isNew}){
           </span>
         )}
       </div>
+      {notePreview ? (
+        <p className={'tl-baby-feed-note-preview'+(hasDetail ? ' is-after-detail' : '')}>{notePreview}</p>
+      ) : null}
       <div className="tl-baby-feed-tags">
         <span className="tl-baby-feed-tag-main">小豆苗</span>
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
       </div>
-      {item.voiceQuote && (
-        <div className={'tl-baby-feed-source'+(item.sourceGroupRole === 'anchor' ? ' is-anchor' : '')}>
-          <span className="tl-baby-feed-source-mic">🎙</span>
-          <span className="tl-baby-feed-source-text">"{item.voiceQuote}"</span>
-          {item.sourceGroupCount ? (
-            <span className="tl-baby-feed-source-count">共{item.sourceGroupCount}条</span>
-          ) : null}
-        </div>
-      )}
-      {!item.voiceQuote && item.sourceGroupHint ? (
-        <div className="tl-baby-feed-source is-linked">
-          <span className="tl-baby-feed-source-mic">🎙</span>
-          <span className="tl-baby-feed-source-text">{item.sourceGroupHint}</span>
-        </div>
-      ) : null}
       {summary && (
         <div className={'tl-baby-feed-summary'+(summaryOpen ? ' is-open' : '')}>
           <button
             type="button"
             className="tl-baby-feed-summary-toggle"
             aria-expanded={summaryOpen}
-            onClick={()=>setSummaryOpen(v=>!v)}
+            onClick={(event)=>{
+              event.stopPropagation();
+              setSummaryOpen(v=>!v);
+            }}
           >
             <span className="tl-baby-feed-summary-spark" aria-hidden="true">✦</span>
             <span className="tl-baby-feed-summary-title">{summary.title || '喂养小结'}</span>

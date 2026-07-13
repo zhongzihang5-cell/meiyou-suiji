@@ -58,7 +58,8 @@ body.standalone-demo .phone .dock-wrap{
 }
 body.standalone-demo .phone.is-baby-feeding-entry .dock-wrap,
 body.standalone-demo .phone.is-baby-feeding-entry .dock-wrap.is-mood-expanded{
-  bottom:calc(var(--my-tabbar-h) + var(--baby-feeding-strip-h, 96px));
+  /* 快捷记录已和输入框合并在同一面板，不能再为旧的独立记录条预留高度。 */
+  bottom:calc(var(--my-tabbar-h) + 12px);
 }
 body.standalone-demo .phone .baby-feeding-quick-strip{
   bottom:var(--my-tabbar-h);

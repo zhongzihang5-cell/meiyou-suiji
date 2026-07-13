@@ -358,6 +358,8 @@
   gap:8px;
   margin-bottom:10px;
 }
+.tl-baby-feeding-card.is-clickable{cursor:pointer}
+.tl-baby-feeding-card.is-clickable:active{transform:scale(0.992)}
 .tl-baby-feed-time{
   font-size:13.5px;
   line-height:1;
@@ -422,6 +424,20 @@
 .tl-baby-feed-text *,
 .tl-baby-feed-detail *{
   font-weight:400 !important;
+}
+.tl-baby-feed-note-preview{
+  min-width:0;
+  overflow:hidden;
+  margin:-12px 0 0 51px;
+  color:var(--my-text-tertiary);
+  font-size:13px;
+  font-weight:400;
+  line-height:1.45;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.tl-baby-feed-note-preview.is-after-detail{
+  margin-top:4px;
 }
 .tl-baby-feed-detail{
   min-width:0;
@@ -3704,3 +3720,22 @@
 @keyframes miSlotIn{
   to{opacity:1;transform:translateY(0)}
 }
+.baby-formula-detail{position:fixed;inset:auto 0 0;z-index:700;width:100%;max-width:390px;height:85dvh;min-height:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;background:linear-gradient(180deg,#fde0e5 0%,#fff4f5 62%,#fff7f7 100%);box-shadow:0 -100vh 0 rgba(20,20,28,.22),0 -8px 28px rgba(104,68,77,.16);color:#333;animation:babyFormulaSheetIn .28s cubic-bezier(.22,1,.36,1)}
+.baby-formula-detail::before{content:'';position:absolute;top:10px;left:50%;width:38px;height:4px;border-radius:4px;background:rgba(80,70,74,.2);transform:translateX(-50%)}
+.baby-formula-detail-nav{height:92px;display:grid;grid-template-columns:42px 1fr 42px;align-items:start;padding:18px 18px 0}.baby-formula-detail-nav div{text-align:center}.baby-formula-detail-nav h1{margin:0;text-align:center;font-size:17px;font-weight:600}.baby-formula-detail-nav p{margin:6px 0 0;font-size:14px;color:#555}.baby-formula-close{width:32px;height:32px;padding:0;border:0;background:transparent;color:#333;font-size:34px;font-weight:200;line-height:26px}
+.baby-formula-detail-body{flex:1;overflow:auto;padding:14px 14px 10px}.baby-formula-form{overflow:hidden;border-radius:16px;background:#fff;box-shadow:0 4px 18px rgba(166,83,99,.07)}
+.baby-formula-row{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid rgba(0,0,0,.06);font-size:15px}.baby-formula-value{border:0;background:transparent;color:#a0a0a5;font:400 14px/1 inherit}.baby-formula-value b{padding-left:6px;font-size:22px;font-weight:200;vertical-align:-2px}.baby-formula-value.is-placeholder{color:#b6b6ba}
+.baby-formula-amount-head{display:flex;align-items:center;justify-content:space-between;padding:13px 15px 0;font-size:15px}.baby-formula-keyboard{border:0;background:transparent;color:#a0a0a5;font:400 11px/1.15 inherit;text-align:center}.baby-formula-keyboard span{display:block;margin-bottom:2px;font-size:20px;line-height:16px;color:#929296}
+.baby-formula-picker{position:relative;height:205px;display:flex;align-items:center;justify-content:center;overflow:hidden}.baby-formula-bottle{position:absolute;bottom:10px;width:132px;height:152px;border:4px solid rgba(255,136,151,.26);border-top:0;border-radius:30px 30px 42px 42px;background:linear-gradient(90deg,rgba(255,118,138,.16),rgba(255,255,255,.9) 42%,rgba(255,118,138,.16));box-shadow:inset 0 0 18px rgba(255,111,133,.14)}.baby-formula-bottle::before{content:'';position:absolute;top:-13px;left:-10px;right:-10px;height:14px;border-radius:9px;background:linear-gradient(#ff9ca9,#ff6d82)}.baby-formula-bottle::after{content:'';position:absolute;top:-51px;left:38px;width:50px;height:48px;border-radius:50% 50% 40% 40%;background:radial-gradient(circle at 50% 35%,#fff 0 22%,#ffe8ec 58%,rgba(255,144,160,.25) 100%)}.baby-formula-values{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0}.baby-formula-values button{height:29px;min-width:108px;border:0;border-radius:17px;background:transparent;color:#85858a;font:400 16px/29px inherit}.baby-formula-values button.is-selected{background:rgba(255,98,126,.16);color:#111;font-size:24px;font-weight:500}
+.baby-formula-note{border-top:1px solid rgba(0,0,0,.06)}.baby-formula-note-toggle{width:100%;min-height:47px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border:0;background:#fff;color:#555;font:400 16px/1 inherit}.baby-formula-note-toggle b{color:#aaa;font-size:16px;font-weight:400}.baby-formula-note textarea{display:block;width:calc(100% - 30px);min-height:62px;resize:none;margin:0 15px 14px;padding:9px 10px;border:0;border-radius:8px;background:#f7f7f8;color:#666;font:400 14px/1.45 inherit;outline:0}
+.baby-formula-detail-foot{padding:8px 18px calc(12px + var(--my-safe-bottom));background:transparent}.baby-formula-detail-foot button{width:100%;height:50px;border:0;border-radius:25px;background:#ff647c;color:#fff;font:600 22px/1 inherit}
+@keyframes babyFormulaSheetIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.baby-breast-detail{position:fixed;inset:auto 0 0;z-index:701;width:100%;max-width:390px;height:85dvh;min-height:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;background:linear-gradient(180deg,#fde0e5 0%,#fff4f5 62%,#fff 100%);box-shadow:0 -100vh 0 rgba(20,20,28,.22),0 -8px 28px rgba(104,68,77,.16);color:#333;animation:babyFormulaSheetIn .28s cubic-bezier(.22,1,.36,1)}
+.baby-breast-detail::before{content:'';position:absolute;top:10px;left:50%;width:38px;height:4px;border-radius:4px;background:rgba(80,70,74,.2);transform:translateX(-50%)}
+.baby-breast-nav{height:92px;display:grid;grid-template-columns:42px 1fr 42px;align-items:start;padding:18px 18px 0}.baby-breast-nav button{width:32px;height:32px;padding:0;border:0;background:transparent;color:#333;font-size:34px;font-weight:200;line-height:26px}.baby-breast-nav div{text-align:center}.baby-breast-nav h1{margin:0;font-size:17px;font-weight:600}.baby-breast-nav p{margin:6px 0 0;font-size:14px;color:#555}
+.baby-breast-body{flex:1;overflow:auto;padding:8px 14px 10px}.baby-breast-form{min-height:100%;overflow:hidden;border-radius:16px;background:#fff;box-shadow:0 4px 18px rgba(166,83,99,.07)}
+.baby-breast-mode{display:flex;width:208px;height:38px;margin:18px auto 0;padding:3px;border-radius:22px;background:#f7f7f8}.baby-breast-mode button{flex:1;border:0;border-radius:18px;background:transparent;color:#777;font:500 16px/1 inherit}.baby-breast-mode button.is-active{background:#fff;color:#333;box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.baby-breast-timer{min-height:330px;display:flex;align-items:center;justify-content:space-evenly;padding:35px 12px}.baby-breast-timer-side{width:124px;height:124px;border:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:radial-gradient(circle at 50% 35%,#fff 0 36%,#ffeaf0 100%);box-shadow:0 12px 22px rgba(255,100,135,.14);color:#ff4d88}.baby-breast-timer-side b{font-size:18px;font-weight:500}.baby-breast-timer-side i{font-style:normal;font-size:24px;line-height:22px}.baby-breast-timer-side span{font-size:16px;color:#666}.baby-breast-timer-side.is-running{box-shadow:0 0 0 3px rgba(255,77,136,.16),0 12px 22px rgba(255,100,135,.18)}
+.baby-breast-row{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid rgba(0,0,0,.06);font-size:15px}.baby-breast-row em{font-style:normal;color:#aaa;font-size:14px}.baby-breast-duration{padding:13px 15px 16px;border-bottom:1px solid rgba(0,0,0,.06)}.baby-breast-duration-head{display:flex;justify-content:space-between;font-size:15px}.baby-breast-duration-head small{text-align:center;color:#999;font-size:10px;line-height:1.2}.baby-breast-wheels{display:flex;gap:10px;margin-top:10px}.baby-breast-wheels label{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;height:112px;border-radius:12px;background:#fafafb;color:#777;font-size:14px}.baby-breast-wheels button{width:22px;height:22px;border:0;border-radius:50%;background:#fff;color:#999;font-size:15px;line-height:1}.baby-breast-wheels strong{font-size:25px;font-weight:500;color:#333}.baby-breast-wheels em{font-style:normal;font-size:13px}.baby-breast-side-chips{display:flex;gap:8px}.baby-breast-side-chips b{min-width:42px;padding:7px 0;border-radius:16px;background:#fafafb;color:#777;text-align:center;font-size:14px;font-weight:400}
+.baby-breast-note{padding:12px 15px 16px;border-top:1px solid rgba(0,0,0,.06)}.baby-breast-note label{display:block;margin-bottom:7px;color:#555;font-size:15px}.baby-breast-note textarea{display:block;width:100%;min-height:58px;resize:none;padding:9px 10px;border:0;border-radius:8px;background:#f7f7f8;color:#666;font:400 14px/1.45 inherit;outline:0}
+.baby-breast-foot{padding:8px 18px calc(12px + var(--my-safe-bottom));background:transparent}.baby-breast-foot button{width:100%;height:50px;border:0;border-radius:25px;background:#ff647c;color:#fff;font:600 22px/1 inherit}

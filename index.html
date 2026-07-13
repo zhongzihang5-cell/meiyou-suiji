@@ -8,7 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
 <link rel="stylesheet" href="cloud.css?v=20260710-empty-guide">
-<link rel="stylesheet" href="timeline.css?v=20260707-person-panel-filter">
+<link rel="stylesheet" href="timeline.css?v=20260713-detail-note-space">
 <link rel="stylesheet" href="calendar.css?v=20260701-float-notice-no-icon">
 <link rel="stylesheet" href="record-page.css?v=20260710-empty-preview2">
 <link rel="stylesheet" href="record-empty.css?v=20260602-v102">
@@ -67,7 +67,7 @@
 
   /* 底部 Tab + 安全区（iPhone 横条） */
   --my-safe-bottom:env(safe-area-inset-bottom, 0px);
-  --my-tabbar-h:calc(58px + var(--my-safe-bottom));
+  --my-tabbar-h:calc(64px + var(--my-safe-bottom));
   --my-dock-float-b:calc(180px + var(--my-safe-bottom));
   --baby-feeding-strip-h:96px;
   --my-dock-path-h:76px;
@@ -783,8 +783,10 @@ html,body{
   border-top:0.5px solid #e8e8e8;
   display:flex;
   justify-content:space-around;
-  align-items:center;
-  padding:5px 0 14px;
+  align-items:flex-start;
+  height:var(--my-tabbar-h);
+  box-sizing:border-box;
+  padding:5px 0 calc(6px + var(--my-safe-bottom));
   z-index:100;
 }
 .tab{
@@ -807,7 +809,7 @@ html,body{
   display:flex;align-items:center;justify-content:center;
   color:#999;
 }
-.tab-ico svg{width:26px;height:26px;display:block}
+.tab-ico svg{width:26px;height:26px;display:block;overflow:visible}.tab-note-mic{width:28px;height:28px;display:block;overflow:visible;flex:0 0 auto}
 .tab-icon-img{width:26px;height:26px;display:block;object-fit:contain}
 .tab-ico .mascot{width:26px;height:26px}
 .tab.active .tab-ico{color:var(--my-brand-red)}
@@ -1128,14 +1130,14 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="icons.jsx?v=20260624-tab-review"></script>
 <script type="text/babel" src="data.jsx?v=20260629-analysis-title-unify"></script>
 <script src="tabbar-icons.js?v=20260624-v1"></script>
-<script type="text/babel" src="components.jsx?v=20260703-baby-voice-global-release"></script>
+<script type="text/babel" src="components.jsx?v=20260713-tabbar-icons-fix"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260701-float-notice-copy-2"></script>
 <script type="text/babel" src="record-page.jsx?v=20260710-empty-preview2"></script>
 <script type="text/babel" src="timeline-sister-cards.jsx?v=20260629-symptom-quick-edit"></script>
 <script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260710-diet-meal-headline"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260629-mood-band"></script>
 <script type="text/babel" src="quick-pickers.jsx?v=20260629-analysis-title-unify"></script>
-<script type="text/babel" src="timeline-modules.jsx?v=20260709-diet-sync-compact"></script>
+<script type="text/babel" src="timeline-modules.jsx?v=20260713-detail-note-space"></script>
 <script type="text/babel" src="timeline.jsx?v=20260628-real-today"></script>
 <script type="text/babel" src="record-empty.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank.jsx?v=20260710-empty-guide6"></script>
@@ -1157,7 +1159,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="path-flyout.jsx?v=20260611"></script>
 <script type="text/babel" src="demo-scenes.jsx?v=20260703-baby-default"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260710-empty-guide4"></script>
+<script type="text/babel" src="app.jsx?v=20260713-voice-now-repeat"></script>
 
 <!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
 <button id="resetDemo" style="
