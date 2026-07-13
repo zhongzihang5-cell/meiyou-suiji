@@ -151,24 +151,38 @@ function SleepReviewCard(){
 }
 
 function DiaperReviewChart(){
-  const days = [
-    {date:'10.15', records:['pee','pee','poop','pee','both']},
-    {date:'10.16', records:['pee','poop','pee','pee','pee']},
-    {date:'10.17', records:['both','pee','pee','poop','pee','pee']},
-    {date:'10.18', records:['pee','pee','both','pee','poop']},
-    {date:'10.19', records:['poop','pee','pee','pee','both']},
-    {date:'10.20', records:['pee','both','pee','poop','pee']},
-    {date:'今天', records:['both','pee','pee','poop','pee','pee'], highlight:true},
+  const recordPatterns = [
+    ['pee','pee','poop','pee','both'],
+    ['pee','poop','pee','pee','pee'],
+    ['both','pee','pee','poop','pee','pee'],
+    ['pee','pee','both','pee','poop'],
+    ['poop','pee','pee','pee','both'],
+    ['pee','both','pee','poop','pee'],
   ];
+  const dateLabels = [
+    '9.22','9.23','9.24','9.25','9.26','9.27','9.28','9.29','9.30',
+    '10.1','10.2','10.3','10.4','10.5','10.6','10.7','10.8','10.9','10.10','10.11',
+    '10.12','10.13','10.14','10.15','10.16','10.17','10.18','10.19','10.20','今天',
+  ];
+  const days = Array.from({length:30}, (_item, index)=>(
+    {
+      key:'diaper-day-' + index,
+      date:dateLabels[index],
+      records:index === 29 ? [] : recordPatterns[index % recordPatterns.length],
+      highlight:index === 29,
+    }
+  ));
   const W = 340, H = 168, padL = 28, padR = 12, padT = 14, padB = 27;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const yMax = 6.8;
   const band = (x1 - x0) / days.length;
+  const segmentWidth = 5.6;
   const X = i => x0 + band * i + band / 2;
   const Y = count => y1 - count / yMax * (y1 - y0);
   const colors = {pee:'#f5b335', poop:'#45c978', both:'#4b91ed'};
+  const visibleDateIndexes = {0:true, 7:true, 14:true, 21:true, 29:true};
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天换尿布分类次数图">
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天换尿布分类次数图">
       {[2,4,6].map(tick=>(
         <React.Fragment key={tick}>
           <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
@@ -182,14 +196,15 @@ function DiaperReviewChart(){
         )).filter(segment=>segment.count > 0);
         let stackedCount = 0;
         return (
-          <React.Fragment key={day.date}>
+          <React.Fragment key={day.key}>
             {segments.map(segment=>{
               const segmentBottom = Y(stackedCount);
               stackedCount += segment.count;
               const segmentTop = Y(stackedCount);
-              return <rect key={segment.type} x={X(i) - 10} y={segmentTop + 1.5} width="20" height={segmentBottom - segmentTop - 3} rx="7" fill={colors[segment.type]}/>;
+              return <rect key={segment.type} x={X(i) - segmentWidth / 2} y={segmentTop + 0.8} width={segmentWidth} height={segmentBottom - segmentTop - 1.6} rx={segmentWidth / 2} fill={colors[segment.type]}/>;
             })}
-            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e8930f' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+            <line x1={X(i)} y1={y1} x2={X(i)} y2={y1 + 3} stroke="#d8d8dc" strokeWidth="0.7"/>
+            {visibleDateIndexes[i] ? <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e8930f' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text> : null}
           </React.Fragment>
         );
       })}
@@ -229,7 +244,7 @@ function DiaperReviewCard(){
       metrics={(
         <>
           <DiaperReviewMetric kind="empty" label="最近记录"/>
-          <DiaperReviewMetric kind="average" label="近7天平均"/>
+          <DiaperReviewMetric kind="average" label="近30天平均"/>
           <DiaperReviewMetric kind="trend" label="整体趋势"/>
         </>
       )}
