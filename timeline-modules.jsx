@@ -878,10 +878,17 @@ function BabyFeedingTimelineCard({item, isNew}){
     setSummaryOpen(item.summaryOpen !== false);
   }, [item.id, item.summaryOpen]);
 
-  const canOpenFeedingDetail = title === '配方奶' || title === '母乳';
+  const canOpenFeedingDetail = title === '配方奶' || title === '母乳' || title === '睡眠';
   const openFeedingDetail = ()=>{
     if(!canOpenFeedingDetail) return;
     window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {detail:item}));
+  };
+  const sleepMinutes = Math.max(1, Math.ceil((item.elapsedSeconds || 60) / 60));
+  const openSleepWakeSheet = (event)=>{
+    event.stopPropagation();
+    window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {
+      detail:{...item, elapsedSeconds:item.elapsedSeconds || 60, sleepMode:'timer'}
+    }));
   };
 
   return (
@@ -918,6 +925,13 @@ function BabyFeedingTimelineCard({item, isNew}){
           </span>
         )}
       </div>
+      {item.sleeping ? (
+        <div className="tl-baby-sleep-live">
+          <span className="tl-baby-sleep-duration">睡了{sleepMinutes}分钟</span>
+          <span className="tl-baby-sleep-status">宝宝睡觉中...</span>
+          <button type="button" onClick={openSleepWakeSheet}>宝宝醒了</button>
+        </div>
+      ) : null}
       {notePreview ? (
         <p className={'tl-baby-feed-note-preview'+(hasDetail ? ' is-after-detail' : '')}>{notePreview}</p>
       ) : null}

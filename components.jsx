@@ -264,11 +264,18 @@ function TabBar({
   const icon = (id) => (
     <img className="tab-icon-img" src={tabIcons[id]} alt="" aria-hidden="true" />
   );
+  const reviewIcon = (
+    <svg viewBox="0 0 28 28" aria-hidden="true">
+      <path d="M5 21.5V5.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
+      <path d="M5 21.5H23" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
+      <path d="M8.5 17.5l4-4 3.5 3 5.5-7" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
   const tabs = [
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
     {id:'note', label:noteLabel, custom:<svg className="tab-note-mic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="13" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M5 11.5a7 7 0 0 0 14 0M12 18.5v3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>, notif: noteUnread},
-    {id:'cash', label:'回顾', custom:icon('cash')},
+    {id:'cash', label:'回顾', custom:reviewIcon},
     {id:'me', label:'我', custom:icon('me')},
   ];
   return (

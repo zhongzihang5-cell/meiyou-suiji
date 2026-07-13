@@ -281,6 +281,67 @@ function BabyBreastDetailPage({entry, onClose, onSave}){
   </section>;
 }
 
+function BabySleepDetailPage({entry, onClose, onStart, onSave}){
+  const [mode, setMode] = useState(entry?.sleepMode || 'timer');
+  const [seconds, setSeconds] = useState(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
+  const [running, setRunning] = useState(false);
+  const [note, setNote] = useState(entry?.noteText || '');
+  useEffect(()=>{
+    setMode(entry?.sleepMode || 'timer');
+    setSeconds(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
+    setRunning(false);
+    setNote(entry?.noteText || '');
+  }, [entry?.id]);
+  useEffect(()=>{
+    if(!running) return undefined;
+    const timer = setInterval(()=>setSeconds(value=>value + 1), 1000);
+    return ()=>clearInterval(timer);
+  }, [running]);
+  const now = new Date();
+  const timeText = entry?.time || window.formatNowTime?.() || '12:04';
+  const manual = mode === 'manual';
+  const activeTimer = !!entry?.sleeping;
+  const minutes = Math.max(1, Math.ceil(seconds / 60));
+  const formatClock = (value)=>`${String(Math.floor(value / 60)).padStart(2,'0')}:${String(value % 60).padStart(2,'0')}`;
+  const handleStart = ()=>onStart?.({seconds:Math.max(1, seconds || 1), note});
+  const handleSave = ()=>onSave?.({minutes, seconds:Math.max(seconds, 60), note, mode});
+  return <section className="baby-sleep-detail" role="dialog" aria-modal="true" aria-label="睡眠记录详情">
+    <header className="baby-sleep-nav">
+      <button type="button" aria-label={activeTimer ? '收起' : '关闭'} onClick={onClose}>{activeTimer ? '收起' : '×'}</button>
+      <div><h1>睡眠</h1><p>{activeTimer ? `妈妈 今天 ${timeText} 创建 ◌` : '上次：14小时49分钟前'}</p></div><span/>
+    </header>
+    <main className="baby-sleep-body"><section className="baby-sleep-form">
+      <div className="baby-sleep-mode">
+        <button type="button" className={!manual ? 'is-active' : ''} onClick={()=>setMode('timer')}>计时</button>
+        <button type="button" className={manual ? 'is-active' : ''} onClick={()=>setMode('manual')}>手动输入</button>
+      </div>
+      {manual ? (
+        <div className="baby-sleep-manual">
+          <div className="baby-sleep-moon" aria-hidden="true"><span>Z</span></div>
+          <div className="baby-sleep-row"><span>开始时间</span><em>请选择 ›</em></div>
+          <div className="baby-sleep-row"><span>结束时间</span><em>请选择 ›</em></div>
+          <div className="baby-sleep-note is-compact"><button type="button"><span>▣</span>备注</button></div>
+        </div>
+      ) : activeTimer ? (
+        <div className="baby-sleep-running">
+          <div className="baby-sleep-total"><span>总时长 ⓘ</span><strong>{formatClock(seconds || 60)}</strong></div>
+          <p className="baby-sleep-tip"><i>❤</i>静静看你熟睡的样子，幸福感无以言表!<br/><b>查看七七的白天小睡规律 〉</b></p>
+          <div className="baby-sleep-row"><span>开始时间</span><em>{now.getMonth()+1}月{now.getDate()}日 {timeText} ›</em></div>
+          <button type="button" className="baby-sleep-big-action is-pause" onClick={()=>setRunning(value=>!value)}><b>醒了</b><i>{running ? 'Ⅱ' : '▶'}</i></button>
+          <div className="baby-sleep-note"><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="输入备注内容"/><span>▣</span></div>
+        </div>
+      ) : (
+        <div className="baby-sleep-idle">
+          <div className="baby-sleep-moon" aria-hidden="true"><span>Z</span></div>
+          <button type="button" className="baby-sleep-big-action" onClick={handleStart}><b>睡了</b><i>▶</i></button>
+          <div className="baby-sleep-note"><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="输入备注内容"/><span>▣</span></div>
+        </div>
+      )}
+    </section></main>
+    <footer className="baby-sleep-foot"><button type="button" onClick={activeTimer ? handleSave : (manual ? handleSave : handleStart)}>{activeTimer ? '结束并保存' : '保存'}</button></footer>
+  </section>;
+}
+
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
@@ -329,6 +390,7 @@ function App(){
   const [showPhoto, setShowPhoto] = useState(false);
   const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
+  const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
   const [activeTab, setActiveTab] = useState(()=>{
     if(IS_BABY_FEEDING_DEMO){
       return 'note';
@@ -388,6 +450,7 @@ function App(){
     const openFeedingDetail = event=>{
       const entry=event.detail || null;
       if(entry?.feedType === '母乳') setBreastDetailEntry(entry);
+      else if(entry?.feedType === '睡眠') setSleepDetailEntry(entry);
       else setFormulaDetailEntry(entry);
     };
     window.addEventListener('open-baby-feeding-detail', openFeedingDetail);
@@ -1349,6 +1412,10 @@ function App(){
     }
     if(item.id === 'breast'){
       setBreastDetailEntry({...entry, isQuickDraft:true});
+      return;
+    }
+    if(item.id === 'sleep'){
+      setSleepDetailEntry({...entry, isQuickDraft:true, sleepMode:'timer', noteText:''});
       return;
     }
     setTimeline(blocks=>{
@@ -2430,6 +2497,64 @@ function App(){
           return {...block,items,entries:undefined};
         }));
         setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
+      {sleepDetailEntry ? <BabySleepDetailPage entry={sleepDetailEntry} onClose={()=>setSleepDetailEntry(null)} onStart={({seconds,note})=>{
+        const draftEntry = sleepDetailEntry;
+        const time = draftEntry.time || window.formatNowTime?.() || '12:04';
+        const entry = {
+          ...draftEntry,
+          id:'baby-feeding-sleep-running-'+Date.now(),
+          time,
+          text:'睡眠',
+          feedType:'睡眠',
+          value:'宝宝睡觉中',
+          detailLines:null,
+          statDurationMinutes:undefined,
+          sleeping:true,
+          elapsedSeconds:seconds,
+          noteText:note || undefined,
+          isNew:true,
+        };
+        setTimeline(blocks=>{
+          const dayId=resolveBabyFeedingTargetDayId(blocks);
+          const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
+          return refreshBabyFeedingLatestMarks(next,dayId);
+        });
+        setSleepDetailEntry(null);
+        pushToast({text:'睡眠计时已开始',placement:'center'});
+        setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+      }} onSave={({minutes, seconds, note, mode})=>{
+        const duration = minutes || 1;
+        const time = sleepDetailEntry.time || window.formatNowTime?.() || '12:04';
+        const finalEntry = {
+          ...sleepDetailEntry,
+          sleeping:false,
+          value:formatBabyFeedingDurationText(duration),
+          text:'睡眠',
+          detailLines:[`睡眠：睡了${formatBabyFeedingDurationText(duration)}`, `${time}-${addMinutesToBabyTime(time, duration)}`],
+          statDurationMinutes:duration,
+          elapsedSeconds:seconds,
+          noteText:note || undefined,
+        };
+        if(sleepDetailEntry.isQuickDraft){
+          const {isQuickDraft, sleepMode, ...draftEntry}=finalEntry;
+          setTimeline(blocks=>{
+            const dayId=resolveBabyFeedingTargetDayId(blocks);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),draftEntry,{dayId});
+            return refreshBabyFeedingLatestMarks(next,dayId);
+          });
+          setSleepDetailEntry(null);
+          pushToast({text:'已保存',placement:'center'});
+          setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+          return;
+        }
+        setTimeline(blocks=>refreshBabyFeedingLatestMarks(blocks.map(block=>{
+          if(block.type!=='day') return block;
+          const items=(block.items||block.entries||[]).map(item=>item.id===sleepDetailEntry.id?finalEntry:item);
+          return {...block,items,entries:undefined};
+        })));
+        setSleepDetailEntry(null);
+        pushToast({text:'已保存',placement:'center'});
       }}/>:null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
