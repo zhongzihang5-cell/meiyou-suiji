@@ -323,16 +323,17 @@ function FoodReviewCard(){
   );
 }
 
-function FeedingReviewChart(){
-  const days = [
-    {date:'10.15', breast:220, formula:300, minutes:48},
-    {date:'10.16', breast:260, formula:350, minutes:42},
-    {date:'10.17', breast:190, formula:280, minutes:37},
-    {date:'10.18', breast:300, formula:380, minutes:50},
-    {date:'10.19', breast:240, formula:300, minutes:44},
-    {date:'10.20', breast:293, formula:380, minutes:39},
-    {date:'今天', breast:580, formula:120, minutes:42, highlight:true},
-  ];
+const FEEDING_REVIEW_DAYS = [
+  {date:'10.15', breast:220, formula:300, minutes:48, directCount:3, leftMinutes:25, rightMinutes:23, feeds:[{hour:3.6,type:'formula'},{hour:8.1,type:'breast'},{hour:12.4,type:'direct'},{hour:16.2,type:'formula'},{hour:20.3,type:'breast'}]},
+  {date:'10.16', breast:260, formula:350, minutes:42, directCount:3, leftMinutes:22, rightMinutes:20, feeds:[{hour:2.8,type:'formula'},{hour:7.4,type:'breast'},{hour:11.2,type:'formula'},{hour:15.1,type:'direct'},{hour:19.3,type:'breast'},{hour:23.1,type:'formula'}]},
+  {date:'10.17', breast:190, formula:280, minutes:37, directCount:2, leftMinutes:18, rightMinutes:19, feeds:[{hour:4.2,type:'breast'},{hour:9.0,type:'formula'},{hour:13.5,type:'direct'},{hour:18.0,type:'formula'},{hour:22.4,type:'breast'}]},
+  {date:'10.18', breast:300, formula:380, minutes:50, directCount:3, leftMinutes:26, rightMinutes:24, feeds:[{hour:3.2,type:'formula'},{hour:7.6,type:'breast'},{hour:10.9,type:'direct'},{hour:14.6,type:'formula'},{hour:18.1,type:'breast'},{hour:22.0,type:'formula'}]},
+  {date:'10.19', breast:240, formula:300, minutes:44, directCount:3, leftMinutes:21, rightMinutes:23, feeds:[{hour:4.0,type:'formula'},{hour:8.3,type:'breast'},{hour:12.0,type:'direct'},{hour:16.6,type:'formula'},{hour:21.0,type:'breast'}]},
+  {date:'10.20', breast:293, formula:380, minutes:39, directCount:2, leftMinutes:20, rightMinutes:19, feeds:[{hour:3.5,type:'formula'},{hour:7.8,type:'breast'},{hour:11.4,type:'formula'},{hour:15.4,type:'direct'},{hour:19.2,type:'breast'},{hour:23.0,type:'formula'}]},
+  {date:'今天', breast:580, formula:120, minutes:42, directCount:3, leftMinutes:24, rightMinutes:18, highlight:true, feeds:[{hour:3.63,type:'formula'},{hour:7.78,type:'formula'},{hour:11.1,type:'breast'},{hour:15.4,type:'direct'},{hour:20.77,type:'formula'}]},
+];
+
+function FeedingReviewChart({days=FEEDING_REVIEW_DAYS}){
   const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const amountMax = 720;
@@ -391,21 +392,18 @@ function FeedingReviewChart(){
 function FeedingReviewMetric({kind, label}){
   return (
     <div className="review-metric review-feeding-metric">
-      {kind === 'recent' ? (
-        <div className="review-feeding-recent-value"><span className="review-feeding-formula-icon" aria-label="瓶喂配方奶"><ReviewFormulaRecordIcon/></span><div><b>120</b><i>ml</i></div></div>
-      ) : null}
       {kind === 'average' ? (
         <div className="review-feeding-average-value"><b>599</b><i>ml</i></div>
       ) : null}
-      {kind === 'trend' ? (
-        <div className="review-feeding-trend-value"><span>↕</span><b>波动</b></div>
+      {kind === 'standard' ? (
+        <div className="review-feeding-standard-value"><span>✓</span><b>符合标准值</b></div>
       ) : null}
       <div className="review-metric-label">{label}</div>
     </div>
   );
 }
 
-function FeedingReviewCard(){
+function FeedingReviewCard({onOpen,onFullOpen}){
   return (
     <ReviewCard
       title="喂奶"
@@ -421,13 +419,171 @@ function FeedingReviewCard(){
       )}
       metrics={(
         <>
-          <FeedingReviewMetric kind="recent" label="最近记录"/>
           <FeedingReviewMetric kind="average" label="近7天平均"/>
-          <FeedingReviewMetric kind="trend" label="整体趋势"/>
+          <FeedingReviewMetric kind="standard" label="喂奶次数"/>
+          <FeedingReviewMetric kind="standard" label="喂奶规律"/>
         </>
       )}
-      more="查看完整喂奶变化"
+      more="查看完整喂奶分析"
+      moreIcon={(
+        <span className="review-vip-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path className="review-vip-gem" d="M5.2 5.5h13.6l2.4 5.2L12 20 2.8 10.7z"/><path className="review-vip-check" d="M8.2 11.2l2.5 2.5 5.2-5.2"/></svg>
+        </span>
+      )}
+      onMore={onFullOpen}
+      headerAction={(
+        <button type="button" className="review-card-expand" aria-label="展开喂奶分析" onClick={onOpen}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        </button>
+      )}
     />
+  );
+}
+
+function FeedingAmountDetail({days}){
+  const max = Math.max(...days.map(day=>day.breast + day.formula), 1);
+  return (
+    <>
+      <section className="feeding-analysis-module" aria-labelledby="feeding-amount-title">
+      <div className="feeding-analysis-module-head"><b id="feeding-amount-title">喂奶量</b><span>统计周期：每日00:00-24:00</span></div>
+      <div className="feeding-analysis-insights" aria-label="喂奶量总结">
+        <span className="feeding-insight-mark" aria-hidden="true">✦</span>
+        <div className="feeding-insight-copy">
+          <p>近7天：瓶喂<strong>599ml/天</strong><i>·</i>亲喂<strong>3次/天</strong><i>·</i>次数<em>✓ 符合标准值</em></p>
+        </div>
+      </div>
+      <div className="feeding-direct-block">
+        <h3><i/>亲喂母乳</h3>
+        <div className="feeding-chart-scroll" role="region" aria-label="亲喂母乳日期数据，可左右滑动" tabIndex="0">
+          <div className="feeding-direct-table" style={{width:Math.max(330, 32 + days.length * 52),gridTemplateColumns:`32px repeat(${days.length}, minmax(52px, 1fr))`}}>
+            <div className="feeding-direct-labels" aria-hidden="true"><span>次数</span><span>左</span><span>右</span></div>
+            {days.map(day=><div className={'feeding-direct-day'+(day.highlight?' is-today':'')} key={day.date}>
+              <b>{day.directCount}次</b>
+              <span>{day.leftMinutes}分钟</span>
+              <span>{day.rightMinutes}分钟</span>
+            </div>)}
+          </div>
+        </div>
+      </div>
+      <div className="feeding-bottle-title"><i/>瓶喂</div>
+      <div className="feeding-amount-legend"><span className="is-breast"><i/>瓶喂母乳</span><span className="is-formula"><i/>瓶喂配方奶</span></div>
+      <div className="feeding-chart-scroll" role="region" aria-label="瓶喂量日期图表，可左右滑动" tabIndex="0">
+        <div className="feeding-amount-chart" style={{width:Math.max(330, days.length * 52)}}>
+          {days.map(day=>{
+            const total = day.breast + day.formula;
+            const height = Math.max(10, Math.round(total / max * 176));
+            const breastHeight = Math.round(day.breast / total * height);
+            return <div className={'feeding-amount-day'+(day.highlight?' is-today':'')} key={day.date}>
+              <div className="feeding-amount-total">{total}</div>
+              <div className="feeding-amount-bar" style={{height}}>
+                <span className="is-breast" style={{height:breastHeight}}>{day.breast}</span>
+                <span className="is-formula" style={{height:height-breastHeight}}>{day.formula}</span>
+              </div>
+              <em>{day.date}</em>
+            </div>;
+          })}
+        </div>
+      </div>
+      </section>
+    </>
+  );
+}
+
+function FeedingPatternDetail({days}){
+  return (
+    <>
+      <section className="feeding-analysis-module" aria-labelledby="feeding-pattern-title">
+      <div className="feeding-analysis-module-head"><b id="feeding-pattern-title">时间规律</b><span>近7天喂养时段</span></div>
+      <div className="feeding-analysis-insights" aria-label="时间规律总结">
+        <span className="feeding-insight-mark" aria-hidden="true">✦</span>
+        <div className="feeding-insight-copy">
+          <p>近7天：白天规律<em>✓ 符合标准值</em><i>·</i>夜奶暂无记录</p>
+        </div>
+      </div>
+      <div className="feeding-chart-scroll" role="region" aria-label="喂奶时间规律日期图表，可左右滑动" tabIndex="0">
+        <div className="feeding-pattern-chart" style={{width:Math.max(330, days.length * 52 + 28)}}>
+          <div className="feeding-pattern-grid">
+            {days.map(day=><div className={'feeding-pattern-day'+(day.highlight?' is-today':'')} key={day.date}>
+              <div className="feeding-pattern-track">
+                {day.feeds.map((feed,index)=><span key={index} className={'feeding-pattern-dot is-'+feed.type} style={{top:(feed.hour/24*100)+'%'}} aria-label={feed.hour.toFixed(1)+'时'}/>) }
+              </div>
+              <em>{day.date}</em>
+            </div>)}
+            <div className="feeding-pattern-axis">{[0,4,8,12,16,20,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+          </div>
+          <div className="feeding-pattern-legend"><span className="is-direct"><i/>亲喂母乳</span><span className="is-formula"><i/>配方奶</span><span className="is-breast"><i/>瓶喂母乳</span></div>
+        </div>
+      </div>
+      </section>
+    </>
+  );
+}
+
+function FeedingAnalysisSheet({open,onClose,days=FEEDING_REVIEW_DAYS}){
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const handleKey = event=>{ if(event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    return ()=>window.removeEventListener('keydown', handleKey);
+  },[open,onClose]);
+  return (
+    <div className={'feeding-analysis-layer'+(open?' is-open':'')} aria-hidden={!open}>
+      <button type="button" className="feeding-analysis-scrim" aria-label="关闭喂奶分析" onClick={onClose}/>
+      <section className="feeding-analysis-sheet" role="dialog" aria-modal="true" aria-label="喂奶分析">
+        <div className="feeding-analysis-handle" aria-hidden="true"/>
+        <div className="feeding-analysis-scroll">
+          <FeedingAmountDetail days={days}/>
+          <FeedingPatternDetail days={days}/>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function FeedingFullAnalysisPage({open,onClose,days=FEEDING_REVIEW_DAYS}){
+  const [week,setWeek] = React.useState(16);
+  const reportDates = ['23','24','25','26','27','28','29'];
+  const average = Math.round(days.reduce((sum,day)=>sum+day.breast+day.formula,0)/days.length);
+  return (
+    <section className={'feeding-full-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="完整喂奶分析">
+      <header className="feeding-full-nav">
+        <button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <div className="feeding-full-tabs"><b>喂奶</b><span>睡眠</span></div>
+      </header>
+      <div className="feeding-full-weeks" role="tablist" aria-label="选择周数">
+        {[13,14,15,16,17].map(value=><button key={value} type="button" role="tab" aria-selected={week===value} className={week===value?'is-active':''} onClick={()=>setWeek(value)}>第{value}周</button>)}
+      </div>
+      <div className="feeding-full-scroll">
+        <article className="feeding-daily-card">
+          <header><span className="feeding-report-icon">▮</span><b>喂奶日报</b><em>宝宝第{week}周（6月23日-6月29日）</em></header>
+          <div className="feeding-report-days">
+            {reportDates.map(date=><div key={date} className={date==='27'?'is-selected':''}><b>{date}</b><span><i/><i/></span></div>)}
+          </div>
+          <div className="feeding-report-wide is-count">
+            <span className="feeding-report-picture">🍼</span><div><b>喂奶次数 <strong>5</strong>次</b><p>参考次数　4~6次</p></div><i>›</i>
+          </div>
+          <div className="feeding-report-wide is-total">
+            <span className="feeding-report-picture">🍼</span><div><b>瓶喂总量 <strong>735</strong>ml</b><p>参考奶量　720ml~960ml</p></div><i>›</i>
+          </div>
+          <div className="feeding-report-grid">
+            <div><i>›</i><b>白天单次喂奶量</b><strong>153.8<small>ml</small></strong><span className="feeding-mini-bars is-yellow"><i/><i/><i/><i/></span></div>
+            <div><i>›</i><b>白天间隔时长</b><strong>4.0<small>小时</small></strong><span className="feeding-mini-interval is-yellow"><i/><i/><i/></span></div>
+            <div><i>›</i><b>夜奶次数</b><strong>1<small>次　次日00:00-06:00</small></strong><span className="feeding-mini-dots"><i/><i/><i/><i className="is-on"/></span></div>
+            <div><i>›</i><b>夜奶间隔时长</b><strong>8.1<small>小时</small></strong><span className="feeding-mini-line"/></div>
+          </div>
+        </article>
+        <article className="feeding-week-analysis">
+          <header><span>Ai</span><b>周规律分析</b></header>
+          <h3>6月23日-6月29日，已记录7天</h3>
+          <div className="feeding-analysis-table">
+            <b>指标(日均)</b><b>宝宝的记录</b><b>参考值</b>
+            <span>亲喂次数</span><strong>3次</strong><span>2~5次</span>
+            <span>瓶喂奶量</span><strong>{average}ml</strong><span>480~960ml</span>
+            <span>喂奶总次数</span><strong>5次</strong><em>正常</em>
+          </div>
+        </article>
+      </div>
+    </section>
   );
 }
 
@@ -453,7 +609,7 @@ function ReviewBackIcon(){
   return <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>;
 }
 
-function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sample, onOpen}){
+function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, moreIcon, sample, onOpen, onMore, headerAction}){
   const isActionable = typeof onOpen === 'function';
   const handleKeyDown = (event)=>{
     if(!isActionable) return;
@@ -474,13 +630,14 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sa
         <div className="review-card-head">
           <div className={'review-card-icon ' + iconClass} aria-hidden="true">{icon}</div>
           <div className="review-card-title">{title}</div>
+          {headerAction ? <div className="review-card-head-action" onClick={event=>event.stopPropagation()}>{headerAction}</div> : null}
         </div>
         <div className="review-chart">{chart}</div>
         <div className="review-legend">{legend}</div>
         <div className="review-metrics">{metrics}</div>
       </div>
-      <div className="review-card-more" role="button" aria-label={more}>
-        <div className="review-card-more-main">{more}</div>
+      <div className="review-card-more" role="button" aria-label={more} tabIndex={onMore ? 0 : undefined} onClick={event=>{if(onMore){event.stopPropagation();onMore();}}} onKeyDown={event=>{if(onMore&&(event.key==='Enter'||event.key===' ')){event.preventDefault();event.stopPropagation();onMore();}}}>
+        <div className="review-card-more-main">{moreIcon}{more}</div>
         <ReviewChevron/>
       </div>
       {sample}
@@ -870,6 +1027,8 @@ function MoodChart(){
 
 function ReviewPage(){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
+  const [feedingAnalysisOpen, setFeedingAnalysisOpen] = useState(false);
+  const [feedingFullOpen, setFeedingFullOpen] = useState(false);
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -980,12 +1139,14 @@ function ReviewPage(){
         )}
       />
 
-      <FeedingReviewCard/>
+      <FeedingReviewCard onOpen={()=>setFeedingAnalysisOpen(true)} onFullOpen={()=>setFeedingFullOpen(true)}/>
       <SleepReviewCard/>
       <DiaperReviewCard/>
       <FoodReviewCard/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
+      <FeedingAnalysisSheet open={feedingAnalysisOpen} onClose={()=>setFeedingAnalysisOpen(false)}/>
+      <FeedingFullAnalysisPage open={feedingFullOpen} onClose={()=>setFeedingFullOpen(false)}/>
     </main>
   );
 }
