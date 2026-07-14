@@ -416,8 +416,12 @@ function FeedingReviewCard({onOpen,onFullOpen}){
           <span className="review-legend-item is-feeding-breast"><i></i>瓶喂母乳</span>
           <span className="review-legend-item is-feeding-formula"><i></i>瓶喂配方奶</span>
           <span className="review-legend-item is-feeding-direct"><i></i>亲喂时长</span>
+          <button type="button" className="review-legend-expand" aria-label="展开喂奶分析" onClick={event=>{event.stopPropagation();onOpen();}}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+          </button>
         </>
       )}
+      onOpen={onOpen}
       metrics={(
         <>
           <FeedingReviewMetric kind="average" label="近7天平均"/>
@@ -433,9 +437,11 @@ function FeedingReviewCard({onOpen,onFullOpen}){
       )}
       onMore={onFullOpen}
       headerAction={(
-        <button type="button" className="review-card-expand" aria-label="展开喂奶分析" onClick={onOpen}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-        </button>
+        <div className="review-family-avatars" aria-label="共同记录人：爸爸、奶奶、爷爷">
+          <span title="爸爸" aria-label="爸爸">👨</span>
+          <span title="奶奶" aria-label="奶奶">👵</span>
+          <span title="爷爷" aria-label="爷爷">👴</span>
+        </div>
       )}
     />
   );
@@ -491,6 +497,15 @@ function FeedingAmountDetail({days}){
 }
 
 function FeedingPatternDetail({days}){
+  const patternScrollRef = React.useRef(null);
+  React.useEffect(()=>{
+    const scroll = patternScrollRef.current;
+    if(!scroll) return;
+    const revealAxis = ()=>{ scroll.scrollLeft = Math.max(0, scroll.scrollWidth - scroll.clientWidth); };
+    revealAxis();
+    const frame = requestAnimationFrame(revealAxis);
+    return ()=>cancelAnimationFrame(frame);
+  },[days.length]);
   return (
     <>
       <section className="feeding-analysis-module" aria-labelledby="feeding-pattern-title">
@@ -501,7 +516,7 @@ function FeedingPatternDetail({days}){
           <p>近7天：白天规律<em>✓ 符合标准值</em><i>·</i>夜奶暂无记录</p>
         </div>
       </div>
-      <div className="feeding-chart-scroll" role="region" aria-label="喂奶时间规律日期图表，可左右滑动" tabIndex="0">
+      <div ref={patternScrollRef} className="feeding-chart-scroll" role="region" aria-label="喂奶时间规律日期图表，可左右滑动" tabIndex="0">
         <div className="feeding-pattern-chart" style={{width:Math.max(330, days.length * 52 + 28)}}>
           <div className="feeding-pattern-grid">
             {days.map(day=><div className={'feeding-pattern-day'+(day.highlight?' is-today':'')} key={day.date}>
@@ -620,16 +635,16 @@ function SleepRecordReviewPage({open,onClose}){
           <header><span>Ai</span><b>智能分析</b><i>养成规律睡眠，促进智力发育</i><strong>›</strong></header>
           <div className="sleep-smart-body"><div className="sleep-smart-score"><b>每天睡觉</b><strong>10<i>h</i><small>34min</small></strong><span>第24周</span></div><div className="sleep-smart-status"><p>睡眠量　<em className="is-good">符合参考值</em></p><p>白天小睡　<em className="is-attention">建议关注</em></p><p>夜间睡眠　<em>未记录</em></p><button type="button">立即查看</button></div></div>
         </article>
-        <article className="sleep-record-module sleep-amount-first">
-          <h2>睡眠量</h2>
-          <section><h3><i/>总次数</h3><div className="sleep-record-counts">{SLEEP_REVIEW_COUNTS.map((count,index)=><span key={SLEEP_REVIEW_DATES[index]}>{count}次</span>)}</div></section>
-          <section><h3><i/>总时长</h3><div className="sleep-duration-empty has-data"><span>近7天平均每天15小时6分钟</span><div>{SLEEP_REVIEW_HOURS.map((hours,index)=><i key={SLEEP_REVIEW_DATES[index]} style={{height:(hours/18*230)}}><b>{hours}h</b></i>)}</div></div><div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div></section>
-        </article>
-        <article className="sleep-record-module sleep-pattern-second">
+        <article className="sleep-record-module sleep-pattern-first">
           <h2>时间规律</h2>
           <div className="sleep-time-grid"><div className="sleep-time-days">{SLEEP_REVIEW_DATES.map((date,dayIndex)=><span key={date}>{SLEEP_REVIEW_PERIODS[dayIndex].map((period,index)=><i key={index} style={{top:(period[0]/24*100)+'%',height:((period[1]-period[0])/24*100)+'%'}}/>)}</span>)}</div><div className="sleep-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div></div>
           <div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div>
           <div className="sleep-record-legend"><i/>睡眠</div>
+        </article>
+        <article className="sleep-record-module sleep-amount-second">
+          <h2>睡眠量</h2>
+          <section><h3><i/>总次数</h3><div className="sleep-record-counts">{SLEEP_REVIEW_COUNTS.map((count,index)=><span key={SLEEP_REVIEW_DATES[index]}>{count}次</span>)}</div></section>
+          <section><h3><i/>总时长</h3><div className="sleep-duration-empty has-data"><span>近7天平均每天15小时6分钟</span><div>{SLEEP_REVIEW_HOURS.map((hours,index)=><i key={SLEEP_REVIEW_DATES[index]} style={{height:(hours/18*230)}}><b>{hours}h</b></i>)}</div></div><div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div></section>
         </article>
       </div>
     </section>
