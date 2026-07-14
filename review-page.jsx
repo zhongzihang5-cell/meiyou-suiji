@@ -540,10 +540,20 @@ function FeedingAnalysisSheet({open,onClose,days=FEEDING_REVIEW_DAYS}){
   );
 }
 
-function FeedingFullAnalysisPage({open,onClose,days=FEEDING_REVIEW_DAYS}){
-  const [week,setWeek] = React.useState(16);
-  const reportDates = ['23','24','25','26','27','28','29'];
-  const average = Math.round(days.reduce((sum,day)=>sum+day.breast+day.formula,0)/days.length);
+function FeedingRangeRow({title,value,status,statusKind='good',left='偏少',middle='参考值',right='偏多',note}){
+  return (
+    <section className="feeding-range-row">
+      <header><b>{title}<i>?</i></b><strong>{value}</strong><em className={'is-'+statusKind}>{status}</em></header>
+      <div className="feeding-range-track"><span/><span/><span/><i/><i/><i/><i/></div>
+      <div className="feeding-range-labels"><span>{left}</span><span>{middle}</span><span>{right}</span></div>
+      {note ? <p>{note}</p> : null}
+    </section>
+  );
+}
+
+function FeedingFullAnalysisPage({open,onClose}){
+  const [week,setWeek] = React.useState(24);
+  const reportDates = ['19','20','21','22','23','24','25'];
   return (
     <section className={'feeding-full-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="完整喂奶分析">
       <header className="feeding-full-nav">
@@ -551,36 +561,38 @@ function FeedingFullAnalysisPage({open,onClose,days=FEEDING_REVIEW_DAYS}){
         <div className="feeding-full-tabs"><b>喂奶</b><span>睡眠</span></div>
       </header>
       <div className="feeding-full-weeks" role="tablist" aria-label="选择周数">
-        {[13,14,15,16,17].map(value=><button key={value} type="button" role="tab" aria-selected={week===value} className={week===value?'is-active':''} onClick={()=>setWeek(value)}>第{value}周</button>)}
+        {[20,21,22,23,24].map(value=><button key={value} type="button" role="tab" aria-selected={week===value} className={week===value?'is-active':''} onClick={()=>setWeek(value)}>第{value}周</button>)}
       </div>
       <div className="feeding-full-scroll">
         <article className="feeding-daily-card">
-          <header><span className="feeding-report-icon">▮</span><b>喂奶日报</b><em>宝宝第{week}周（6月23日-6月29日）</em></header>
+          <header><span className="feeding-report-icon">▮</span><b>喂养日报</b><em>宝宝第{week}周　（3月19日-3月25日）</em></header>
           <div className="feeding-report-days">
-            {reportDates.map(date=><div key={date} className={date==='27'?'is-selected':''}><b>{date}</b><span><i/><i/></span></div>)}
+            {reportDates.map(date=><div key={date} className={date==='25'?'is-selected':''}><b>{date}</b><span className={date==='24'?'is-empty':''}><i/>{date==='23'?<em>★</em>:null}</span></div>)}
           </div>
           <div className="feeding-report-wide is-count">
-            <span className="feeding-report-picture">🍼</span><div><b>喂奶次数 <strong>5</strong>次</b><p>参考次数　4~6次</p></div><i>›</i>
-          </div>
-          <div className="feeding-report-wide is-total">
-            <span className="feeding-report-picture">🍼</span><div><b>瓶喂总量 <strong>735</strong>ml</b><p>参考奶量　720ml~960ml</p></div><i>›</i>
+            <span className="feeding-count-ring"><img src="assets/baby-feeding-icons/formula.png" alt=""/></span><div><b>喂奶次数 <strong>10</strong>次</b><p>参考次数　12~14次</p></div><i>›</i>
+            <div className="feeding-day-timeline"><span/><span className="is-on"/><span/><span className="is-on"/><span/><span className="is-on"/><span/><span className="is-on"/><span/><span className="is-on"/><span/><small>06:00</small><small>12:00</small><small>18:00</small><small>次日00:00</small></div>
           </div>
           <div className="feeding-report-grid">
-            <div><i>›</i><b>白天单次喂奶量</b><strong>153.8<small>ml</small></strong><span className="feeding-mini-bars is-yellow"><i/><i/><i/><i/></span></div>
-            <div><i>›</i><b>白天间隔时长</b><strong>4.0<small>小时</small></strong><span className="feeding-mini-interval is-yellow"><i/><i/><i/></span></div>
-            <div><i>›</i><b>夜奶次数</b><strong>1<small>次　次日00:00-06:00</small></strong><span className="feeding-mini-dots"><i/><i/><i/><i className="is-on"/></span></div>
-            <div><i>›</i><b>夜奶间隔时长</b><strong>8.1<small>小时</small></strong><span className="feeding-mini-line"/></div>
+            <div><i>›</i><b>白天单次时长</b><strong>11.4<small>分钟</small></strong><span className="feeding-mini-bars is-yellow">{[22,18,31,25,35,20,26,34,19,30].map((h,i)=><i key={i} style={{height:h}}/>)}</span></div>
+            <div><i>›</i><b>白天间隔时长</b><strong>2.4<small>小时</small></strong><span className="feeding-mini-interval is-yellow"><i/><i/><i/><i/><i/><i/></span></div>
+            <div><i>›</i><b>夜奶次数</b><strong>3<small>次　21:00-次日06:00</small></strong><span className="feeding-mini-dots"><i/><i/><i/><i className="is-on"/><i/><i/><i/></span></div>
+            <div><i>›</i><b>夜奶间隔时长</b><strong>2.5<small>小时</small></strong><span className="feeding-mini-interval is-purple"><i/><i/><i/></span></div>
           </div>
         </article>
         <article className="feeding-week-analysis">
           <header><span>Ai</span><b>周规律分析</b></header>
-          <h3>6月23日-6月29日，已记录7天</h3>
-          <div className="feeding-analysis-table">
-            <b>指标(日均)</b><b>宝宝的记录</b><b>参考值</b>
-            <span>亲喂次数</span><strong>3次</strong><span>2~5次</span>
-            <span>瓶喂奶量</span><strong>{average}ml</strong><span>480~960ml</span>
-            <span>喂奶总次数</span><strong>5次</strong><em>正常</em>
-          </div>
+          <h3>3月19日-3月25日，已记录7天</h3>
+          <section className="feeding-analysis-copy-block"><h4><i/>0–1月龄重点关注 <span>收起⌃</span></h4><p>本月依旧可以按需喂养，每天吃奶8–12次或更多，夜奶间隔2–3小时吃一次都是适宜的。此外，哺乳期妈妈要多吃瘦肉、蛋奶类、豆制品等高蛋白食物，每天喝2100ml水，有利于乳汁分泌。</p></section>
+          <section className="feeding-analysis-copy-block"><h4><i/>周规律解读</h4>
+            <FeedingRangeRow title="喂奶次数" value="10.6次" status="符合参考值" note="小豆苗这周每天吃奶次数符合参考值，平均10.6次。妈妈记得多喝水，哺乳间隙多休息。"/>
+            <FeedingRangeRow title="白天间隔时长" value="1.3–3.9h" status="偏短" statusKind="warn" left="偏短" right="偏长"/>
+            <FeedingRangeRow title="白天单次时长" value="11–68min" status="偏长" statusKind="warn" left="偏短" right="偏长" note="白天规律：小豆苗白天吃奶间隔最短只有35分钟，有52次吃奶不足10分钟，可能存在宝宝频繁短时进食问题。新生儿每次哺乳时长一般在20–30分钟，间隔1.5–3小时。"/>
+            <FeedingRangeRow title="夜奶次数" value="2次" status="符合参考值" left="偏少" right="偏多"/>
+            <FeedingRangeRow title="夜奶间隔时长" value="9–65min" status="不规律" statusKind="bad" left="偏短" right="偏长" note="夜奶规律：小豆苗白天吃奶间隔最短只有35分钟，有52次吃奶不足10分钟，可能存在宝宝频繁短时进食问题。新生儿每次哺乳时长一般在20–30分钟，间隔1.5–3小时。"/>
+          </section>
+          <section className="feeding-analysis-copy-block"><h4><i/>原因分析</h4><p>喂养次数多、宝宝频繁短时进食情况，原因可能有：</p><p><b>哺乳效率低：</b>宝宝含接姿势不对，吸吮效果差，乳汁吸不出；或妈妈乳腺管未通，乳汁流出不顺，宝宝吃起来费劲，易频繁松口。</p><p><b>母乳不足：</b>妈妈产后身体未恢复，或饮食过于清淡、营养摄入不足，使得乳汁分泌量暂时无法满足宝宝需求。</p></section>
+          <section className="feeding-analysis-copy-block"><h4><i/>下一步建议</h4><p><b>吸空一侧乳房：</b>这样能确保宝宝吃到高脂肪后奶，增加饱腹感。</p><p><b>夜间按需哺乳：</b>如果宝宝体重正常、状态良好，大小便也正常，超3小时未醒可暂不叫醒。</p></section>
         </article>
       </div>
     </section>
