@@ -130,7 +130,7 @@ function SleepReviewMetric({major, majorUnit, minor, minorUnit, label, trend}){
   );
 }
 
-function SleepReviewCard(){
+function SleepReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="睡眠"
@@ -146,6 +146,7 @@ function SleepReviewCard(){
         </>
       )}
       more="查看完整睡眠变化"
+      onMore={onFullOpen}
     />
   );
 }
@@ -599,6 +600,42 @@ function FeedingFullAnalysisPage({open,onClose}){
   );
 }
 
+const SLEEP_REVIEW_DATES = ['7.8','7.9','7.10','7.11','7.12','7.13','今天'];
+const SLEEP_REVIEW_COUNTS = [5,4,5,6,5,4,4];
+const SLEEP_REVIEW_HOURS = [14.8,15.6,14.3,16.1,15.2,14.7,15.0];
+const SLEEP_REVIEW_PERIODS = [
+  [[0.4,5.8],[8.2,9.5],[12.1,13.3],[16,17.2],[20.5,24]], [[0,5.4],[8.6,10],[12.8,14],[17.1,18.2],[21,24]],
+  [[0.2,6],[9,10.1],[13,14.4],[16.4,17.6],[20.8,24]], [[0,5.7],[8.1,9],[11.4,12.4],[14.8,15.7],[18,19],[21.4,24]],
+  [[0.3,6.1],[8.7,10],[12.5,13.7],[16.2,17.4],[20.6,24]], [[0.1,5.5],[9.2,10.6],[13.5,14.7],[17,18.1],[21.2,24]],
+  [[0.2,6],[8.5,9.8],[13,14.2],[20.9,24]],
+];
+
+function SleepRecordReviewPage({open,onClose}){
+  return (
+    <section className={'sleep-record-review'+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养记录回顾">
+      <header className="sleep-record-nav"><button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button><b>喂养分析</b><span>参考表</span></header>
+      <nav className="sleep-record-tabs" aria-label="喂养分析分类"><span>喂奶</span><b>睡眠</b><span>换尿布</span><span>辅食</span><span>全部</span></nav>
+      <div className="sleep-record-scroll">
+        <article className="sleep-smart-card">
+          <header><span>Ai</span><b>智能分析</b><i>养成规律睡眠，促进智力发育</i><strong>›</strong></header>
+          <div className="sleep-smart-body"><div className="sleep-smart-score"><b>每天睡觉</b><strong>10<i>h</i><small>34min</small></strong><span>第24周</span></div><div className="sleep-smart-status"><p>睡眠量　<em className="is-good">符合参考值</em></p><p>白天小睡　<em className="is-attention">建议关注</em></p><p>夜间睡眠　<em>未记录</em></p><button type="button">立即查看</button></div></div>
+        </article>
+        <article className="sleep-record-module sleep-amount-first">
+          <h2>睡眠量</h2>
+          <section><h3><i/>总次数</h3><div className="sleep-record-counts">{SLEEP_REVIEW_COUNTS.map((count,index)=><span key={SLEEP_REVIEW_DATES[index]}>{count}次</span>)}</div></section>
+          <section><h3><i/>总时长</h3><div className="sleep-duration-empty has-data"><span>近7天平均每天15小时6分钟</span><div>{SLEEP_REVIEW_HOURS.map((hours,index)=><i key={SLEEP_REVIEW_DATES[index]} style={{height:(hours/18*230)}}><b>{hours}h</b></i>)}</div></div><div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div></section>
+        </article>
+        <article className="sleep-record-module sleep-pattern-second">
+          <h2>时间规律</h2>
+          <div className="sleep-time-grid"><div className="sleep-time-days">{SLEEP_REVIEW_DATES.map((date,dayIndex)=><span key={date}>{SLEEP_REVIEW_PERIODS[dayIndex].map((period,index)=><i key={index} style={{top:(period[0]/24*100)+'%',height:((period[1]-period[0])/24*100)+'%'}}/>)}</span>)}</div><div className="sleep-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div></div>
+          <div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div>
+          <div className="sleep-record-legend"><i/>睡眠</div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function BabyReviewCard({title, kind}){
   return (
     <ReviewCard
@@ -1041,6 +1078,7 @@ function ReviewPage(){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [feedingAnalysisOpen, setFeedingAnalysisOpen] = useState(false);
   const [feedingFullOpen, setFeedingFullOpen] = useState(false);
+  const [sleepRecordOpen, setSleepRecordOpen] = useState(false);
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -1152,13 +1190,14 @@ function ReviewPage(){
       />
 
       <FeedingReviewCard onOpen={()=>setFeedingAnalysisOpen(true)} onFullOpen={()=>setFeedingFullOpen(true)}/>
-      <SleepReviewCard/>
+      <SleepReviewCard onFullOpen={()=>setSleepRecordOpen(true)}/>
       <DiaperReviewCard/>
       <FoodReviewCard/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingAnalysisSheet open={feedingAnalysisOpen} onClose={()=>setFeedingAnalysisOpen(false)}/>
       <FeedingFullAnalysisPage open={feedingFullOpen} onClose={()=>setFeedingFullOpen(false)}/>
+      <SleepRecordReviewPage open={sleepRecordOpen} onClose={()=>setSleepRecordOpen(false)}/>
     </main>
   );
 }
