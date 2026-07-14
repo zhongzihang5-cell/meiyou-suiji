@@ -416,9 +416,6 @@ function FeedingReviewCard({onOpen,onFullOpen}){
           <span className="review-legend-item is-feeding-breast"><i></i>瓶喂母乳</span>
           <span className="review-legend-item is-feeding-formula"><i></i>瓶喂配方奶</span>
           <span className="review-legend-item is-feeding-direct"><i></i>亲喂时长</span>
-          <button type="button" className="review-legend-expand" aria-label="展开喂奶分析" onClick={event=>{event.stopPropagation();onOpen();}}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-          </button>
         </>
       )}
       onOpen={onOpen}
@@ -437,11 +434,9 @@ function FeedingReviewCard({onOpen,onFullOpen}){
       )}
       onMore={onFullOpen}
       headerAction={(
-        <div className="review-family-avatars" aria-label="共同记录人：爸爸、奶奶、爷爷">
-          <span title="爸爸" aria-label="爸爸">👨</span>
-          <span title="奶奶" aria-label="奶奶">👵</span>
-          <span title="爷爷" aria-label="爷爷">👴</span>
-        </div>
+        <button type="button" className="review-card-expand" aria-label="展开喂奶分析" onClick={onOpen}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        </button>
       )}
     />
   );
