@@ -146,6 +146,7 @@ function SleepReviewCard({onFullOpen}){
         </>
       )}
       more="查看完整睡眠变化"
+      onOpen={onFullOpen}
       onMore={onFullOpen}
     />
   );
@@ -228,7 +229,7 @@ function DiaperReviewMetric({kind, label}){
   );
 }
 
-function DiaperReviewCard(){
+function DiaperReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="换尿布"
@@ -250,6 +251,8 @@ function DiaperReviewCard(){
         </>
       )}
       more="查看完整换尿布变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
@@ -304,7 +307,7 @@ function FoodReviewMetric({kind, label}){
   );
 }
 
-function FoodReviewCard(){
+function FoodReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="辅食"
@@ -320,21 +323,24 @@ function FoodReviewCard(){
         </>
       )}
       more="查看完整辅食变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
 
 const FEEDING_REVIEW_DAYS = [
-  {date:'10.15', breast:220, formula:300, minutes:48, directCount:3, leftMinutes:25, rightMinutes:23, feeds:[{hour:3.6,type:'formula'},{hour:8.1,type:'breast'},{hour:12.4,type:'direct'},{hour:16.2,type:'formula'},{hour:20.3,type:'breast'}]},
-  {date:'10.16', breast:260, formula:350, minutes:42, directCount:3, leftMinutes:22, rightMinutes:20, feeds:[{hour:2.8,type:'formula'},{hour:7.4,type:'breast'},{hour:11.2,type:'formula'},{hour:15.1,type:'direct'},{hour:19.3,type:'breast'},{hour:23.1,type:'formula'}]},
-  {date:'10.17', breast:190, formula:280, minutes:37, directCount:2, leftMinutes:18, rightMinutes:19, feeds:[{hour:4.2,type:'breast'},{hour:9.0,type:'formula'},{hour:13.5,type:'direct'},{hour:18.0,type:'formula'},{hour:22.4,type:'breast'}]},
-  {date:'10.18', breast:300, formula:380, minutes:50, directCount:3, leftMinutes:26, rightMinutes:24, feeds:[{hour:3.2,type:'formula'},{hour:7.6,type:'breast'},{hour:10.9,type:'direct'},{hour:14.6,type:'formula'},{hour:18.1,type:'breast'},{hour:22.0,type:'formula'}]},
-  {date:'10.19', breast:240, formula:300, minutes:44, directCount:3, leftMinutes:21, rightMinutes:23, feeds:[{hour:4.0,type:'formula'},{hour:8.3,type:'breast'},{hour:12.0,type:'direct'},{hour:16.6,type:'formula'},{hour:21.0,type:'breast'}]},
-  {date:'10.20', breast:293, formula:380, minutes:39, directCount:2, leftMinutes:20, rightMinutes:19, feeds:[{hour:3.5,type:'formula'},{hour:7.8,type:'breast'},{hour:11.4,type:'formula'},{hour:15.4,type:'direct'},{hour:19.2,type:'breast'},{hour:23.0,type:'formula'}]},
-  {date:'今天', breast:580, formula:120, minutes:42, directCount:3, leftMinutes:24, rightMinutes:18, highlight:true, feeds:[{hour:3.63,type:'formula'},{hour:7.78,type:'formula'},{hour:11.1,type:'breast'},{hour:15.4,type:'direct'},{hour:20.77,type:'formula'}]},
+  {date:'10.15', breast:220, formula:300, minutes:48, directCount:3, leftMinutes:25, rightMinutes:23, feeds:[{hour:1.2,type:'formula'},{hour:8.4,type:'direct'},{hour:13.1,type:'breast'},{hour:18.3,type:'direct'},{hour:22.1,type:'formula'}]},
+  {date:'10.16', breast:260, formula:350, minutes:42, directCount:3, leftMinutes:20, rightMinutes:22, feeds:[{hour:.8,type:'formula'},{hour:7.9,type:'direct'},{hour:11.8,type:'breast'},{hour:16.5,type:'formula'},{hour:20.7,type:'direct'},{hour:23,type:'breast'}]},
+  {date:'10.17', breast:190, formula:280, minutes:37, directCount:2, leftMinutes:18, rightMinutes:19, feeds:[{hour:2,type:'formula'},{hour:9.2,type:'direct'},{hour:13.8,type:'breast'},{hour:18.8,type:'direct'},{hour:22.4,type:'formula'}]},
+  {date:'10.18', breast:300, formula:380, minutes:50, directCount:4, leftMinutes:26, rightMinutes:24, feeds:[{hour:1.4,type:'formula'},{hour:6.8,type:'direct'},{hour:10.5,type:'breast'},{hour:14.2,type:'direct'},{hour:18,type:'formula'},{hour:21.5,type:'direct'},{hour:23.3,type:'breast'}]},
+  {date:'10.19', breast:240, formula:300, minutes:44, directCount:3, leftMinutes:22, rightMinutes:22, feeds:[{hour:2.3,type:'formula'},{hour:8.2,type:'direct'},{hour:12.7,type:'breast'},{hour:17.2,type:'direct'},{hour:21.8,type:'formula'}]},
+  {date:'10.20', breast:293, formula:380, minutes:39, directCount:3, leftMinutes:20, rightMinutes:19, feeds:[{hour:1.1,type:'formula'},{hour:7.4,type:'direct'},{hour:11.3,type:'breast'},{hour:15.6,type:'formula'},{hour:19.7,type:'direct'},{hour:22.8,type:'breast'}]},
+  {date:'今天', breast:580, formula:120, minutes:42, directCount:3, leftMinutes:21, rightMinutes:21, feeds:[{hour:1.5,type:'formula'},{hour:8,type:'direct'},{hour:12.2,type:'breast'},{hour:16.8,type:'direct'},{hour:21.3,type:'breast'}], highlight:true},
 ];
 
-function FeedingReviewChart({days=FEEDING_REVIEW_DAYS}){
+function FeedingReviewChart(){
+  const days = FEEDING_REVIEW_DAYS;
   const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const amountMax = 720;
@@ -393,18 +399,21 @@ function FeedingReviewChart({days=FEEDING_REVIEW_DAYS}){
 function FeedingReviewMetric({kind, label}){
   return (
     <div className="review-metric review-feeding-metric">
+      {kind === 'recent' ? (
+        <div className="review-feeding-recent-value"><span className="review-feeding-formula-icon" aria-label="瓶喂配方奶"><ReviewFormulaRecordIcon/></span><div><b>120</b><i>ml</i></div></div>
+      ) : null}
       {kind === 'average' ? (
         <div className="review-feeding-average-value"><b>599</b><i>ml</i></div>
       ) : null}
-      {kind === 'standard' ? (
-        <div className="review-feeding-standard-value"><span>✓</span><b>符合标准值</b></div>
+      {kind === 'trend' ? (
+        <div className="review-feeding-average-value"><b>6.9</b><i>次</i></div>
       ) : null}
       <div className="review-metric-label">{label}</div>
     </div>
   );
 }
 
-function FeedingReviewCard({onOpen,onFullOpen}){
+function FeedingReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="喂奶"
@@ -418,231 +427,17 @@ function FeedingReviewCard({onOpen,onFullOpen}){
           <span className="review-legend-item is-feeding-direct"><i></i>亲喂时长</span>
         </>
       )}
-      onOpen={onOpen}
       metrics={(
         <>
+          <FeedingReviewMetric kind="recent" label="最近记录"/>
           <FeedingReviewMetric kind="average" label="近7天平均"/>
-          <FeedingReviewMetric kind="standard" label="喂奶次数"/>
-          <FeedingReviewMetric kind="standard" label="喂奶规律"/>
+          <FeedingReviewMetric kind="trend" label="近7天平均"/>
         </>
       )}
-      more="查看完整喂奶分析"
-      moreIcon={(
-        <span className="review-vip-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path className="review-vip-gem" d="M5.2 5.5h13.6l2.4 5.2L12 20 2.8 10.7z"/><path className="review-vip-check" d="M8.2 11.2l2.5 2.5 5.2-5.2"/></svg>
-        </span>
-      )}
+      more="查看完整喂奶变化"
+      onOpen={onFullOpen}
       onMore={onFullOpen}
-      headerAction={(
-        <button type="button" className="review-card-expand" aria-label="展开喂奶分析" onClick={onOpen}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-        </button>
-      )}
     />
-  );
-}
-
-function FeedingAmountDetail({days}){
-  const max = Math.max(...days.map(day=>day.breast + day.formula), 1);
-  return (
-    <>
-      <section className="feeding-analysis-module" aria-labelledby="feeding-amount-title">
-      <div className="feeding-analysis-module-head"><b id="feeding-amount-title">喂奶量</b><span>统计周期：每日00:00-24:00</span></div>
-      <div className="feeding-analysis-insights" aria-label="喂奶量总结">
-        <span className="feeding-insight-mark" aria-hidden="true">✦</span>
-        <div className="feeding-insight-copy">
-          <p>近7天：瓶喂<strong>599ml/天</strong><i>·</i>亲喂<strong>3次/天</strong><i>·</i>次数<em>✓ 符合标准值</em></p>
-        </div>
-      </div>
-      <div className="feeding-direct-block">
-        <h3><i/>亲喂母乳</h3>
-        <div className="feeding-chart-scroll" role="region" aria-label="亲喂母乳日期数据，可左右滑动" tabIndex="0">
-          <div className="feeding-direct-table" style={{width:Math.max(330, 32 + days.length * 52),gridTemplateColumns:`32px repeat(${days.length}, minmax(52px, 1fr))`}}>
-            <div className="feeding-direct-labels" aria-hidden="true"><span>次数</span><span>左</span><span>右</span></div>
-            {days.map(day=><div className={'feeding-direct-day'+(day.highlight?' is-today':'')} key={day.date}>
-              <b>{day.directCount}次</b>
-              <span>{day.leftMinutes}分钟</span>
-              <span>{day.rightMinutes}分钟</span>
-            </div>)}
-          </div>
-        </div>
-      </div>
-      <div className="feeding-bottle-title"><i/>瓶喂</div>
-      <div className="feeding-amount-legend"><span className="is-breast"><i/>瓶喂母乳</span><span className="is-formula"><i/>瓶喂配方奶</span></div>
-      <div className="feeding-chart-scroll" role="region" aria-label="瓶喂量日期图表，可左右滑动" tabIndex="0">
-        <div className="feeding-amount-chart" style={{width:Math.max(330, days.length * 52)}}>
-          {days.map(day=>{
-            const total = day.breast + day.formula;
-            const height = Math.max(10, Math.round(total / max * 176));
-            const breastHeight = Math.round(day.breast / total * height);
-            return <div className={'feeding-amount-day'+(day.highlight?' is-today':'')} key={day.date}>
-              <div className="feeding-amount-total">{total}</div>
-              <div className="feeding-amount-bar" style={{height}}>
-                <span className="is-breast" style={{height:breastHeight}}>{day.breast}</span>
-                <span className="is-formula" style={{height:height-breastHeight}}>{day.formula}</span>
-              </div>
-              <em>{day.date}</em>
-            </div>;
-          })}
-        </div>
-      </div>
-      </section>
-    </>
-  );
-}
-
-function FeedingPatternDetail({days}){
-  const patternScrollRef = React.useRef(null);
-  React.useEffect(()=>{
-    const scroll = patternScrollRef.current;
-    if(!scroll) return;
-    const revealAxis = ()=>{ scroll.scrollLeft = Math.max(0, scroll.scrollWidth - scroll.clientWidth); };
-    revealAxis();
-    const frame = requestAnimationFrame(revealAxis);
-    return ()=>cancelAnimationFrame(frame);
-  },[days.length]);
-  return (
-    <>
-      <section className="feeding-analysis-module" aria-labelledby="feeding-pattern-title">
-      <div className="feeding-analysis-module-head"><b id="feeding-pattern-title">时间规律</b><span>近7天喂养时段</span></div>
-      <div className="feeding-analysis-insights" aria-label="时间规律总结">
-        <span className="feeding-insight-mark" aria-hidden="true">✦</span>
-        <div className="feeding-insight-copy">
-          <p>近7天：白天规律<em>✓ 符合标准值</em><i>·</i>夜奶暂无记录</p>
-        </div>
-      </div>
-      <div ref={patternScrollRef} className="feeding-chart-scroll" role="region" aria-label="喂奶时间规律日期图表，可左右滑动" tabIndex="0">
-        <div className="feeding-pattern-chart" style={{width:Math.max(330, days.length * 52 + 28)}}>
-          <div className="feeding-pattern-grid">
-            {days.map(day=><div className={'feeding-pattern-day'+(day.highlight?' is-today':'')} key={day.date}>
-              <div className="feeding-pattern-track">
-                {day.feeds.map((feed,index)=><span key={index} className={'feeding-pattern-dot is-'+feed.type} style={{top:(feed.hour/24*100)+'%'}} aria-label={feed.hour.toFixed(1)+'时'}/>) }
-              </div>
-              <em>{day.date}</em>
-            </div>)}
-            <div className="feeding-pattern-axis">{[0,4,8,12,16,20,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
-          </div>
-          <div className="feeding-pattern-legend"><span className="is-direct"><i/>亲喂母乳</span><span className="is-formula"><i/>配方奶</span><span className="is-breast"><i/>瓶喂母乳</span></div>
-        </div>
-      </div>
-      </section>
-    </>
-  );
-}
-
-function FeedingAnalysisSheet({open,onClose,days=FEEDING_REVIEW_DAYS}){
-  React.useEffect(()=>{
-    if(!open) return undefined;
-    const handleKey = event=>{ if(event.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handleKey);
-    return ()=>window.removeEventListener('keydown', handleKey);
-  },[open,onClose]);
-  return (
-    <div className={'feeding-analysis-layer'+(open?' is-open':'')} aria-hidden={!open}>
-      <button type="button" className="feeding-analysis-scrim" aria-label="关闭喂奶分析" onClick={onClose}/>
-      <section className="feeding-analysis-sheet" role="dialog" aria-modal="true" aria-label="喂奶分析">
-        <div className="feeding-analysis-handle" aria-hidden="true"/>
-        <div className="feeding-analysis-scroll">
-          <FeedingAmountDetail days={days}/>
-          <FeedingPatternDetail days={days}/>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function FeedingRangeRow({title,value,status,statusKind='good',left='偏少',middle='参考值',right='偏多',note}){
-  return (
-    <section className="feeding-range-row">
-      <header><b>{title}<i>?</i></b><strong>{value}</strong><em className={'is-'+statusKind}>{status}</em></header>
-      <div className="feeding-range-track"><span/><span/><span/><i/><i/><i/><i/></div>
-      <div className="feeding-range-labels"><span>{left}</span><span>{middle}</span><span>{right}</span></div>
-      {note ? <p>{note}</p> : null}
-    </section>
-  );
-}
-
-function FeedingFullAnalysisPage({open,onClose}){
-  const [week,setWeek] = React.useState(24);
-  const reportDates = ['19','20','21','22','23','24','25'];
-  return (
-    <section className={'feeding-full-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="完整喂奶分析">
-      <header className="feeding-full-nav">
-        <button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
-        <div className="feeding-full-tabs"><b>喂奶</b><span>睡眠</span></div>
-      </header>
-      <div className="feeding-full-weeks" role="tablist" aria-label="选择周数">
-        {[20,21,22,23,24].map(value=><button key={value} type="button" role="tab" aria-selected={week===value} className={week===value?'is-active':''} onClick={()=>setWeek(value)}>第{value}周</button>)}
-      </div>
-      <div className="feeding-full-scroll">
-        <article className="feeding-daily-card">
-          <header><span className="feeding-report-icon">▮</span><b>喂养日报</b><em>宝宝第{week}周　（3月19日-3月25日）</em></header>
-          <div className="feeding-report-days">
-            {reportDates.map(date=><div key={date} className={date==='25'?'is-selected':''}><b>{date}</b><span className={date==='24'?'is-empty':''}><i/>{date==='23'?<em>★</em>:null}</span></div>)}
-          </div>
-          <div className="feeding-report-wide is-count">
-            <span className="feeding-count-ring"><img src="assets/baby-feeding-icons/formula.png" alt=""/></span><div><b>喂奶次数 <strong>10</strong>次</b><p>参考次数　12~14次</p></div><i>›</i>
-            <div className="feeding-day-timeline"><span/><span className="is-on"/><span/><span className="is-on"/><span/><span className="is-on"/><span/><span className="is-on"/><span/><span className="is-on"/><span/><small>06:00</small><small>12:00</small><small>18:00</small><small>次日00:00</small></div>
-          </div>
-          <div className="feeding-report-grid">
-            <div><i>›</i><b>白天单次时长</b><strong>11.4<small>分钟</small></strong><span className="feeding-mini-bars is-yellow">{[22,18,31,25,35,20,26,34,19,30].map((h,i)=><i key={i} style={{height:h}}/>)}</span></div>
-            <div><i>›</i><b>白天间隔时长</b><strong>2.4<small>小时</small></strong><span className="feeding-mini-interval is-yellow"><i/><i/><i/><i/><i/><i/></span></div>
-            <div><i>›</i><b>夜奶次数</b><strong>3<small>次　21:00-次日06:00</small></strong><span className="feeding-mini-dots"><i/><i/><i/><i className="is-on"/><i/><i/><i/></span></div>
-            <div><i>›</i><b>夜奶间隔时长</b><strong>2.5<small>小时</small></strong><span className="feeding-mini-interval is-purple"><i/><i/><i/></span></div>
-          </div>
-        </article>
-        <article className="feeding-week-analysis">
-          <header><span>Ai</span><b>周规律分析</b></header>
-          <h3>3月19日-3月25日，已记录7天</h3>
-          <section className="feeding-analysis-copy-block"><h4><i/>0–1月龄重点关注 <span>收起⌃</span></h4><p>本月依旧可以按需喂养，每天吃奶8–12次或更多，夜奶间隔2–3小时吃一次都是适宜的。此外，哺乳期妈妈要多吃瘦肉、蛋奶类、豆制品等高蛋白食物，每天喝2100ml水，有利于乳汁分泌。</p></section>
-          <section className="feeding-analysis-copy-block"><h4><i/>周规律解读</h4>
-            <FeedingRangeRow title="喂奶次数" value="10.6次" status="符合参考值" note="小豆苗这周每天吃奶次数符合参考值，平均10.6次。妈妈记得多喝水，哺乳间隙多休息。"/>
-            <FeedingRangeRow title="白天间隔时长" value="1.3–3.9h" status="偏短" statusKind="warn" left="偏短" right="偏长"/>
-            <FeedingRangeRow title="白天单次时长" value="11–68min" status="偏长" statusKind="warn" left="偏短" right="偏长" note="白天规律：小豆苗白天吃奶间隔最短只有35分钟，有52次吃奶不足10分钟，可能存在宝宝频繁短时进食问题。新生儿每次哺乳时长一般在20–30分钟，间隔1.5–3小时。"/>
-            <FeedingRangeRow title="夜奶次数" value="2次" status="符合参考值" left="偏少" right="偏多"/>
-            <FeedingRangeRow title="夜奶间隔时长" value="9–65min" status="不规律" statusKind="bad" left="偏短" right="偏长" note="夜奶规律：小豆苗白天吃奶间隔最短只有35分钟，有52次吃奶不足10分钟，可能存在宝宝频繁短时进食问题。新生儿每次哺乳时长一般在20–30分钟，间隔1.5–3小时。"/>
-          </section>
-          <section className="feeding-analysis-copy-block"><h4><i/>原因分析</h4><p>喂养次数多、宝宝频繁短时进食情况，原因可能有：</p><p><b>哺乳效率低：</b>宝宝含接姿势不对，吸吮效果差，乳汁吸不出；或妈妈乳腺管未通，乳汁流出不顺，宝宝吃起来费劲，易频繁松口。</p><p><b>母乳不足：</b>妈妈产后身体未恢复，或饮食过于清淡、营养摄入不足，使得乳汁分泌量暂时无法满足宝宝需求。</p></section>
-          <section className="feeding-analysis-copy-block"><h4><i/>下一步建议</h4><p><b>吸空一侧乳房：</b>这样能确保宝宝吃到高脂肪后奶，增加饱腹感。</p><p><b>夜间按需哺乳：</b>如果宝宝体重正常、状态良好，大小便也正常，超3小时未醒可暂不叫醒。</p></section>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-const SLEEP_REVIEW_DATES = ['7.8','7.9','7.10','7.11','7.12','7.13','今天'];
-const SLEEP_REVIEW_COUNTS = [5,4,5,6,5,4,4];
-const SLEEP_REVIEW_HOURS = [14.8,15.6,14.3,16.1,15.2,14.7,15.0];
-const SLEEP_REVIEW_PERIODS = [
-  [[0.4,5.8],[8.2,9.5],[12.1,13.3],[16,17.2],[20.5,24]], [[0,5.4],[8.6,10],[12.8,14],[17.1,18.2],[21,24]],
-  [[0.2,6],[9,10.1],[13,14.4],[16.4,17.6],[20.8,24]], [[0,5.7],[8.1,9],[11.4,12.4],[14.8,15.7],[18,19],[21.4,24]],
-  [[0.3,6.1],[8.7,10],[12.5,13.7],[16.2,17.4],[20.6,24]], [[0.1,5.5],[9.2,10.6],[13.5,14.7],[17,18.1],[21.2,24]],
-  [[0.2,6],[8.5,9.8],[13,14.2],[20.9,24]],
-];
-
-function SleepRecordReviewPage({open,onClose}){
-  return (
-    <section className={'sleep-record-review'+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养记录回顾">
-      <header className="sleep-record-nav"><button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button><b>喂养分析</b><span>参考表</span></header>
-      <nav className="sleep-record-tabs" aria-label="喂养分析分类"><span>喂奶</span><b>睡眠</b><span>换尿布</span><span>辅食</span><span>全部</span></nav>
-      <div className="sleep-record-scroll">
-        <article className="sleep-smart-card">
-          <header><span>Ai</span><b>智能分析</b><i>养成规律睡眠，促进智力发育</i><strong>›</strong></header>
-          <div className="sleep-smart-body"><div className="sleep-smart-score"><b>每天睡觉</b><strong>10<i>h</i><small>34min</small></strong><span>第24周</span></div><div className="sleep-smart-status"><p>睡眠量　<em className="is-good">符合参考值</em></p><p>白天小睡　<em className="is-attention">建议关注</em></p><p>夜间睡眠　<em>未记录</em></p><button type="button">立即查看</button></div></div>
-        </article>
-        <article className="sleep-record-module sleep-pattern-first">
-          <h2>时间规律</h2>
-          <div className="sleep-time-grid"><div className="sleep-time-days">{SLEEP_REVIEW_DATES.map((date,dayIndex)=><span key={date}>{SLEEP_REVIEW_PERIODS[dayIndex].map((period,index)=><i key={index} style={{top:(period[0]/24*100)+'%',height:((period[1]-period[0])/24*100)+'%'}}/>)}</span>)}</div><div className="sleep-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div></div>
-          <div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div>
-          <div className="sleep-record-legend"><i/>睡眠</div>
-        </article>
-        <article className="sleep-record-module sleep-amount-second">
-          <h2>睡眠量</h2>
-          <section><h3><i/>总次数</h3><div className="sleep-record-counts">{SLEEP_REVIEW_COUNTS.map((count,index)=><span key={SLEEP_REVIEW_DATES[index]}>{count}次</span>)}</div></section>
-          <section><h3><i/>总时长</h3><div className="sleep-duration-empty has-data"><span>近7天平均每天15小时6分钟</span><div>{SLEEP_REVIEW_HOURS.map((hours,index)=><i key={SLEEP_REVIEW_DATES[index]} style={{height:(hours/18*230)}}><b>{hours}h</b></i>)}</div></div><div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div></section>
-        </article>
-      </div>
-    </section>
   );
 }
 
@@ -668,13 +463,22 @@ function ReviewBackIcon(){
   return <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>;
 }
 
-function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, moreIcon, sample, onOpen, onMore, headerAction}){
+function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sample, onOpen, onMore}){
   const isActionable = typeof onOpen === 'function';
+  const isMoreActionable = typeof onMore === 'function';
   const handleKeyDown = (event)=>{
     if(!isActionable) return;
     if(event.key === 'Enter' || event.key === ' '){
       event.preventDefault();
       onOpen();
+    }
+  };
+  const handleMoreKeyDown = (event)=>{
+    if(!isMoreActionable) return;
+    if(event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      event.stopPropagation();
+      onMore();
     }
   };
   return (
@@ -689,18 +493,229 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, mo
         <div className="review-card-head">
           <div className={'review-card-icon ' + iconClass} aria-hidden="true">{icon}</div>
           <div className="review-card-title">{title}</div>
-          {headerAction ? <div className="review-card-head-action" onClick={event=>event.stopPropagation()}>{headerAction}</div> : null}
         </div>
         <div className="review-chart">{chart}</div>
         <div className="review-legend">{legend}</div>
         <div className="review-metrics">{metrics}</div>
       </div>
-      <div className="review-card-more" role="button" aria-label={more} tabIndex={onMore ? 0 : undefined} onClick={event=>{if(onMore){event.stopPropagation();onMore();}}} onKeyDown={event=>{if(onMore&&(event.key==='Enter'||event.key===' ')){event.preventDefault();event.stopPropagation();onMore();}}}>
-        <div className="review-card-more-main">{moreIcon}{more}</div>
+      <div
+        className={'review-card-more'+(isMoreActionable?' is-actionable':'')}
+        role="button"
+        tabIndex={isMoreActionable ? 0 : undefined}
+        aria-label={more}
+        onClick={isMoreActionable ? (event)=>{ event.stopPropagation(); onMore(); } : undefined}
+        onKeyDown={handleMoreKeyDown}
+      >
+        <div className="review-card-more-main">{more}</div>
         <ReviewChevron/>
       </div>
       {sample}
     </div>
+  );
+}
+
+function FeedingReviewTabs({active,onChange}){
+  return (
+    <nav className="feeding-review-tabs" aria-label="喂养分析分类">
+      <button type="button" className={active==='feeding'?'is-active':''} aria-current={active==='feeding'?'page':undefined} onClick={()=>onChange('feeding')}>喂奶</button>
+      <button type="button" className={active==='sleep'?'is-active':''} aria-current={active==='sleep'?'page':undefined} onClick={()=>onChange('sleep')}>睡眠</button>
+      <button type="button" className={active==='diaper'?'is-active':''} aria-current={active==='diaper'?'page':undefined} onClick={()=>onChange('diaper')}>换尿布</button>
+      <button type="button" className={active==='food'?'is-active':''} aria-current={active==='food'?'page':undefined} onClick={()=>onChange('food')}>辅食</button>
+      <button type="button" className={active==='all'?'is-active':''} aria-current={active==='all'?'page':undefined} onClick={()=>onChange('all')}>全部</button>
+    </nav>
+  );
+}
+
+function FeedingRecordReviewContent(){
+  const days = FEEDING_REVIEW_DAYS;
+  const maxBottle = Math.max(...days.map(day=>day.breast+day.formula));
+  const bottleAverage = Math.round(days.reduce((sum,day)=>sum+day.breast+day.formula,0)/days.length);
+  return (
+    <div className="feeding-record-scroll" aria-label="喂奶分析内容">
+        <article className="feeding-smart-card">
+          <header><span>Ai</span><b>小小屁的喂奶规律解读</b><em>VIP</em><strong>›</strong></header>
+          <div className="feeding-smart-body">
+            <div className="feeding-smart-score"><b>每天喝奶</b><strong>10<i>次</i></strong><span>第24周</span></div>
+            <div className="feeding-smart-status"><p>喂奶次数　<em className="is-good">符合参考值</em></p><p>白天规律　<em className="is-attention">建议关注</em></p><p>夜奶规律　<em>未记录</em></p><button type="button">立即查看</button></div>
+          </div>
+        </article>
+
+        <article className="feeding-record-module">
+          <h2>时间规律</h2>
+          <div className="feeding-pattern-grid">
+            <div className="feeding-pattern-days">{days.map(day=><span key={day.date}>{day.feeds.map((feed,index)=><i key={index} className={'is-'+feed.type} style={{top:(feed.hour/24*100)+'%'}}/>)}</span>)}</div>
+            <div className="feeding-pattern-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+          </div>
+          <div className="feeding-record-dates">{days.map(day=><span key={day.date} className={day.highlight?'is-hot':''}>{day.date}</span>)}</div>
+          <div className="feeding-record-legend"><span className="is-direct"><i/>母乳</span><span className="is-formula"><i/>配方奶</span><span className="is-breast"><i/>瓶喂母乳</span></div>
+        </article>
+
+        <article className="feeding-record-module feeding-amount-module">
+          <header><h2>喂奶量</h2><span>统计周期：每日00:00-24:00</span></header>
+          <section><h3><i/>亲喂母乳</h3><div className="feeding-direct-table"><div className="feeding-direct-labels"><span>次数</span><span>左</span><span>右</span></div>{days.map(day=><div key={day.date}><b>{day.directCount}次</b><span>{day.leftMinutes}分钟</span><span>{day.rightMinutes}分钟</span></div>)}</div></section>
+          <section><h3><i/>瓶喂</h3><div className="feeding-bottle-chart"><div className="feeding-average-badge">近7天平均每天{bottleAverage}ml</div>{days.map(day=>{const total=day.breast+day.formula;const height=Math.round(total/maxBottle*230);return <div className="feeding-bottle-day" key={day.date}><div className="feeding-bottle-bar" style={{height}}><i className="is-breast" style={{height:(day.breast/total*100)+'%'}}>{day.breast}</i><i className="is-formula" style={{height:(day.formula/total*100)+'%'}}>{day.formula}</i></div></div>;})}</div><div className="feeding-record-dates">{days.map(day=><span key={day.date} className={day.highlight?'is-hot':''}>{day.date}</span>)}</div><div className="feeding-record-legend"><span className="is-breast"><i/>瓶喂母乳</span><span className="is-formula"><i/>瓶喂配方奶</span></div></section>
+        </article>
+    </div>
+  );
+}
+
+const SLEEP_REVIEW_DATES = ['7.8','7.9','7.10','7.11','7.12','7.13','今天'];
+const SLEEP_REVIEW_COUNTS = [5,4,5,6,5,4,4];
+const SLEEP_REVIEW_HOURS = [14.8,15.6,14.3,16.1,15.2,14.7,15.0];
+const SLEEP_REVIEW_PERIODS = [
+  [[0.4,5.8],[8.2,9.5],[12.1,13.3],[16,17.2],[20.5,24]], [[0,5.4],[8.6,10],[12.8,14],[17.1,18.2],[21,24]],
+  [[0.2,6],[9,10.1],[13,14.4],[16.4,17.6],[20.8,24]], [[0,5.7],[8.1,9],[11.4,12.4],[14.8,15.7],[18,19],[21.4,24]],
+  [[0.3,6.1],[8.7,10],[12.5,13.7],[16.2,17.4],[20.6,24]], [[0.1,5.5],[9.2,10.6],[13.5,14.7],[17,18.1],[21.2,24]],
+  [[0.2,6],[8.5,9.8],[13,14.2],[20.9,24]],
+];
+
+function SleepRecordReviewContent(){
+  return (
+    <div className="sleep-record-scroll" aria-label="睡眠分析内容">
+        <article className="sleep-smart-card">
+          <header><span>Ai</span><b>智能分析</b><em>VIP</em><i>养成规律睡眠，促进智力发育</i><strong>›</strong></header>
+          <div className="sleep-smart-body"><div className="sleep-smart-score"><b>每天睡觉</b><strong>10<i>h</i><small>34min</small></strong><span>第24周</span></div><div className="sleep-smart-status"><p>睡眠量　<em className="is-good">符合参考值</em></p><p>白天小睡　<em className="is-attention">建议关注</em></p><p>夜间睡眠　<em>未记录</em></p><button type="button">立即查看</button></div></div>
+        </article>
+        <article className="sleep-record-module sleep-pattern-first">
+          <h2>时间规律</h2>
+          <div className="sleep-time-grid"><div className="sleep-time-days">{SLEEP_REVIEW_DATES.map((date,dayIndex)=><span key={date}>{SLEEP_REVIEW_PERIODS[dayIndex].map((period,index)=><i key={index} style={{top:(period[0]/24*100)+'%',height:((period[1]-period[0])/24*100)+'%'}}/>)}</span>)}</div><div className="sleep-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div></div>
+          <div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div>
+          <div className="sleep-record-legend"><i/>睡眠</div>
+        </article>
+        <article className="sleep-record-module sleep-amount-second">
+          <h2>睡眠量</h2>
+          <section><h3><i/>总次数</h3><div className="sleep-record-counts">{SLEEP_REVIEW_COUNTS.map((count,index)=><span key={SLEEP_REVIEW_DATES[index]}>{count}次</span>)}</div></section>
+          <section><h3><i/>总时长</h3><div className="sleep-duration-empty has-data"><span>近7天平均每天15小时6分钟</span><div>{SLEEP_REVIEW_HOURS.map((hours,index)=><i key={SLEEP_REVIEW_DATES[index]} style={{height:(hours/18*230)}}><b>{hours}h</b></i>)}</div></div><div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div></section>
+        </article>
+    </div>
+  );
+}
+
+const DIAPER_REVIEW_DAYS = [
+  {date:'10.15',time:8.5,count:1},{date:'10.16',time:11.5,count:1},{date:'10.17',time:null,count:0},
+  {date:'10.18',time:7.5,count:1,hot:true},{date:'10.19',time:18.5,count:1,hot:true},{date:'10.20',time:9.5,count:1},{date:'今天',time:null,count:0,hot:true},
+];
+
+function DiaperRecordReviewContent(){
+  return (
+    <div className="diaper-record-scroll" aria-label="换尿布分析内容">
+      <article className="diaper-record-module">
+        <h2>时间规律</h2>
+        <div className="diaper-time-grid">
+          <div className="diaper-time-days">{DIAPER_REVIEW_DAYS.map(day=><span key={day.date}>{day.time==null?null:<i style={{top:(day.time/24*100)+'%'}}>🩲</i>}</span>)}</div>
+          <div className="diaper-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="diaper-record-dates">{DIAPER_REVIEW_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="diaper-record-legend"><i>🩲</i>换尿布</div>
+      </article>
+
+      <article className="diaper-record-module diaper-count-module">
+        <h2>换尿布次数</h2>
+        <h3><i/>总次数</h3>
+        <div className="diaper-count-chart">
+          <div className="diaper-count-average">近7天平均每天1.0次</div>
+          {DIAPER_REVIEW_DAYS.map(day=><div className="diaper-count-day" key={day.date}>{day.count?<><b>{day.count}次</b><i style={{height:42}}/></>:null}</div>)}
+        </div>
+        <div className="diaper-record-dates">{DIAPER_REVIEW_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="diaper-count-legend"><span className="is-pee"><i/>嘘嘘</span><span className="is-poop"><i/>臭臭</span><span className="is-both"><i/>嘘嘘+臭臭</span><span className="is-diaper"><i/>换尿布</span></div>
+      </article>
+
+      <article className="diaper-advice-card">
+        <h2>分析与建议</h2>
+        <p>昨天臭臭是正常的哦~</p>
+        <p>宝宝大便的颜色与食物息息相关，如果发现大便的次数或者稠度有改变的话，要及时调整婴儿以及母亲的饮食。在平时的喂养中，可以给6月龄以上的宝宝适当补充水分，宝宝醒着的时候要多陪他玩耍，增加运动量，必要时为宝宝肚子做做按摩，帮助肠胃蠕动。</p>
+        <p>另外，排出好便便的快捷方式是充分摄取膳食纤维，所以宝宝满6月龄添加辅食后，就可以尝试各种新鲜的蔬菜水果，促进健康排便。</p>
+      </article>
+    </div>
+  );
+}
+
+const FOOD_DETAIL_DAYS = [
+  {date:'10.15',count:1,grams:600,time:10.2},{date:'10.16',count:1,grams:500,time:11.1},{date:'10.17',count:1,grams:600,time:10.6},
+  {date:'10.18',count:1,grams:500,time:11.5},{date:'10.19',count:1,grams:600,time:10.8},{date:'10.20',count:1,grams:600,time:11.2},{date:'今天',count:1,grams:600,time:10.5,hot:true},
+];
+
+function FoodRecordReviewContent(){
+  const maxAmount = Math.max(...FOOD_DETAIL_DAYS.map(day=>day.grams),1);
+  return (
+    <div className="food-record-scroll" aria-label="辅食分析内容">
+      <article className="food-record-module">
+        <h2>时间规律</h2>
+        <div className="food-time-grid">
+          <div className="food-time-days">{FOOD_DETAIL_DAYS.map(day=><span key={day.date}>{day.time==null?null:<i style={{top:(day.time/24*100)+'%'}}>🥣</i>}</span>)}</div>
+          <div className="food-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="food-record-dates">{FOOD_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="food-record-legend"><i>🥣</i>辅食</div>
+      </article>
+
+      <article className="food-record-module food-amount-detail">
+        <h2>辅食量</h2>
+        <section><h3><i/>总次数</h3><div className="food-count-row">{FOOD_DETAIL_DAYS.map(day=><span key={day.date}>{day.count}次</span>)}</div></section>
+        <section><h3><i/>总量</h3><div className="food-amount-chart"><div className="food-average-badge">近7天平均每天600克</div>{FOOD_DETAIL_DAYS.map(day=><div className="food-amount-day" key={day.date}>{day.grams?<><b>{day.grams.toFixed(1)}g</b><i style={{height:Math.round(day.grams/maxAmount*230)}}/></>:null}</div>)}</div><div className="food-record-dates">{FOOD_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div></section>
+      </article>
+    </div>
+  );
+}
+
+const ALL_EVENT_ICONS = {
+  direct:'assets/baby-feeding-icons/breast.png', formula:'assets/baby-feeding-icons/formula.png', breast:'assets/baby-feeding-icons/bottle-breast.png',
+  diaper:'assets/baby-feeding-icons/diaper.png', food:'assets/baby-feeding-icons/solid-food.png', pump:'assets/baby-feeding-icons/pump.png',
+  bath:'assets/baby-feeding-icons/bath.png', play:'assets/baby-feeding-icons/play.png', swim:'assets/baby-feeding-icons/swim.png', other:'assets/baby-feeding-icons/other-event.png',
+};
+const ALL_DETAIL_DAYS = [
+  {date:'9.21',hot:true,sleep:[[10,11],[14.5,17],[21.8,24]],events:[[2.4,'direct'],[3.3,'formula'],[7.4,'direct'],[8.5,'bath'],[9.3,'direct'],[11.6,'direct'],[13.5,'diaper'],[13.7,'formula'],[17.6,'formula'],[18.4,'direct'],[19.4,'direct'],[20.7,'diaper'],[21.4,'formula']]},
+  {date:'9.22',sleep:[[0,2.6],[4.2,7.1],[21.7,22.4]],events:[[2.5,'direct'],[3.4,'formula'],[7.3,'direct'],[8.4,'direct'],[9.4,'formula'],[10.9,'direct'],[12.4,'direct'],[13.5,'formula'],[16.1,'direct'],[18.4,'direct'],[19.3,'formula'],[20.7,'direct'],[21.4,'other']]},
+  {date:'9.23',sleep:[[13.3,15.7],[17.5,18.5]],events:[[.5,'direct'],[2.4,'direct'],[3.4,'formula'],[6.8,'direct'],[8.4,'direct'],[9.4,'formula'],[10.4,'formula'],[12.5,'direct'],[15.7,'bath'],[16.5,'formula'],[18.4,'direct'],[19.4,'direct'],[20.4,'direct'],[21.4,'formula']]},
+  {date:'9.24',sleep:[[10.7,12.5]],events:[[1.4,'direct'],[2.4,'formula'],[2.5,'diaper'],[5.4,'formula'],[7.4,'direct'],[8.4,'bath'],[8.5,'direct'],[9.4,'direct'],[10.4,'formula'],[11.4,'other'],[13.4,'direct'],[14.4,'formula'],[15.4,'direct'],[16.4,'formula'],[17.4,'direct'],[18.4,'direct'],[19.4,'formula'],[20.4,'direct'],[21.4,'formula']]},
+  {date:'9.25',sleep:[[13.7,14.1],[20.9,24]],events:[[1.4,'direct'],[2.4,'formula'],[6.5,'formula'],[9.3,'direct'],[12.4,'direct'],[13.4,'formula'],[13.5,'diaper'],[17.4,'pump'],[18.4,'breast'],[19.4,'direct'],[20.4,'other'],[20.5,'formula']]},
+  {date:'9.26',sleep:[[0,3.5],[4,6.5],[7.2,8.1],[10.8,12.8],[17.2,19.2],[21.7,24]],events:[[.4,'formula'],[.5,'breast'],[.6,'direct'],[4.4,'pump'],[4.5,'formula'],[6.4,'breast'],[7.4,'direct'],[8.4,'formula'],[9.3,'breast'],[9.4,'pump'],[10.3,'bath'],[13.4,'breast'],[13.5,'direct'],[14.4,'play'],[14.5,'formula'],[17.4,'formula'],[19.4,'play'],[19.5,'formula'],[19.6,'breast'],[20.4,'direct'],[21.4,'formula'],[23.4,'pump']]},
+  {date:'9.27',hot:true,sleep:[[0,1.8],[3.2,5.1],[5.8,7.2],[8.2,10.1],[17.3,19.2],[21.8,22.4]],events:[[1.4,'direct'],[2.4,'breast'],[3.4,'formula'],[5.4,'formula'],[7.4,'direct'],[7.5,'bath'],[7.6,'diaper'],[8.4,'formula'],[8.5,'breast'],[11.4,'formula'],[12.4,'direct'],[13.4,'direct'],[15.4,'direct'],[15.5,'diaper'],[16.4,'formula'],[16.5,'breast'],[19.4,'direct'],[19.5,'breast'],[19.6,'direct'],[20.5,'formula'],[22.4,'formula']]},
+];
+
+function AllRecordReviewContent(){
+  const [filterOpen,setFilterOpen] = React.useState(false);
+  const filterItems = ['母乳','配方奶','瓶喂母乳','睡眠','换尿布','辅食','营养补剂','喝水','吸奶','洗澡','玩耍','游泳','其他事件'];
+  React.useEffect(()=>{
+    if(!filterOpen) return undefined;
+    const handleKey = event=>{ if(event.key==='Escape') setFilterOpen(false); };
+    window.addEventListener('keydown',handleKey);
+    return ()=>window.removeEventListener('keydown',handleKey);
+  },[filterOpen]);
+  return (
+    <>
+      <div className="all-record-scroll" aria-label="全部喂养分析内容">
+        <article className="all-record-module">
+          <header><h2>时间规律</h2><button type="button" className="all-filter-trigger" aria-expanded={filterOpen} onClick={()=>setFilterOpen(true)}><span>筛选</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button></header>
+          <div className="all-time-grid">
+            <div className="all-time-days">{ALL_DETAIL_DAYS.map(day=><span key={day.date}>{day.sleep.map((period,index)=><i className="all-sleep-block" key={'sleep'+index} style={{top:(period[0]/24*100)+'%',height:((period[1]-period[0])/24*100)+'%'}}/>)}{day.events.map((event,index)=><i className={'all-event is-'+event[1]} key={'event'+index} style={{top:(event[0]/24*100)+'%'}}><img src={ALL_EVENT_ICONS[event[1]]} alt=""/></i>)}</span>)}</div>
+            <div className="all-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+          </div>
+          <div className="all-record-dates">{ALL_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+          <div className="all-record-legend">{[['direct','母乳'],['formula','配方奶'],['breast','瓶喂母乳'],['sleep','睡眠'],['diaper','换尿布'],['food','辅食'],['pump','吸奶'],['bath','洗澡'],['play','玩耍'],['swim','游泳'],['other','其他事件']].map(item=><span key={item[0]}><i className={'is-'+item[0]}>{item[0]==='sleep'?null:<img src={ALL_EVENT_ICONS[item[0]]} alt=""/>}</i>{item[1]}</span>)}</div>
+        </article>
+      </div>
+      <div className={'all-filter-layer'+(filterOpen?' is-open':'')} aria-hidden={!filterOpen}>
+        <button type="button" className="all-filter-scrim" aria-label="关闭筛选" onClick={()=>setFilterOpen(false)}/>
+        <section className="all-filter-panel" role="dialog" aria-modal="true" aria-label="筛选记录项">
+          <header><h2>请筛选记录项</h2><button type="button" className="all-filter-trigger" onClick={()=>setFilterOpen(false)}><span>筛选</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="m2.5 7.5 3.5-3.5 3.5 3.5"/></svg></button></header>
+          <div className="all-filter-options">{filterItems.map(item=><button type="button" key={item}>{item}</button>)}</div>
+          <footer><button type="button" className="is-clear" onClick={()=>setFilterOpen(false)}>不筛选</button><button type="button" className="is-confirm" onClick={()=>setFilterOpen(false)}>确定</button></footer>
+        </section>
+      </div>
+    </>
+  );
+}
+
+function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
+  return (
+    <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
+      <header className="feeding-detail-nav"><button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button><b>喂养分析</b><span>参考表</span></header>
+      <FeedingReviewTabs active={activeTab} onChange={onTabChange}/>
+      <div className="feeding-detail-content" key={activeTab}>
+        {activeTab==='sleep' ? <SleepRecordReviewContent/> : (activeTab==='diaper' ? <DiaperRecordReviewContent/> : (activeTab==='food' ? <FoodRecordReviewContent/> : (activeTab==='all' ? <AllRecordReviewContent/> : <FeedingRecordReviewContent/>)))}
+      </div>
+    </section>
   );
 }
 
@@ -1086,9 +1101,9 @@ function MoodChart(){
 
 function ReviewPage(){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
-  const [feedingAnalysisOpen, setFeedingAnalysisOpen] = useState(false);
-  const [feedingFullOpen, setFeedingFullOpen] = useState(false);
-  const [sleepRecordOpen, setSleepRecordOpen] = useState(false);
+  const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
+  const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
+  const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -1199,15 +1214,13 @@ function ReviewPage(){
         )}
       />
 
-      <FeedingReviewCard onOpen={()=>setFeedingAnalysisOpen(true)} onFullOpen={()=>setFeedingFullOpen(true)}/>
-      <SleepReviewCard onFullOpen={()=>setSleepRecordOpen(true)}/>
-      <DiaperReviewCard/>
-      <FoodReviewCard/>
+      <FeedingReviewCard onFullOpen={()=>openFeedingDetail('feeding')}/>
+      <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
+      <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
+      <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
-      <FeedingAnalysisSheet open={feedingAnalysisOpen} onClose={()=>setFeedingAnalysisOpen(false)}/>
-      <FeedingFullAnalysisPage open={feedingFullOpen} onClose={()=>setFeedingFullOpen(false)}/>
-      <SleepRecordReviewPage open={sleepRecordOpen} onClose={()=>setSleepRecordOpen(false)}/>
+      <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
     </main>
   );
 }
