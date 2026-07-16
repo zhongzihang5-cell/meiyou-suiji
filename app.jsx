@@ -1,10 +1,25 @@
 const { useState, useEffect, useRef } = React;
 const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
 const BABY_VOICE_DEMO_TEXT = '刚刚喝了120毫升奶粉';
+const VOICE_DEMO_SEQUENCE = ['personal', 'formula', 'sleep', 'breast'];
+const BABY_VOICE_DEMO_QUOTES = {
+  formula: BABY_VOICE_DEMO_TEXT,
+  sleep: '宝宝睡了4小时52分钟',
+  breast: '左边喂了10分钟，右边喂了10分钟',
+};
+const BABY_RECORD_VOICE_PATTERN = /(宝宝|小豆苗|奶粉|配方奶|母乳|瓶喂|吸奶|喂奶|喝奶|吃奶|\d+\s*(?:ml|毫升).{0,3}奶|尿布|辅食|营养补剂|洗澡|玩耍|游泳|喝水|睡觉|睡眠)/i;
+const PERSONAL_RECORD_VOICE_PATTERN = /(月经|姨妈|经期|心情|情绪|体重|饮食|吃了|体温|症状|头痛|肚子|运动|锻炼)/;
 const IS_BABY_FEEDING_DEMO = typeof window !== 'undefined' && (
   window.__BABY_FEEDING_MODE === true
   || new URLSearchParams(location.search).get('feeding') === '1'
 );
+
+function inferVoiceRecordSpace(transcript, fallback='personal'){
+  const text = String(transcript || '').trim();
+  if(BABY_RECORD_VOICE_PATTERN.test(text)) return 'shared';
+  if(PERSONAL_RECORD_VOICE_PATTERN.test(text)) return 'personal';
+  return fallback;
+}
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -81,35 +96,28 @@ function BabyVoiceOverlay({session, success}){
           </div>
         </div>
       </div>
-      <div className={'baby-voice-success-toast' + (success.show ? ' is-show' : '')}>
-        <span className="baby-voice-toast-check">✓</span>
-        <div>
-          <div className="baby-voice-toast-title">记录成功</div>
-          <div className="baby-voice-toast-sub">可以在喂养记录或点滴查看</div>
-        </div>
-      </div>
     </>
   );
 }
 
 const BABY_FEEDING_QUICK_ITEMS = [
-  { id: 'formula', label: '配方奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/formula.png', color:'#FF7A66', value:'130ml', text:'配方奶：130ml' },
-  { id: 'breast', label: '母乳', cardIcon:'🤱', iconSrc:'assets/baby-feeding-icons/breast.png', color:'#FF8EB8', value:'20分钟', text:'母乳', leftMinutes:10, rightMinutes:10 },
-  { id: 'bottle-breast', label: '瓶喂母乳', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/bottle-breast.png', color:'#FF8EB8', value:'90ml', text:'瓶喂母乳：90ml' },
-  { id: 'diaper', label: '换尿布', cardIcon:'🧷', iconSrc:'assets/baby-feeding-icons/diaper.png', color:'#E8A23D', value:'臭臭 墨绿色、膏状', text:'换尿布：臭臭 墨绿色、膏状' },
-  { id: 'sleep', label: '睡眠', cardIcon:'🌙', iconSrc:'assets/baby-feeding-icons/sleep.png', color:'#8E7BD9', value:'4小时52分钟', text:'睡眠', durationMinutes:292 },
-  { id: 'nutrition', label: '营养补剂', cardIcon:'💊', iconSrc:'assets/baby-feeding-icons/nutrition.png', color:'#3CB88C', value:'维生素D3，50mg', text:'营养补剂：维生素D3，50mg' },
-  { id: 'water', label: '喝水', cardIcon:'💧', iconSrc:'assets/baby-feeding-icons/water.png', color:'#5B8DEF', value:'50ml', text:'喝水：50ml' },
-  { id: 'pump', label: '吸奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/pump.png', color:'#7BC7D8', value:'100ml', text:'吸奶：100ml' },
-  { id: 'solid-food', label: '辅食', cardIcon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png', color:'#F2A65A', value:'米粉，菠菜，20g', text:'辅食：米粉，菠菜，20g' },
-  { id: 'bath', label: '洗澡', cardIcon:'🛁', iconSrc:'assets/baby-feeding-icons/bath.png', color:'#5FCAD1', value:'13分钟', text:'洗澡', durationMinutes:13 },
-  { id: 'play', label: '玩耍', cardIcon:'🧸', iconSrc:'assets/baby-feeding-icons/play.png', color:'#F4B45F', value:'30分钟', text:'玩耍', durationMinutes:30 },
-  { id: 'swim', label: '游泳', cardIcon:'🏊', iconSrc:'assets/baby-feeding-icons/swim.png', color:'#4AA9E9', value:'20分钟', text:'游泳', durationMinutes:20 },
-  { id: 'mood', label: '心情', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'开心', text:'心情：开心' },
-  { id: 'weight', label: '体重', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'4.6kg', text:'体重：4.6kg' },
-  { id: 'diet', label: '饮食', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'已记录', text:'饮食：已记录' },
-  { id: 'temperature', label: '体温', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'36.8℃', text:'体温：36.8℃' },
-  { id: 'symptom', label: '症状', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'无异常', text:'症状：无异常' },
+  { id: 'formula', group:'baby', label: '配方奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/formula.png', color:'#FF7A66', value:'130ml', text:'配方奶：130ml' },
+  { id: 'breast', group:'baby', label: '母乳', cardIcon:'🤱', iconSrc:'assets/baby-feeding-icons/breast.png', color:'#FF8EB8', value:'20分钟', text:'母乳', leftMinutes:10, rightMinutes:10 },
+  { id: 'sleep', group:'baby', label: '睡眠', cardIcon:'🌙', iconSrc:'assets/baby-feeding-icons/sleep.png', color:'#8E7BD9', value:'4小时52分钟', text:'睡眠', durationMinutes:292 },
+  { id: 'bottle-breast', group:'baby', label: '瓶喂母乳', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/bottle-breast.png', color:'#FF8EB8', value:'90ml', text:'瓶喂母乳：90ml' },
+  { id: 'diaper', group:'baby', label: '换尿布', cardIcon:'🧷', iconSrc:'assets/baby-feeding-icons/diaper.png', color:'#E8A23D', value:'臭臭 墨绿色、膏状', text:'换尿布：臭臭 墨绿色、膏状' },
+  { id: 'pump', group:'baby', label: '吸奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/pump.png', color:'#7BC7D8', value:'100ml', text:'吸奶：100ml' },
+  { id: 'solid-food', group:'baby', label: '辅食', cardIcon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png', color:'#F2A65A', value:'米粉，菠菜，20g', text:'辅食：米粉，菠菜，20g' },
+  { id: 'bath', group:'baby', label: '洗澡', cardIcon:'🛁', iconSrc:'assets/baby-feeding-icons/bath.png', color:'#5FCAD1', value:'13分钟', text:'洗澡', durationMinutes:13 },
+  { id: 'play', group:'baby', label: '玩耍', cardIcon:'🧸', iconSrc:'assets/baby-feeding-icons/play.png', color:'#F4B45F', value:'30分钟', text:'玩耍', durationMinutes:30 },
+  { id: 'swim', group:'baby', label: '游泳', cardIcon:'🏊', iconSrc:'assets/baby-feeding-icons/swim.png', color:'#4AA9E9', value:'20分钟', text:'游泳', durationMinutes:20 },
+  { id: 'nutrition', group:'baby', label: '营养补剂', cardIcon:'💊', iconSrc:'assets/baby-feeding-icons/nutrition.png', color:'#3CB88C', value:'维生素D3，50mg', text:'营养补剂：维生素D3，50mg' },
+  { id: 'water', group:'baby', label: '喝水', cardIcon:'💧', iconSrc:'assets/baby-feeding-icons/water.png', color:'#5B8DEF', value:'50ml', text:'喝水：50ml' },
+  { id: 'mood', group:'mine', label: '心情', iconSrc:'assets/quick-icon-mood.png' },
+  { id: 'weight', group:'mine', label: '体重', iconSrc:'assets/quick-icon-weight.png' },
+  { id: 'diet', group:'mine', label: '饮食', iconSrc:'assets/quick-icon-diet.png' },
+  { id: 'temperature', group:'mine', label: '体温', iconSrc:'assets/record-temp.png' },
+  { id: 'symptom', group:'mine', label: '症状', iconSrc:'assets/quick-icon-symptom.png' },
 ];
 
 function BabyFeedingQuickIcon({type}){
@@ -429,6 +437,9 @@ function App(){
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
+  const [recordSpace, setRecordSpace] = useState('personal');
+  const [relationshipScheme, setRelationshipScheme] = useState('without-family');
+  const [relationshipSchemeOpen, setRelationshipSchemeOpen] = useState(false);
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -446,6 +457,8 @@ function App(){
   const babyVoiceTimerRef = useRef(null);
   const babyVoiceSuccessTimerRef = useRef(null);
   const babyFeedingQuickGuardRef = useRef({id:null, at:0});
+  const voiceDemoSequenceRef = useRef(0);
+  const lastAutoRevealedEntryRef = useRef(null);
   useEffect(()=>{
     const openFeedingDetail = event=>{
       const entry=event.detail || null;
@@ -570,6 +583,8 @@ function App(){
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
     babyFeedingQuickGuardRef.current = {id:null, at:0};
+    voiceDemoSequenceRef.current = 0;
+    setRecordSpace('personal');
     setBabyDiscoverVisible(false);
     setBabyFeedingEntryActive(true);
     setEmptyPreviewMode(null);
@@ -651,39 +666,57 @@ function App(){
     }
   }, [sisterPlayAnimation]);
 
+  const revealLatestTimelineCard = (behavior='smooth')=>{
+    const el = streamRef.current;
+    if(!el) return;
+    const nodes = el.querySelectorAll('.tl-rail-node[data-entry-id], .tl-rail-node');
+    const anchor = el.querySelector('.tl-rail-node.is-feed-last') || nodes[nodes.length - 1] || timelineEndRef.current;
+    if(!anchor){
+      if(behavior === 'auto') el.scrollTop = el.scrollHeight;
+      else el.scrollTo({ top:el.scrollHeight, behavior });
+      return;
+    }
+
+    const streamRect = el.getBoundingClientRect();
+    const dock = el.closest('.phone')?.querySelector('.dock-wrap');
+    const dockRect = dock?.getBoundingClientRect();
+    const visibleTop = streamRect.top + 12;
+    const visibleBottom = Math.min(
+      streamRect.bottom - 12,
+      dockRect?.height > 0 ? dockRect.top - 16 : streamRect.bottom - 12
+    );
+    const anchorRect = anchor.getBoundingClientRect();
+    const availableHeight = Math.max(0, visibleBottom - visibleTop);
+    const targetTop = anchorRect.height <= availableHeight
+      ? Math.min(Math.max(anchorRect.top, visibleTop), visibleBottom - anchorRect.height)
+      : visibleTop;
+    const nextTop = Math.max(0, el.scrollTop + anchorRect.top - targetTop);
+    if(Math.abs(nextTop - el.scrollTop) < 1) return;
+    if(behavior === 'auto') el.scrollTop = nextTop;
+    else el.scrollTo({ top:nextTop, behavior });
+  };
+
   const scrollTimelineToLastItem = (behavior='smooth')=>{
     requestAnimationFrame(()=>{
       setTimeout(()=>{
-        const el = streamRef.current;
-        if(!el) return;
-        const reserve = el.classList.contains('has-baby-discover')
-          ? 220
-          : el.classList.contains('has-baby-feeding-strip')
-            ? 176
-            : 28;
-        const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
-        if(anchor){
-          const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - reserve;
-          if(behavior === 'auto') el.scrollTop = Math.max(0, top);
-          else el.scrollTo({ top: Math.max(0, top), behavior });
-          return;
-        }
-        if(behavior === 'auto') el.scrollTop = el.scrollHeight;
-        else el.scrollTo({ top: el.scrollHeight, behavior });
+        revealLatestTimelineCard(behavior);
       }, 80);
     });
   };
 
-  const scrollTimelineToBottom = (behavior='auto')=>{
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        const el = streamRef.current;
-        if(!el) return;
-        const top = Math.max(0, el.scrollHeight - el.clientHeight);
-        if(behavior === 'auto') el.scrollTop = top;
-        else el.scrollTo({ top, behavior });
-      });
+  const appendPersonalVoiceTimelineCard = (transcript, durSec)=>{
+    const text = String(transcript || '').trim();
+    if(!text) return;
+    const hits = window.extractKeywords?.(text) || [];
+    const entry = buildTimelineEntry(text, hits, {
+      voice: { duration: window.formatVoiceDur?.(durSec) || '0:03' },
     });
+    delete entry.aiNote;
+    pushToTimeline(entry, text);
+  };
+
+  const scrollTimelineToBottom = (behavior='auto')=>{
+    scrollTimelineToLastItem(behavior);
   };
 
   useEffect(()=>{
@@ -1220,8 +1253,10 @@ function App(){
   const buildBabyFeedingDailySummary = (items=[])=>{
     const order = BABY_FEEDING_QUICK_ITEMS.map(item=>item.label);
     const stats = new Map();
+    let familyCount = 0;
     (items || []).forEach((item)=>{
       if(item.kind !== 'baby-feeding-card') return;
+      if(item.creatorId === 'family' || item.isOwnRecord === false) familyCount += 1;
       const label = item.feedType || String(item.text || '').split('：')[0] || '其他事件';
       const current = stats.get(label) || {
         label,
@@ -1243,6 +1278,7 @@ function App(){
     });
     return {
       title:'今日喂养小计',
+      meta:familyCount ? `含亲友记录${familyCount}条` : '',
       items:sorted.map((row)=>({
         label:row.label,
         value:[
@@ -1306,6 +1342,17 @@ function App(){
           break;
         }
       }
+      if(!latestDayId){
+        for(let i = cleaned.length - 1; i >= 0; i -= 1){
+          const block = cleaned[i];
+          if(block.type !== 'day') continue;
+          const items = block.items || block.entries || [];
+          if(items.some(item=>item.kind === 'baby-feeding-card')){
+            latestDayId = block.id;
+            break;
+          }
+        }
+      }
     }
     return cleaned.map(block=>{
       if(block.type !== 'day') return block;
@@ -1319,7 +1366,10 @@ function App(){
         item.kind === 'baby-feeding-card' ? index : found
       ), -1);
       if(latestIndex < 0) return {...block, items:itemsWithRelativeTime, entries:undefined};
-      const summary = buildBabyFeedingDailySummary(items);
+      const summary = {
+        ...buildBabyFeedingDailySummary(items),
+        title:block.relativeLabel === '昨天' ? '昨日喂养小计' : '今日喂养小计',
+      };
       return {
         ...block,
         items:itemsWithRelativeTime.map((item, index)=>index === latestIndex ? {
@@ -1357,21 +1407,34 @@ function App(){
     return minutes ? `${hours}小时${minutes}分钟前` : `${hours}小时前`;
   };
 
-  const appendBabyFeedingTimelineCard = ()=>{
+  const appendBabyFeedingTimelineCard = (recordType='formula')=>{
     const timestamp = Date.now();
     const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
+    const sourceItem = BABY_FEEDING_QUICK_ITEMS.find(item=>item.id === recordType)
+      || BABY_FEEDING_QUICK_ITEMS[0];
+    const value = recordType === 'formula' ? '120ml' : sourceItem.value;
     const entry = {
-      id:"baby-feeding-voice-formula-"+timestamp+"-"+Math.random().toString(36).slice(2,6),
+      id:`baby-feeding-voice-${recordType}-${timestamp}-${Math.random().toString(36).slice(2,6)}`,
       kind:"baby-feeding-card",
       time,
-      text:"配方奶：120ml",
+      text:recordType === 'formula' ? '配方奶：120ml' : sourceItem.text,
       voice:{duration:"8″"},
-      feedType:"配方奶",
-      value:"120ml",
-      icon:"🍼",
-      color:"#FF7A66",
-      voiceQuote:BABY_VOICE_DEMO_TEXT,
+      feedType:sourceItem.label,
+      value,
+      detailLines:buildBabyFeedingDetailLines(sourceItem, time),
+      statDurationMinutes:sourceItem.durationMinutes
+        || ((sourceItem.leftMinutes || 0) + (sourceItem.rightMinutes || 0))
+        || undefined,
+      leftMinutes:sourceItem.leftMinutes,
+      rightMinutes:sourceItem.rightMinutes,
+      icon:sourceItem.cardIcon || '🍼',
+      iconSrc:sourceItem.iconSrc,
+      color:sourceItem.color || '#FF7A66',
+      voiceQuote:BABY_VOICE_DEMO_QUOTES[recordType] || BABY_VOICE_DEMO_TEXT,
       railDot:"baby",
+      creator:'妈妈',
+      creatorId:'self',
+      isOwnRecord:true,
       isNew:true,
     };
     setTimeline(blocks=>{
@@ -1404,6 +1467,9 @@ function App(){
       color:item.color || '#FF7A66',
       voiceQuote:item.voiceQuote,
       railDot:'baby',
+      creator:'妈妈',
+      creatorId:'self',
+      isOwnRecord:true,
       isNew:true,
     };
     if(item.id === 'formula'){
@@ -1435,12 +1501,19 @@ function App(){
     setTimeout(()=>scrollTimelineToBottom('smooth'), 60);
   };
 
-  const submitBabyFeedingVoice = ()=>{
+  const submitBabyFeedingVoice = (transcript, durSec)=>{
+    const sequenceStep = VOICE_DEMO_SEQUENCE[voiceDemoSequenceRef.current % VOICE_DEMO_SEQUENCE.length];
+    voiceDemoSequenceRef.current += 1;
+    const nextSpace = sequenceStep === 'personal' ? 'personal' : 'shared';
+    setRecordSpace(nextSpace);
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
     setBabyDiscoverVisible(false);
     clearTimeout(babyVoiceSuccessTimerRef.current);
     setBabyVoiceSuccess({show:false});
     setNoteTabUnread(false);
-    appendBabyFeedingTimelineCard();
+    if(sequenceStep === 'personal') appendPersonalVoiceTimelineCard(transcript, durSec);
+    else appendBabyFeedingTimelineCard(sequenceStep);
     setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
   };
 
@@ -1463,6 +1536,9 @@ function App(){
     setBabyVoiceSession((current)=>({...current, active:false, cancel:false}));
     stopBabyVoiceTyping();
     if(!cancelled){
+      setRecordSpace('shared');
+      setBabyFeedingPanelMode(null);
+      setSearchCriteria(null);
       setBabyDiscoverVisible(false);
       appendBabyFeedingTimelineCard();
       setBabyVoiceSuccess({show:true});
@@ -2013,13 +2089,9 @@ function App(){
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const toggleSearchPage = ()=>{
-    if(showBabyFeedingHeader){
-      setBabyFeedingPanelMode((prev)=> prev === 'search' ? null : 'search');
-      return;
-    }
     setShowSearchPage((prev)=> !prev);
   };
-  const toggleBabyFeedingAllPanel = ()=>{
+  const toggleBabyFeedingFilterPanel = ()=>{
     setBabyFeedingPanelMode((prev)=> prev === 'all' ? null : 'all');
   };
   const closeBabyFeedingPanel = ()=>{
@@ -2057,6 +2129,32 @@ function App(){
         else el.scrollTo({ top: Math.max(0, top), behavior });
       }, 80);
     });
+  };
+  const selectRecordSpace = (nextSpace)=>{
+    setTimeline(blocks=>blocks.map(block=>{
+      if(block.type !== 'day') return block;
+      const items = (block.items || block.entries || []).map(item=>{
+        if(!item?.isNew) return item;
+        return {...item, isNew:false};
+      });
+      return {...block, items, entries:undefined};
+    }));
+    setRecordSpace(nextSpace);
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
+    scrollTimelineToFirstItem('auto');
+  };
+  const selectRelationshipScheme = (nextScheme)=>{
+    if(nextScheme === relationshipScheme){
+      setRelationshipSchemeOpen(false);
+      return;
+    }
+    setRelationshipScheme(nextScheme);
+    if(nextScheme === 'with-family') setRecordSpace('personal');
+    setRelationshipSchemeOpen(false);
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
+    scrollTimelineToFirstItem('auto');
   };
   const restoreSearchCloseScroll = React.useCallback(()=>{
     const saved = searchCloseScrollRef.current;
@@ -2113,8 +2211,9 @@ function App(){
     || searchCriteria.personPanelFilter
   ));
   const displayTimeline = React.useMemo(()=>{
-    const source = (recordLifeMode === '育儿' && babyFeedingEntryActive)
-      ? (timeline || []).map(block=>{
+    let source = timeline;
+    if(recordLifeMode === '育儿' && babyFeedingEntryActive){
+      const normalized = (timeline || []).map(block=>{
           if(block.type !== 'day') return block;
           const items = block.items || block.entries || [];
           const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
@@ -2139,15 +2238,75 @@ function App(){
             weekday,
             isToday:true,
           };
-        })
-      : timeline;
+        });
+      const projected = normalized.map(block=>{
+        if(block.type !== 'day'){
+          return relationshipScheme === 'with-family' && recordSpace === 'shared' ? null : block;
+        }
+        const items = block.items || block.entries || [];
+        const visibleItems = relationshipScheme === 'without-family'
+          ? items.map(item=>item.kind === 'baby-feeding-card'
+            ? {
+                ...item,
+                creator:'妈妈',
+                creatorId:'self',
+                isOwnRecord:true,
+                showCreator:false,
+                showBabyTag:true,
+              }
+            : item)
+          : recordSpace === 'shared'
+            ? items.filter(item=>item.kind === 'baby-feeding-card').map(item=>({...item, showCreator:true, showBabyTag:false}))
+            : items.filter(item=>item.kind !== 'baby-feeding-card');
+        if(!visibleItems.length) return null;
+        return {...block, items:visibleItems, entries:undefined};
+      }).filter(Boolean);
+      const refreshed = refreshBabyFeedingLatestMarks(projected);
+      source = relationshipScheme === 'without-family' || recordSpace === 'shared'
+        ? refreshed
+        : refreshed.map(block=>{
+            if(block.type !== 'day') return block;
+            const items = (block.items || block.entries || []).map(item=>{
+              if(item.kind !== 'baby-feeding-card' || !item.summary) return item;
+              const next = {...item};
+              delete next.summary;
+              return next;
+            });
+            return {...block, items, entries:undefined};
+          });
+    }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
   }, [displayTimeline, isSearchActive, countTimelineSearchItems]);
+
+  const latestVisibleEntryId = React.useMemo(()=>{
+    let latest = null;
+    displayTimeline.forEach(block=>{
+      if(block.type !== 'day') return;
+      (block.items || block.entries || []).forEach(item=>{
+        if(item?.id) latest = item.id;
+      });
+    });
+    return latest;
+  }, [displayTimeline]);
+
+  React.useEffect(()=>{
+    if(!latestVisibleEntryId) return;
+    if(lastAutoRevealedEntryRef.current == null){
+      lastAutoRevealedEntryRef.current = latestVisibleEntryId;
+      return;
+    }
+    if(lastAutoRevealedEntryRef.current === latestVisibleEntryId) return;
+    lastAutoRevealedEntryRef.current = latestVisibleEntryId;
+    const timers = [120, 320, 620].map(delay=>setTimeout(()=>{
+      revealLatestTimelineCard(delay === 120 ? 'smooth' : 'auto');
+    }, delay));
+    return ()=>timers.forEach(clearTimeout);
+  }, [latestVisibleEntryId, recordSpace, relationshipScheme]);
 
   React.useLayoutEffect(()=>{
     if(searchCriteria) return;
@@ -2177,6 +2336,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
@@ -2191,6 +2351,42 @@ function App(){
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
+        {showBabyFeedingHeader ? (
+          <div className={'relationship-scheme-switch' + (relationshipSchemeOpen ? ' is-open' : '')}>
+            <button
+              type="button"
+              className="relationship-scheme-trigger"
+              aria-haspopup="menu"
+              aria-expanded={relationshipSchemeOpen}
+              onClick={()=>setRelationshipSchemeOpen(open=>!open)}
+            >
+              <span>{relationshipScheme === 'with-family' ? '有亲友' : '无亲友'}</span>
+              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+                <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {relationshipSchemeOpen ? (
+              <div className="relationship-scheme-menu" role="menu" aria-label="切换亲友方案">
+                {[
+                  {id:'without-family', label:'无亲友'},
+                  {id:'with-family', label:'有亲友'},
+                ].map(option=>(
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={relationshipScheme === option.id}
+                    className={relationshipScheme === option.id ? 'is-active' : ''}
+                    onClick={()=>selectRelationshipScheme(option.id)}
+                  >
+                    <span>{option.label}</span>
+                    {relationshipScheme === option.id ? <span aria-hidden="true">✓</span> : null}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
       {showHome && HomePage && (
         <HomePage
@@ -2257,7 +2453,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -2319,33 +2515,78 @@ function App(){
         ) : (
         <>
         {showStreamHeader ? (
-        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '')}>
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (showBabyFeedingHeader && relationshipScheme === 'without-family' ? ' is-single-timeline' : '')}>
           {showBabyFeedingHeader ? (
+            relationshipScheme === 'without-family' ? (
             <>
-              <div className="stream-header-side"/>
-              <button
-                type="button"
-                className={'stream-filter-center' + (babyFeedingPanelMode === 'all' ? ' is-open' : '') + (searchCriteria?.personPanelFilter ? ' is-filtered' : '')}
-                aria-expanded={babyFeedingPanelMode === 'all'}
-                onClick={toggleBabyFeedingAllPanel}
-              >
-                <span>全部</span>
-                <svg className="stream-filter-chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <div className="stream-actions">
+              <div className="stream-actions is-left">
                 <button
-                  className={'stream-action' + (babyFeedingPanelMode === 'search' ? ' is-active' : '')}
-                  aria-label="搜索"
-                  aria-pressed={babyFeedingPanelMode === 'search'}
+                  className="stream-action"
+                  aria-label="搜索，暂未开放"
                   type="button"
-                  onClick={toggleSearchPage}
                 >
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
+              <h1 className="stream-title">我的点滴</h1>
+              <div className="stream-actions">
+                <button
+                  className={'stream-action' + (isSearchActive ? ' is-active' : '')}
+                  aria-label="筛选记录项"
+                  aria-pressed={babyFeedingPanelMode === 'all'}
+                  type="button"
+                  onClick={toggleBabyFeedingFilterPanel}
+                >
+                  <I name="filter" size={20} stroke={1.7}/>
+                </button>
+              </div>
             </>
+            ) : (
+            <>
+              <div className="stream-actions is-left">
+                <button
+                  className="stream-action"
+                  aria-label="搜索，暂未开放"
+                  type="button"
+                >
+                  <I name="search" size={20} stroke={1.7}/>
+                </button>
+              </div>
+              <div className="stream-space-segment" role="tablist" aria-label="切换记录空间">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={recordSpace === 'personal'}
+                  className={'stream-space-segment-item' + (recordSpace === 'personal' ? ' is-active' : '')}
+                  onClick={()=>selectRecordSpace('personal')}
+                >
+                  <b>我的</b>
+                  <em>仅自己可见</em>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={recordSpace === 'shared'}
+                  className={'stream-space-segment-item' + (recordSpace === 'shared' ? ' is-active' : '')}
+                  onClick={()=>selectRecordSpace('shared')}
+                >
+                  <b>小豆苗</b>
+                  <em>3位亲友共享</em>
+                </button>
+              </div>
+              <div className="stream-actions">
+                <button
+                  className={'stream-action' + (isSearchActive ? ' is-active' : '')}
+                  aria-label="筛选记录项"
+                  aria-pressed={babyFeedingPanelMode === 'all'}
+                  type="button"
+                  onClick={toggleBabyFeedingFilterPanel}
+                >
+                  <I name="filter" size={20} stroke={1.7}/>
+                </button>
+              </div>
+            </>
+            )
           ) : (
             <>
               <div className="stream-header-side"/>
@@ -2370,6 +2611,8 @@ function App(){
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
             + (showBabyFeedingQuickStrip ? ' has-baby-feeding-strip' : '')
+            + (showBabyFeedingHeader && relationshipScheme === 'with-family' ? ' has-record-space-segment' : '')
+            + (babyFeedingDetailOpen ? ' is-detail-scroll-locked' : '')
           }
           ref={streamRef}
         >
@@ -2422,14 +2665,16 @@ function App(){
           hideQuickFan={showBabyFeedingQuickStrip}
           feedingQuickItems={babyFeedingDockItems}
           onFeedingQuickSelect={handleBabyFeedingQuickSelect}
+          onRecordSpaceChange={selectRecordSpace}
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />
         )}
-        {babyFeedingPanelMode && XhsStyleSearchPage ? (
+        {babyFeedingPanelMode === 'all' && XhsStyleSearchPage ? (
           <XhsStyleSearchPage
             intent={babyFeedingPanelMode}
             variant="baby-feeding"
+            recordSpace={relationshipScheme === 'without-family' ? 'combined' : recordSpace}
             activeFilter={searchCriteria?.personPanelFilter}
             onClose={closeBabyFeedingPanel}
             onSearch={handleTimelineSearch}
@@ -2500,9 +2745,10 @@ function App(){
       }}/>:null}
       {sleepDetailEntry ? <BabySleepDetailPage entry={sleepDetailEntry} onClose={()=>setSleepDetailEntry(null)} onStart={({seconds,note})=>{
         const draftEntry = sleepDetailEntry;
+        const {isQuickDraft, ...runningEntry} = draftEntry;
         const time = draftEntry.time || window.formatNowTime?.() || '12:04';
         const entry = {
-          ...draftEntry,
+          ...runningEntry,
           id:'baby-feeding-sleep-running-'+Date.now(),
           time,
           text:'睡眠',

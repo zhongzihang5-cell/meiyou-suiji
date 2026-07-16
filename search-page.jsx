@@ -632,6 +632,11 @@ const BABY_FEEDING_PERSON_OPTIONS = ['全部', ...BABY_FEEDING_FILTER_ITEMS];
 
 const SELF_PERSON_OPTIONS = ['全部', '爱爱', '心情', '体重', '体温', '症状', '饮食'];
 
+const PERSONAL_TIMELINE_OPTIONS = [
+  ...SELF_PERSON_OPTIONS,
+  '运动',
+];
+
 const BABY_FEEDING_PANEL_SECTIONS = [
   {
     id: 'self',
@@ -694,6 +699,7 @@ const XHS_FILTER_SECTIONS = [
 function XhsStyleSearchPage({
   intent = 'search',
   variant = 'default',
+  recordSpace = 'personal',
   activeFilter = null,
   onClose,
   onSearch,
@@ -705,7 +711,28 @@ function XhsStyleSearchPage({
   const isFilterOnly = isBabyFeeding && intent === 'all';
   const showSearchTop = !isFilterOnly;
   const tabs = XHS_SEARCH_TABS;
-  const sections = isBabyFeeding ? BABY_FEEDING_PANEL_SECTIONS : XHS_FILTER_SECTIONS;
+  const sections = isBabyFeeding
+    ? (recordSpace === 'combined'
+      ? [
+          {
+            id:'elder',
+            title:'宝宝记录',
+            options:BABY_FEEDING_PERSON_OPTIONS,
+            default:'全部',
+            grid:true,
+          },
+          {
+            id:'self',
+            title:'我的记录',
+            options:PERSONAL_TIMELINE_OPTIONS,
+            default:'全部',
+            grid:true,
+          },
+        ]
+      : recordSpace === 'shared'
+      ? [{...BABY_FEEDING_PANEL_SECTIONS[1], title:'记录项'}]
+      : [{id:'personal', title:'记录项', options:PERSONAL_TIMELINE_OPTIONS, default:'全部', grid:true}])
+    : XHS_FILTER_SECTIONS;
   const [query, setQuery] = React.useState(isBabyFeeding ? '' : '已经那个格兰云天');
   const [activeTab, setActiveTab] = React.useState('全部');
   const [filtersExpanded, setFiltersExpanded] = React.useState(true);

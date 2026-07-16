@@ -57,8 +57,10 @@
   overflow:hidden;
 }
 .dock-panel.is-feeding-expanded{
-  border-radius:28px;
-  box-shadow:0 16px 44px rgba(26,22,35,0.18);
+  width:100%;
+  background:#fff;
+  border-radius:22px 22px 0 0;
+  box-shadow:0 -10px 34px rgba(26,22,35,0.12);
 }
 .dock-wrap.is-mood-expanded{
   bottom:var(--my-tabbar-h);
@@ -1268,6 +1270,10 @@
   gap:9px;
   padding:9px 10px 12px;
 }
+.dock-panel.is-feeding-expanded .dock-bar.has-feeding-quick{
+  gap:12px;
+  padding:9px 18px 14px;
+}
 .dock-feeding-quick{
   width:100%;
   min-width:0;
@@ -1299,9 +1305,25 @@
   display:grid;
   grid-template-columns:repeat(6, minmax(0, 1fr));
   column-gap:4px;
-  row-gap:11px;
+  row-gap:14px;
   overflow:visible;
   padding:0 2px 2px;
+}
+.dock-feeding-groups{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  padding:0 2px 4px;
+}
+.dock-feeding-group{
+  min-width:0;
+}
+.dock-feeding-group-title{
+  margin:0 0 12px 3px;
+  color:rgba(0,0,0,0.82);
+  font-size:17px;
+  line-height:1.3;
+  font-weight:600;
 }
 .dock-feeding-quick-item{
   min-width:0;
@@ -1320,8 +1342,8 @@
   transform:scale(0.96);
 }
 .dock-feeding-quick-icon{
-  width:40px;
-  height:40px;
+  width:42px;
+  height:42px;
   border-radius:50%;
   display:flex;
   align-items:center;
@@ -1338,22 +1360,35 @@
   object-fit:contain;
 }
 .dock-feeding-quick-label{
-  max-width:50px;
+  max-width:62px;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:10px;
+  font-size:11px;
   line-height:1.2;
   color:rgba(0,0,0,0.68);
 }
 .dock-panel.is-feeding-expanded .dock-feeding-quick-scroll{
   grid-template-columns:repeat(6, minmax(0, 1fr));
-  column-gap:4px;
-  row-gap:12px;
+  column-gap:5px;
+  row-gap:16px;
   padding:0 2px 4px;
 }
 .dock-panel.is-feeding-expanded .dock-feeding-quick-item{
-  gap:4px;
+  gap:6px;
+}
+.dock-panel.is-feeding-expanded .dock-feeding-quick-icon{
+  width:44px;
+  height:44px;
+}
+.dock-panel.is-feeding-expanded .dock-feeding-quick-label{
+  max-width:64px;
+  font-size:12px;
+  color:rgba(0,0,0,0.78);
+}
+.dock-feeding-quick-item.is-mine .dock-feeding-quick-icon{
+  width:40px;
+  height:40px;
 }
 
 .dock-fan{

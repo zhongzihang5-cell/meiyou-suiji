@@ -222,7 +222,7 @@ function DockPublisher({
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
   demoPhase, isDemoRunning, hideQuickFan = false,
-  feedingQuickItems = null, onFeedingQuickSelect,
+  feedingQuickItems = null, onFeedingQuickSelect, onRecordSpaceChange,
   emptyPreviewGuideStep = 0, onEmptyPreviewGuideAdvance, onEmptyPreviewGuideDismiss, fabGuidePulse = false,
 }){
   const I = window.Icon;
@@ -428,9 +428,12 @@ function DockPublisher({
   const isQuickActive = quickOpen || !!quickSelected;
   const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
   const showFeedingQuick = Array.isArray(feedingQuickItems) && feedingQuickItems.length > 0;
-  const feedingVisibleItems = showFeedingQuick && !feedingExpanded
-    ? feedingQuickItems.slice(0, 6)
-    : (feedingQuickItems || []);
+  const feedingBabyItems = showFeedingQuick
+    ? feedingQuickItems.filter(item=>item.group !== 'mine')
+    : [];
+  const feedingMineItems = showFeedingQuick
+    ? feedingQuickItems.filter(item=>item.group === 'mine')
+    : [];
   const MoodOverlay = window.MoodQuickOverlay || (()=>null);
   const SymptomOverlay = window.SymptomQuickOverlay || (()=>null);
 
@@ -447,9 +450,53 @@ function DockPublisher({
     if(dy > 18) setFeedingExpanded(false);
   };
 
+  const handleGroupedQuickSelect = (item, buttonEl)=>{
+    if(!item) return;
+    setFeedingExpanded(false);
+    onRecordSpaceChange?.(item.group === 'mine' ? 'personal' : 'shared');
+    if(item.group !== 'mine'){
+      onFeedingQuickSelect?.(item);
+      return;
+    }
+    if(item.id === 'mood'){
+      handleMoodFanTap();
+      return;
+    }
+    if(item.id === 'symptom'){
+      handleSymptomFanTap();
+      return;
+    }
+    if(item.id === 'weight'){
+      setWeightPickerKey(key=>key + 1);
+      setQuickSelected('weight');
+      return;
+    }
+    if(item.id === 'diet'){
+      handleDietFanTap(buttonEl);
+      return;
+    }
+    if(item.id === 'temperature'){
+      onQuickMark?.({ text:'体温：36.8℃', emoji:'🌡️', label:'体温' });
+    }
+  };
+
+  const renderFeedingQuickItem = (item)=>(
+    <button
+      key={item.id}
+      type="button"
+      className={'dock-feeding-quick-item is-' + (item.group === 'mine' ? 'mine' : 'baby')}
+      onClick={(event)=>handleGroupedQuickSelect(item, event.currentTarget)}
+    >
+      <span className="dock-feeding-quick-icon" aria-hidden="true">
+        {item.iconNode || item.icon || '🍼'}
+      </span>
+      <span className="dock-feeding-quick-label">{item.label}</span>
+    </button>
+  );
+
   return (
     <>
-      {!hideQuickFan && (
+      {(!hideQuickFan || quickSelected) && (
       <div className={'quick-float-wrap'+(isDockExpanded ? ' is-covered' : '')+(isQuickActive ? ' is-quick-active' : '')}>
         <QuickCardFan
           open={quickOpen}
@@ -541,21 +588,26 @@ function DockPublisher({
                 >
                   <span/>
                 </button>
-                <div className="dock-feeding-quick-scroll">
-                  {feedingVisibleItems.map((item)=>(
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="dock-feeding-quick-item"
-                      onClick={()=>onFeedingQuickSelect?.(item)}
-                    >
-                      <span className="dock-feeding-quick-icon" aria-hidden="true">
-                        {item.iconNode || item.icon || '🍼'}
-                      </span>
-                      <span className="dock-feeding-quick-label">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
+                {feedingExpanded ? (
+                  <div className="dock-feeding-groups">
+                    <section className="dock-feeding-group" aria-labelledby="dock-feeding-baby-title">
+                      <h3 id="dock-feeding-baby-title" className="dock-feeding-group-title">宝宝</h3>
+                      <div className="dock-feeding-quick-scroll">
+                        {feedingBabyItems.map(renderFeedingQuickItem)}
+                      </div>
+                    </section>
+                    <section className="dock-feeding-group" aria-labelledby="dock-feeding-mine-title">
+                      <h3 id="dock-feeding-mine-title" className="dock-feeding-group-title">我的</h3>
+                      <div className="dock-feeding-quick-scroll">
+                        {feedingMineItems.map(renderFeedingQuickItem)}
+                      </div>
+                    </section>
+                  </div>
+                ) : (
+                  <div className="dock-feeding-quick-scroll is-collapsed">
+                    {feedingBabyItems.slice(0, 6).map(renderFeedingQuickItem)}
+                  </div>
+                )}
               </div>
             ) : null}
             <div className="dock-input-row dock-input-pill">

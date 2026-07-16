@@ -24,6 +24,11 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
         <path d="m20 20-3.5-3.5"/>
       </svg>
     );
+    case 'filter': return (
+      <svg {...common}>
+        <path d="M4 5h16M7 12h10M10 19h4"/>
+      </svg>
+    );
     case 'camera': return (
       <svg {...common}>
         <path d="M3 7h3l2-2.5h8L18 7h3a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 21 20H3a1.5 1.5 0 0 1-1.5-1.5v-10A1.5 1.5 0 0 1 3 7z"/>

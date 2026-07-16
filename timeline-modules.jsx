@@ -870,6 +870,7 @@ function BabyFeedingTimelineCard({item, isNew}){
   const iconSrc = item.iconSrc || iconSrcByType[title];
   const color = item.color || '#FF7A66';
   const summary = item.summary;
+  const creator = item.creator || '妈妈';
   const detailLines = Array.isArray(item.detailLines) ? item.detailLines.filter(Boolean) : [];
   const hasDetail = detailLines.length > 0;
   const notePreview = item.noteText || item.voiceQuote || '';
@@ -936,7 +937,10 @@ function BabyFeedingTimelineCard({item, isNew}){
         <p className={'tl-baby-feed-note-preview'+(hasDetail ? ' is-after-detail' : '')}>{notePreview}</p>
       ) : null}
       <div className="tl-baby-feed-tags">
-        <span className="tl-baby-feed-tag-main">小豆苗</span>
+        {item.showBabyTag !== false ? <span className="tl-baby-feed-tag-main">小豆苗</span> : null}
+        {item.showCreator ? (
+          <span className={'tl-baby-feed-creator' + (item.creatorId === 'family' ? ' is-family' : '')}>{creator}记录</span>
+        ) : null}
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
       </div>
       {summary && (
@@ -952,6 +956,7 @@ function BabyFeedingTimelineCard({item, isNew}){
           >
             <span className="tl-baby-feed-summary-spark" aria-hidden="true">✦</span>
             <span className="tl-baby-feed-summary-title">{summary.title || '喂养小结'}</span>
+            {summary.meta ? <span className="tl-baby-feed-summary-meta">{summary.meta}</span> : null}
             <span className={'tl-baby-feed-summary-chev'+(summaryOpen ? ' is-open' : '')} aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M6 15l6-6 6 6"/>

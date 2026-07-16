@@ -141,6 +141,10 @@ const SELF_PANEL_MATCHERS = {
   饮食(item, primary) {
     return SEARCH_FILTER_MATCHERS.diet(item, primary);
   },
+  运动(item, primary) {
+    const text = entryText(item, primary);
+    return /运动|健身|跑步|游泳|训练/.test(text) || tagMatches(primary, item, (t) => /运动|run/i.test(t.cat || ''));
+  },
 };
 
 const BABY_PANEL_MATCHERS = {
@@ -202,6 +206,14 @@ function itemMatchesPersonPanelFilter(item, { personId, option }) {
   const entry = getSearchableEntry(item);
   if (!entry) return false;
   const { item: row, primary } = entry;
+
+  if (personId === 'personal') {
+    if (option === '全部') return true;
+    const selfMatcher = SELF_PANEL_MATCHERS[option];
+    const babyMatcher = BABY_PANEL_MATCHERS[option];
+    return (selfMatcher ? selfMatcher(row, primary) : false)
+      || (babyMatcher ? babyMatcher(row, primary) : false);
+  }
 
   if (personId === 'self') {
     if (option === '全部') return isSelfHealthEntry(row, primary);
