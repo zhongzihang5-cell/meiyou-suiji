@@ -12,7 +12,7 @@
 <title>美柚 · 场景六 · 宝宝喂养记录 · 方案一</title>
 <!--
   宝宝喂养记录：点滴时间轴与快捷记录面板
-  生成日期: 2026-07-10
+  生成日期: 2026-07-16
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -68,7 +68,7 @@
 
   /* 底部 Tab + 安全区（iPhone 横条） */
   --my-safe-bottom:env(safe-area-inset-bottom, 0px);
-  --my-tabbar-h:calc(58px + var(--my-safe-bottom));
+  --my-tabbar-h:calc(64px + var(--my-safe-bottom));
   --my-dock-float-b:calc(180px + var(--my-safe-bottom));
   --baby-feeding-strip-h:96px;
   --my-dock-path-h:76px;
@@ -784,8 +784,10 @@ html,body{
   border-top:0.5px solid #e8e8e8;
   display:flex;
   justify-content:space-around;
-  align-items:center;
-  padding:5px 0 14px;
+  align-items:flex-start;
+  height:var(--my-tabbar-h);
+  box-sizing:border-box;
+  padding:5px 0 calc(6px + var(--my-safe-bottom));
   z-index:100;
 }
 .tab{
@@ -808,7 +810,7 @@ html,body{
   display:flex;align-items:center;justify-content:center;
   color:#999;
 }
-.tab-ico svg{width:26px;height:26px;display:block}
+.tab-ico svg{width:26px;height:26px;display:block;overflow:visible}.tab-note-mic{width:28px;height:28px;display:block;overflow:visible;flex:0 0 auto}
 .tab-icon-img{width:26px;height:26px;display:block;object-fit:contain}
 .tab-ico .mascot{width:26px;height:26px}
 .tab.active .tab-ico{color:var(--my-brand-red)}
@@ -1168,8 +1170,10 @@ html,body{
   overflow:hidden;
 }
 .dock-panel.is-feeding-expanded{
-  border-radius:28px;
-  box-shadow:0 16px 44px rgba(26,22,35,0.18);
+  width:100%;
+  background:#fff;
+  border-radius:22px 22px 0 0;
+  box-shadow:0 -10px 34px rgba(26,22,35,0.12);
 }
 .dock-wrap.is-mood-expanded{
   bottom:var(--my-tabbar-h);
@@ -2379,6 +2383,10 @@ html,body{
   gap:9px;
   padding:9px 10px 12px;
 }
+.dock-panel.is-feeding-expanded .dock-bar.has-feeding-quick{
+  gap:12px;
+  padding:9px 18px 14px;
+}
 .dock-feeding-quick{
   width:100%;
   min-width:0;
@@ -2410,9 +2418,25 @@ html,body{
   display:grid;
   grid-template-columns:repeat(6, minmax(0, 1fr));
   column-gap:4px;
-  row-gap:11px;
+  row-gap:14px;
   overflow:visible;
   padding:0 2px 2px;
+}
+.dock-feeding-groups{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  padding:0 2px 4px;
+}
+.dock-feeding-group{
+  min-width:0;
+}
+.dock-feeding-group-title{
+  margin:0 0 12px 3px;
+  color:rgba(0,0,0,0.82);
+  font-size:17px;
+  line-height:1.3;
+  font-weight:600;
 }
 .dock-feeding-quick-item{
   min-width:0;
@@ -2431,8 +2455,8 @@ html,body{
   transform:scale(0.96);
 }
 .dock-feeding-quick-icon{
-  width:40px;
-  height:40px;
+  width:42px;
+  height:42px;
   border-radius:50%;
   display:flex;
   align-items:center;
@@ -2449,22 +2473,35 @@ html,body{
   object-fit:contain;
 }
 .dock-feeding-quick-label{
-  max-width:50px;
+  max-width:62px;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:10px;
+  font-size:11px;
   line-height:1.2;
   color:rgba(0,0,0,0.68);
 }
 .dock-panel.is-feeding-expanded .dock-feeding-quick-scroll{
   grid-template-columns:repeat(6, minmax(0, 1fr));
-  column-gap:4px;
-  row-gap:12px;
+  column-gap:5px;
+  row-gap:16px;
   padding:0 2px 4px;
 }
 .dock-panel.is-feeding-expanded .dock-feeding-quick-item{
-  gap:4px;
+  gap:6px;
+}
+.dock-panel.is-feeding-expanded .dock-feeding-quick-icon{
+  width:44px;
+  height:44px;
+}
+.dock-panel.is-feeding-expanded .dock-feeding-quick-label{
+  max-width:64px;
+  font-size:12px;
+  color:rgba(0,0,0,0.78);
+}
+.dock-feeding-quick-item.is-mine .dock-feeding-quick-icon{
+  width:40px;
+  height:40px;
 }
 
 .dock-fan{
@@ -3597,6 +3634,8 @@ html,body{
   gap:8px;
   margin-bottom:10px;
 }
+.tl-baby-feeding-card.is-clickable{cursor:pointer}
+.tl-baby-feeding-card.is-clickable:active{transform:scale(0.992)}
 .tl-baby-feed-time{
   font-size:13.5px;
   line-height:1;
@@ -3662,6 +3701,20 @@ html,body{
 .tl-baby-feed-detail *{
   font-weight:400 !important;
 }
+.tl-baby-feed-note-preview{
+  min-width:0;
+  overflow:hidden;
+  margin:-12px 0 0 51px;
+  color:var(--my-text-tertiary);
+  font-size:13px;
+  font-weight:400;
+  line-height:1.45;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.tl-baby-feed-note-preview.is-after-detail{
+  margin-top:4px;
+}
 .tl-baby-feed-detail{
   min-width:0;
   display:flex;
@@ -3679,6 +3732,7 @@ html,body{
   color:var(--my-text-secondary);
   font-weight:400;
 }
+.tl-baby-sleep-live{margin:4px 0 0 51px;display:flex;flex-direction:column;align-items:flex-start;gap:7px}.tl-baby-sleep-duration{color:var(--my-text-primary);font-size:15px;line-height:1.2}.tl-baby-sleep-status{display:inline-flex;align-items:center;min-height:25px;padding:2px 8px;border-radius:5px;background:rgba(201,119,255,.18);color:#ba61ff;font-size:14px;font-weight:600;line-height:1.2}.tl-baby-sleep-live button{height:30px;padding:0 14px;border:1px solid #ff4d88;border-radius:16px;background:#fff;color:#ff4d88;font:500 13px/1 inherit}
 .tl-baby-feed-tags{
   display:flex;
   align-items:center;
@@ -3708,6 +3762,22 @@ html,body{
 .tl-baby-feed-chip.is-ago{
   color:#ff4d88;
   background:rgba(255,77,136,0.10);
+}
+.tl-baby-feed-creator{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#f2f3f5;
+  color:var(--my-text-secondary);
+  font-size:12px;
+  font-weight:500;
+  line-height:1.25;
+}
+.tl-baby-feed-creator.is-family{
+  background:rgba(111,91,211,0.10);
+  color:#7565c6;
 }
 .tl-baby-feed-source{
   margin-top:12px;
@@ -3791,6 +3861,13 @@ html,body{
   line-height:1.2;
   flex:1;
   text-align:left;
+}
+.tl-baby-feed-summary-meta{
+  flex:0 0 auto;
+  color:var(--my-text-tertiary);
+  font-size:11px;
+  font-weight:400;
+  line-height:1.2;
 }
 .tl-baby-feed-summary-chev{
   width:18px;
@@ -3917,6 +3994,9 @@ html,body{
 .phone.is-baby-feeding-entry .dock-wrap.is-mood-expanded{
   bottom:calc(var(--my-tabbar-h) + 12px);
   z-index:90;
+}
+.phone.is-baby-feeding-entry .dock-wrap.is-feeding-expanded{
+  bottom:var(--my-tabbar-h);
 }
 .baby-feeding-quick-strip{
   position:fixed;
@@ -4433,18 +4513,157 @@ html,body{
 }
 .stream-header.is-baby-feeding-header{
   display:grid;
-  grid-template-columns:1fr auto 1fr;
+  grid-template-columns:32px 216px 32px;
+  justify-content:space-between;
   align-items:center;
-  gap:8px;
-  padding:8px 16px 12px;
+  gap:4px;
+  padding:5px 12px 8px;
 }
-.stream-filter-center{
+.stream-header.is-baby-feeding-header.is-single-timeline{
+  grid-template-columns:32px minmax(0, 1fr) 32px;
+  padding:5px 18px 8px;
+}
+.stream-header.is-baby-feeding-header.is-single-timeline .stream-title{
+  min-width:0;
+  padding:0 8px;
+}
+.suiji-stream.has-record-space-segment{
+  padding-top:64px;
+}
+.suiji-stream.is-detail-scroll-locked{
+  overflow-y:hidden;
+  overscroll-behavior:none;
+  touch-action:none;
+  -webkit-overflow-scrolling:auto;
+}
+.relationship-scheme-switch{
+  position:absolute;
+  top:7px;
+  left:50%;
+  z-index:210;
+  transform:translateX(-50%);
+}
+.relationship-scheme-trigger{
+  height:30px;
+  min-width:88px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:0 12px;
+  border:0.5px solid rgba(0,0,0,0.10);
+  border-radius:8px;
+  background:rgba(255,255,255,0.94);
+  box-shadow:0 2px 10px rgba(28,24,32,0.10);
+  color:var(--my-text-primary);
+  font-family:inherit;
+  font-size:12px;
+  font-weight:500;
+  line-height:1;
+  cursor:pointer;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.relationship-scheme-trigger svg{
+  transition:transform 0.18s ease;
+}
+.relationship-scheme-switch.is-open .relationship-scheme-trigger svg{
+  transform:rotate(180deg);
+}
+.relationship-scheme-menu{
+  position:absolute;
+  top:35px;
+  left:50%;
+  width:116px;
+  overflow:hidden;
+  padding:4px;
+  border:0.5px solid rgba(0,0,0,0.08);
+  border-radius:8px;
+  background:rgba(255,255,255,0.98);
+  box-shadow:0 8px 24px rgba(28,24,32,0.16);
+  transform:translateX(-50%);
+  box-sizing:border-box;
+}
+.relationship-scheme-menu button{
+  width:100%;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 10px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:var(--my-text-primary);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:400;
+  cursor:pointer;
+}
+.relationship-scheme-menu button.is-active{
+  background:#fff0f5;
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.stream-space-segment{
+  width:216px;
+  height:46px;
+  justify-self:center;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:2px;
+  padding:2px;
+  border-radius:8px;
+  background:#ececef;
+  box-sizing:border-box;
+}
+.stream-space-segment-item{
+  min-width:0;
+  height:42px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:var(--my-text-secondary);
+  font-family:inherit;
+  cursor:pointer;
+}
+.stream-space-segment-item.is-active{
+  background:#fff;
+  color:var(--my-text-primary);
+  box-shadow:0 1px 4px rgba(31,27,38,0.10);
+}
+.stream-space-segment-item b{
+  font-size:14px;
+  font-weight:500;
+  line-height:1.2;
+}
+.stream-space-segment-item em{
+  overflow:hidden;
+  max-width:100%;
+  color:var(--my-text-tertiary);
+  font-size:9.5px;
+  font-style:normal;
+  font-weight:400;
+  line-height:1.2;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.stream-space-segment-item.is-active em{
+  color:#ff6c9d;
+}
+.stream-space-center{
   justify-self:center;
   display:inline-flex;
   align-items:center;
   gap:4px;
   border:none;
   background:transparent;
+  max-width:190px;
   padding:4px 2px;
   font:inherit;
   font-size:17px;
@@ -4453,18 +4672,271 @@ html,body{
   color:var(--my-text-primary);
   cursor:pointer;
 }
-.stream-filter-chev{
+.stream-space-center > span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.stream-space-center > i{
+  min-width:16px;
+  height:16px;
+  padding:0 4px;
+  border-radius:8px;
+  background:#ff4d88;
+  color:#fff;
+  font-family:inherit;
+  font-size:10px;
+  font-weight:500;
+  line-height:16px;
+  text-align:center;
+}
+.stream-space-chev{
+  flex:0 0 auto;
   color:rgba(0,0,0,0.45);
   transition:transform 0.2s ease;
 }
-.stream-filter-center.is-open .stream-filter-chev{
+.stream-space-center.is-open .stream-space-chev{
   transform:rotate(180deg);
 }
-.stream-filter-center.is-filtered span{
+.stream-header.is-baby-feeding-header .stream-actions{
+  position:relative;
+  z-index:2;
+  width:32px;
+  height:46px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  justify-self:end;
+  opacity:1;
+  visibility:visible;
+}
+.stream-header.is-baby-feeding-header .stream-actions.is-left{
+  justify-self:start;
+}
+.stream-header.is-baby-feeding-header .stream-action{
+  width:32px;
+  height:46px;
+  color:#4f4f4f;
+  opacity:1;
+  visibility:visible;
+}
+.stream-header.is-baby-feeding-header .stream-action svg{
+  width:21px;
+  height:21px;
+  display:block;
+  color:inherit;
+  stroke:currentColor;
+  opacity:1;
+  visibility:visible;
+}
+.stream-header.is-baby-feeding-header .stream-action.is-active{
   color:#ff4d88;
 }
-.stream-header.is-baby-feeding-header .stream-actions{
-  justify-self:end;
+.record-space-scrim{
+  position:absolute;
+  inset:0;
+  z-index:93;
+  border:0;
+  padding:0;
+  background:rgba(20,20,24,0.14);
+  cursor:default;
+}
+.record-space-menu{
+  position:absolute;
+  top:50px;
+  left:24px;
+  right:24px;
+  z-index:96;
+  padding:6px;
+  border:0.5px solid rgba(0,0,0,0.06);
+  border-radius:8px;
+  background:rgba(255,255,255,0.98);
+  box-shadow:0 12px 34px rgba(33,28,40,0.16);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.record-space-option{
+  width:100%;
+  min-height:62px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 10px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:var(--my-text-primary);
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.record-space-option + .record-space-option{
+  border-top:0.5px solid var(--my-line);
+}
+.record-space-option.is-active{
+  background:rgba(255,77,136,0.06);
+}
+.record-space-option-icon{
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+}
+.record-space-option-icon.is-personal{
+  background:#f3f3f5;
+  color:#666;
+}
+.record-space-option-icon.is-baby{
+  background:#fff4ed;
+}
+.record-space-option-icon img{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+}
+.record-space-option-copy{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.record-space-option-copy b{
+  font-size:15px;
+  font-weight:500;
+  line-height:1.25;
+}
+.record-space-option-copy em{
+  overflow:hidden;
+  color:var(--my-text-tertiary);
+  font-size:12px;
+  font-style:normal;
+  font-weight:400;
+  line-height:1.3;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.record-space-option-badge{
+  flex:0 0 auto;
+  padding:3px 6px;
+  border-radius:5px;
+  background:rgba(255,77,136,0.10);
+  color:#ff4d88;
+  font-size:10px;
+  font-weight:500;
+  white-space:nowrap;
+}
+.record-space-option > svg{
+  flex:0 0 auto;
+  color:#ff4d88;
+}
+.family-activity-digest,
+.baby-shared-context{
+  position:relative;
+  z-index:4;
+  margin:6px 0 18px;
+  border:0.5px solid rgba(0,0,0,0.05);
+  border-radius:8px;
+  background:#fff;
+  box-shadow:0 2px 10px rgba(35,31,42,0.035);
+}
+.family-activity-main{
+  width:100%;
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px 38px 11px 12px;
+  border:0;
+  background:transparent;
+  color:var(--my-text-primary);
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.family-activity-icon,
+.baby-shared-context-icon{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:#fff4ed;
+}
+.family-activity-icon img,
+.baby-shared-context-icon img{
+  width:36px;
+  height:36px;
+  object-fit:contain;
+}
+.family-activity-copy,
+.baby-shared-context-copy{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.family-activity-copy b,
+.baby-shared-context-copy b{
+  overflow:hidden;
+  font-size:14px;
+  font-weight:500;
+  line-height:1.25;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.family-activity-copy em,
+.baby-shared-context-copy em{
+  overflow:hidden;
+  color:var(--my-text-tertiary);
+  font-size:12px;
+  font-style:normal;
+  line-height:1.35;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.family-activity-main > svg{
+  flex:0 0 auto;
+  color:rgba(0,0,0,0.34);
+}
+.family-activity-close{
+  position:absolute;
+  top:8px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  background:transparent;
+  color:rgba(0,0,0,0.28);
+  cursor:pointer;
+}
+.baby-shared-context{
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px 12px;
+}
+.baby-shared-context-count{
+  flex:0 0 auto;
+  padding:4px 7px;
+  border-radius:5px;
+  background:rgba(255,77,136,0.08);
+  color:#ff4d88;
+  font-size:11px;
+  font-weight:500;
+  white-space:nowrap;
 }
 
 /* ============ 场景模块占位 ============ */
@@ -6943,6 +7415,44 @@ html,body{
 @keyframes miSlotIn{
   to{opacity:1;transform:translateY(0)}
 }
+.baby-formula-detail{position:fixed;inset:auto 0 0;z-index:700;width:100%;max-width:390px;height:85dvh;min-height:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;background:linear-gradient(180deg,#fde0e5 0%,#fff4f5 62%,#fff7f7 100%);box-shadow:0 -100vh 0 rgba(20,20,28,.22),0 -8px 28px rgba(104,68,77,.16);color:#333;animation:babyFormulaSheetIn .28s cubic-bezier(.22,1,.36,1)}
+.baby-formula-detail::before{content:'';position:absolute;top:10px;left:50%;width:38px;height:4px;border-radius:4px;background:rgba(80,70,74,.2);transform:translateX(-50%)}
+.baby-formula-detail-nav{height:92px;display:grid;grid-template-columns:42px 1fr 42px;align-items:start;padding:18px 18px 0}.baby-formula-detail-nav div{text-align:center}.baby-formula-detail-nav h1{margin:0;text-align:center;font-size:17px;font-weight:600}.baby-formula-detail-nav p{margin:6px 0 0;font-size:14px;color:#555}.baby-formula-close{width:32px;height:32px;padding:0;border:0;background:transparent;color:#333;font-size:34px;font-weight:200;line-height:26px}
+.baby-formula-detail-body{flex:1;overflow:auto;padding:14px 14px 10px}.baby-formula-form{overflow:hidden;border-radius:16px;background:#fff;box-shadow:0 4px 18px rgba(166,83,99,.07)}
+.baby-formula-row{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid rgba(0,0,0,.06);font-size:15px}.baby-formula-value{border:0;background:transparent;color:#a0a0a5;font:400 14px/1 inherit}.baby-formula-value b{padding-left:6px;font-size:22px;font-weight:200;vertical-align:-2px}.baby-formula-value.is-placeholder{color:#b6b6ba}
+.baby-formula-amount-head{display:flex;align-items:center;justify-content:space-between;padding:13px 15px 0;font-size:15px}.baby-formula-keyboard{border:0;background:transparent;color:#a0a0a5;font:400 11px/1.15 inherit;text-align:center}.baby-formula-keyboard span{display:block;margin-bottom:2px;font-size:20px;line-height:16px;color:#929296}
+.baby-formula-picker{position:relative;height:205px;display:flex;align-items:center;justify-content:center;overflow:hidden}.baby-formula-bottle{position:absolute;bottom:10px;width:132px;height:152px;border:4px solid rgba(255,136,151,.26);border-top:0;border-radius:30px 30px 42px 42px;background:linear-gradient(90deg,rgba(255,118,138,.16),rgba(255,255,255,.9) 42%,rgba(255,118,138,.16));box-shadow:inset 0 0 18px rgba(255,111,133,.14)}.baby-formula-bottle::before{content:'';position:absolute;top:-13px;left:-10px;right:-10px;height:14px;border-radius:9px;background:linear-gradient(#ff9ca9,#ff6d82)}.baby-formula-bottle::after{content:'';position:absolute;top:-51px;left:38px;width:50px;height:48px;border-radius:50% 50% 40% 40%;background:radial-gradient(circle at 50% 35%,#fff 0 22%,#ffe8ec 58%,rgba(255,144,160,.25) 100%)}.baby-formula-values{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0}.baby-formula-values button{height:29px;min-width:108px;border:0;border-radius:17px;background:transparent;color:#85858a;font:400 16px/29px inherit}.baby-formula-values button.is-selected{background:rgba(255,98,126,.16);color:#111;font-size:24px;font-weight:500}
+.baby-formula-note{border-top:1px solid rgba(0,0,0,.06)}.baby-formula-note-toggle{width:100%;min-height:47px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border:0;background:#fff;color:#555;font:400 16px/1 inherit}.baby-formula-note-toggle b{color:#aaa;font-size:16px;font-weight:400}.baby-formula-note textarea{display:block;width:calc(100% - 30px);min-height:62px;resize:none;margin:0 15px 14px;padding:9px 10px;border:0;border-radius:8px;background:#f7f7f8;color:#666;font:400 14px/1.45 inherit;outline:0}
+.baby-formula-detail-foot{padding:8px 18px calc(12px + var(--my-safe-bottom));background:transparent}.baby-formula-detail-foot button{width:100%;height:50px;border:0;border-radius:25px;background:#ff647c;color:#fff;font:600 22px/1 inherit}
+@keyframes babyFormulaSheetIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.baby-breast-detail{position:fixed;inset:auto 0 0;z-index:701;width:100%;max-width:390px;height:85dvh;min-height:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;background:linear-gradient(180deg,#fde0e5 0%,#fff4f5 62%,#fff 100%);box-shadow:0 -100vh 0 rgba(20,20,28,.22),0 -8px 28px rgba(104,68,77,.16);color:#333;animation:babyFormulaSheetIn .28s cubic-bezier(.22,1,.36,1)}
+.baby-breast-detail::before{content:'';position:absolute;top:10px;left:50%;width:38px;height:4px;border-radius:4px;background:rgba(80,70,74,.2);transform:translateX(-50%)}
+.baby-breast-nav{height:92px;display:grid;grid-template-columns:42px 1fr 42px;align-items:start;padding:18px 18px 0}.baby-breast-nav button{width:32px;height:32px;padding:0;border:0;background:transparent;color:#333;font-size:34px;font-weight:200;line-height:26px}.baby-breast-nav div{text-align:center}.baby-breast-nav h1{margin:0;font-size:17px;font-weight:600}.baby-breast-nav p{margin:6px 0 0;font-size:14px;color:#555}
+.baby-breast-body{flex:1;overflow:auto;padding:8px 14px 10px}.baby-breast-form{min-height:100%;overflow:hidden;border-radius:16px;background:#fff;box-shadow:0 4px 18px rgba(166,83,99,.07)}
+.baby-breast-mode{display:flex;width:208px;height:38px;margin:18px auto 0;padding:3px;border-radius:22px;background:#f7f7f8}.baby-breast-mode button{flex:1;border:0;border-radius:18px;background:transparent;color:#777;font:500 16px/1 inherit}.baby-breast-mode button.is-active{background:#fff;color:#333;box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.baby-breast-timer{min-height:330px;display:flex;align-items:center;justify-content:space-evenly;padding:35px 12px}.baby-breast-timer-side{width:124px;height:124px;border:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:radial-gradient(circle at 50% 35%,#fff 0 36%,#ffeaf0 100%);box-shadow:0 12px 22px rgba(255,100,135,.14);color:#ff4d88}.baby-breast-timer-side b{font-size:18px;font-weight:500}.baby-breast-timer-side i{font-style:normal;font-size:24px;line-height:22px}.baby-breast-timer-side span{font-size:16px;color:#666}.baby-breast-timer-side.is-running{box-shadow:0 0 0 3px rgba(255,77,136,.16),0 12px 22px rgba(255,100,135,.18)}
+.baby-breast-row{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid rgba(0,0,0,.06);font-size:15px}.baby-breast-row em{font-style:normal;color:#aaa;font-size:14px}.baby-breast-duration{padding:13px 15px 16px;border-bottom:1px solid rgba(0,0,0,.06)}.baby-breast-duration-head{display:flex;justify-content:space-between;font-size:15px}.baby-breast-duration-head small{text-align:center;color:#999;font-size:10px;line-height:1.2}.baby-breast-wheels{display:flex;gap:10px;margin-top:10px}.baby-breast-wheels label{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;height:112px;border-radius:12px;background:#fafafb;color:#777;font-size:14px}.baby-breast-wheels button{width:22px;height:22px;border:0;border-radius:50%;background:#fff;color:#999;font-size:15px;line-height:1}.baby-breast-wheels strong{font-size:25px;font-weight:500;color:#333}.baby-breast-wheels em{font-style:normal;font-size:13px}.baby-breast-side-chips{display:flex;gap:8px}.baby-breast-side-chips b{min-width:42px;padding:7px 0;border-radius:16px;background:#fafafb;color:#777;text-align:center;font-size:14px;font-weight:400}
+.baby-breast-note{padding:12px 15px 16px;border-top:1px solid rgba(0,0,0,.06)}.baby-breast-note label{display:block;margin-bottom:7px;color:#555;font-size:15px}.baby-breast-note textarea{display:block;width:100%;min-height:58px;resize:none;padding:9px 10px;border:0;border-radius:8px;background:#f7f7f8;color:#666;font:400 14px/1.45 inherit;outline:0}
+.baby-breast-foot{padding:8px 18px calc(12px + var(--my-safe-bottom));background:transparent}.baby-breast-foot button{width:100%;height:50px;border:0;border-radius:25px;background:#ff647c;color:#fff;font:600 22px/1 inherit}
+.baby-sleep-detail{position:fixed;inset:auto 0 0;z-index:702;width:100%;max-width:390px;height:85dvh;min-height:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;background:linear-gradient(180deg,#ead9ff 0%,#f4eaff 62%,#fbf8ff 100%);box-shadow:0 -100vh 0 rgba(20,20,28,.22),0 -8px 28px rgba(95,70,130,.16);color:#333;animation:babyFormulaSheetIn .28s cubic-bezier(.22,1,.36,1)}
+.baby-sleep-detail::before{content:'';position:absolute;top:10px;left:50%;width:38px;height:4px;border-radius:4px;background:rgba(80,70,74,.2);transform:translateX(-50%)}.baby-sleep-nav{height:92px;display:grid;grid-template-columns:52px 1fr 52px;align-items:start;padding:18px 18px 0}.baby-sleep-nav button{width:44px;height:32px;padding:0;border:0;background:transparent;color:#333;font-size:15px;font-weight:400;text-align:left}.baby-sleep-nav button[aria-label="关闭"]{font-size:34px;font-weight:200;line-height:26px}.baby-sleep-nav div{text-align:center}.baby-sleep-nav h1{margin:0;font-size:17px;font-weight:600}.baby-sleep-nav p{margin:6px 0 0;font-size:14px;color:#555}
+.baby-sleep-body{flex:1;overflow:auto;padding:8px 14px 10px}.baby-sleep-form{min-height:100%;overflow:hidden;border-radius:16px;background:#fff;box-shadow:0 4px 18px rgba(125,83,166,.07)}.baby-sleep-mode{display:flex;width:208px;height:38px;margin:18px auto 0;padding:3px;border-radius:22px;background:#f7f7f8}.baby-sleep-mode button{flex:1;border:0;border-radius:18px;background:transparent;color:#777;font:500 16px/1 inherit}.baby-sleep-mode button.is-active{background:#fff;color:#333;box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.baby-sleep-idle,.baby-sleep-manual,.baby-sleep-running{display:flex;flex-direction:column;align-items:center}.baby-sleep-moon{position:relative;width:118px;height:118px;margin:74px auto 80px;border-radius:50%;background:radial-gradient(circle at 37% 35%,#fff4b8 0 10%,#ffd966 46%,#ffc84e 72%);box-shadow:0 20px 36px rgba(197,133,255,.13)}.baby-sleep-moon::before{content:'';position:absolute;right:0;top:7px;width:72px;height:72px;border-radius:50%;background:#fff}.baby-sleep-moon::after{content:'';position:absolute;left:-18px;bottom:12px;width:74px;height:28px;border-radius:24px;background:linear-gradient(180deg,#ffeaff,#f7dcff)}.baby-sleep-moon span{position:absolute;right:18px;top:-24px;color:#c77cff;font-size:26px;font-weight:800;z-index:1}
+.baby-sleep-row{width:100%;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid rgba(0,0,0,.06);font-size:18px}.baby-sleep-row em{font-style:normal;color:#aaa;font-size:16px}.baby-sleep-big-action{width:130px;height:130px;margin:26px auto 76px;border:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;background:radial-gradient(circle at 50% 35%,#fff 0 34%,#f1e6ff 100%);box-shadow:0 16px 28px rgba(171,103,244,.12);color:#b565ff}.baby-sleep-big-action b{font-size:18px;font-weight:600}.baby-sleep-big-action i{font-style:normal;font-size:28px;line-height:1}.baby-sleep-big-action.is-pause{margin:28px auto 58px;background:linear-gradient(180deg,#b260ff,#d9b6ff);color:#fff;box-shadow:0 18px 30px rgba(178,96,255,.22)}
+.baby-sleep-total{margin:78px auto 18px;text-align:center;color:#777}.baby-sleep-total span{display:block;margin-bottom:14px;font-size:16px}.baby-sleep-total strong{display:block;color:#333;font-size:44px;font-weight:400;line-height:1;font-variant-numeric:tabular-nums}.baby-sleep-tip{margin:0 24px 30px;color:#999;text-align:center;font-size:15px;line-height:1.45}.baby-sleep-tip i{display:inline-flex;margin-right:6px;color:#c77cff;font-style:normal}.baby-sleep-tip b{color:#b565ff;font-weight:500}
+.baby-sleep-note{width:calc(100% - 30px);min-height:88px;margin:0 15px 16px;padding:13px 12px;border-radius:10px;background:#fafafa;color:#aaa;align-self:stretch}.baby-sleep-note textarea{display:block;width:100%;min-height:45px;resize:none;border:0;background:transparent;color:#666;font:400 15px/1.45 inherit;outline:0}.baby-sleep-note span{display:inline-flex;width:38px;height:38px;margin-top:4px;align-items:center;justify-content:center;border:1px dashed #d4d4d8;border-radius:8px;color:#c8c8cc}.baby-sleep-note.is-compact{min-height:0;margin-top:520px;background:transparent;text-align:center}.baby-sleep-note.is-compact button{height:42px;padding:0 20px;border:1px solid #ddd;border-radius:22px;background:#fff;color:#777;font:500 18px/1 inherit}.baby-sleep-note.is-compact span{margin:0 5px 0 0;border:0;width:auto;height:auto}
+.baby-sleep-foot{padding:8px 18px calc(12px + var(--my-safe-bottom));background:transparent}.baby-sleep-foot button{width:100%;height:50px;border:0;border-radius:25px;background:#b86cff;color:#fff;font:600 22px/1 inherit}
+
+.relationship-transition-overlay{position:fixed;inset:0;z-index:760;display:flex;align-items:flex-end;width:100%;max-width:390px;margin:0 auto;background:rgba(31,29,34,.34);animation:relationshipTransitionFade .2s ease-out}
+.relationship-transition-sheet{position:relative;width:100%;min-height:58%;padding:12px 24px calc(24px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -8px 30px rgba(42,35,46,.12);animation:relationshipTransitionRise .28s cubic-bezier(.22,.8,.32,1)}
+.relationship-transition-handle{width:42px;height:5px;margin:0 auto 8px;border-radius:3px;background:#dedde2}
+.relationship-transition-close{position:absolute;top:18px;right:18px;display:grid;width:34px;height:34px;padding:0;place-items:center;border:0;border-radius:50%;color:#77747b;background:#f5f4f6}
+.relationship-transition-header{padding:10px 30px 18px;text-align:center}.relationship-transition-privacy-icon{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:26px;margin-bottom:12px;padding:0 10px;border-radius:13px;color:#ff4f88;background:#fff0f5;font-size:13px;font-weight:600}.relationship-transition-header h2{margin:0;color:#29272c;font-size:22px;line-height:1.35}.relationship-transition-header p{max-width:310px;margin:8px auto 0;color:#858189;font-size:14px;line-height:1.55}
+.relationship-transition-spaces{border-top:1px solid #f0edf1;border-bottom:1px solid #f0edf1}.relationship-transition-space{display:flex;align-items:center;min-height:88px;gap:14px}.relationship-transition-space+.relationship-transition-space{border-top:1px solid #f0edf1}.relationship-transition-space-icon{display:grid;flex:0 0 48px;width:48px;height:48px;place-items:center;border-radius:50%}.relationship-transition-space-icon.is-personal{color:#ff4f88;background:#fff0f5}.relationship-transition-space-icon.is-baby{background:#fff7ee}.relationship-transition-space-icon img{width:42px;height:42px;object-fit:contain}
+.relationship-transition-space-copy{min-width:0;flex:1}.relationship-transition-space-copy>div{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.relationship-transition-space-copy strong{color:#302e33;font-size:18px}.relationship-transition-space-copy span{color:#ff4f88;font-size:13px}.relationship-transition-space-copy p{margin:5px 0 0;overflow:hidden;color:#8d8991;font-size:13px;white-space:nowrap;text-overflow:ellipsis}
+.relationship-transition-note{position:relative;margin:18px 0 20px;padding-left:22px;color:#77727c;font-size:13px;line-height:1.45}.relationship-transition-note::before{content:'✓';position:absolute;left:0;top:0;color:#ff4f88;font-weight:700}.relationship-transition-confirm{width:100%;height:52px;border:0;border-radius:26px;color:#fff;background:#ff4f88;font-size:17px;font-weight:600}
+@keyframes relationshipTransitionFade{from{background:rgba(31,29,34,0)}to{background:rgba(31,29,34,.34)}}
+@keyframes relationshipTransitionRise{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
 
 /* ============ 日历 Tab（经期记录页） ============ */
@@ -13826,15 +14336,15 @@ html,body{
   overflow:hidden;
 }
 .xhs-search-page.is-filter-only{
-  top:50px;
+  top:60px;
   bottom:auto;
-  max-height:calc(100% - 50px);
+  max-height:calc(100% - 60px);
   border-radius:0 0 16px 16px;
   box-shadow:0 8px 24px rgba(0,0,0,0.08);
 }
 .xhs-search-page.is-filter-only .xhs-search-body{
   padding-top:16px;
-  max-height:calc(100vh - 50px - 52px);
+  max-height:calc(100vh - 60px - 52px);
 }
 .xhs-search-top{
   display:flex;
@@ -17869,6 +18379,78 @@ html,body{
 .review-legend-item.is-feeding-formula i{background:#ff9a45}
 .review-legend-item.is-feeding-direct i{border-top:2px solid var(--my-brand-red)}
 
+/* Feeding record review — restored from the reference layout */
+.feeding-detail-page{position:absolute;inset:0;z-index:126;display:flex;flex-direction:column;background:linear-gradient(180deg,#ffdceb 0,#fff 165px,#f4f4f7 360px);visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}.feeding-detail-page.is-sleep{background:linear-gradient(180deg,#f8e6ff 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-diaper{background:linear-gradient(180deg,#ffe7dc 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-food{background:linear-gradient(180deg,#fff0cf 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-all{background:linear-gradient(180deg,#ffe2ef 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
+.feeding-detail-nav{height:48px;flex:0 0 48px;position:relative;display:flex;align-items:center;justify-content:center}.feeding-detail-nav>button{position:absolute;left:0;width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center}.feeding-detail-nav>button svg{width:23px;height:23px;fill:none;stroke:#333;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.feeding-detail-nav>b{font-size:17px}.feeding-detail-nav>span{position:absolute;right:14px;color:#555;font-size:14px}.feeding-detail-content{flex:1;min-height:0;display:flex}.feeding-detail-content>.feeding-record-scroll,.feeding-detail-content>.sleep-record-scroll,.feeding-detail-content>.diaper-record-scroll,.feeding-detail-content>.food-record-scroll,.feeding-detail-content>.all-record-scroll{width:100%;height:100%}
+.feeding-detail-content .feeding-smart-card,.feeding-detail-content .sleep-smart-card,.feeding-detail-content .feeding-record-module,.feeding-detail-content .sleep-record-module{margin-top:10px}
+.feeding-detail-content .feeding-record-scroll,.feeding-detail-content .sleep-record-scroll,.feeding-detail-content .diaper-record-scroll,.feeding-detail-content .food-record-scroll,.feeding-detail-content .all-record-scroll{padding-top:0}
+.feeding-detail-content .feeding-record-module>h2,
+.feeding-detail-content .feeding-amount-module>header h2,
+.feeding-detail-content .sleep-record-module>h2,
+.feeding-detail-content .diaper-record-module>h2,
+.feeding-detail-content .food-record-module>h2,
+.feeding-detail-content .all-record-module>header h2{
+  min-width:92px;
+  height:34px;
+  padding:0 14px;
+  border-radius:0 18px 18px 0;
+  font-size:15px;
+}
+.feeding-record-review{position:absolute;inset:0;z-index:126;display:flex;flex-direction:column;background:linear-gradient(180deg,#ffdceb 0,#fff 165px,#f4f4f7 360px);visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}.feeding-record-review.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
+.feeding-record-nav{height:48px;flex:0 0 48px;position:relative;display:flex;align-items:center;justify-content:center}.feeding-record-nav>button{position:absolute;left:0;width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center}.feeding-record-nav>button svg{width:23px;height:23px;fill:none;stroke:#333;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.feeding-record-nav>b{font-size:17px}.feeding-record-nav>span{position:absolute;right:14px;color:#555;font-size:14px}
+.feeding-review-tabs{height:48px;flex:0 0 48px;display:flex;align-items:stretch;justify-content:space-around}.feeding-review-tabs button{min-width:52px;padding:0 8px;border:0;background:transparent;position:relative;color:#666;font:500 14px/1 inherit}.feeding-review-tabs button.is-active{color:var(--my-brand-red);font-weight:700}.feeding-review-tabs button.is-active::after{content:"";position:absolute;left:50%;bottom:3px;width:25px;height:3px;border-radius:2px;background:var(--my-brand-red);transform:translateX(-50%)}
+.feeding-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.feeding-smart-card,.feeding-record-module{margin-top:10px;border-radius:14px;background:#fff;overflow:hidden}.feeding-smart-card{padding:14px}.feeding-smart-card>header{display:flex;align-items:center;gap:7px;white-space:nowrap}.feeding-smart-card>header>span{width:18px;height:18px;display:grid;place-items:center;border-radius:4px;background:linear-gradient(#ff8db4,#ff4d88);color:#fff;font-size:8px}.feeding-smart-card>header>b{font-size:16px}.feeding-smart-card>header>em{padding:2px 7px;border-radius:10px;background:#ffd4e5;color:#ff4d88;font-size:10px;font-style:normal;font-weight:700}.feeding-smart-card>header>strong{margin-left:auto;color:#bbb;font:300 22px/1 Arial}.feeding-smart-body{display:grid;grid-template-columns:145px 1fr;gap:20px;padding:24px 20px 20px}.feeding-smart-score{height:150px;padding:16px;border:1px solid rgba(255,77,136,.16);border-radius:13px;box-shadow:0 2px 5px rgba(255,77,136,.1);display:flex;flex-direction:column}.feeding-smart-score>b{font-size:16px}.feeding-smart-score>strong{margin-top:38px;color:var(--my-brand-red);font-size:25px}.feeding-smart-score>strong i{margin-left:4px;color:#666;font-size:12px;font-style:normal;font-weight:400}.feeding-smart-score>span{margin-top:auto;color:#555;font-size:12px}.feeding-smart-status{padding-top:8px}.feeding-smart-status p{margin:0 0 10px;color:#555;font-size:12px;white-space:nowrap}.feeding-smart-status em{color:#aaa;font-style:normal}.feeding-smart-status em.is-wave{padding:2px 5px;border-radius:4px;background:#fff0f5;color:var(--my-brand-red)}.feeding-smart-status button{height:34px;margin-top:8px;padding:0 20px;border:0;border-radius:18px;background:#ff5b93;color:#fff;font:500 13px/1 inherit}
+.feeding-record-module{padding-bottom:16px}.feeding-record-module>h2,.feeding-amount-module>header h2{width:max-content;min-width:105px;height:42px;margin:0;padding:0 18px;display:flex;align-items:center;border-radius:0 24px 24px 0;background:linear-gradient(90deg,#ff3f7f,#ff5b94);color:#fff;font-size:17px}.feeding-record-module section h3{margin:18px 0 10px;padding:0 12px;display:flex;align-items:center;gap:7px;color:#ff4d88;font-size:13px}.feeding-record-module section h3 i{width:4px;height:15px;border-radius:3px;background:#ff4d88}
+.feeding-pattern-grid{height:520px;margin:16px 22px 0 12px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 42px,rgba(0,0,0,.055) 43px),repeating-linear-gradient(90deg,#fff 0,#fff 46px,#fff9fb 47px,#fff9fb 93px)}.feeding-pattern-days{position:absolute;inset:0 18px 0 0;display:grid;grid-template-columns:repeat(7,1fr)}.feeding-pattern-days>span{position:relative;border-right:.5px solid rgba(0,0,0,.025)}.feeding-pattern-days>span>i{position:absolute;left:50%;width:9px;height:9px;border-radius:3px;transform:translate(-50%,-50%);box-shadow:0 1px 2px rgba(255,77,136,.18)}.feeding-pattern-days i.is-direct{background:#e85aad;border-radius:50%}.feeding-pattern-days i.is-formula{background:#ff7654}.feeding-pattern-days i.is-breast{background:#ff4d88}.feeding-pattern-axis{position:absolute;right:-18px;inset-block:0;width:18px}.feeding-pattern-axis span{position:absolute;right:0;transform:translateY(-50%);color:#777;font-size:9px}
+.feeding-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#777;font-size:10px;text-align:center}.feeding-record-dates span.is-hot{color:var(--my-brand-red);font-weight:600}.feeding-record-legend{margin:20px 16px 0;display:flex;align-items:center;gap:16px;color:#555;font-size:11px}.feeding-record-legend span{display:flex;align-items:center;gap:5px}.feeding-record-legend i{width:9px;height:9px;border-radius:3px}.feeding-record-legend .is-direct i{border-radius:50%;background:#e85aad}.feeding-record-legend .is-formula i{background:#ff7654}.feeding-record-legend .is-breast i{background:#ff4d88}
+.feeding-amount-module>header{display:flex;align-items:center}.feeding-amount-module>header>span{margin-left:10px;color:#999;font-size:11px}.feeding-direct-table{display:grid;grid-template-columns:40px repeat(7,minmax(38px,1fr));margin:0 10px;border-radius:9px;overflow:hidden;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fff9fb 49px,#fff9fb 97px)}.feeding-direct-table>div{display:grid;grid-template-rows:repeat(3,34px);font-size:10px;text-align:center}.feeding-direct-table>div>*{display:grid;place-items:center;border-bottom:.5px solid #f3eef0}.feeding-direct-table b{font-weight:500}.feeding-direct-labels{color:#ff4d88}.feeding-bottle-chart{height:330px;margin:0 12px;position:relative;display:grid;grid-template-columns:repeat(7,1fr);align-items:end;padding:58px 8px 0;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fff9fb 49px,#fff9fb 97px)}.feeding-average-badge{position:absolute;top:24px;left:50%;transform:translateX(-50%);padding:4px 7px;border:1px solid #ff8eb1;border-radius:5px;color:#ff4d88;font-size:11px;white-space:nowrap}.feeding-bottle-day{height:230px;display:flex;align-items:flex-end;justify-content:center}.feeding-bottle-bar{width:28px;display:flex;flex-direction:column;border-radius:13px 13px 4px 4px;overflow:hidden}.feeding-bottle-bar i{min-height:18px;display:grid;place-items:center;color:#fff;font-size:9px;font-style:normal;font-weight:600}.feeding-bottle-bar i.is-breast{background:#ff4d88}.feeding-bottle-bar i.is-formula{background:#ff7654}
+
+.feeding-smart-status em.is-good{padding:2px 5px;border-radius:4px;background:#e9f9ef;color:#32b86c}
+.feeding-smart-status em.is-attention{padding:2px 5px;border-radius:4px;background:#fff3df;color:#efa540}
+
+/* Diaper record review */
+.diaper-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.diaper-record-module,.diaper-advice-card{margin-top:10px;border-radius:14px;background:#fff;overflow:hidden}.diaper-record-module{padding-bottom:16px}.diaper-record-module>h2{width:max-content;min-width:118px;height:42px;margin:0;padding:0 18px;display:flex;align-items:center;border-radius:0 24px 24px 0;background:linear-gradient(90deg,#ff9f25,#ffb53d);color:#fff;font-size:17px}
+.diaper-time-grid{height:520px;margin:16px 22px 0 12px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 42px,rgba(0,0,0,.055) 43px),repeating-linear-gradient(90deg,#fff 0,#fff 46px,#fffaf7 47px,#fffaf7 93px)}.diaper-time-days{position:absolute;inset:0 18px 0 0;display:grid;grid-template-columns:repeat(7,1fr)}.diaper-time-days>span{position:relative;border-right:.5px solid rgba(0,0,0,.025)}.diaper-time-days>span>i{position:absolute;left:50%;transform:translate(-50%,-50%);font-size:16px;font-style:normal}.diaper-time-axis{position:absolute;right:-18px;inset-block:0;width:18px}.diaper-time-axis span{position:absolute;right:0;transform:translateY(-50%);color:#777;font-size:9px}
+.diaper-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#777;font-size:10px;text-align:center}.diaper-record-dates span.is-hot{color:var(--my-brand-red);font-weight:600}.diaper-record-legend{margin:20px 16px 0;display:flex;align-items:center;gap:6px;color:#555;font-size:12px}.diaper-record-legend i{font-style:normal}
+.diaper-count-module>h3{margin:22px 0 10px;padding:0 16px;display:flex;align-items:center;gap:7px;color:#f2a42f;font-size:14px}.diaper-count-module>h3 i{width:4px;height:16px;border-radius:3px;background:#ffae32}.diaper-count-chart{height:340px;margin:0 12px;position:relative;display:grid;grid-template-columns:repeat(7,1fr);align-items:end;padding:58px 8px 0;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fffaf7 49px,#fffaf7 97px)}.diaper-count-average{position:absolute;top:34px;left:50%;transform:translateX(-50%);padding:4px 7px;border:1px solid #f4b94b;border-radius:5px;color:#dda02f;font-size:11px;white-space:nowrap}.diaper-count-day{height:230px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px}.diaper-count-day b{color:#d99828;font-size:10px}.diaper-count-day>i{width:22px;border-radius:10px 10px 5px 5px;background:#3aca68}
+.diaper-count-legend{margin:20px 16px 0;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#555;font-size:10px}.diaper-count-legend span{display:flex;align-items:center;gap:4px;white-space:nowrap}.diaper-count-legend i{width:10px;height:10px;border-radius:3px}.diaper-count-legend .is-pee i{background:#ffad32}.diaper-count-legend .is-poop i{background:#3aca68}.diaper-count-legend .is-both i{background:#4b91ed}.diaper-count-legend .is-diaper i{background:#f4c13c}
+.diaper-advice-card{padding:20px}.diaper-advice-card h2{margin:0 0 18px;color:#333;font-size:20px}.diaper-advice-card p{margin:0 0 8px;color:#666;font-size:14px;line-height:1.85}.diaper-advice-card p:last-child{margin-bottom:0}
+
+/* Solid-food record review */
+.food-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.food-record-module{margin-top:10px;padding-bottom:16px;border-radius:14px;background:#fff;overflow:hidden}.food-record-module>h2{width:max-content;min-width:105px;height:42px;margin:0;padding:0 18px;display:flex;align-items:center;border-radius:0 24px 24px 0;background:linear-gradient(90deg,#ff7647,#ff9257);color:#fff;font-size:17px}
+.food-time-grid{height:520px;margin:16px 22px 0 12px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 42px,rgba(0,0,0,.055) 43px),repeating-linear-gradient(90deg,#fff 0,#fff 46px,#fff9f7 47px,#fff9f7 93px)}.food-time-days{position:absolute;inset:0 18px 0 0;display:grid;grid-template-columns:repeat(7,1fr)}.food-time-days>span{position:relative;border-right:.5px solid rgba(0,0,0,.025)}.food-time-days>span>i{position:absolute;left:50%;transform:translate(-50%,-50%);font-size:16px;font-style:normal}.food-time-axis{position:absolute;right:-18px;inset-block:0;width:18px}.food-time-axis span{position:absolute;right:0;transform:translateY(-50%);color:#777;font-size:9px}
+.food-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#777;font-size:10px;text-align:center}.food-record-dates span.is-hot{color:var(--my-brand-red);font-weight:600}.food-record-legend{margin:20px 16px 0;display:flex;align-items:center;gap:6px;color:#555;font-size:12px}.food-record-legend i{font-style:normal}
+.food-amount-detail section h3{margin:22px 0 10px;padding:0 16px;display:flex;align-items:center;gap:7px;color:#f07c4d;font-size:14px}.food-amount-detail section h3 i{width:4px;height:16px;border-radius:3px;background:#ff7c4d}.food-count-row{display:grid;grid-template-columns:repeat(7,1fr);height:54px;margin:0 12px;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fff9f7 49px,#fff9f7 97px)}.food-count-row span{display:grid;place-items:center;color:#666;font-size:11px;border-bottom:.5px solid #f4efed}
+.food-amount-chart{height:340px;margin:0 12px;position:relative;display:grid;grid-template-columns:repeat(7,1fr);align-items:end;padding:58px 8px 0;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fff9f7 49px,#fff9f7 97px)}.food-average-badge{position:absolute;top:34px;left:50%;transform:translateX(-50%);padding:4px 7px;border:1px solid #f29a6f;border-radius:5px;color:#e47a4d;font-size:11px;white-space:nowrap}.food-amount-day{height:230px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}.food-amount-day b{color:#e97749;font-size:10px}.food-amount-day>i{width:26px;border-radius:13px 13px 4px 4px;background:linear-gradient(#ff7954,#ff9b66)}
+
+/* All feeding events review */
+.all-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.all-record-module{margin-top:10px;padding-bottom:16px;border-radius:14px;background:#fff;overflow:hidden}.all-record-module>header{height:58px;display:flex;align-items:center;justify-content:space-between}.all-record-module>header h2{width:max-content;min-width:105px;height:42px;margin:0;padding:0 18px;display:flex;align-items:center;border-radius:0 24px 24px 0;background:linear-gradient(90deg,#ff3f7f,#ff5b94);color:#fff;font-size:17px}.all-record-module>header button{height:34px;margin-right:12px;padding:0 18px;border:1px solid var(--my-brand-red);border-radius:18px;background:#fff;color:var(--my-brand-red);font:500 13px/1 inherit}
+.all-time-grid{height:760px;margin:8px 22px 0 12px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 62px,rgba(0,0,0,.055) 63px),repeating-linear-gradient(90deg,#fff 0,#fff 46px,#fff8fb 47px,#fff8fb 93px)}.all-time-days{position:absolute;inset:0 18px 0 0;display:grid;grid-template-columns:repeat(7,1fr)}.all-time-days>span{position:relative;border-right:.5px solid rgba(0,0,0,.025)}.all-sleep-block{position:absolute;left:6%;right:6%;border-radius:6px;background:#eed7fb;opacity:.9}.all-event{position:absolute;left:50%;z-index:2;transform:translate(-50%,-50%);font-size:13px;font-style:normal;line-height:1}.all-event:nth-of-type(3n){left:30%}.all-event:nth-of-type(3n+1){left:70%}.all-time-axis{position:absolute;right:-18px;inset-block:0;width:18px}.all-time-axis span{position:absolute;right:0;transform:translateY(-50%);color:#666;font-size:9px}
+.all-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#666;font-size:10px;text-align:center}.all-record-dates span.is-hot{color:var(--my-brand-red);font-weight:700}.all-record-legend{margin:22px 14px 2px;display:flex;flex-wrap:wrap;gap:12px 14px;color:#555;font-size:11px}.all-record-legend span{display:flex;align-items:center;gap:4px;white-space:nowrap}.all-record-legend i{min-width:15px;font-size:14px;font-style:normal;text-align:center}.all-record-legend i.is-sleep{width:14px;height:14px;border-radius:3px;background:#eed7fb}
+.feeding-detail-content .all-record-module>header h2{min-width:94px;height:32px;padding:0 13px;border-radius:0 17px 17px 0;font-size:15px}
+.all-record-module>header{height:52px}.all-record-module>header button{height:32px;margin-right:10px;padding:0 17px;border-radius:17px;font-size:13px}
+.all-record-module>header .all-filter-trigger,.all-filter-panel>header .all-filter-trigger{width:68px;height:28px;padding:0 11px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:15px;font-size:12px;line-height:1}.all-filter-trigger span{display:block;line-height:1}.all-filter-trigger svg{width:10px;height:10px;display:block;flex:0 0 10px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.all-time-grid{height:440px;margin-top:0;background:repeating-linear-gradient(to bottom,transparent 0,transparent 35.7px,rgba(0,0,0,.055) 36.7px),repeating-linear-gradient(90deg,#fff 0,#fff 46px,#fff8fb 47px,#fff8fb 93px)}
+.all-sleep-block{border-radius:4px}.all-event{width:13px;height:13px;display:grid;place-items:center;font-size:0}.all-event img{display:block;width:13px;height:13px;object-fit:contain}
+.all-record-dates{margin-top:9px;font-size:10px}.all-record-legend{margin:20px 12px 2px;gap:10px 12px;font-size:10px}.all-record-legend i{width:15px;height:15px;display:grid;place-items:center}.all-record-legend i img{display:block;width:15px;height:15px;object-fit:contain}.all-record-legend i.is-sleep{min-width:15px;height:15px}
+.all-filter-layer{position:absolute;left:0;right:0;top:96px;bottom:0;z-index:8;visibility:hidden;pointer-events:none}.all-filter-layer.is-open{visibility:visible;pointer-events:auto}.all-filter-scrim{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;background:rgba(0,0,0,.34);opacity:0;transition:opacity .2s}.all-filter-layer.is-open .all-filter-scrim{opacity:1}
+.all-filter-panel{position:relative;z-index:1;padding:18px 12px 14px;background:#fff;box-shadow:0 7px 18px rgba(0,0,0,.06);transform:translateY(-8px);opacity:0;transition:transform .22s ease,opacity .18s}.all-filter-layer.is-open .all-filter-panel{transform:translateY(0);opacity:1}.all-filter-panel>header{height:42px;display:flex;align-items:center;justify-content:space-between}.all-filter-panel>header h2{margin:0;font-size:19px}.all-filter-panel>header button{height:32px;padding:0 17px;border:1px solid var(--my-brand-red);border-radius:17px;background:#fff;color:var(--my-brand-red);font:500 13px/1 inherit}
+.all-filter-options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 12px;margin-top:12px}.all-filter-options button{height:34px;padding:0 6px;border:0;border-radius:18px;background:#f5f5f6;color:#666;font:500 14px/1 inherit;white-space:nowrap}.all-filter-panel>footer{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}.all-filter-panel>footer button{height:42px;border-radius:22px;font:700 16px/1 inherit}.all-filter-panel>footer .is-clear{border:1px solid var(--my-brand-red);background:#fff;color:var(--my-brand-red)}.all-filter-panel>footer .is-confirm{border:1px solid var(--my-brand-red);background:var(--my-brand-red);color:#fff}
+@media (prefers-reduced-motion:reduce){.all-filter-scrim,.all-filter-panel{transition:none}}
+
+/* Sleep feeding-record review */
+.sleep-record-review{position:absolute;inset:0;z-index:126;display:flex;flex-direction:column;background:linear-gradient(180deg,#f8e6ff 0,#fff 165px,#f4f4f7 360px);visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}.sleep-record-review.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
+.sleep-record-nav{height:48px;flex:0 0 48px;position:relative;display:flex;align-items:center;justify-content:center}.sleep-record-nav>button{position:absolute;left:0;width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center}.sleep-record-nav>button svg{width:23px;height:23px;fill:none;stroke:#333;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.sleep-record-nav>b{font-size:17px}.sleep-record-nav>span{position:absolute;right:14px;color:#555;font-size:14px}
+.sleep-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.sleep-smart-card,.sleep-record-module{margin-top:10px;border-radius:14px;background:#fff;overflow:hidden}.sleep-smart-card{padding:14px}.sleep-smart-card>header{display:flex;align-items:center;gap:7px;white-space:nowrap}.sleep-smart-card>header>span{width:18px;height:18px;display:grid;place-items:center;border-radius:4px;background:linear-gradient(#c780ff,#a84cea);color:#fff;font-size:8px}.sleep-smart-card>header>b{font-size:17px}.sleep-smart-card>header>em{padding:2px 8px;border-radius:12px;background:#ffd6e8;color:#ff5590;font-size:11px;font-style:normal;font-weight:700}.sleep-smart-card>header>i{margin-left:auto;color:#aaa;font-size:11px;font-style:normal}.sleep-smart-card>header>strong{color:#bbb;font:300 22px/1 Arial}.sleep-smart-body{display:flex;gap:24px;padding:24px 24px 20px}.sleep-smart-score{width:145px;height:150px;padding:16px;border:1px solid rgba(178,98,232,.2);border-radius:13px;box-shadow:0 2px 5px rgba(177,97,232,.1);display:flex;flex-direction:column}.sleep-smart-score>b{font-size:16px}.sleep-smart-score>strong{margin-top:38px;color:#b45ce8;font-size:26px}.sleep-smart-score>strong i{margin-left:4px;color:#666;font-size:12px;font-style:normal;font-weight:400}.sleep-smart-score>span{margin-top:auto;color:#555;font-size:12px}.sleep-smart-status{padding-top:10px}.sleep-smart-status p{margin:0 0 10px;color:#555;font-size:13px;white-space:nowrap}.sleep-smart-status em{padding:2px 5px;border-radius:4px;background:#f4f4f4;color:#aaa;font-size:11px;font-style:normal}.sleep-smart-status button{height:34px;margin-top:10px;padding:0 20px;border:0;border-radius:18px;background:#ff5b93;color:#fff;font:500 13px/1 inherit}
+.sleep-record-module{padding-bottom:16px}.sleep-record-module>h2{width:max-content;min-width:105px;height:42px;margin:0 0 16px;padding:0 18px;display:flex;align-items:center;border-radius:0 24px 24px 0;background:linear-gradient(90deg,#a948e4,#bb68ef);color:#fff;font-size:17px}.sleep-record-module section h3{margin:0;padding:0 12px 10px;display:flex;align-items:center;gap:7px;color:#aa55e6;font-size:13px}.sleep-record-module section h3 i{width:4px;height:15px;border-radius:3px;background:#b559e9}
+.sleep-record-counts{display:grid;grid-template-columns:repeat(7,1fr);height:44px;margin:0 12px 14px;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fcf9ff 49px,#fcf9ff 97px)}.sleep-record-counts span{display:grid;place-items:center;color:#777;font-size:11px;border-bottom:1px dashed #eee}.sleep-duration-empty{height:310px;margin:0 12px;position:relative;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fbf8ff 49px,#fbf8ff 97px)}.sleep-duration-empty span{position:absolute;top:36px;left:50%;transform:translateX(-50%);padding:4px 7px;border:1px solid #bd64ec;border-radius:5px;color:#ad55df;font-size:11px;white-space:nowrap}
+.sleep-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#777;font-size:10px;text-align:center}.sleep-record-dates span.is-hot{color:#b14ee5;font-weight:600}.sleep-record-legend{margin:22px 16px 0;display:flex;align-items:center;gap:6px;color:#555;font-size:12px}.sleep-record-legend i{width:10px;height:10px;border-radius:3px;background:#ecd9fa}
+.sleep-time-grid{height:560px;margin:0 20px 0 12px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 45px,rgba(0,0,0,.06) 46px),repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fbf8ff 49px,#fbf8ff 97px)}.sleep-time-days{position:absolute;inset:0 18px 0 0;display:grid;grid-template-columns:repeat(7,1fr)}.sleep-time-days span{border-right:.5px solid rgba(0,0,0,.025)}.sleep-time-axis{position:absolute;right:-18px;top:0;bottom:0;width:18px}.sleep-time-axis span{position:absolute;right:0;transform:translateY(-50%);color:#777;font-size:9px}
+.sleep-smart-status em.is-ready{background:#f1e6fa;color:#aa55df;font-weight:500}
+.sleep-smart-score>strong small{margin-left:4px;color:#a75ed8;font-size:11px;font-weight:500}.sleep-smart-status em.is-good{background:#e9f9ef;color:#32b86c}.sleep-smart-status em.is-attention{background:#fff3df;color:#efa540}
+.sleep-duration-empty.has-data>div{position:absolute;left:8px;right:8px;bottom:0;height:245px;display:flex;align-items:flex-end;justify-content:space-around}.sleep-duration-empty.has-data>div>i{width:24px;position:relative;border-radius:12px 12px 3px 3px;background:linear-gradient(#c67af2,#ae56e4)}.sleep-duration-empty.has-data>div>i b{position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#777;font-size:9px;font-style:normal;font-weight:400;white-space:nowrap}
+.sleep-time-days>span{position:relative}.sleep-time-days>span>i{position:absolute;left:24%;right:24%;min-height:5px;border-radius:7px;background:linear-gradient(#d795f4,#bd66e8);box-shadow:0 1px 3px rgba(177,82,225,.14)}
+
 .review-placeholder-chart{
   position:relative;
   height:150px;
@@ -18142,6 +18724,8 @@ html,body{
   transition:background 0.15s;
 }
 .review-card-more:active{background:#fafafb}
+.review-card-more.is-actionable{cursor:pointer}
+.review-card-more.is-actionable:focus-visible{outline:2px solid rgba(255,77,136,.35);outline-offset:-2px}
 .review-card-more-main{
   font-size:14px;
   font-weight:500;
@@ -19850,7 +20434,7 @@ const TWEAK_DEFAULTS = {
   "demoScene": "note-quick-record"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-window.__BUILD__ = "2026-07-10-nomask";
+window.__BUILD__ = "2026-07-16-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 window.__BABY_FEEDING_MODE = true;
 </script>
@@ -19897,6 +20481,11 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
       <svg {...common}>
         <circle cx="11" cy="11" r="7"/>
         <path d="m20 20-3.5-3.5"/>
+      </svg>
+    );
+    case 'filter': return (
+      <svg {...common}>
+        <path d="M4 5h16M7 12h10M10 19h4"/>
       </svg>
     );
     case 'camera': return (
@@ -20444,6 +21033,10 @@ const TIMELINE_BLOCKS = [
         color:'#FF7A66',
         railDot:'baby',
         voiceQuote:'三点半喂了155',
+        creator:'爸爸',
+        creatorId:'family',
+        isOwnRecord:false,
+        familyUnread:true,
       },
       {
         kind:'baby-feeding-card', id:'baby-feed-0747',
@@ -20455,6 +21048,10 @@ const TIMELINE_BLOCKS = [
         icon:'🍼',
         color:'#FF7A66',
         railDot:'baby',
+        creator:'奶奶',
+        creatorId:'family',
+        isOwnRecord:false,
+        familyUnread:true,
       },
       {
         kind:'baby-feeding-card', id:'baby-feed-1510',
@@ -20466,6 +21063,10 @@ const TIMELINE_BLOCKS = [
         icon:'🧷',
         color:'#E8A23D',
         railDot:'baby',
+        creator:'奶奶',
+        creatorId:'family',
+        isOwnRecord:false,
+        familyUnread:true,
       },
       {
         kind:'record-group', id:'e-517-fit-g',
@@ -20497,6 +21098,9 @@ const TIMELINE_BLOCKS = [
         color:'#FF7A66',
         railDot:'baby',
         voiceQuote:'刚喂了130毫升，喝得有点慢',
+        creator:'妈妈',
+        creatorId:'self',
+        isOwnRecord:true,
       },
     ],
   },
@@ -20849,11 +21453,18 @@ function TabBar({
   const icon = (id) => (
     <img className="tab-icon-img" src={tabIcons[id]} alt="" aria-hidden="true" />
   );
+  const reviewIcon = (
+    <svg viewBox="0 0 28 28" aria-hidden="true">
+      <path d="M5 21.5V5.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
+      <path d="M5 21.5H23" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
+      <path d="M8.5 17.5l4-4 3.5 3 5.5-7" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
   const tabs = [
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
-    {id:'note', label:noteLabel, custom:<I name="mic" size={26} stroke={1.7}/>, notif: noteUnread},
-    {id:'cash', label:'回顾', custom:<I name="line-chart" size={26} stroke={1.7}/>},
+    {id:'note', label:noteLabel, custom:<svg className="tab-note-mic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="13" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M5 11.5a7 7 0 0 0 14 0M12 18.5v3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>, notif: noteUnread},
+    {id:'cash', label:'回顾', custom:reviewIcon},
     {id:'me', label:'我', custom:icon('me')},
   ];
   return (
@@ -29758,18 +30369,43 @@ function BabyFeedingTimelineCard({item, isNew}){
   const iconSrc = item.iconSrc || iconSrcByType[title];
   const color = item.color || '#FF7A66';
   const summary = item.summary;
+  const creator = item.creator || '妈妈';
   const detailLines = Array.isArray(item.detailLines) ? item.detailLines.filter(Boolean) : [];
   const hasDetail = detailLines.length > 0;
+  const notePreview = item.noteText || item.voiceQuote || '';
 
   React.useEffect(()=>{
     setSummaryOpen(item.summaryOpen !== false);
   }, [item.id, item.summaryOpen]);
 
+  const canOpenFeedingDetail = title === '配方奶' || title === '母乳' || title === '睡眠';
+  const openFeedingDetail = ()=>{
+    if(!canOpenFeedingDetail) return;
+    window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {detail:item}));
+  };
+  const sleepMinutes = Math.max(1, Math.ceil((item.elapsedSeconds || 60) / 60));
+  const openSleepWakeSheet = (event)=>{
+    event.stopPropagation();
+    window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {
+      detail:{...item, elapsedSeconds:item.elapsedSeconds || 60, sleepMode:'timer'}
+    }));
+  };
+
   return (
-    <article className={'tl-baby-feeding-card'+(isNew ? ' is-stream fade-in' : '')}>
+    <article
+      className={'tl-baby-feeding-card'+(isNew ? ' is-stream fade-in' : '')+(canOpenFeedingDetail ? ' is-clickable' : '')}
+      role={canOpenFeedingDetail ? 'button' : undefined}
+      tabIndex={canOpenFeedingDetail ? 0 : undefined}
+      onClick={openFeedingDetail}
+      onKeyDown={(event)=>{
+        if(canOpenFeedingDetail && (event.key === 'Enter' || event.key === ' ')){
+          event.preventDefault();
+          openFeedingDetail();
+        }
+      }}
+    >
       <div className="tl-baby-feed-head">
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
-        {item.voice?.duration ? <span className="tl-baby-feed-voice">{item.voice.duration}</span> : null}
       </div>
       <div className={'tl-baby-feed-main'+(hasDetail ? ' is-detail' : '')}>
         <span className={'tl-baby-feed-icon'+(iconSrc ? ' is-image' : '')} style={iconSrc ? undefined : {background: color}}>
@@ -29789,35 +30425,37 @@ function BabyFeedingTimelineCard({item, isNew}){
           </span>
         )}
       </div>
-      <div className="tl-baby-feed-tags">
-        <span className="tl-baby-feed-tag-main">小豆苗</span>
-        {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
-      </div>
-      {item.voiceQuote && (
-        <div className={'tl-baby-feed-source'+(item.sourceGroupRole === 'anchor' ? ' is-anchor' : '')}>
-          <span className="tl-baby-feed-source-mic">🎙</span>
-          <span className="tl-baby-feed-source-text">"{item.voiceQuote}"</span>
-          {item.sourceGroupCount ? (
-            <span className="tl-baby-feed-source-count">共{item.sourceGroupCount}条</span>
-          ) : null}
-        </div>
-      )}
-      {!item.voiceQuote && item.sourceGroupHint ? (
-        <div className="tl-baby-feed-source is-linked">
-          <span className="tl-baby-feed-source-mic">🎙</span>
-          <span className="tl-baby-feed-source-text">{item.sourceGroupHint}</span>
+      {item.sleeping ? (
+        <div className="tl-baby-sleep-live">
+          <span className="tl-baby-sleep-duration">睡了{sleepMinutes}分钟</span>
+          <span className="tl-baby-sleep-status">宝宝睡觉中...</span>
+          <button type="button" onClick={openSleepWakeSheet}>宝宝醒了</button>
         </div>
       ) : null}
+      {notePreview ? (
+        <p className={'tl-baby-feed-note-preview'+(hasDetail ? ' is-after-detail' : '')}>{notePreview}</p>
+      ) : null}
+      <div className="tl-baby-feed-tags">
+        {item.showBabyTag !== false ? <span className="tl-baby-feed-tag-main">小豆苗</span> : null}
+        {item.showCreator ? (
+          <span className={'tl-baby-feed-creator' + (item.creatorId === 'family' ? ' is-family' : '')}>{creator}记录</span>
+        ) : null}
+        {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
+      </div>
       {summary && (
         <div className={'tl-baby-feed-summary'+(summaryOpen ? ' is-open' : '')}>
           <button
             type="button"
             className="tl-baby-feed-summary-toggle"
             aria-expanded={summaryOpen}
-            onClick={()=>setSummaryOpen(v=>!v)}
+            onClick={(event)=>{
+              event.stopPropagation();
+              setSummaryOpen(v=>!v);
+            }}
           >
             <span className="tl-baby-feed-summary-spark" aria-hidden="true">✦</span>
             <span className="tl-baby-feed-summary-title">{summary.title || '喂养小结'}</span>
+            {summary.meta ? <span className="tl-baby-feed-summary-meta">{summary.meta}</span> : null}
             <span className={'tl-baby-feed-summary-chev'+(summaryOpen ? ' is-open' : '')} aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M6 15l6-6 6 6"/>
@@ -31879,6 +32517,10 @@ const SELF_PANEL_MATCHERS = {
   饮食(item, primary) {
     return SEARCH_FILTER_MATCHERS.diet(item, primary);
   },
+  运动(item, primary) {
+    const text = entryText(item, primary);
+    return /运动|健身|跑步|游泳|训练/.test(text) || tagMatches(primary, item, (t) => /运动|run/i.test(t.cat || ''));
+  },
 };
 
 const BABY_PANEL_MATCHERS = {
@@ -31940,6 +32582,14 @@ function itemMatchesPersonPanelFilter(item, { personId, option }) {
   const entry = getSearchableEntry(item);
   if (!entry) return false;
   const { item: row, primary } = entry;
+
+  if (personId === 'personal') {
+    if (option === '全部') return true;
+    const selfMatcher = SELF_PANEL_MATCHERS[option];
+    const babyMatcher = BABY_PANEL_MATCHERS[option];
+    return (selfMatcher ? selfMatcher(row, primary) : false)
+      || (babyMatcher ? babyMatcher(row, primary) : false);
+  }
 
   if (personId === 'self') {
     if (option === '全部') return isSelfHealthEntry(row, primary);
@@ -32666,6 +33316,11 @@ const BABY_FEEDING_PERSON_OPTIONS = ['全部', ...BABY_FEEDING_FILTER_ITEMS];
 
 const SELF_PERSON_OPTIONS = ['全部', '爱爱', '心情', '体重', '体温', '症状', '饮食'];
 
+const PERSONAL_TIMELINE_OPTIONS = [
+  ...SELF_PERSON_OPTIONS,
+  '运动',
+];
+
 const BABY_FEEDING_PANEL_SECTIONS = [
   {
     id: 'self',
@@ -32728,6 +33383,7 @@ const XHS_FILTER_SECTIONS = [
 function XhsStyleSearchPage({
   intent = 'search',
   variant = 'default',
+  recordSpace = 'personal',
   activeFilter = null,
   onClose,
   onSearch,
@@ -32739,7 +33395,28 @@ function XhsStyleSearchPage({
   const isFilterOnly = isBabyFeeding && intent === 'all';
   const showSearchTop = !isFilterOnly;
   const tabs = XHS_SEARCH_TABS;
-  const sections = isBabyFeeding ? BABY_FEEDING_PANEL_SECTIONS : XHS_FILTER_SECTIONS;
+  const sections = isBabyFeeding
+    ? (recordSpace === 'combined'
+      ? [
+          {
+            id:'elder',
+            title:'宝宝记录',
+            options:BABY_FEEDING_PERSON_OPTIONS,
+            default:'全部',
+            grid:true,
+          },
+          {
+            id:'self',
+            title:'我的记录',
+            options:PERSONAL_TIMELINE_OPTIONS,
+            default:'全部',
+            grid:true,
+          },
+        ]
+      : recordSpace === 'shared'
+      ? [{...BABY_FEEDING_PANEL_SECTIONS[1], title:'记录项'}]
+      : [{id:'personal', title:'记录项', options:PERSONAL_TIMELINE_OPTIONS, default:'全部', grid:true}])
+    : XHS_FILTER_SECTIONS;
   const [query, setQuery] = React.useState(isBabyFeeding ? '' : '已经那个格兰云天');
   const [activeTab, setActiveTab] = React.useState('全部');
   const [filtersExpanded, setFiltersExpanded] = React.useState(true);
@@ -33046,7 +33723,7 @@ function SleepReviewMetric({major, majorUnit, minor, minorUnit, label, trend}){
   );
 }
 
-function SleepReviewCard(){
+function SleepReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="睡眠"
@@ -33062,29 +33739,45 @@ function SleepReviewCard(){
         </>
       )}
       more="查看完整睡眠变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
 
 function DiaperReviewChart(){
-  const days = [
-    {date:'10.15', records:['pee','pee','poop','pee','both']},
-    {date:'10.16', records:['pee','poop','pee','pee','pee']},
-    {date:'10.17', records:['both','pee','pee','poop','pee','pee']},
-    {date:'10.18', records:['pee','pee','both','pee','poop']},
-    {date:'10.19', records:['poop','pee','pee','pee','both']},
-    {date:'10.20', records:['pee','both','pee','poop','pee']},
-    {date:'今天', records:['both','pee','pee','poop','pee','pee'], highlight:true},
+  const recordPatterns = [
+    ['pee','pee','poop','pee','both'],
+    ['pee','poop','pee','pee','pee'],
+    ['both','pee','pee','poop','pee','pee'],
+    ['pee','pee','both','pee','poop'],
+    ['poop','pee','pee','pee','both'],
+    ['pee','both','pee','poop','pee'],
   ];
+  const dateLabels = [
+    '9.22','9.23','9.24','9.25','9.26','9.27','9.28','9.29','9.30',
+    '10.1','10.2','10.3','10.4','10.5','10.6','10.7','10.8','10.9','10.10','10.11',
+    '10.12','10.13','10.14','10.15','10.16','10.17','10.18','10.19','10.20','今天',
+  ];
+  const days = Array.from({length:30}, (_item, index)=>(
+    {
+      key:'diaper-day-' + index,
+      date:dateLabels[index],
+      records:index === 29 ? [] : recordPatterns[index % recordPatterns.length],
+      highlight:index === 29,
+    }
+  ));
   const W = 340, H = 168, padL = 28, padR = 12, padT = 14, padB = 27;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const yMax = 6.8;
   const band = (x1 - x0) / days.length;
+  const segmentWidth = 5.6;
   const X = i => x0 + band * i + band / 2;
   const Y = count => y1 - count / yMax * (y1 - y0);
   const colors = {pee:'#f5b335', poop:'#45c978', both:'#4b91ed'};
+  const visibleDateIndexes = {0:true, 7:true, 14:true, 21:true, 29:true};
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天换尿布分类次数图">
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天换尿布分类次数图">
       {[2,4,6].map(tick=>(
         <React.Fragment key={tick}>
           <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
@@ -33098,14 +33791,15 @@ function DiaperReviewChart(){
         )).filter(segment=>segment.count > 0);
         let stackedCount = 0;
         return (
-          <React.Fragment key={day.date}>
+          <React.Fragment key={day.key}>
             {segments.map(segment=>{
               const segmentBottom = Y(stackedCount);
               stackedCount += segment.count;
               const segmentTop = Y(stackedCount);
-              return <rect key={segment.type} x={X(i) - 10} y={segmentTop + 1.5} width="20" height={segmentBottom - segmentTop - 3} rx="7" fill={colors[segment.type]}/>;
+              return <rect key={segment.type} x={X(i) - segmentWidth / 2} y={segmentTop + 0.8} width={segmentWidth} height={segmentBottom - segmentTop - 1.6} rx={segmentWidth / 2} fill={colors[segment.type]}/>;
             })}
-            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e8930f' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+            <line x1={X(i)} y1={y1} x2={X(i)} y2={y1 + 3} stroke="#d8d8dc" strokeWidth="0.7"/>
+            {visibleDateIndexes[i] ? <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e8930f' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text> : null}
           </React.Fragment>
         );
       })}
@@ -33128,7 +33822,7 @@ function DiaperReviewMetric({kind, label}){
   );
 }
 
-function DiaperReviewCard(){
+function DiaperReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="换尿布"
@@ -33145,11 +33839,13 @@ function DiaperReviewCard(){
       metrics={(
         <>
           <DiaperReviewMetric kind="empty" label="最近记录"/>
-          <DiaperReviewMetric kind="average" label="近7天平均"/>
+          <DiaperReviewMetric kind="average" label="近30天平均"/>
           <DiaperReviewMetric kind="trend" label="整体趋势"/>
         </>
       )}
       more="查看完整换尿布变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
@@ -33204,7 +33900,7 @@ function FoodReviewMetric({kind, label}){
   );
 }
 
-function FoodReviewCard(){
+function FoodReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="辅食"
@@ -33220,20 +33916,24 @@ function FoodReviewCard(){
         </>
       )}
       more="查看完整辅食变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
 
+const FEEDING_REVIEW_DAYS = [
+  {date:'10.15', breast:220, formula:300, minutes:48, directCount:3, leftMinutes:25, rightMinutes:23, feeds:[{hour:1.2,type:'formula'},{hour:8.4,type:'direct'},{hour:13.1,type:'breast'},{hour:18.3,type:'direct'},{hour:22.1,type:'formula'}]},
+  {date:'10.16', breast:260, formula:350, minutes:42, directCount:3, leftMinutes:20, rightMinutes:22, feeds:[{hour:.8,type:'formula'},{hour:7.9,type:'direct'},{hour:11.8,type:'breast'},{hour:16.5,type:'formula'},{hour:20.7,type:'direct'},{hour:23,type:'breast'}]},
+  {date:'10.17', breast:190, formula:280, minutes:37, directCount:2, leftMinutes:18, rightMinutes:19, feeds:[{hour:2,type:'formula'},{hour:9.2,type:'direct'},{hour:13.8,type:'breast'},{hour:18.8,type:'direct'},{hour:22.4,type:'formula'}]},
+  {date:'10.18', breast:300, formula:380, minutes:50, directCount:4, leftMinutes:26, rightMinutes:24, feeds:[{hour:1.4,type:'formula'},{hour:6.8,type:'direct'},{hour:10.5,type:'breast'},{hour:14.2,type:'direct'},{hour:18,type:'formula'},{hour:21.5,type:'direct'},{hour:23.3,type:'breast'}]},
+  {date:'10.19', breast:240, formula:300, minutes:44, directCount:3, leftMinutes:22, rightMinutes:22, feeds:[{hour:2.3,type:'formula'},{hour:8.2,type:'direct'},{hour:12.7,type:'breast'},{hour:17.2,type:'direct'},{hour:21.8,type:'formula'}]},
+  {date:'10.20', breast:293, formula:380, minutes:39, directCount:3, leftMinutes:20, rightMinutes:19, feeds:[{hour:1.1,type:'formula'},{hour:7.4,type:'direct'},{hour:11.3,type:'breast'},{hour:15.6,type:'formula'},{hour:19.7,type:'direct'},{hour:22.8,type:'breast'}]},
+  {date:'今天', breast:580, formula:120, minutes:42, directCount:3, leftMinutes:21, rightMinutes:21, feeds:[{hour:1.5,type:'formula'},{hour:8,type:'direct'},{hour:12.2,type:'breast'},{hour:16.8,type:'direct'},{hour:21.3,type:'breast'}], highlight:true},
+];
+
 function FeedingReviewChart(){
-  const days = [
-    {date:'10.15', breast:220, formula:300, minutes:48},
-    {date:'10.16', breast:260, formula:350, minutes:42},
-    {date:'10.17', breast:190, formula:280, minutes:37},
-    {date:'10.18', breast:300, formula:380, minutes:50},
-    {date:'10.19', breast:240, formula:300, minutes:44},
-    {date:'10.20', breast:293, formula:380, minutes:39},
-    {date:'今天', breast:580, formula:120, minutes:42, highlight:true},
-  ];
+  const days = FEEDING_REVIEW_DAYS;
   const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const amountMax = 720;
@@ -33299,14 +33999,14 @@ function FeedingReviewMetric({kind, label}){
         <div className="review-feeding-average-value"><b>599</b><i>ml</i></div>
       ) : null}
       {kind === 'trend' ? (
-        <div className="review-feeding-trend-value"><span>↕</span><b>波动</b></div>
+        <div className="review-feeding-average-value"><b>6.9</b><i>次</i></div>
       ) : null}
       <div className="review-metric-label">{label}</div>
     </div>
   );
 }
 
-function FeedingReviewCard(){
+function FeedingReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="喂奶"
@@ -33324,10 +34024,12 @@ function FeedingReviewCard(){
         <>
           <FeedingReviewMetric kind="recent" label="最近记录"/>
           <FeedingReviewMetric kind="average" label="近7天平均"/>
-          <FeedingReviewMetric kind="trend" label="整体趋势"/>
+          <FeedingReviewMetric kind="trend" label="近7天平均"/>
         </>
       )}
       more="查看完整喂奶变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
@@ -33354,13 +34056,22 @@ function ReviewBackIcon(){
   return <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>;
 }
 
-function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sample, onOpen}){
+function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sample, onOpen, onMore}){
   const isActionable = typeof onOpen === 'function';
+  const isMoreActionable = typeof onMore === 'function';
   const handleKeyDown = (event)=>{
     if(!isActionable) return;
     if(event.key === 'Enter' || event.key === ' '){
       event.preventDefault();
       onOpen();
+    }
+  };
+  const handleMoreKeyDown = (event)=>{
+    if(!isMoreActionable) return;
+    if(event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      event.stopPropagation();
+      onMore();
     }
   };
   return (
@@ -33380,12 +34091,224 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sa
         <div className="review-legend">{legend}</div>
         <div className="review-metrics">{metrics}</div>
       </div>
-      <div className="review-card-more" role="button" aria-label={more}>
+      <div
+        className={'review-card-more'+(isMoreActionable?' is-actionable':'')}
+        role="button"
+        tabIndex={isMoreActionable ? 0 : undefined}
+        aria-label={more}
+        onClick={isMoreActionable ? (event)=>{ event.stopPropagation(); onMore(); } : undefined}
+        onKeyDown={handleMoreKeyDown}
+      >
         <div className="review-card-more-main">{more}</div>
         <ReviewChevron/>
       </div>
       {sample}
     </div>
+  );
+}
+
+function FeedingReviewTabs({active,onChange}){
+  return (
+    <nav className="feeding-review-tabs" aria-label="喂养分析分类">
+      <button type="button" className={active==='feeding'?'is-active':''} aria-current={active==='feeding'?'page':undefined} onClick={()=>onChange('feeding')}>喂奶</button>
+      <button type="button" className={active==='sleep'?'is-active':''} aria-current={active==='sleep'?'page':undefined} onClick={()=>onChange('sleep')}>睡眠</button>
+      <button type="button" className={active==='diaper'?'is-active':''} aria-current={active==='diaper'?'page':undefined} onClick={()=>onChange('diaper')}>换尿布</button>
+      <button type="button" className={active==='food'?'is-active':''} aria-current={active==='food'?'page':undefined} onClick={()=>onChange('food')}>辅食</button>
+      <button type="button" className={active==='all'?'is-active':''} aria-current={active==='all'?'page':undefined} onClick={()=>onChange('all')}>全部</button>
+    </nav>
+  );
+}
+
+function FeedingRecordReviewContent(){
+  const days = FEEDING_REVIEW_DAYS;
+  const maxBottle = Math.max(...days.map(day=>day.breast+day.formula));
+  const bottleAverage = Math.round(days.reduce((sum,day)=>sum+day.breast+day.formula,0)/days.length);
+  return (
+    <div className="feeding-record-scroll" aria-label="喂奶分析内容">
+        <article className="feeding-smart-card">
+          <header><span>Ai</span><b>小小屁的喂奶规律解读</b><em>VIP</em><strong>›</strong></header>
+          <div className="feeding-smart-body">
+            <div className="feeding-smart-score"><b>每天喝奶</b><strong>10<i>次</i></strong><span>第24周</span></div>
+            <div className="feeding-smart-status"><p>喂奶次数　<em className="is-good">符合参考值</em></p><p>白天规律　<em className="is-attention">建议关注</em></p><p>夜奶规律　<em>未记录</em></p><button type="button">立即查看</button></div>
+          </div>
+        </article>
+
+        <article className="feeding-record-module">
+          <h2>时间规律</h2>
+          <div className="feeding-pattern-grid">
+            <div className="feeding-pattern-days">{days.map(day=><span key={day.date}>{day.feeds.map((feed,index)=><i key={index} className={'is-'+feed.type} style={{top:(feed.hour/24*100)+'%'}}/>)}</span>)}</div>
+            <div className="feeding-pattern-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+          </div>
+          <div className="feeding-record-dates">{days.map(day=><span key={day.date} className={day.highlight?'is-hot':''}>{day.date}</span>)}</div>
+          <div className="feeding-record-legend"><span className="is-direct"><i/>母乳</span><span className="is-formula"><i/>配方奶</span><span className="is-breast"><i/>瓶喂母乳</span></div>
+        </article>
+
+        <article className="feeding-record-module feeding-amount-module">
+          <header><h2>喂奶量</h2><span>统计周期：每日00:00-24:00</span></header>
+          <section><h3><i/>亲喂母乳</h3><div className="feeding-direct-table"><div className="feeding-direct-labels"><span>次数</span><span>左</span><span>右</span></div>{days.map(day=><div key={day.date}><b>{day.directCount}次</b><span>{day.leftMinutes}分钟</span><span>{day.rightMinutes}分钟</span></div>)}</div></section>
+          <section><h3><i/>瓶喂</h3><div className="feeding-bottle-chart"><div className="feeding-average-badge">近7天平均每天{bottleAverage}ml</div>{days.map(day=>{const total=day.breast+day.formula;const height=Math.round(total/maxBottle*230);return <div className="feeding-bottle-day" key={day.date}><div className="feeding-bottle-bar" style={{height}}><i className="is-breast" style={{height:(day.breast/total*100)+'%'}}>{day.breast}</i><i className="is-formula" style={{height:(day.formula/total*100)+'%'}}>{day.formula}</i></div></div>;})}</div><div className="feeding-record-dates">{days.map(day=><span key={day.date} className={day.highlight?'is-hot':''}>{day.date}</span>)}</div><div className="feeding-record-legend"><span className="is-breast"><i/>瓶喂母乳</span><span className="is-formula"><i/>瓶喂配方奶</span></div></section>
+        </article>
+    </div>
+  );
+}
+
+const SLEEP_REVIEW_DATES = ['7.8','7.9','7.10','7.11','7.12','7.13','今天'];
+const SLEEP_REVIEW_COUNTS = [5,4,5,6,5,4,4];
+const SLEEP_REVIEW_HOURS = [14.8,15.6,14.3,16.1,15.2,14.7,15.0];
+const SLEEP_REVIEW_PERIODS = [
+  [[0.4,5.8],[8.2,9.5],[12.1,13.3],[16,17.2],[20.5,24]], [[0,5.4],[8.6,10],[12.8,14],[17.1,18.2],[21,24]],
+  [[0.2,6],[9,10.1],[13,14.4],[16.4,17.6],[20.8,24]], [[0,5.7],[8.1,9],[11.4,12.4],[14.8,15.7],[18,19],[21.4,24]],
+  [[0.3,6.1],[8.7,10],[12.5,13.7],[16.2,17.4],[20.6,24]], [[0.1,5.5],[9.2,10.6],[13.5,14.7],[17,18.1],[21.2,24]],
+  [[0.2,6],[8.5,9.8],[13,14.2],[20.9,24]],
+];
+
+function SleepRecordReviewContent(){
+  return (
+    <div className="sleep-record-scroll" aria-label="睡眠分析内容">
+        <article className="sleep-smart-card">
+          <header><span>Ai</span><b>智能分析</b><em>VIP</em><i>养成规律睡眠，促进智力发育</i><strong>›</strong></header>
+          <div className="sleep-smart-body"><div className="sleep-smart-score"><b>每天睡觉</b><strong>10<i>h</i><small>34min</small></strong><span>第24周</span></div><div className="sleep-smart-status"><p>睡眠量　<em className="is-good">符合参考值</em></p><p>白天小睡　<em className="is-attention">建议关注</em></p><p>夜间睡眠　<em>未记录</em></p><button type="button">立即查看</button></div></div>
+        </article>
+        <article className="sleep-record-module sleep-pattern-first">
+          <h2>时间规律</h2>
+          <div className="sleep-time-grid"><div className="sleep-time-days">{SLEEP_REVIEW_DATES.map((date,dayIndex)=><span key={date}>{SLEEP_REVIEW_PERIODS[dayIndex].map((period,index)=><i key={index} style={{top:(period[0]/24*100)+'%',height:((period[1]-period[0])/24*100)+'%'}}/>)}</span>)}</div><div className="sleep-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div></div>
+          <div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div>
+          <div className="sleep-record-legend"><i/>睡眠</div>
+        </article>
+        <article className="sleep-record-module sleep-amount-second">
+          <h2>睡眠量</h2>
+          <section><h3><i/>总次数</h3><div className="sleep-record-counts">{SLEEP_REVIEW_COUNTS.map((count,index)=><span key={SLEEP_REVIEW_DATES[index]}>{count}次</span>)}</div></section>
+          <section><h3><i/>总时长</h3><div className="sleep-duration-empty has-data"><span>近7天平均每天15小时6分钟</span><div>{SLEEP_REVIEW_HOURS.map((hours,index)=><i key={SLEEP_REVIEW_DATES[index]} style={{height:(hours/18*230)}}><b>{hours}h</b></i>)}</div></div><div className="sleep-record-dates">{SLEEP_REVIEW_DATES.map((date,index)=><span key={date} className={index===3||index===4||index===6?'is-hot':''}>{date}</span>)}</div></section>
+        </article>
+    </div>
+  );
+}
+
+const DIAPER_REVIEW_DAYS = [
+  {date:'10.15',time:8.5,count:1},{date:'10.16',time:11.5,count:1},{date:'10.17',time:null,count:0},
+  {date:'10.18',time:7.5,count:1,hot:true},{date:'10.19',time:18.5,count:1,hot:true},{date:'10.20',time:9.5,count:1},{date:'今天',time:null,count:0,hot:true},
+];
+
+function DiaperRecordReviewContent(){
+  return (
+    <div className="diaper-record-scroll" aria-label="换尿布分析内容">
+      <article className="diaper-record-module">
+        <h2>时间规律</h2>
+        <div className="diaper-time-grid">
+          <div className="diaper-time-days">{DIAPER_REVIEW_DAYS.map(day=><span key={day.date}>{day.time==null?null:<i style={{top:(day.time/24*100)+'%'}}>🩲</i>}</span>)}</div>
+          <div className="diaper-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="diaper-record-dates">{DIAPER_REVIEW_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="diaper-record-legend"><i>🩲</i>换尿布</div>
+      </article>
+
+      <article className="diaper-record-module diaper-count-module">
+        <h2>换尿布次数</h2>
+        <h3><i/>总次数</h3>
+        <div className="diaper-count-chart">
+          <div className="diaper-count-average">近7天平均每天1.0次</div>
+          {DIAPER_REVIEW_DAYS.map(day=><div className="diaper-count-day" key={day.date}>{day.count?<><b>{day.count}次</b><i style={{height:42}}/></>:null}</div>)}
+        </div>
+        <div className="diaper-record-dates">{DIAPER_REVIEW_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="diaper-count-legend"><span className="is-pee"><i/>嘘嘘</span><span className="is-poop"><i/>臭臭</span><span className="is-both"><i/>嘘嘘+臭臭</span><span className="is-diaper"><i/>换尿布</span></div>
+      </article>
+
+      <article className="diaper-advice-card">
+        <h2>分析与建议</h2>
+        <p>昨天臭臭是正常的哦~</p>
+        <p>宝宝大便的颜色与食物息息相关，如果发现大便的次数或者稠度有改变的话，要及时调整婴儿以及母亲的饮食。在平时的喂养中，可以给6月龄以上的宝宝适当补充水分，宝宝醒着的时候要多陪他玩耍，增加运动量，必要时为宝宝肚子做做按摩，帮助肠胃蠕动。</p>
+        <p>另外，排出好便便的快捷方式是充分摄取膳食纤维，所以宝宝满6月龄添加辅食后，就可以尝试各种新鲜的蔬菜水果，促进健康排便。</p>
+      </article>
+    </div>
+  );
+}
+
+const FOOD_DETAIL_DAYS = [
+  {date:'10.15',count:1,grams:600,time:10.2},{date:'10.16',count:1,grams:500,time:11.1},{date:'10.17',count:1,grams:600,time:10.6},
+  {date:'10.18',count:1,grams:500,time:11.5},{date:'10.19',count:1,grams:600,time:10.8},{date:'10.20',count:1,grams:600,time:11.2},{date:'今天',count:1,grams:600,time:10.5,hot:true},
+];
+
+function FoodRecordReviewContent(){
+  const maxAmount = Math.max(...FOOD_DETAIL_DAYS.map(day=>day.grams),1);
+  return (
+    <div className="food-record-scroll" aria-label="辅食分析内容">
+      <article className="food-record-module">
+        <h2>时间规律</h2>
+        <div className="food-time-grid">
+          <div className="food-time-days">{FOOD_DETAIL_DAYS.map(day=><span key={day.date}>{day.time==null?null:<i style={{top:(day.time/24*100)+'%'}}>🥣</i>}</span>)}</div>
+          <div className="food-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="food-record-dates">{FOOD_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="food-record-legend"><i>🥣</i>辅食</div>
+      </article>
+
+      <article className="food-record-module food-amount-detail">
+        <h2>辅食量</h2>
+        <section><h3><i/>总次数</h3><div className="food-count-row">{FOOD_DETAIL_DAYS.map(day=><span key={day.date}>{day.count}次</span>)}</div></section>
+        <section><h3><i/>总量</h3><div className="food-amount-chart"><div className="food-average-badge">近7天平均每天600克</div>{FOOD_DETAIL_DAYS.map(day=><div className="food-amount-day" key={day.date}>{day.grams?<><b>{day.grams.toFixed(1)}g</b><i style={{height:Math.round(day.grams/maxAmount*230)}}/></>:null}</div>)}</div><div className="food-record-dates">{FOOD_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div></section>
+      </article>
+    </div>
+  );
+}
+
+const ALL_EVENT_ICONS = {
+  direct:'assets/baby-feeding-icons/breast.png', formula:'assets/baby-feeding-icons/formula.png', breast:'assets/baby-feeding-icons/bottle-breast.png',
+  diaper:'assets/baby-feeding-icons/diaper.png', food:'assets/baby-feeding-icons/solid-food.png', pump:'assets/baby-feeding-icons/pump.png',
+  bath:'assets/baby-feeding-icons/bath.png', play:'assets/baby-feeding-icons/play.png', swim:'assets/baby-feeding-icons/swim.png', other:'assets/baby-feeding-icons/other-event.png',
+};
+const ALL_DETAIL_DAYS = [
+  {date:'9.21',hot:true,sleep:[[10,11],[14.5,17],[21.8,24]],events:[[2.4,'direct'],[3.3,'formula'],[7.4,'direct'],[8.5,'bath'],[9.3,'direct'],[11.6,'direct'],[13.5,'diaper'],[13.7,'formula'],[17.6,'formula'],[18.4,'direct'],[19.4,'direct'],[20.7,'diaper'],[21.4,'formula']]},
+  {date:'9.22',sleep:[[0,2.6],[4.2,7.1],[21.7,22.4]],events:[[2.5,'direct'],[3.4,'formula'],[7.3,'direct'],[8.4,'direct'],[9.4,'formula'],[10.9,'direct'],[12.4,'direct'],[13.5,'formula'],[16.1,'direct'],[18.4,'direct'],[19.3,'formula'],[20.7,'direct'],[21.4,'other']]},
+  {date:'9.23',sleep:[[13.3,15.7],[17.5,18.5]],events:[[.5,'direct'],[2.4,'direct'],[3.4,'formula'],[6.8,'direct'],[8.4,'direct'],[9.4,'formula'],[10.4,'formula'],[12.5,'direct'],[15.7,'bath'],[16.5,'formula'],[18.4,'direct'],[19.4,'direct'],[20.4,'direct'],[21.4,'formula']]},
+  {date:'9.24',sleep:[[10.7,12.5]],events:[[1.4,'direct'],[2.4,'formula'],[2.5,'diaper'],[5.4,'formula'],[7.4,'direct'],[8.4,'bath'],[8.5,'direct'],[9.4,'direct'],[10.4,'formula'],[11.4,'other'],[13.4,'direct'],[14.4,'formula'],[15.4,'direct'],[16.4,'formula'],[17.4,'direct'],[18.4,'direct'],[19.4,'formula'],[20.4,'direct'],[21.4,'formula']]},
+  {date:'9.25',sleep:[[13.7,14.1],[20.9,24]],events:[[1.4,'direct'],[2.4,'formula'],[6.5,'formula'],[9.3,'direct'],[12.4,'direct'],[13.4,'formula'],[13.5,'diaper'],[17.4,'pump'],[18.4,'breast'],[19.4,'direct'],[20.4,'other'],[20.5,'formula']]},
+  {date:'9.26',sleep:[[0,3.5],[4,6.5],[7.2,8.1],[10.8,12.8],[17.2,19.2],[21.7,24]],events:[[.4,'formula'],[.5,'breast'],[.6,'direct'],[4.4,'pump'],[4.5,'formula'],[6.4,'breast'],[7.4,'direct'],[8.4,'formula'],[9.3,'breast'],[9.4,'pump'],[10.3,'bath'],[13.4,'breast'],[13.5,'direct'],[14.4,'play'],[14.5,'formula'],[17.4,'formula'],[19.4,'play'],[19.5,'formula'],[19.6,'breast'],[20.4,'direct'],[21.4,'formula'],[23.4,'pump']]},
+  {date:'9.27',hot:true,sleep:[[0,1.8],[3.2,5.1],[5.8,7.2],[8.2,10.1],[17.3,19.2],[21.8,22.4]],events:[[1.4,'direct'],[2.4,'breast'],[3.4,'formula'],[5.4,'formula'],[7.4,'direct'],[7.5,'bath'],[7.6,'diaper'],[8.4,'formula'],[8.5,'breast'],[11.4,'formula'],[12.4,'direct'],[13.4,'direct'],[15.4,'direct'],[15.5,'diaper'],[16.4,'formula'],[16.5,'breast'],[19.4,'direct'],[19.5,'breast'],[19.6,'direct'],[20.5,'formula'],[22.4,'formula']]},
+];
+
+function AllRecordReviewContent(){
+  const [filterOpen,setFilterOpen] = React.useState(false);
+  const filterItems = ['母乳','配方奶','瓶喂母乳','睡眠','换尿布','辅食','营养补剂','喝水','吸奶','洗澡','玩耍','游泳','其他事件'];
+  React.useEffect(()=>{
+    if(!filterOpen) return undefined;
+    const handleKey = event=>{ if(event.key==='Escape') setFilterOpen(false); };
+    window.addEventListener('keydown',handleKey);
+    return ()=>window.removeEventListener('keydown',handleKey);
+  },[filterOpen]);
+  return (
+    <>
+      <div className="all-record-scroll" aria-label="全部喂养分析内容">
+        <article className="all-record-module">
+          <header><h2>时间规律</h2><button type="button" className="all-filter-trigger" aria-expanded={filterOpen} onClick={()=>setFilterOpen(true)}><span>筛选</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button></header>
+          <div className="all-time-grid">
+            <div className="all-time-days">{ALL_DETAIL_DAYS.map(day=><span key={day.date}>{day.sleep.map((period,index)=><i className="all-sleep-block" key={'sleep'+index} style={{top:(period[0]/24*100)+'%',height:((period[1]-period[0])/24*100)+'%'}}/>)}{day.events.map((event,index)=><i className={'all-event is-'+event[1]} key={'event'+index} style={{top:(event[0]/24*100)+'%'}}><img src={ALL_EVENT_ICONS[event[1]]} alt=""/></i>)}</span>)}</div>
+            <div className="all-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+          </div>
+          <div className="all-record-dates">{ALL_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+          <div className="all-record-legend">{[['direct','母乳'],['formula','配方奶'],['breast','瓶喂母乳'],['sleep','睡眠'],['diaper','换尿布'],['food','辅食'],['pump','吸奶'],['bath','洗澡'],['play','玩耍'],['swim','游泳'],['other','其他事件']].map(item=><span key={item[0]}><i className={'is-'+item[0]}>{item[0]==='sleep'?null:<img src={ALL_EVENT_ICONS[item[0]]} alt=""/>}</i>{item[1]}</span>)}</div>
+        </article>
+      </div>
+      <div className={'all-filter-layer'+(filterOpen?' is-open':'')} aria-hidden={!filterOpen}>
+        <button type="button" className="all-filter-scrim" aria-label="关闭筛选" onClick={()=>setFilterOpen(false)}/>
+        <section className="all-filter-panel" role="dialog" aria-modal="true" aria-label="筛选记录项">
+          <header><h2>请筛选记录项</h2><button type="button" className="all-filter-trigger" onClick={()=>setFilterOpen(false)}><span>筛选</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="m2.5 7.5 3.5-3.5 3.5 3.5"/></svg></button></header>
+          <div className="all-filter-options">{filterItems.map(item=><button type="button" key={item}>{item}</button>)}</div>
+          <footer><button type="button" className="is-clear" onClick={()=>setFilterOpen(false)}>不筛选</button><button type="button" className="is-confirm" onClick={()=>setFilterOpen(false)}>确定</button></footer>
+        </section>
+      </div>
+    </>
+  );
+}
+
+function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
+  return (
+    <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
+      <header className="feeding-detail-nav"><button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button><b>喂养分析</b><span>参考表</span></header>
+      <FeedingReviewTabs active={activeTab} onChange={onTabChange}/>
+      <div className="feeding-detail-content" key={activeTab}>
+        {activeTab==='sleep' ? <SleepRecordReviewContent/> : (activeTab==='diaper' ? <DiaperRecordReviewContent/> : (activeTab==='food' ? <FoodRecordReviewContent/> : (activeTab==='all' ? <AllRecordReviewContent/> : <FeedingRecordReviewContent/>)))}
+      </div>
+    </section>
   );
 }
 
@@ -33771,6 +34694,9 @@ function MoodChart(){
 
 function ReviewPage(){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
+  const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
+  const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
+  const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -33881,12 +34807,13 @@ function ReviewPage(){
         )}
       />
 
-      <FeedingReviewCard/>
-      <SleepReviewCard/>
-      <DiaperReviewCard/>
-      <FoodReviewCard/>
+      <FeedingReviewCard onFullOpen={()=>openFeedingDetail('feeding')}/>
+      <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
+      <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
+      <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
+      <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
     </main>
   );
 }
@@ -34627,7 +35554,7 @@ function DockPublisher({
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
   demoPhase, isDemoRunning, hideQuickFan = false,
-  feedingQuickItems = null, onFeedingQuickSelect,
+  feedingQuickItems = null, onFeedingQuickSelect, onRecordSpaceChange,
   emptyPreviewGuideStep = 0, onEmptyPreviewGuideAdvance, onEmptyPreviewGuideDismiss, fabGuidePulse = false,
 }){
   const I = window.Icon;
@@ -34833,9 +35760,12 @@ function DockPublisher({
   const isQuickActive = quickOpen || !!quickSelected;
   const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
   const showFeedingQuick = Array.isArray(feedingQuickItems) && feedingQuickItems.length > 0;
-  const feedingVisibleItems = showFeedingQuick && !feedingExpanded
-    ? feedingQuickItems.slice(0, 6)
-    : (feedingQuickItems || []);
+  const feedingBabyItems = showFeedingQuick
+    ? feedingQuickItems.filter(item=>item.group !== 'mine')
+    : [];
+  const feedingMineItems = showFeedingQuick
+    ? feedingQuickItems.filter(item=>item.group === 'mine')
+    : [];
   const MoodOverlay = window.MoodQuickOverlay || (()=>null);
   const SymptomOverlay = window.SymptomQuickOverlay || (()=>null);
 
@@ -34852,9 +35782,53 @@ function DockPublisher({
     if(dy > 18) setFeedingExpanded(false);
   };
 
+  const handleGroupedQuickSelect = (item, buttonEl)=>{
+    if(!item) return;
+    setFeedingExpanded(false);
+    onRecordSpaceChange?.(item.group === 'mine' ? 'personal' : 'shared');
+    if(item.group !== 'mine'){
+      onFeedingQuickSelect?.(item);
+      return;
+    }
+    if(item.id === 'mood'){
+      handleMoodFanTap();
+      return;
+    }
+    if(item.id === 'symptom'){
+      handleSymptomFanTap();
+      return;
+    }
+    if(item.id === 'weight'){
+      setWeightPickerKey(key=>key + 1);
+      setQuickSelected('weight');
+      return;
+    }
+    if(item.id === 'diet'){
+      handleDietFanTap(buttonEl);
+      return;
+    }
+    if(item.id === 'temperature'){
+      onQuickMark?.({ text:'体温：36.8℃', emoji:'🌡️', label:'体温' });
+    }
+  };
+
+  const renderFeedingQuickItem = (item)=>(
+    <button
+      key={item.id}
+      type="button"
+      className={'dock-feeding-quick-item is-' + (item.group === 'mine' ? 'mine' : 'baby')}
+      onClick={(event)=>handleGroupedQuickSelect(item, event.currentTarget)}
+    >
+      <span className="dock-feeding-quick-icon" aria-hidden="true">
+        {item.iconNode || item.icon || '🍼'}
+      </span>
+      <span className="dock-feeding-quick-label">{item.label}</span>
+    </button>
+  );
+
   return (
     <>
-      {!hideQuickFan && (
+      {(!hideQuickFan || quickSelected) && (
       <div className={'quick-float-wrap'+(isDockExpanded ? ' is-covered' : '')+(isQuickActive ? ' is-quick-active' : '')}>
         <QuickCardFan
           open={quickOpen}
@@ -34946,21 +35920,26 @@ function DockPublisher({
                 >
                   <span/>
                 </button>
-                <div className="dock-feeding-quick-scroll">
-                  {feedingVisibleItems.map((item)=>(
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="dock-feeding-quick-item"
-                      onClick={()=>onFeedingQuickSelect?.(item)}
-                    >
-                      <span className="dock-feeding-quick-icon" aria-hidden="true">
-                        {item.iconNode || item.icon || '🍼'}
-                      </span>
-                      <span className="dock-feeding-quick-label">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
+                {feedingExpanded ? (
+                  <div className="dock-feeding-groups">
+                    <section className="dock-feeding-group" aria-labelledby="dock-feeding-baby-title">
+                      <h3 id="dock-feeding-baby-title" className="dock-feeding-group-title">宝宝</h3>
+                      <div className="dock-feeding-quick-scroll">
+                        {feedingBabyItems.map(renderFeedingQuickItem)}
+                      </div>
+                    </section>
+                    <section className="dock-feeding-group" aria-labelledby="dock-feeding-mine-title">
+                      <h3 id="dock-feeding-mine-title" className="dock-feeding-group-title">我的</h3>
+                      <div className="dock-feeding-quick-scroll">
+                        {feedingMineItems.map(renderFeedingQuickItem)}
+                      </div>
+                    </section>
+                  </div>
+                ) : (
+                  <div className="dock-feeding-quick-scroll is-collapsed">
+                    {feedingBabyItems.slice(0, 6).map(renderFeedingQuickItem)}
+                  </div>
+                )}
               </div>
             ) : null}
             <div className="dock-input-row dock-input-pill">
@@ -40927,11 +41906,26 @@ Object.assign(window, {
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
 const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
-const BABY_VOICE_DEMO_TEXT = '今天早上喂奶喂了60ml';
+const BABY_VOICE_DEMO_TEXT = '刚刚喝了120毫升奶粉';
+const VOICE_DEMO_SEQUENCE = ['personal', 'formula', 'sleep', 'breast'];
+const BABY_VOICE_DEMO_QUOTES = {
+  formula: BABY_VOICE_DEMO_TEXT,
+  sleep: '宝宝睡了4小时52分钟',
+  breast: '左边喂了10分钟，右边喂了10分钟',
+};
+const BABY_RECORD_VOICE_PATTERN = /(宝宝|小豆苗|奶粉|配方奶|母乳|瓶喂|吸奶|喂奶|喝奶|吃奶|\d+\s*(?:ml|毫升).{0,3}奶|尿布|辅食|营养补剂|洗澡|玩耍|游泳|喝水|睡觉|睡眠)/i;
+const PERSONAL_RECORD_VOICE_PATTERN = /(月经|姨妈|经期|心情|情绪|体重|饮食|吃了|体温|症状|头痛|肚子|运动|锻炼)/;
 const IS_BABY_FEEDING_DEMO = typeof window !== 'undefined' && (
   window.__BABY_FEEDING_MODE === true
   || new URLSearchParams(location.search).get('feeding') === '1'
 );
+
+function inferVoiceRecordSpace(transcript, fallback='personal'){
+  const text = String(transcript || '').trim();
+  if(BABY_RECORD_VOICE_PATTERN.test(text)) return 'shared';
+  if(PERSONAL_RECORD_VOICE_PATTERN.test(text)) return 'personal';
+  return fallback;
+}
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -41008,35 +42002,28 @@ function BabyVoiceOverlay({session, success}){
           </div>
         </div>
       </div>
-      <div className={'baby-voice-success-toast' + (success.show ? ' is-show' : '')}>
-        <span className="baby-voice-toast-check">✓</span>
-        <div>
-          <div className="baby-voice-toast-title">记录成功</div>
-          <div className="baby-voice-toast-sub">可以在喂养记录或点滴查看</div>
-        </div>
-      </div>
     </>
   );
 }
 
 const BABY_FEEDING_QUICK_ITEMS = [
-  { id: 'formula', label: '配方奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/formula.png', color:'#FF7A66', value:'130ml', text:'配方奶：130ml' },
-  { id: 'breast', label: '母乳', cardIcon:'🤱', iconSrc:'assets/baby-feeding-icons/breast.png', color:'#FF8EB8', value:'20分钟', text:'母乳', leftMinutes:10, rightMinutes:10 },
-  { id: 'bottle-breast', label: '瓶喂母乳', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/bottle-breast.png', color:'#FF8EB8', value:'90ml', text:'瓶喂母乳：90ml' },
-  { id: 'diaper', label: '换尿布', cardIcon:'🧷', iconSrc:'assets/baby-feeding-icons/diaper.png', color:'#E8A23D', value:'臭臭 墨绿色、膏状', text:'换尿布：臭臭 墨绿色、膏状' },
-  { id: 'sleep', label: '睡眠', cardIcon:'🌙', iconSrc:'assets/baby-feeding-icons/sleep.png', color:'#8E7BD9', value:'4小时52分钟', text:'睡眠', durationMinutes:292 },
-  { id: 'nutrition', label: '营养补剂', cardIcon:'💊', iconSrc:'assets/baby-feeding-icons/nutrition.png', color:'#3CB88C', value:'维生素D3，50mg', text:'营养补剂：维生素D3，50mg' },
-  { id: 'water', label: '喝水', cardIcon:'💧', iconSrc:'assets/baby-feeding-icons/water.png', color:'#5B8DEF', value:'50ml', text:'喝水：50ml' },
-  { id: 'pump', label: '吸奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/pump.png', color:'#7BC7D8', value:'100ml', text:'吸奶：100ml' },
-  { id: 'solid-food', label: '辅食', cardIcon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png', color:'#F2A65A', value:'米粉，菠菜，20g', text:'辅食：米粉，菠菜，20g' },
-  { id: 'bath', label: '洗澡', cardIcon:'🛁', iconSrc:'assets/baby-feeding-icons/bath.png', color:'#5FCAD1', value:'13分钟', text:'洗澡', durationMinutes:13 },
-  { id: 'play', label: '玩耍', cardIcon:'🧸', iconSrc:'assets/baby-feeding-icons/play.png', color:'#F4B45F', value:'30分钟', text:'玩耍', durationMinutes:30 },
-  { id: 'swim', label: '游泳', cardIcon:'🏊', iconSrc:'assets/baby-feeding-icons/swim.png', color:'#4AA9E9', value:'20分钟', text:'游泳', durationMinutes:20 },
-  { id: 'mood', label: '心情', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'开心', text:'心情：开心' },
-  { id: 'weight', label: '体重', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'4.6kg', text:'体重：4.6kg' },
-  { id: 'diet', label: '饮食', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'已记录', text:'饮食：已记录' },
-  { id: 'temperature', label: '体温', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'36.8℃', text:'体温：36.8℃' },
-  { id: 'symptom', label: '症状', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'无异常', text:'症状：无异常' },
+  { id: 'formula', group:'baby', label: '配方奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/formula.png', color:'#FF7A66', value:'130ml', text:'配方奶：130ml' },
+  { id: 'breast', group:'baby', label: '母乳', cardIcon:'🤱', iconSrc:'assets/baby-feeding-icons/breast.png', color:'#FF8EB8', value:'20分钟', text:'母乳', leftMinutes:10, rightMinutes:10 },
+  { id: 'sleep', group:'baby', label: '睡眠', cardIcon:'🌙', iconSrc:'assets/baby-feeding-icons/sleep.png', color:'#8E7BD9', value:'4小时52分钟', text:'睡眠', durationMinutes:292 },
+  { id: 'bottle-breast', group:'baby', label: '瓶喂母乳', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/bottle-breast.png', color:'#FF8EB8', value:'90ml', text:'瓶喂母乳：90ml' },
+  { id: 'diaper', group:'baby', label: '换尿布', cardIcon:'🧷', iconSrc:'assets/baby-feeding-icons/diaper.png', color:'#E8A23D', value:'臭臭 墨绿色、膏状', text:'换尿布：臭臭 墨绿色、膏状' },
+  { id: 'pump', group:'baby', label: '吸奶', cardIcon:'🍼', iconSrc:'assets/baby-feeding-icons/pump.png', color:'#7BC7D8', value:'100ml', text:'吸奶：100ml' },
+  { id: 'solid-food', group:'baby', label: '辅食', cardIcon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png', color:'#F2A65A', value:'米粉，菠菜，20g', text:'辅食：米粉，菠菜，20g' },
+  { id: 'bath', group:'baby', label: '洗澡', cardIcon:'🛁', iconSrc:'assets/baby-feeding-icons/bath.png', color:'#5FCAD1', value:'13分钟', text:'洗澡', durationMinutes:13 },
+  { id: 'play', group:'baby', label: '玩耍', cardIcon:'🧸', iconSrc:'assets/baby-feeding-icons/play.png', color:'#F4B45F', value:'30分钟', text:'玩耍', durationMinutes:30 },
+  { id: 'swim', group:'baby', label: '游泳', cardIcon:'🏊', iconSrc:'assets/baby-feeding-icons/swim.png', color:'#4AA9E9', value:'20分钟', text:'游泳', durationMinutes:20 },
+  { id: 'nutrition', group:'baby', label: '营养补剂', cardIcon:'💊', iconSrc:'assets/baby-feeding-icons/nutrition.png', color:'#3CB88C', value:'维生素D3，50mg', text:'营养补剂：维生素D3，50mg' },
+  { id: 'water', group:'baby', label: '喝水', cardIcon:'💧', iconSrc:'assets/baby-feeding-icons/water.png', color:'#5B8DEF', value:'50ml', text:'喝水：50ml' },
+  { id: 'mood', group:'mine', label: '心情', iconSrc:'assets/quick-icon-mood.png' },
+  { id: 'weight', group:'mine', label: '体重', iconSrc:'assets/quick-icon-weight.png' },
+  { id: 'diet', group:'mine', label: '饮食', iconSrc:'assets/quick-icon-diet.png' },
+  { id: 'temperature', group:'mine', label: '体温', iconSrc:'assets/record-temp.png' },
+  { id: 'symptom', group:'mine', label: '症状', iconSrc:'assets/quick-icon-symptom.png' },
 ];
 
 function BabyFeedingQuickIcon({type}){
@@ -41153,6 +42140,122 @@ function BabyFeedingDiscoverCard({onClose}){
   );
 }
 
+function BabyFormulaDetailPage({entry, onClose, onSave}){
+  const initialAmount = Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130;
+  const [amount, setAmount] = useState(initialAmount);
+  const [noteOpen, setNoteOpen] = useState(true);
+  const [note, setNote] = useState(entry?.voiceQuote || entry?.noteText || '');
+  const now = new Date();
+  const options = [amount - 15, amount - 10, amount - 5, amount, amount + 5, amount + 10, amount + 15].filter(value=>value > 0);
+  useEffect(()=>{ setAmount(Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130); setNote(entry?.voiceQuote || entry?.noteText || ''); setNoteOpen(true); }, [entry?.id]);
+  return <section className="baby-formula-detail" role="dialog" aria-modal="true" aria-label="配方奶记录详情">
+    <header className="baby-formula-detail-nav"><button type="button" className="baby-formula-close" aria-label="关闭" onClick={onClose}>×</button><div><h1>配方奶</h1><p>上次：{entry?.lastRecordLabel || '3小时47分钟前'}</p></div><span/></header>
+    <main className="baby-formula-detail-body"><section className="baby-formula-form">
+      <div className="baby-formula-row"><span>开始时间</span><button type="button" className="baby-formula-value">{now.getMonth()+1}月{now.getDate()}日 {entry?.time || '13:35'}<b>›</b></button></div>
+      <div className="baby-formula-amount-head"><span>奶量</span><button type="button" className="baby-formula-keyboard"><span>⠿</span>键盘输入</button></div>
+      <div className="baby-formula-picker"><div className="baby-formula-bottle"/><div className="baby-formula-values">{options.map(value=><button key={value} type="button" className={value===amount?'is-selected':''} onClick={()=>setAmount(value)}>{value} ml</button>)}</div></div>
+      <div className="baby-formula-row"><span>结束时间</span><button type="button" className="baby-formula-value is-placeholder">请选择<b>›</b></button></div>
+      <div className="baby-formula-note"><button type="button" className="baby-formula-note-toggle" aria-expanded={noteOpen} onClick={()=>setNoteOpen(open=>!open)}><span>备注</span><b>{noteOpen?'⌃':'⌄'}</b></button>{noteOpen?<textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/>:null}</div>
+    </section></main>
+    <footer className="baby-formula-detail-foot"><button type="button" onClick={()=>onSave({amount,note})}>保存</button></footer>
+  </section>;
+}
+
+function BabyBreastDetailPage({entry, onClose, onSave}){
+  const lockedManual = !entry?.isQuickDraft;
+  const [mode, setMode] = useState(lockedManual ? 'manual' : 'timer');
+  const [left, setLeft] = useState(entry?.leftMinutes || 10);
+  const [right, setRight] = useState(entry?.rightMinutes || 10);
+  const [running, setRunning] = useState('');
+  const [seconds, setSeconds] = useState({left:0,right:0});
+  const [note, setNote] = useState(entry?.noteText || entry?.voiceQuote || '');
+  useEffect(()=>{ setMode(lockedManual ? 'manual' : 'timer'); setLeft(entry?.leftMinutes || 10); setRight(entry?.rightMinutes || 10); setRunning(''); setSeconds({left:0,right:0}); setNote(entry?.noteText || entry?.voiceQuote || ''); }, [entry?.id]);
+  useEffect(()=>{
+    if(!running) return undefined;
+    const timer=setInterval(()=>setSeconds(value=>({...value,[running]:value[running]+1})),1000);
+    return ()=>clearInterval(timer);
+  },[running]);
+  const format=(value)=>`${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;
+  const now=new Date();
+  const manual=mode==='manual';
+  return <section className="baby-breast-detail" role="dialog" aria-modal="true" aria-label="母乳记录详情">
+    <header className="baby-breast-nav"><button type="button" aria-label="关闭" onClick={onClose}>×</button><div><h1>母乳</h1><p>上次：3小时47分钟前</p></div><span/></header>
+    <main className="baby-breast-body"><section className="baby-breast-form">
+      {!lockedManual ? <div className="baby-breast-mode"><button type="button" className={!manual?'is-active':''} onClick={()=>setMode('timer')}>计时</button><button type="button" className={manual?'is-active':''} onClick={()=>setMode('manual')}>手动输入</button></div> : null}
+      {!manual ? <div className="baby-breast-timer">
+        {['left','right'].map(side=><button key={side} type="button" className={'baby-breast-timer-side'+(running===side?' is-running':'')} onClick={()=>setRunning(running===side?'':side)}><b>{side==='left'?'左':'右'}</b><i>▶</i><span>{format(seconds[side])}</span></button>)}
+      </div> : <div className="baby-breast-manual">
+        <div className="baby-breast-row"><span>开始时间</span><em>{now.getMonth()+1}月{now.getDate()}日 {entry?.time || '12:32'} ›</em></div>
+        <div className="baby-breast-duration"><div className="baby-breast-duration-head"><span>喂奶时长</span><small>⠿<br/>键盘输入</small></div><div className="baby-breast-wheels"><label>左侧<button type="button" onClick={()=>setLeft(value=>Math.max(1,value-1))}>−</button><strong>{left}</strong><button type="button" onClick={()=>setLeft(value=>value+1)}>＋</button><em>分钟</em></label><label>右侧<button type="button" onClick={()=>setRight(value=>Math.max(1,value-1))}>−</button><strong>{right}</strong><button type="button" onClick={()=>setRight(value=>value+1)}>＋</button><em>分钟</em></label></div></div>
+        <div className="baby-breast-row"><span>最后使用</span><div className="baby-breast-side-chips"><b>左</b><b>右</b></div></div><div className="baby-breast-row"><span>结束时间</span><em>请选择 ›</em></div>
+      </div>}
+      <div className="baby-breast-note"><label>备注</label><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/></div>
+    </section></main>
+    <footer className="baby-breast-foot"><button type="button" onClick={()=>onSave({left:manual?left:Math.max(1,Math.ceil(seconds.left/60)),right:manual?right:Math.max(1,Math.ceil(seconds.right/60)),note})}>保存</button></footer>
+  </section>;
+}
+
+function BabySleepDetailPage({entry, onClose, onStart, onSave}){
+  const [mode, setMode] = useState(entry?.sleepMode || 'timer');
+  const [seconds, setSeconds] = useState(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
+  const [running, setRunning] = useState(false);
+  const [note, setNote] = useState(entry?.noteText || '');
+  useEffect(()=>{
+    setMode(entry?.sleepMode || 'timer');
+    setSeconds(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
+    setRunning(false);
+    setNote(entry?.noteText || '');
+  }, [entry?.id]);
+  useEffect(()=>{
+    if(!running) return undefined;
+    const timer = setInterval(()=>setSeconds(value=>value + 1), 1000);
+    return ()=>clearInterval(timer);
+  }, [running]);
+  const now = new Date();
+  const timeText = entry?.time || window.formatNowTime?.() || '12:04';
+  const manual = mode === 'manual';
+  const activeTimer = !!entry?.sleeping;
+  const minutes = Math.max(1, Math.ceil(seconds / 60));
+  const formatClock = (value)=>`${String(Math.floor(value / 60)).padStart(2,'0')}:${String(value % 60).padStart(2,'0')}`;
+  const handleStart = ()=>onStart?.({seconds:Math.max(1, seconds || 1), note});
+  const handleSave = ()=>onSave?.({minutes, seconds:Math.max(seconds, 60), note, mode});
+  return <section className="baby-sleep-detail" role="dialog" aria-modal="true" aria-label="睡眠记录详情">
+    <header className="baby-sleep-nav">
+      <button type="button" aria-label={activeTimer ? '收起' : '关闭'} onClick={onClose}>{activeTimer ? '收起' : '×'}</button>
+      <div><h1>睡眠</h1><p>{activeTimer ? `妈妈 今天 ${timeText} 创建 ◌` : '上次：14小时49分钟前'}</p></div><span/>
+    </header>
+    <main className="baby-sleep-body"><section className="baby-sleep-form">
+      <div className="baby-sleep-mode">
+        <button type="button" className={!manual ? 'is-active' : ''} onClick={()=>setMode('timer')}>计时</button>
+        <button type="button" className={manual ? 'is-active' : ''} onClick={()=>setMode('manual')}>手动输入</button>
+      </div>
+      {manual ? (
+        <div className="baby-sleep-manual">
+          <div className="baby-sleep-moon" aria-hidden="true"><span>Z</span></div>
+          <div className="baby-sleep-row"><span>开始时间</span><em>请选择 ›</em></div>
+          <div className="baby-sleep-row"><span>结束时间</span><em>请选择 ›</em></div>
+          <div className="baby-sleep-note is-compact"><button type="button"><span>▣</span>备注</button></div>
+        </div>
+      ) : activeTimer ? (
+        <div className="baby-sleep-running">
+          <div className="baby-sleep-total"><span>总时长 ⓘ</span><strong>{formatClock(seconds || 60)}</strong></div>
+          <p className="baby-sleep-tip"><i>❤</i>静静看你熟睡的样子，幸福感无以言表!<br/><b>查看七七的白天小睡规律 〉</b></p>
+          <div className="baby-sleep-row"><span>开始时间</span><em>{now.getMonth()+1}月{now.getDate()}日 {timeText} ›</em></div>
+          <button type="button" className="baby-sleep-big-action is-pause" onClick={()=>setRunning(value=>!value)}><b>醒了</b><i>{running ? 'Ⅱ' : '▶'}</i></button>
+          <div className="baby-sleep-note"><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="输入备注内容"/><span>▣</span></div>
+        </div>
+      ) : (
+        <div className="baby-sleep-idle">
+          <div className="baby-sleep-moon" aria-hidden="true"><span>Z</span></div>
+          <button type="button" className="baby-sleep-big-action" onClick={handleStart}><b>睡了</b><i>▶</i></button>
+          <div className="baby-sleep-note"><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="输入备注内容"/><span>▣</span></div>
+        </div>
+      )}
+    </section></main>
+    <footer className="baby-sleep-foot"><button type="button" onClick={activeTimer ? handleSave : (manual ? handleSave : handleStart)}>{activeTimer ? '结束并保存' : '保存'}</button></footer>
+  </section>;
+}
+
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
@@ -41199,6 +42302,9 @@ function App(){
   const [timeline, setTimeline] = useState(initial.timeline);
   const [toasts, setToasts] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
+  const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
+  const [breastDetailEntry, setBreastDetailEntry] = useState(null);
+  const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
   const [activeTab, setActiveTab] = useState(()=>{
     if(IS_BABY_FEEDING_DEMO){
       return 'note';
@@ -41237,6 +42343,10 @@ function App(){
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
+  const [recordSpace, setRecordSpace] = useState('personal');
+  const [relationshipScheme, setRelationshipScheme] = useState('without-family');
+  const [relationshipSchemeOpen, setRelationshipSchemeOpen] = useState(false);
+  const [relationshipTransitionOpen, setRelationshipTransitionOpen] = useState(false);
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -41253,8 +42363,19 @@ function App(){
   const babyVoiceHoldTimerRef = useRef(null);
   const babyVoiceTimerRef = useRef(null);
   const babyVoiceSuccessTimerRef = useRef(null);
-  const babyFeedingCardInsertedRef = useRef(false);
   const babyFeedingQuickGuardRef = useRef({id:null, at:0});
+  const voiceDemoSequenceRef = useRef(0);
+  const lastAutoRevealedEntryRef = useRef(null);
+  useEffect(()=>{
+    const openFeedingDetail = event=>{
+      const entry=event.detail || null;
+      if(entry?.feedType === '母乳') setBreastDetailEntry(entry);
+      else if(entry?.feedType === '睡眠') setSleepDetailEntry(entry);
+      else setFormulaDetailEntry(entry);
+    };
+    window.addEventListener('open-baby-feeding-detail', openFeedingDetail);
+    return ()=>window.removeEventListener('open-baby-feeding-detail', openFeedingDetail);
+  }, []);
 
   const recordFeedback = !!scene.record.recordFeedback;
 
@@ -41368,8 +42489,9 @@ function App(){
     firstRecordAnimDoneRef.current = false;
     moodGuideQueueRef.current = null;
     dropLandRevealRef.current = false;
-    babyFeedingCardInsertedRef.current = false;
     babyFeedingQuickGuardRef.current = {id:null, at:0};
+    voiceDemoSequenceRef.current = 0;
+    setRecordSpace('personal');
     setBabyDiscoverVisible(false);
     setBabyFeedingEntryActive(true);
     setEmptyPreviewMode(null);
@@ -41451,39 +42573,57 @@ function App(){
     }
   }, [sisterPlayAnimation]);
 
+  const revealLatestTimelineCard = (behavior='smooth')=>{
+    const el = streamRef.current;
+    if(!el) return;
+    const nodes = el.querySelectorAll('.tl-rail-node[data-entry-id], .tl-rail-node');
+    const anchor = el.querySelector('.tl-rail-node.is-feed-last') || nodes[nodes.length - 1] || timelineEndRef.current;
+    if(!anchor){
+      if(behavior === 'auto') el.scrollTop = el.scrollHeight;
+      else el.scrollTo({ top:el.scrollHeight, behavior });
+      return;
+    }
+
+    const streamRect = el.getBoundingClientRect();
+    const dock = el.closest('.phone')?.querySelector('.dock-wrap');
+    const dockRect = dock?.getBoundingClientRect();
+    const visibleTop = streamRect.top + 12;
+    const visibleBottom = Math.min(
+      streamRect.bottom - 12,
+      dockRect?.height > 0 ? dockRect.top - 16 : streamRect.bottom - 12
+    );
+    const anchorRect = anchor.getBoundingClientRect();
+    const availableHeight = Math.max(0, visibleBottom - visibleTop);
+    const targetTop = anchorRect.height <= availableHeight
+      ? Math.min(Math.max(anchorRect.top, visibleTop), visibleBottom - anchorRect.height)
+      : visibleTop;
+    const nextTop = Math.max(0, el.scrollTop + anchorRect.top - targetTop);
+    if(Math.abs(nextTop - el.scrollTop) < 1) return;
+    if(behavior === 'auto') el.scrollTop = nextTop;
+    else el.scrollTo({ top:nextTop, behavior });
+  };
+
   const scrollTimelineToLastItem = (behavior='smooth')=>{
     requestAnimationFrame(()=>{
       setTimeout(()=>{
-        const el = streamRef.current;
-        if(!el) return;
-        const reserve = el.classList.contains('has-baby-discover')
-          ? 220
-          : el.classList.contains('has-baby-feeding-strip')
-            ? 176
-            : 28;
-        const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
-        if(anchor){
-          const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - reserve;
-          if(behavior === 'auto') el.scrollTop = Math.max(0, top);
-          else el.scrollTo({ top: Math.max(0, top), behavior });
-          return;
-        }
-        if(behavior === 'auto') el.scrollTop = el.scrollHeight;
-        else el.scrollTo({ top: el.scrollHeight, behavior });
+        revealLatestTimelineCard(behavior);
       }, 80);
     });
   };
 
-  const scrollTimelineToBottom = (behavior='auto')=>{
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        const el = streamRef.current;
-        if(!el) return;
-        const top = Math.max(0, el.scrollHeight - el.clientHeight);
-        if(behavior === 'auto') el.scrollTop = top;
-        else el.scrollTo({ top, behavior });
-      });
+  const appendPersonalVoiceTimelineCard = (transcript, durSec)=>{
+    const text = String(transcript || '').trim();
+    if(!text) return;
+    const hits = window.extractKeywords?.(text) || [];
+    const entry = buildTimelineEntry(text, hits, {
+      voice: { duration: window.formatVoiceDur?.(durSec) || '0:03' },
     });
+    delete entry.aiNote;
+    pushToTimeline(entry, text);
+  };
+
+  const scrollTimelineToBottom = (behavior='auto')=>{
+    scrollTimelineToLastItem(behavior);
   };
 
   useEffect(()=>{
@@ -42020,8 +43160,10 @@ function App(){
   const buildBabyFeedingDailySummary = (items=[])=>{
     const order = BABY_FEEDING_QUICK_ITEMS.map(item=>item.label);
     const stats = new Map();
+    let familyCount = 0;
     (items || []).forEach((item)=>{
       if(item.kind !== 'baby-feeding-card') return;
+      if(item.creatorId === 'family' || item.isOwnRecord === false) familyCount += 1;
       const label = item.feedType || String(item.text || '').split('：')[0] || '其他事件';
       const current = stats.get(label) || {
         label,
@@ -42043,6 +43185,7 @@ function App(){
     });
     return {
       title:'今日喂养小计',
+      meta:familyCount ? `含亲友记录${familyCount}条` : '',
       items:sorted.map((row)=>({
         label:row.label,
         value:[
@@ -42068,8 +43211,32 @@ function App(){
     return {...block, items, entries:undefined};
   });
 
+  const getBabyFeedingTimeScore = (block, item, blockIndex, itemIndex)=>{
+    const match = String(item.time || '').match(/^(\d{1,2}):(\d{2})$/);
+    const minutes = match ? Number(match[1]) * 60 + Number(match[2]) : 0;
+    const dayRank = block.isToday ? 2 : (block.relativeLabel === '昨天' ? 1 : 0);
+    return dayRank * 10000000 + minutes * 1000 + blockIndex * 100 + itemIndex;
+  };
+
+  const getLatestBabyFeedingIdsByType = (blocks)=>{
+    const latestByType = new Map();
+    (blocks || []).forEach((block, blockIndex)=>{
+      if(block.type !== 'day') return;
+      (block.items || block.entries || []).forEach((item, itemIndex)=>{
+        if(item.kind !== 'baby-feeding-card') return;
+        const type = item.feedType || String(item.text || '').split('：')[0];
+        if(!type) return;
+        const score = getBabyFeedingTimeScore(block, item, blockIndex, itemIndex);
+        const current = latestByType.get(type);
+        if(!current || score > current.score) latestByType.set(type, {id:item.id, score});
+      });
+    });
+    return new Set([...latestByType.values()].map(item=>item.id));
+  };
+
   const refreshBabyFeedingLatestMarks = (blocks, targetDayId)=>{
     const cleaned = clearBabyFeedingLatestMarks(blocks);
+    const latestIdsByType = getLatestBabyFeedingIdsByType(cleaned);
     let latestDayId = targetDayId;
     if(!latestDayId){
       for(let i = cleaned.length - 1; i >= 0; i -= 1){
@@ -42082,20 +43249,38 @@ function App(){
           break;
         }
       }
+      if(!latestDayId){
+        for(let i = cleaned.length - 1; i >= 0; i -= 1){
+          const block = cleaned[i];
+          if(block.type !== 'day') continue;
+          const items = block.items || block.entries || [];
+          if(items.some(item=>item.kind === 'baby-feeding-card')){
+            latestDayId = block.id;
+            break;
+          }
+        }
+      }
     }
     return cleaned.map(block=>{
-      if(block.type !== 'day' || block.id !== latestDayId) return block;
+      if(block.type !== 'day') return block;
       const items = block.items || block.entries || [];
+      const itemsWithRelativeTime = items.map(item=>latestIdsByType.has(item.id) ? {
+        ...item,
+        relativeTime:formatBabyFeedingRelativeTime(item.time, block),
+      } : item);
+      if(block.id !== latestDayId) return {...block, items:itemsWithRelativeTime, entries:undefined};
       const latestIndex = items.reduce((found, item, index)=>(
         item.kind === 'baby-feeding-card' ? index : found
       ), -1);
-      if(latestIndex < 0) return {...block, items, entries:undefined};
-      const summary = buildBabyFeedingDailySummary(items);
+      if(latestIndex < 0) return {...block, items:itemsWithRelativeTime, entries:undefined};
+      const summary = {
+        ...buildBabyFeedingDailySummary(items),
+        title:block.relativeLabel === '昨天' ? '昨日喂养小计' : '今日喂养小计',
+      };
       return {
         ...block,
-        items:items.map((item, index)=>index === latestIndex ? {
+        items:itemsWithRelativeTime.map((item, index)=>index === latestIndex ? {
           ...item,
-          relativeTime:formatBabyFeedingRelativeTime(item.time),
           summary,
         } : item),
         entries:undefined,
@@ -42113,14 +43298,15 @@ function App(){
     return days.find(day=>day.isToday)?.id;
   };
 
-  const formatBabyFeedingRelativeTime = (timeText)=>{
+  const formatBabyFeedingRelativeTime = (timeText, dayBlock)=>{
     const match = String(timeText || '').match(/^(\d{1,2}):(\d{2})$/);
     if(!match) return '刚刚';
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
     const recordMinutes = Number(match[1]) * 60 + Number(match[2]);
     let diff = nowMinutes - recordMinutes;
-    if(diff < 0) diff += 24 * 60;
+    if(dayBlock?.relativeLabel === '昨天') diff += 24 * 60;
+    else if(diff < 0) diff += 24 * 60;
     if(diff < 1) return '刚刚';
     if(diff < 60) return diff + '分钟前';
     const hours = Math.floor(diff / 60);
@@ -42128,69 +43314,40 @@ function App(){
     return minutes ? `${hours}小时${minutes}分钟前` : `${hours}小时前`;
   };
 
-  const appendBabyFeedingTimelineCard = ()=>{
-    if(babyFeedingCardInsertedRef.current) return;
-    babyFeedingCardInsertedRef.current = true;
-    const sourceQuote = '昨晚3点喝了100ml奶，然后换了1片尿布，早上7点又喝了120ml奶';
-    const sourceGroupId = 'baby-feeding-source-'+Date.now();
-    const sourceGroupHint = '来自语音「昨晚3点喝100ml奶...」· 共3条';
-    const entries = [
-      {
-        id:'baby-feeding-batch-formula-night-'+Date.now(),
-        kind:'baby-feeding-card',
-        time:'03:00',
-        text:'配方奶：100ml',
-        feedType:'配方奶',
-        value:'100ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        sourceGroupId,
-        sourceGroupHint,
-        railDot:'baby',
-        isNew:true,
-      },
-      {
-        id:'baby-feeding-batch-diaper-'+Date.now(),
-        kind:'baby-feeding-card',
-        time:'03:05',
-        text:'换尿布：1片',
-        feedType:'换尿布',
-        value:'1片',
-        icon:'🧷',
-        color:'#E8A23D',
-        sourceGroupId,
-        sourceGroupHint,
-        railDot:'baby',
-        isNew:true,
-      },
-      {
-        id:'baby-feeding-batch-formula-morning-'+Date.now(),
-        kind:'baby-feeding-card',
-        time:'07:00',
-        text:'配方奶：120ml',
-        voice:{duration:'8″'},
-        feedType:'配方奶',
-        value:'120ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        voiceQuote:sourceQuote,
-        sourceGroupId,
-        sourceGroupRole:'anchor',
-        sourceGroupCount:3,
-        railDot:'baby',
-        isNew:true,
-      },
-    ];
+  const appendBabyFeedingTimelineCard = (recordType='formula')=>{
+    const timestamp = Date.now();
+    const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
+    const sourceItem = BABY_FEEDING_QUICK_ITEMS.find(item=>item.id === recordType)
+      || BABY_FEEDING_QUICK_ITEMS[0];
+    const value = recordType === 'formula' ? '120ml' : sourceItem.value;
+    const entry = {
+      id:`baby-feeding-voice-${recordType}-${timestamp}-${Math.random().toString(36).slice(2,6)}`,
+      kind:"baby-feeding-card",
+      time,
+      text:recordType === 'formula' ? '配方奶：120ml' : sourceItem.text,
+      voice:{duration:"8″"},
+      feedType:sourceItem.label,
+      value,
+      detailLines:buildBabyFeedingDetailLines(sourceItem, time),
+      statDurationMinutes:sourceItem.durationMinutes
+        || ((sourceItem.leftMinutes || 0) + (sourceItem.rightMinutes || 0))
+        || undefined,
+      leftMinutes:sourceItem.leftMinutes,
+      rightMinutes:sourceItem.rightMinutes,
+      icon:sourceItem.cardIcon || '🍼',
+      iconSrc:sourceItem.iconSrc,
+      color:sourceItem.color || '#FF7A66',
+      voiceQuote:BABY_VOICE_DEMO_QUOTES[recordType] || BABY_VOICE_DEMO_TEXT,
+      railDot:"baby",
+      creator:'妈妈',
+      creatorId:'self',
+      isOwnRecord:true,
+      isNew:true,
+    };
     setTimeline(blocks=>{
-      const cleaned = clearBabyFeedingLatestMarks(blocks);
-      const yesterdayDayId = cleaned.find(block=>block.type === 'day' && block.relativeLabel === '昨天')?.id;
-      const todayDayId = cleaned.find(block=>block.type === 'day' && block.isToday)?.id
-        || resolveBabyFeedingTargetDayId(cleaned);
-      let next = cleaned;
-      next = window.appendTimelineEntry(next, entries[0], {dayId:yesterdayDayId || todayDayId});
-      next = window.appendTimelineEntry(next, entries[1], {dayId:yesterdayDayId || todayDayId});
-      next = window.appendTimelineEntry(next, entries[2], {dayId:todayDayId});
-      return refreshBabyFeedingLatestMarks(next, todayDayId);
+      const dayId = resolveBabyFeedingTargetDayId(blocks);
+      const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
+      return refreshBabyFeedingLatestMarks(next, dayId);
     });
   };
 
@@ -42217,8 +43374,23 @@ function App(){
       color:item.color || '#FF7A66',
       voiceQuote:item.voiceQuote,
       railDot:'baby',
+      creator:'妈妈',
+      creatorId:'self',
+      isOwnRecord:true,
       isNew:true,
     };
+    if(item.id === 'formula'){
+      setFormulaDetailEntry({...entry, isQuickDraft:true, noteText:''});
+      return;
+    }
+    if(item.id === 'breast'){
+      setBreastDetailEntry({...entry, isQuickDraft:true});
+      return;
+    }
+    if(item.id === 'sleep'){
+      setSleepDetailEntry({...entry, isQuickDraft:true, sleepMode:'timer', noteText:''});
+      return;
+    }
     setTimeline(blocks=>{
       const dayId = resolveBabyFeedingTargetDayId(blocks);
       const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
@@ -42236,12 +43408,19 @@ function App(){
     setTimeout(()=>scrollTimelineToBottom('smooth'), 60);
   };
 
-  const submitBabyFeedingVoice = ()=>{
+  const submitBabyFeedingVoice = (transcript, durSec)=>{
+    const sequenceStep = VOICE_DEMO_SEQUENCE[voiceDemoSequenceRef.current % VOICE_DEMO_SEQUENCE.length];
+    voiceDemoSequenceRef.current += 1;
+    const nextSpace = sequenceStep === 'personal' ? 'personal' : 'shared';
+    setRecordSpace(nextSpace);
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
     setBabyDiscoverVisible(false);
     clearTimeout(babyVoiceSuccessTimerRef.current);
     setBabyVoiceSuccess({show:false});
     setNoteTabUnread(false);
-    appendBabyFeedingTimelineCard();
+    if(sequenceStep === 'personal') appendPersonalVoiceTimelineCard(transcript, durSec);
+    else appendBabyFeedingTimelineCard(sequenceStep);
     setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
   };
 
@@ -42264,6 +43443,9 @@ function App(){
     setBabyVoiceSession((current)=>({...current, active:false, cancel:false}));
     stopBabyVoiceTyping();
     if(!cancelled){
+      setRecordSpace('shared');
+      setBabyFeedingPanelMode(null);
+      setSearchCriteria(null);
       setBabyDiscoverVisible(false);
       appendBabyFeedingTimelineCard();
       setBabyVoiceSuccess({show:true});
@@ -42814,13 +43996,9 @@ function App(){
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const toggleSearchPage = ()=>{
-    if(showBabyFeedingHeader){
-      setBabyFeedingPanelMode((prev)=> prev === 'search' ? null : 'search');
-      return;
-    }
     setShowSearchPage((prev)=> !prev);
   };
-  const toggleBabyFeedingAllPanel = ()=>{
+  const toggleBabyFeedingFilterPanel = ()=>{
     setBabyFeedingPanelMode((prev)=> prev === 'all' ? null : 'all');
   };
   const closeBabyFeedingPanel = ()=>{
@@ -42858,6 +44036,41 @@ function App(){
         else el.scrollTo({ top: Math.max(0, top), behavior });
       }, 80);
     });
+  };
+  const selectRecordSpace = (nextSpace)=>{
+    setTimeline(blocks=>blocks.map(block=>{
+      if(block.type !== 'day') return block;
+      const items = (block.items || block.entries || []).map(item=>{
+        if(!item?.isNew) return item;
+        return {...item, isNew:false};
+      });
+      return {...block, items, entries:undefined};
+    }));
+    setRecordSpace(nextSpace);
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
+    scrollTimelineToFirstItem('auto');
+  };
+  const applyRelationshipScheme = (nextScheme)=>{
+    setRelationshipScheme(nextScheme);
+    if(nextScheme === 'with-family') setRecordSpace('personal');
+    setRelationshipSchemeOpen(false);
+    setRelationshipTransitionOpen(false);
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
+    scrollTimelineToFirstItem('auto');
+  };
+  const selectRelationshipScheme = (nextScheme)=>{
+    if(nextScheme === relationshipScheme){
+      setRelationshipSchemeOpen(false);
+      return;
+    }
+    setRelationshipSchemeOpen(false);
+    if(relationshipScheme === 'without-family' && nextScheme === 'with-family'){
+      setRelationshipTransitionOpen(true);
+      return;
+    }
+    applyRelationshipScheme(nextScheme);
   };
   const restoreSearchCloseScroll = React.useCallback(()=>{
     const saved = searchCloseScrollRef.current;
@@ -42914,8 +44127,9 @@ function App(){
     || searchCriteria.personPanelFilter
   ));
   const displayTimeline = React.useMemo(()=>{
-    const source = (recordLifeMode === '育儿' && babyFeedingEntryActive)
-      ? (timeline || []).map(block=>{
+    let source = timeline;
+    if(recordLifeMode === '育儿' && babyFeedingEntryActive){
+      const normalized = (timeline || []).map(block=>{
           if(block.type !== 'day') return block;
           const items = block.items || block.entries || [];
           const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
@@ -42940,15 +44154,75 @@ function App(){
             weekday,
             isToday:true,
           };
-        })
-      : timeline;
+        });
+      const projected = normalized.map(block=>{
+        if(block.type !== 'day'){
+          return relationshipScheme === 'with-family' && recordSpace === 'shared' ? null : block;
+        }
+        const items = block.items || block.entries || [];
+        const visibleItems = relationshipScheme === 'without-family'
+          ? items.map(item=>item.kind === 'baby-feeding-card'
+            ? {
+                ...item,
+                creator:'妈妈',
+                creatorId:'self',
+                isOwnRecord:true,
+                showCreator:false,
+                showBabyTag:true,
+              }
+            : item)
+          : recordSpace === 'shared'
+            ? items.filter(item=>item.kind === 'baby-feeding-card').map(item=>({...item, showCreator:true, showBabyTag:false}))
+            : items.filter(item=>item.kind !== 'baby-feeding-card');
+        if(!visibleItems.length) return null;
+        return {...block, items:visibleItems, entries:undefined};
+      }).filter(Boolean);
+      const refreshed = refreshBabyFeedingLatestMarks(projected);
+      source = relationshipScheme === 'without-family' || recordSpace === 'shared'
+        ? refreshed
+        : refreshed.map(block=>{
+            if(block.type !== 'day') return block;
+            const items = (block.items || block.entries || []).map(item=>{
+              if(item.kind !== 'baby-feeding-card' || !item.summary) return item;
+              const next = {...item};
+              delete next.summary;
+              return next;
+            });
+            return {...block, items, entries:undefined};
+          });
+    }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
   }, [displayTimeline, isSearchActive, countTimelineSearchItems]);
+
+  const latestVisibleEntryId = React.useMemo(()=>{
+    let latest = null;
+    displayTimeline.forEach(block=>{
+      if(block.type !== 'day') return;
+      (block.items || block.entries || []).forEach(item=>{
+        if(item?.id) latest = item.id;
+      });
+    });
+    return latest;
+  }, [displayTimeline]);
+
+  React.useEffect(()=>{
+    if(!latestVisibleEntryId) return;
+    if(lastAutoRevealedEntryRef.current == null){
+      lastAutoRevealedEntryRef.current = latestVisibleEntryId;
+      return;
+    }
+    if(lastAutoRevealedEntryRef.current === latestVisibleEntryId) return;
+    lastAutoRevealedEntryRef.current = latestVisibleEntryId;
+    const timers = [120, 320, 620].map(delay=>setTimeout(()=>{
+      revealLatestTimelineCard(delay === 120 ? 'smooth' : 'auto');
+    }, delay));
+    return ()=>timers.forEach(clearTimeout);
+  }, [latestVisibleEntryId, recordSpace, relationshipScheme]);
 
   React.useLayoutEffect(()=>{
     if(searchCriteria) return;
@@ -42978,6 +44252,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || relationshipTransitionOpen);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
@@ -42992,6 +44267,42 @@ function App(){
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
+        {showBabyFeedingHeader ? (
+          <div className={'relationship-scheme-switch' + (relationshipSchemeOpen ? ' is-open' : '')}>
+            <button
+              type="button"
+              className="relationship-scheme-trigger"
+              aria-haspopup="menu"
+              aria-expanded={relationshipSchemeOpen}
+              onClick={()=>setRelationshipSchemeOpen(open=>!open)}
+            >
+              <span>{relationshipScheme === 'with-family' ? '有亲友' : '无亲友'}</span>
+              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+                <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {relationshipSchemeOpen ? (
+              <div className="relationship-scheme-menu" role="menu" aria-label="切换亲友方案">
+                {[
+                  {id:'without-family', label:'无亲友'},
+                  {id:'with-family', label:'有亲友'},
+                ].map(option=>(
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={relationshipScheme === option.id}
+                    className={relationshipScheme === option.id ? 'is-active' : ''}
+                    onClick={()=>selectRelationshipScheme(option.id)}
+                  >
+                    <span>{option.label}</span>
+                    {relationshipScheme === option.id ? <span aria-hidden="true">✓</span> : null}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
       {showHome && HomePage && (
         <HomePage
@@ -43058,7 +44369,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -43120,33 +44431,78 @@ function App(){
         ) : (
         <>
         {showStreamHeader ? (
-        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '')}>
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (showBabyFeedingHeader && relationshipScheme === 'without-family' ? ' is-single-timeline' : '')}>
           {showBabyFeedingHeader ? (
+            relationshipScheme === 'without-family' ? (
             <>
-              <div className="stream-header-side"/>
-              <button
-                type="button"
-                className={'stream-filter-center' + (babyFeedingPanelMode === 'all' ? ' is-open' : '') + (searchCriteria?.personPanelFilter ? ' is-filtered' : '')}
-                aria-expanded={babyFeedingPanelMode === 'all'}
-                onClick={toggleBabyFeedingAllPanel}
-              >
-                <span>全部</span>
-                <svg className="stream-filter-chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <div className="stream-actions">
+              <div className="stream-actions is-left">
                 <button
-                  className={'stream-action' + (babyFeedingPanelMode === 'search' ? ' is-active' : '')}
-                  aria-label="搜索"
-                  aria-pressed={babyFeedingPanelMode === 'search'}
+                  className="stream-action"
+                  aria-label="搜索，暂未开放"
                   type="button"
-                  onClick={toggleSearchPage}
                 >
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
+              <h1 className="stream-title">我的点滴</h1>
+              <div className="stream-actions">
+                <button
+                  className={'stream-action' + (isSearchActive ? ' is-active' : '')}
+                  aria-label="筛选记录项"
+                  aria-pressed={babyFeedingPanelMode === 'all'}
+                  type="button"
+                  onClick={toggleBabyFeedingFilterPanel}
+                >
+                  <I name="filter" size={20} stroke={1.7}/>
+                </button>
+              </div>
             </>
+            ) : (
+            <>
+              <div className="stream-actions is-left">
+                <button
+                  className="stream-action"
+                  aria-label="搜索，暂未开放"
+                  type="button"
+                >
+                  <I name="search" size={20} stroke={1.7}/>
+                </button>
+              </div>
+              <div className="stream-space-segment" role="tablist" aria-label="切换记录空间">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={recordSpace === 'personal'}
+                  className={'stream-space-segment-item' + (recordSpace === 'personal' ? ' is-active' : '')}
+                  onClick={()=>selectRecordSpace('personal')}
+                >
+                  <b>我的</b>
+                  <em>仅自己可见</em>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={recordSpace === 'shared'}
+                  className={'stream-space-segment-item' + (recordSpace === 'shared' ? ' is-active' : '')}
+                  onClick={()=>selectRecordSpace('shared')}
+                >
+                  <b>小豆苗</b>
+                  <em>3位亲友共享</em>
+                </button>
+              </div>
+              <div className="stream-actions">
+                <button
+                  className={'stream-action' + (isSearchActive ? ' is-active' : '')}
+                  aria-label="筛选记录项"
+                  aria-pressed={babyFeedingPanelMode === 'all'}
+                  type="button"
+                  onClick={toggleBabyFeedingFilterPanel}
+                >
+                  <I name="filter" size={20} stroke={1.7}/>
+                </button>
+              </div>
+            </>
+            )
           ) : (
             <>
               <div className="stream-header-side"/>
@@ -43171,6 +44527,8 @@ function App(){
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
             + (showBabyFeedingQuickStrip ? ' has-baby-feeding-strip' : '')
+            + (showBabyFeedingHeader && relationshipScheme === 'with-family' ? ' has-record-space-segment' : '')
+            + (babyFeedingDetailOpen ? ' is-detail-scroll-locked' : '')
           }
           ref={streamRef}
         >
@@ -43223,14 +44581,16 @@ function App(){
           hideQuickFan={showBabyFeedingQuickStrip}
           feedingQuickItems={babyFeedingDockItems}
           onFeedingQuickSelect={handleBabyFeedingQuickSelect}
+          onRecordSpaceChange={selectRecordSpace}
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />
         )}
-        {babyFeedingPanelMode && XhsStyleSearchPage ? (
+        {babyFeedingPanelMode === 'all' && XhsStyleSearchPage ? (
           <XhsStyleSearchPage
             intent={babyFeedingPanelMode}
             variant="baby-feeding"
+            recordSpace={relationshipScheme === 'without-family' ? 'combined' : recordSpace}
             activeFilter={searchCriteria?.personPanelFilter}
             onClose={closeBabyFeedingPanel}
             onSearch={handleTimelineSearch}
@@ -43250,6 +44610,150 @@ function App(){
         </>
         )}
       </div>
+
+      {relationshipTransitionOpen ? (
+        <div className="relationship-transition-overlay" role="presentation">
+          <section className="relationship-transition-sheet" role="dialog" aria-modal="true" aria-labelledby="relationship-transition-title">
+            <div className="relationship-transition-handle" aria-hidden="true" />
+            <button type="button" className="relationship-transition-close" aria-label="关闭" onClick={()=>setRelationshipTransitionOpen(false)}>
+              <I name="close" size={19} stroke={1.8}/>
+            </button>
+            <header className="relationship-transition-header">
+              <span className="relationship-transition-privacy-icon" aria-hidden="true">隐私</span>
+              <h2 id="relationship-transition-title">记录将分为两个空间</h2>
+              <p>亲友加入后，为了保护你的个人隐私，记录会按查看范围分开显示。</p>
+            </header>
+            <div className="relationship-transition-spaces">
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-personal" aria-hidden="true"><I name="user" size={23} stroke={1.8}/></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>我的</strong><span>仅自己可见</span></div>
+                  <p>月经、症状、心情、体重等个人记录</p>
+                </div>
+              </div>
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-baby" aria-hidden="true"><img src="assets/baby-feeding-icons/formula.png" alt="" /></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>小豆苗</strong><span>与3位亲友共享</span></div>
+                  <p>喂养、睡眠、换尿布等宝宝记录</p>
+                </div>
+              </div>
+            </div>
+            <p className="relationship-transition-note">亲友只能查看小豆苗空间，无法看到你的个人记录</p>
+            <button type="button" className="relationship-transition-confirm" onClick={()=>applyRelationshipScheme('with-family')}>
+              知道了，进入我的
+            </button>
+          </section>
+        </div>
+      ) : null}
+
+      {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note})=>{
+        if(formulaDetailEntry.isQuickDraft){
+          const {isQuickDraft, ...draftEntry}=formulaDetailEntry;
+          const entry={
+            ...draftEntry,
+            value:`${amount}ml`,
+            text:`配方奶：${amount}ml`,
+            voiceQuote:note || undefined,
+            noteText:note || undefined,
+          };
+          setTimeline(blocks=>{
+            const dayId=resolveBabyFeedingTargetDayId(blocks);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
+            return refreshBabyFeedingLatestMarks(next,dayId);
+          });
+          setFormulaDetailEntry(null);
+          pushToast({text:'已保存',placement:'center'});
+          setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+          return;
+        }
+        setTimeline(blocks=>blocks.map(block=>{
+          if(block.type !=='day') return block;
+          const items=(block.items||block.entries||[]).map(item=>item.id===formulaDetailEntry.id?{...item,value:`${amount}ml`,text:`配方奶：${amount}ml`,voiceQuote:note,noteText:note}:item);
+          return {...block,items,entries:undefined};
+        }));
+        setFormulaDetailEntry(null);
+        pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
+      {breastDetailEntry ? <BabyBreastDetailPage entry={breastDetailEntry} onClose={()=>setBreastDetailEntry(null)} onSave={({left,right,note})=>{
+        const total=left+right;
+        const detailLines=[`母乳：左${left}分钟，右${right}分钟`, `${breastDetailEntry.time || '12:32'}–${breastDetailEntry.time || '12:32'}`];
+        if(breastDetailEntry.isQuickDraft){
+          const {isQuickDraft,...draftEntry}=breastDetailEntry;
+          const entry={...draftEntry,value:`${total}分钟`,text:'母乳',leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined};
+          setTimeline(blocks=>{
+            const dayId=resolveBabyFeedingTargetDayId(blocks);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
+            return refreshBabyFeedingLatestMarks(next,dayId);
+          });
+          setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});setTimeout(()=>scrollTimelineToBottom('smooth'),80);return;
+        }
+        setTimeline(blocks=>blocks.map(block=>{
+          if(block.type!=='day') return block;
+          const items=(block.items||block.entries||[]).map(item=>item.id===breastDetailEntry.id?{...item,value:`${total}分钟`,text:'母乳',leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined}:item);
+          return {...block,items,entries:undefined};
+        }));
+        setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
+      {sleepDetailEntry ? <BabySleepDetailPage entry={sleepDetailEntry} onClose={()=>setSleepDetailEntry(null)} onStart={({seconds,note})=>{
+        const draftEntry = sleepDetailEntry;
+        const {isQuickDraft, ...runningEntry} = draftEntry;
+        const time = draftEntry.time || window.formatNowTime?.() || '12:04';
+        const entry = {
+          ...runningEntry,
+          id:'baby-feeding-sleep-running-'+Date.now(),
+          time,
+          text:'睡眠',
+          feedType:'睡眠',
+          value:'宝宝睡觉中',
+          detailLines:null,
+          statDurationMinutes:undefined,
+          sleeping:true,
+          elapsedSeconds:seconds,
+          noteText:note || undefined,
+          isNew:true,
+        };
+        setTimeline(blocks=>{
+          const dayId=resolveBabyFeedingTargetDayId(blocks);
+          const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
+          return refreshBabyFeedingLatestMarks(next,dayId);
+        });
+        setSleepDetailEntry(null);
+        pushToast({text:'睡眠计时已开始',placement:'center'});
+        setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+      }} onSave={({minutes, seconds, note, mode})=>{
+        const duration = minutes || 1;
+        const time = sleepDetailEntry.time || window.formatNowTime?.() || '12:04';
+        const finalEntry = {
+          ...sleepDetailEntry,
+          sleeping:false,
+          value:formatBabyFeedingDurationText(duration),
+          text:'睡眠',
+          detailLines:[`睡眠：睡了${formatBabyFeedingDurationText(duration)}`, `${time}-${addMinutesToBabyTime(time, duration)}`],
+          statDurationMinutes:duration,
+          elapsedSeconds:seconds,
+          noteText:note || undefined,
+        };
+        if(sleepDetailEntry.isQuickDraft){
+          const {isQuickDraft, sleepMode, ...draftEntry}=finalEntry;
+          setTimeline(blocks=>{
+            const dayId=resolveBabyFeedingTargetDayId(blocks);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),draftEntry,{dayId});
+            return refreshBabyFeedingLatestMarks(next,dayId);
+          });
+          setSleepDetailEntry(null);
+          pushToast({text:'已保存',placement:'center'});
+          setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+          return;
+        }
+        setTimeline(blocks=>refreshBabyFeedingLatestMarks(blocks.map(block=>{
+          if(block.type!=='day') return block;
+          const items=(block.items||block.entries||[]).map(item=>item.id===sleepDetailEntry.id?finalEntry:item);
+          return {...block,items,entries:undefined};
+        })));
+        setSleepDetailEntry(null);
+        pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
         <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>

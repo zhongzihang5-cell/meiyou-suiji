@@ -440,6 +440,7 @@ function App(){
   const [recordSpace, setRecordSpace] = useState('personal');
   const [relationshipScheme, setRelationshipScheme] = useState('without-family');
   const [relationshipSchemeOpen, setRelationshipSchemeOpen] = useState(false);
+  const [relationshipTransitionOpen, setRelationshipTransitionOpen] = useState(false);
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -2144,17 +2145,26 @@ function App(){
     setSearchCriteria(null);
     scrollTimelineToFirstItem('auto');
   };
+  const applyRelationshipScheme = (nextScheme)=>{
+    setRelationshipScheme(nextScheme);
+    if(nextScheme === 'with-family') setRecordSpace('personal');
+    setRelationshipSchemeOpen(false);
+    setRelationshipTransitionOpen(false);
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
+    scrollTimelineToFirstItem('auto');
+  };
   const selectRelationshipScheme = (nextScheme)=>{
     if(nextScheme === relationshipScheme){
       setRelationshipSchemeOpen(false);
       return;
     }
-    setRelationshipScheme(nextScheme);
-    if(nextScheme === 'with-family') setRecordSpace('personal');
     setRelationshipSchemeOpen(false);
-    setBabyFeedingPanelMode(null);
-    setSearchCriteria(null);
-    scrollTimelineToFirstItem('auto');
+    if(relationshipScheme === 'without-family' && nextScheme === 'with-family'){
+      setRelationshipTransitionOpen(true);
+      return;
+    }
+    applyRelationshipScheme(nextScheme);
   };
   const restoreSearchCloseScroll = React.useCallback(()=>{
     const saved = searchCloseScrollRef.current;
@@ -2336,7 +2346,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
-  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry);
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || relationshipTransitionOpen);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
@@ -2694,6 +2704,42 @@ function App(){
         </>
         )}
       </div>
+
+      {relationshipTransitionOpen ? (
+        <div className="relationship-transition-overlay" role="presentation">
+          <section className="relationship-transition-sheet" role="dialog" aria-modal="true" aria-labelledby="relationship-transition-title">
+            <div className="relationship-transition-handle" aria-hidden="true" />
+            <button type="button" className="relationship-transition-close" aria-label="关闭" onClick={()=>setRelationshipTransitionOpen(false)}>
+              <I name="close" size={19} stroke={1.8}/>
+            </button>
+            <header className="relationship-transition-header">
+              <span className="relationship-transition-privacy-icon" aria-hidden="true">隐私</span>
+              <h2 id="relationship-transition-title">记录将分为两个空间</h2>
+              <p>亲友加入后，为了保护你的个人隐私，记录会按查看范围分开显示。</p>
+            </header>
+            <div className="relationship-transition-spaces">
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-personal" aria-hidden="true"><I name="user" size={23} stroke={1.8}/></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>我的</strong><span>仅自己可见</span></div>
+                  <p>月经、症状、心情、体重等个人记录</p>
+                </div>
+              </div>
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-baby" aria-hidden="true"><img src="assets/baby-feeding-icons/formula.png" alt="" /></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>小豆苗</strong><span>与3位亲友共享</span></div>
+                  <p>喂养、睡眠、换尿布等宝宝记录</p>
+                </div>
+              </div>
+            </div>
+            <p className="relationship-transition-note">亲友只能查看小豆苗空间，无法看到你的个人记录</p>
+            <button type="button" className="relationship-transition-confirm" onClick={()=>applyRelationshipScheme('with-family')}>
+              知道了，进入我的
+            </button>
+          </section>
+        </div>
+      ) : null}
 
       {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note})=>{
         if(formulaDetailEntry.isQuickDraft){
