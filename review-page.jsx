@@ -37,6 +37,14 @@ function ReviewDietIcon(){
   return <svg viewBox="0 0 24 24"><path d="M6 3v7a3 3 0 0 0 6 0V3"/><path d="M9 3v18"/><path d="M17 3c-1.5 1-2.5 3-2.5 5.5S15.5 13 17 14v7"/></svg>;
 }
 
+function ReviewSupplementIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M8.2 5.2a4.2 4.2 0 0 1 5.9 0l4.7 4.7a4.2 4.2 0 0 1-5.9 5.9l-4.7-4.7a4.2 4.2 0 0 1 0-5.9z"/><path d="M10.6 13.5l5.9-5.9"/></svg>;
+}
+
+function ReviewWaveIcon(){
+  return <svg className="review-wave-icon" viewBox="0 0 20 14" aria-hidden="true"><path d="M1 9l4-5 4 6 4-7 6 5"/></svg>;
+}
+
 function ReviewBabyIcon({kind}){
   if(kind === 'sleep') return <svg viewBox="0 0 24 24"><path d="M20 15.2A8 8 0 0 1 8.8 4 8 8 0 1 0 20 15.2z"/></svg>;
   if(kind === 'diaper') return <svg viewBox="0 0 24 24"><path d="M5 5.5h14v5.8c0 4.5-2.7 7.2-7 7.2s-7-2.7-7-7.2z"/><path d="M5 9.5c2.2.2 3.8 1.2 4.8 3M19 9.5c-2.2.2-3.8 1.2-4.8 3"/></svg>;
@@ -325,6 +333,108 @@ function FoodReviewCard({onFullOpen}){
       more="查看完整辅食变化"
       onOpen={onFullOpen}
       onMore={onFullOpen}
+    />
+  );
+}
+
+const SUPPLEMENT_TYPES = [
+  {key:'ad', name:'AD', short:'AD', color:'#ff7f9f'},
+  {key:'d3', name:'D3', short:'D3', color:'#f3a638'},
+  {key:'probiotic', name:'益生菌', short:'益', color:'#54bd82'},
+  {key:'calcium', name:'钙', short:'钙', color:'#6f9ee8'},
+  {key:'iron', name:'铁', short:'铁', color:'#e26a62'},
+  {key:'zinc', name:'锌', short:'锌', color:'#8b75d1'},
+  {key:'dha', name:'DHA', short:'DHA', color:'#42aeb7'},
+];
+
+const SUPPLEMENT_REVIEW_DAYS = Array.from({length:30}, (_item,index)=>{
+  const patterns = [
+    ['ad','d3','probiotic'], ['ad','calcium','dha'], ['ad','d3','iron'],
+    ['ad','probiotic','zinc'], ['ad','d3','calcium','dha'], ['ad','iron','zinc'],
+  ];
+  const missed = index === 6 || index === 18;
+  return {
+    date:index === 29 ? '今天' : (index < 10 ? '9.' + (22 + index) : '10.' + (index - 9)),
+    items:missed ? [] : patterns[index % patterns.length],
+    missed,
+  };
+});
+
+function SupplementReviewChart(){
+  const W=340,H=168,padL=28,padR=12,padT=14,padB=27;
+  const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
+  const yMax=6.8;
+  const band=(x1-x0)/SUPPLEMENT_REVIEW_DAYS.length;
+  const segmentWidth=5.6;
+  const X=index=>x0+band*index+band/2;
+  const Y=count=>y1-count/yMax*(y1-y0);
+  const dateMarks={0:true,7:true,14:true,21:true,29:true};
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天营养补剂分类次数图">
+      {[2,4,6].map(tick=><React.Fragment key={tick}><line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,.05)" strokeWidth="1"/><text x={x0-5} y={Y(tick)+3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}次</text></React.Fragment>)}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,.06)" strokeWidth="1"/>
+      {SUPPLEMENT_REVIEW_DAYS.map((day,dayIndex)=>{
+        let stackedCount=0;
+        return <React.Fragment key={day.date}>
+          {day.missed?<rect x={X(dayIndex)-segmentWidth/2} y={Y(1)} width={segmentWidth} height={y1-Y(1)} rx={segmentWidth/2} fill="rgba(255,77,136,.12)" stroke="rgba(255,77,136,.35)" strokeWidth=".7" strokeDasharray="2 1"/>:null}
+          {day.items.map(item=>{const type=SUPPLEMENT_TYPES.find(entry=>entry.key===item);const segmentBottom=Y(stackedCount);stackedCount+=1;const segmentTop=Y(stackedCount);return <rect key={item} x={X(dayIndex)-segmentWidth/2} y={segmentTop+.8} width={segmentWidth} height={segmentBottom-segmentTop-1.6} rx={segmentWidth/2} fill={type.color}/>;})}
+          <line x1={X(dayIndex)} y1={y1} x2={X(dayIndex)} y2={y1+3} stroke="#d8d8dc" strokeWidth=".7"/>
+          {dateMarks[dayIndex]?<text x={X(dayIndex)} y={H-8} textAnchor={dayIndex===0?'start':(dayIndex===29?'end':'middle')} fontSize="9" fontWeight={dayIndex===29?'600':'400'} fill={dayIndex===29?'#e86686':'#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>:null}
+        </React.Fragment>;
+      })}
+    </svg>
+  );
+}
+
+function SupplementReviewCard(){
+  return (
+    <ReviewCard
+      title="营养补剂"
+      iconClass="is-supplement"
+      icon={<ReviewSupplementIcon/>}
+      chart={<SupplementReviewChart/>}
+      legend={<>{SUPPLEMENT_TYPES.map(type=><span className="review-legend-item is-supplement" key={type.key}><i style={{background:type.color}}></i>{type.name}</span>)}</>}
+      metrics={<><ReviewMetric value="AD" unit="1粒" label="最近补充"/><ReviewMetric value="7" unit="天" label="近7日连续"/><ReviewMetric value="3" unit="次" label="近30天平均"/></>}
+      more="查看完整营养补剂变化"
+    />
+  );
+}
+
+const PUMP_REVIEW_DATA = [
+  148,156,162,158,171,166,174,169,160,155,164,172,168,176,170,
+  163,159,167,173,165,178,171,166,160,169,174,168,162,156,150,
+];
+
+function PumpReviewChart(){
+  const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
+  const x0 = padL, x1 = W-padR, y1 = H-padB;
+  const yMin = 120, yMax = 190;
+  const X = index=>x0+(x1-x0)*(index/(PUMP_REVIEW_DATA.length-1));
+  const Y = value=>y1-(value-yMin)/(yMax-yMin)*(y1-padT);
+  const points = PUMP_REVIEW_DATA.map((value,index)=>[X(index),Y(value)]);
+  const dateMarks = [{index:0,label:'9.22'},{index:7,label:'9.29'},{index:14,label:'10.6'},{index:21,label:'10.13'},{index:29,label:'今天'}];
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天吸奶量折线图">
+      {[140,160,180].map(tick=><React.Fragment key={tick}><line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/><text x={x0-5} y={Y(tick)+3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text></React.Fragment>)}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+      <path d={reviewSmoothPath(points)} fill="none" stroke="#c05bd8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {PUMP_REVIEW_DATA.map((value,index)=><circle key={index} cx={X(index)} cy={Y(value)} r={index===PUMP_REVIEW_DATA.length-1?4:2.2} fill="#c05bd8" stroke={index===PUMP_REVIEW_DATA.length-1?'#fff':'none'} strokeWidth="2"/>)}
+      <text x={X(29)-3} y={Y(PUMP_REVIEW_DATA[29])-9} textAnchor="end" fontSize="9.5" fontWeight="600" fill="#a849c2" fontFamily="PingFang SC">150ml</text>
+      {dateMarks.map(mark=><text key={mark.index} x={X(mark.index)} y={H-8} textAnchor={mark.index===0?'start':(mark.index===29?'end':'middle')} fontSize="9" fontWeight={mark.index===29?'600':'400'} fill={mark.index===29?'#a849c2':'#bbbbbf'} fontFamily="PingFang SC">{mark.label}</text>)}
+    </svg>
+  );
+}
+
+function PumpReviewCard(){
+  return (
+    <ReviewCard
+      title="吸奶"
+      iconClass="is-pump"
+      icon={<img className="review-pump-icon" src="assets/baby-feeding-icons/pump.png" alt=""/>}
+      chart={<PumpReviewChart/>}
+      legend={<span className="review-legend-item is-pump"><i></i>吸奶量（ml）</span>}
+      metrics={<><ReviewMetric value="150" unit="ml" label="最近吸奶"/><ReviewMetric value="165" unit="ml" label="近30天平均"/><div className="review-metric"><div className="review-metric-value is-trend is-wave"><ReviewWaveIcon/>波动</div><div className="review-metric-label">整体趋势</div></div></>}
+      more="查看完整吸奶变化"
     />
   );
 }
@@ -1218,6 +1328,8 @@ function ReviewPage(){
       <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
       <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
       <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
+      <SupplementReviewCard/>
+      <PumpReviewCard/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
