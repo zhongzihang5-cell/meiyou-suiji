@@ -361,27 +361,27 @@ const SUPPLEMENT_REVIEW_DAYS = Array.from({length:30}, (_item,index)=>{
 });
 
 function SupplementReviewChart(){
-  const W=340,H=168,padL=28,padR=12,padT=14,padB=27;
+  const W=340,H=176,padL=42,padR=10,padT=10,padB=27;
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
-  const yMax=6.8;
   const band=(x1-x0)/SUPPLEMENT_REVIEW_DAYS.length;
-  const segmentWidth=5.6;
+  const row=(y1-y0)/SUPPLEMENT_TYPES.length;
   const X=index=>x0+band*index+band/2;
-  const Y=count=>y1-count/yMax*(y1-y0);
+  const Y=index=>y0+row*index+row/2;
   const dateMarks={0:true,7:true,14:true,21:true,29:true};
+  const supplementRuns=SUPPLEMENT_TYPES.map(type=>{
+    const activeIndexes=SUPPLEMENT_REVIEW_DAYS.reduce((indexes,day,index)=>day.items.includes(type.key)?indexes.concat(index):indexes,[]);
+    return activeIndexes.reduce((runs,index)=>{
+      const current=runs[runs.length-1];
+      if(current&&index===current[current.length-1]+1) current.push(index);
+      else runs.push([index]);
+      return runs;
+    },[]);
+  });
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天营养补剂分类次数图">
-      {[2,4,6].map(tick=><React.Fragment key={tick}><line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,.05)" strokeWidth="1"/><text x={x0-5} y={Y(tick)+3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}次</text></React.Fragment>)}
-      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,.06)" strokeWidth="1"/>
-      {SUPPLEMENT_REVIEW_DAYS.map((day,dayIndex)=>{
-        let stackedCount=0;
-        return <React.Fragment key={day.date}>
-          {day.missed?<rect x={X(dayIndex)-segmentWidth/2} y={Y(1)} width={segmentWidth} height={y1-Y(1)} rx={segmentWidth/2} fill="rgba(255,77,136,.12)" stroke="rgba(255,77,136,.35)" strokeWidth=".7" strokeDasharray="2 1"/>:null}
-          {day.items.map(item=>{const type=SUPPLEMENT_TYPES.find(entry=>entry.key===item);const segmentBottom=Y(stackedCount);stackedCount+=1;const segmentTop=Y(stackedCount);return <rect key={item} x={X(dayIndex)-segmentWidth/2} y={segmentTop+.8} width={segmentWidth} height={segmentBottom-segmentTop-1.6} rx={segmentWidth/2} fill={type.color}/>;})}
-          <line x1={X(dayIndex)} y1={y1} x2={X(dayIndex)} y2={y1+3} stroke="#d8d8dc" strokeWidth=".7"/>
-          {dateMarks[dayIndex]?<text x={X(dayIndex)} y={H-8} textAnchor={dayIndex===0?'start':(dayIndex===29?'end':'middle')} fontSize="9" fontWeight={dayIndex===29?'600':'400'} fill={dayIndex===29?'#e86686':'#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>:null}
-        </React.Fragment>;
-      })}
+    <svg viewBox="0 0 340 176" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天营养补剂服用类型与漏服记录图">
+      {SUPPLEMENT_TYPES.map((type,index)=><React.Fragment key={type.key}><line x1={x0} y1={Y(index)} x2={x1} y2={Y(index)} stroke="rgba(0,0,0,.045)" strokeWidth="1"/><text x={x0-6} y={Y(index)+3} textAnchor="end" fontSize="8.5" fill="#9999a0" fontFamily="PingFang SC">{type.short}</text></React.Fragment>)}
+      {SUPPLEMENT_TYPES.map((type,typeIndex)=>supplementRuns[typeIndex].map((run,runIndex)=><line key={type.key+'-'+runIndex} x1={X(run[0])-band*.28} y1={Y(typeIndex)} x2={X(run[run.length-1])+band*.28} y2={Y(typeIndex)} stroke={type.color} strokeWidth="4.6" strokeLinecap="round"/>))}
+      {SUPPLEMENT_REVIEW_DAYS.map((day,dayIndex)=>dateMarks[dayIndex]?<text key={day.date} x={X(dayIndex)} y={H-8} textAnchor={dayIndex===0?'start':(dayIndex===29?'end':'middle')} fontSize="9" fontWeight={dayIndex===29?'600':'400'} fill={dayIndex===29?'#e86686':'#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>:null)}
     </svg>
   );
 }
@@ -394,7 +394,7 @@ function SupplementReviewCard(){
       icon={<ReviewSupplementIcon/>}
       chart={<SupplementReviewChart/>}
       legend={<>{SUPPLEMENT_TYPES.map(type=><span className="review-legend-item is-supplement" key={type.key}><i style={{background:type.color}}></i>{type.name}</span>)}</>}
-      metrics={<><ReviewMetric value="AD" unit="1粒" label="最近补充"/><ReviewMetric value="7" unit="天" label="近7日连续"/><ReviewMetric value="3" unit="次" label="近30天平均"/></>}
+      metrics={<><ReviewMetric value="AD" unit="1粒" label="最近补充"/><ReviewMetric value="7" unit="天" label="近7日连续"/><ReviewMetric value="6" unit="次" label="近30天日均"/></>}
       more="查看完整营养补剂变化"
     />
   );
