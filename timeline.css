@@ -346,6 +346,7 @@
 .tl-baby-feeding-card{
   width:100%;
   border-radius:16px;
+  overflow:hidden;
   background:#fff;
   border:0.5px solid var(--my-line);
   box-shadow:none;
@@ -674,6 +675,8 @@
   color:var(--my-text-secondary);
   font-style:normal;
 }
+.tl-baby-feed-history-link{width:calc(100% + 30px);min-height:58px;margin:12px -15px -14px;padding:0 15px;border:0;border-top:.5px solid var(--my-line);background:#fff;display:flex;align-items:center;color:var(--my-text-primary);font-family:inherit;font-size:14px;font-weight:400;line-height:1.3;text-align:left;cursor:pointer}.tl-baby-feed-history-link span{flex:1}.tl-baby-feed-history-link svg{width:18px;height:18px;fill:none;stroke:var(--my-text-tertiary);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.point-feeding-history-host{position:absolute;inset:44px 0 0;z-index:127;overflow:hidden}
 .tl-baby-feed-stream-in{
   opacity:0;
   transform:translateY(5px);

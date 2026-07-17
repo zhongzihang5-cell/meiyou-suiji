@@ -199,6 +199,111 @@ function getTimelineEmpty(ctx){
   return [buildTodayDayBlock(ctx || SCENE_CONTEXT.period)];
 }
 
+const BABY_DEMO_RECORDS = {
+  formula:{recordType:'formula', feedType:'配方奶', color:'#FF7A66', icon:'🍼', iconSrc:'assets/baby-feeding-icons/formula.png'},
+  breast:{recordType:'breast', feedType:'母乳', color:'#FF8EB8', icon:'🤱', iconSrc:'assets/baby-feeding-icons/breast.png'},
+  sleep:{recordType:'sleep', feedType:'睡眠', color:'#8E7BD9', icon:'🌙', iconSrc:'assets/baby-feeding-icons/sleep.png'},
+  diaper:{recordType:'diaper', feedType:'换尿布', color:'#E8A23D', icon:'🧷', iconSrc:'assets/baby-feeding-icons/diaper.png'},
+  bottle:{recordType:'bottle-breast', feedType:'瓶喂母乳', color:'#FF8EB8', icon:'🍼', iconSrc:'assets/baby-feeding-icons/bottle-breast.png'},
+  solid:{recordType:'solid-food', feedType:'辅食', color:'#F2A65A', icon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png'},
+  water:{recordType:'water', feedType:'喝水', color:'#5B8DEF', icon:'💧', iconSrc:'assets/baby-feeding-icons/water.png'},
+  bath:{recordType:'bath', feedType:'洗澡', color:'#5FCAD1', icon:'🛁', iconSrc:'assets/baby-feeding-icons/bath.png'},
+  play:{recordType:'play', feedType:'玩耍', color:'#F4B45F', icon:'🧸', iconSrc:'assets/baby-feeding-icons/play.png'},
+  nutrition:{recordType:'nutrition', feedType:'营养补剂', color:'#3CB88C', icon:'💊', iconSrc:'assets/baby-feeding-icons/nutrition.png'},
+};
+
+function buildBabyDemoCard(dayOffset, index, spec){
+  const [time, type, value, note, durationMinutes] = spec;
+  const base = BABY_DEMO_RECORDS[type];
+  const text = `${base.feedType}：${value}`;
+  const card = {
+    kind:'baby-feeding-card',
+    id:`baby-demo-${dayOffset}-${index}`,
+    time,
+    ...base,
+    value,
+    text,
+    railDot:'baby',
+    creator:'妈妈',
+    creatorId:'self',
+    isOwnRecord:true,
+    showCreator:false,
+    showBabyTag:true,
+  };
+  if(note) card.noteText = note;
+  if(durationMinutes) card.statDurationMinutes = durationMinutes;
+  if(type === 'breast'){
+    const right = Math.max(1, Math.floor(durationMinutes / 2));
+    const left = Math.max(1, durationMinutes - right);
+    card.leftMinutes = left;
+    card.rightMinutes = right;
+    card.detailLines = [`母乳：左${left}分钟，右${right}分钟`];
+  }
+  if(['sleep','bath','play'].includes(type)) card.detailLines = [`${base.feedType}：${value}`];
+  return card;
+}
+
+function buildBabyDemoDay(dayOffset, specs){
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() - dayOffset);
+  return {
+    type:'day',
+    id:dayOffset === 0 ? 'd-today-baby-demo' : `d-baby-demo-minus-${dayOffset}`,
+    date:formatTodayDateLabel(date),
+    weekday:WEEKDAY_ZH[date.getDay()],
+    isToday:dayOffset === 0,
+    relativeLabel:dayOffset === 1 ? '昨天' : undefined,
+    relativeDaysAgo:dayOffset,
+    items:specs.map((spec, index)=>buildBabyDemoCard(dayOffset, index, spec)),
+  };
+}
+
+function buildBabyDemoDays(){
+  return [
+    buildBabyDemoDay(3, [
+      ['01:40','sleep','3小时10分钟','夜里睡得很安稳',190],
+      ['05:10','formula','120ml','一口气喝完了'],
+      ['07:35','diaper','臭臭 黄色、膏状','晨起换尿布'],
+      ['09:20','breast','18分钟','吃完很满足',18],
+      ['11:30','water','50ml','上午喝水'],
+      ['13:05','solid','米粉，菠菜，20g','第一次尝试菠菜米粉'],
+      ['15:25','diaper','嘘嘘','尿量正常'],
+      ['17:40','formula','140ml','傍晚奶量不错'],
+      ['20:10','bath','13分钟','洗完澡很开心',13],
+      ['21:35','sleep','8小时05分钟','夜间长睡眠',485],
+    ]),
+    buildBabyDemoDay(2, [
+      ['02:05','breast','20分钟','夜奶后很快睡着',20],
+      ['05:30','formula','130ml','清晨奶'],
+      ['07:50','diaper','臭臭 墨绿色、膏状','便便状态正常'],
+      ['09:40','sleep','1小时25分钟','上午小睡',85],
+      ['11:35','bottle','90ml','瓶喂母乳'],
+      ['13:15','solid','米粉，南瓜，25g','南瓜米粉吃得不错'],
+      ['15:10','water','60ml','午后补水'],
+      ['17:25','diaper','嘘嘘','换了1片尿布'],
+      ['20:00','formula','150ml','睡前奶'],
+      ['21:20','play','30分钟','和妈妈一起玩积木',30],
+    ]),
+    buildBabyDemoDay(1, [
+      ['01:55','sleep','3小时20分钟','后半夜睡眠',200],
+      ['05:25','formula','135ml','清晨喝奶'],
+      ['07:40','diaper','臭臭 黄绿色、软便','晨起便便'],
+      ['09:35','breast','22分钟','左右两侧都吃了',22],
+      ['11:50','solid','米粉，香蕉，30g','香蕉米粉'],
+      ['14:10','sleep','1小时40分钟','午睡',100],
+      ['16:20','water','50ml','睡醒后喝水'],
+      ['18:15','diaper','嘘嘘','傍晚换尿布'],
+      ['20:30','formula','150ml','睡前喝得很好'],
+      ['21:45','nutrition','维生素D3，50mg','今日营养补剂'],
+    ]),
+    buildBabyDemoDay(0, [
+      ['02:00','breast','20分钟','凌晨母乳，左10分钟，右10分钟',20],
+      ['05:00','formula','130ml','凌晨5点喝了130毫升配方奶'],
+    ]),
+  ];
+}
+
 // ---------- Scene context ----------
 const SCENE_CONTEXT = {
   period: {
@@ -390,91 +495,7 @@ const TIMELINE_BLOCKS = [
       },
     ],
   },
-  {
-    type:'day', id:'d-yesterday-baby', date:'5/17', weekday:'周二', relativeLabel:'昨天',
-    items:[
-      {
-        kind:'baby-feeding-card', id:'baby-feed-0338',
-        time:'03:38',
-        recordType:'formula',
-        feedType:'配方奶',
-        value:'155ml',
-        text:'配方奶：155ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        railDot:'baby',
-        voiceQuote:'三点半喂了155',
-        creator:'爸爸',
-        creatorId:'family',
-        isOwnRecord:false,
-        familyUnread:true,
-      },
-      {
-        kind:'baby-feeding-card', id:'baby-feed-0747',
-        time:'07:47',
-        recordType:'formula',
-        feedType:'配方奶',
-        value:'145ml',
-        text:'配方奶：145ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        railDot:'baby',
-        creator:'奶奶',
-        creatorId:'family',
-        isOwnRecord:false,
-        familyUnread:true,
-      },
-      {
-        kind:'baby-feeding-card', id:'baby-feed-1510',
-        time:'15:10',
-        recordType:'diaper',
-        feedType:'换尿布',
-        value:'臭臭',
-        text:'换尿布：臭臭',
-        icon:'🧷',
-        color:'#E8A23D',
-        railDot:'baby',
-        creator:'奶奶',
-        creatorId:'family',
-        isOwnRecord:false,
-        familyUnread:true,
-      },
-      {
-        kind:'record-group', id:'e-517-fit-g',
-        primary:{
-          id:'e-517-fit', time:'18:10', kind:'text',
-          text:'去健身房练了四十分钟，出了一身汗。',
-          tags:[{ cat:'运动', icon:'run' }],
-        },
-      },
-      {
-        kind:'record-group', id:'baby-sleep-note-g',
-        primary:{
-          id:'baby-sleep-note', time:'19:32', kind:'text',
-          text:'宝宝傍晚闹觉哭了快二十分钟，抱着走了两圈才睡着。',
-          tags:[
-            { cat:'睡眠', icon:'sleep' },
-            { cat:'心情', icon:'mood' },
-          ],
-        },
-      },
-      {
-        kind:'baby-feeding-card', id:'baby-feed-2046',
-        time:'20:46',
-        recordType:'formula',
-        feedType:'配方奶',
-        value:'130ml',
-        text:'配方奶：130ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        railDot:'baby',
-        voiceQuote:'刚喂了130毫升，喝得有点慢',
-        creator:'妈妈',
-        creatorId:'self',
-        isOwnRecord:true,
-      },
-    ],
-  },
+  ...buildBabyDemoDays(),
 ];
 
 // 场景二：新用户空值 — 运行时生成「今天」分日（与场景一时间轴头一致）

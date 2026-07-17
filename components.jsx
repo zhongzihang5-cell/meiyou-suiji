@@ -221,6 +221,7 @@ function TabBar({
   active='note',
   onChange,
   noteUnread=false,
+  reviewUnread=false,
   noteLabel='点滴',
   onNoteVoiceStart,
   onNoteVoiceMove,
@@ -275,7 +276,7 @@ function TabBar({
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
     {id:'note', label:noteLabel, custom:<svg className="tab-note-mic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="13" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M5 11.5a7 7 0 0 0 14 0M12 18.5v3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>, notif: noteUnread},
-    {id:'cash', label:'回顾', custom:reviewIcon},
+    {id:'cash', label:'回顾', custom:reviewIcon, notif:reviewUnread},
     {id:'me', label:'我', custom:icon('me')},
   ];
   return (

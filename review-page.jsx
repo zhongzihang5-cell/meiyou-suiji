@@ -45,6 +45,10 @@ function ReviewWaveIcon(){
   return <svg className="review-wave-icon" viewBox="0 0 20 14" aria-hidden="true"><path d="M1 9l4-5 4 6 4-7 6 5"/></svg>;
 }
 
+function ReviewShareIcon(){
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><circle cx="5.5" cy="10" r="2.2"/><circle cx="18.5" cy="10" r="2.2"/><path d="M7.5 19v-1.4c0-2.6 2-4.6 4.5-4.6s4.5 2 4.5 4.6V19M2.5 18v-1c0-1.9 1.3-3.5 3.1-3.8M21.5 18v-1c0-1.9-1.3-3.5-3.1-3.8"/></svg>;
+}
+
 function ReviewBabyIcon({kind}){
   if(kind === 'sleep') return <svg viewBox="0 0 24 24"><path d="M20 15.2A8 8 0 0 1 8.8 4 8 8 0 1 0 20 15.2z"/></svg>;
   if(kind === 'diaper') return <svg viewBox="0 0 24 24"><path d="M5 5.5h14v5.8c0 4.5-2.7 7.2-7 7.2s-7-2.7-7-7.2z"/><path d="M5 9.5c2.2.2 3.8 1.2 4.8 3M19 9.5c-2.2.2-3.8 1.2-4.8 3"/></svg>;
@@ -1327,43 +1331,6 @@ function MoodChart(){
   );
 }
 
-const SHARED_FEEDING_DAYS = [
-  {
-    date:'7月13日', weekday:'第37天', count:2,
-    summary:[['breast','母乳 1次 28min（左0min｜右28min）'],['sleep','睡眠 1次 4min']],
-    records:[
-      ['12:04','sleep','睡眠','睡了4分钟｜12:04-12:08','奶奶'],
-      ['09:41','breast','母乳','右28分钟｜09:41-10:09','妈妈'],
-    ]
-  },
-  {
-    date:'7月12日', weekday:'第36天', count:7,
-    summary:[['breast','母乳 1次 23min（左9min｜右14min）'],['formula','配方奶 2次 180ml'],['sleep','睡眠 2次 5h39min'],['diaper','换尿布 2次']],
-    records:[
-      ['21:25','formula','配方奶','50ml','奶奶','宝宝一直哭，喝的很慢'],
-      ['21:20','diaper','换尿布','臭臭 绿色、膏状','爸爸','连续3天的便便都是绿色'],
-      ['18:26','sleep','睡眠','睡了2小时49分钟｜18:26-21:15','奶奶'],
-      ['17:35','breast','母乳','右14分钟 → 左9分钟｜17:35-17:58','妈妈'],
-      ['14:05','sleep','睡眠','睡了2小时50分钟｜14:05-16:55','妈妈'],
-      ['13:18','diaper','换尿布','嘘嘘','爸爸'],
-      ['13:03','formula','配方奶','130ml','妈妈'],
-    ]
-  },
-  {
-    date:'7月10日', weekday:'第34天', count:2,
-    summary:[['breast','母乳 1次 20min（左10min｜右10min）'],['bottle','瓶喂母乳 1次 50ml']],
-    records:[
-      ['10:33','bottle','瓶喂母乳','50ml','奶奶'],
-      ['10:33','breast','母乳','左10分钟，右10分钟｜10:33-10:53','妈妈'],
-    ]
-  },
-  {
-    date:'7月9日', weekday:'第33天', count:1,
-    summary:[['sleep','睡眠 1次 3min']],
-    records:[['19:03','sleep','睡眠','睡了3分钟｜19:03-19:06','爸爸']]
-  }
-];
-
 const SHARED_FEEDING_ICONS = {
   formula:'assets/baby-feeding-icons/formula.png',
   breast:'assets/baby-feeding-icons/breast.png',
@@ -1374,35 +1341,75 @@ const SHARED_FEEDING_ICONS = {
   bottle:'assets/baby-feeding-icons/bottle-breast.png'
 };
 
+const SHARED_FEEDING_KIND_BY_LABEL = {'配方奶':'formula','母乳':'breast','瓶喂母乳':'bottle','换尿布':'diaper','睡眠':'sleep','辅食':'food','喝水':'water'};
+
+function buildSharedFeedingDaysFromTimeline(blocks){
+  if(!Array.isArray(blocks)) return [];
+  return blocks.filter(block=>block?.type==='day').map(block=>{
+    const records = (block.items || block.entries || []).filter(item=>item?.kind==='baby-feeding-card');
+    if(!records.length) return null;
+    const latestSummary = [...records].reverse().find(item=>Array.isArray(item.summary?.items))?.summary;
+    const fallbackStats = new Map();
+    records.forEach(item=>{
+      const label = item.feedType || String(item.text || '').split('：')[0] || '其他事件';
+      const row = fallbackStats.get(label) || {label,count:0,value:[]};
+      row.count += 1;
+      if(item.value) row.value.push(item.value);
+      fallbackStats.set(label,row);
+    });
+    const summary = latestSummary?.items?.map(row=>[
+      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      `${row.label} ${row.value}`
+    ]) || [...fallbackStats.values()].map(row=>[
+      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      `${row.label} ${row.count}次${row.value[0] ? ` ${row.value[0]}` : ''}`
+    ]);
+    const normalizedRecords = [...records].sort((a,b)=>String(b.time || '').localeCompare(String(a.time || ''))).map(item=>{
+      const label = item.feedType || String(item.text || '').split('：')[0] || '喂养记录';
+      let core = item.value || String(item.text || '').replace(new RegExp(`^${label}：?`),'') || '';
+      if(Array.isArray(item.detailLines) && item.detailLines.length){
+        core = item.detailLines.map(line=>String(line).replace(new RegExp(`^${label}：?`),'')).join('｜');
+      }
+      return [item.time || '--:--',SHARED_FEEDING_KIND_BY_LABEL[label] || 'formula',label,core,item.creator || '妈妈',item.noteText || item.voiceQuote || ''];
+    });
+    const rawDate = block.isToday ? '今天' : (block.relativeLabel || block.date || '');
+    const date = /^\d{1,2}\/\d{1,2}$/.test(rawDate) ? rawDate.replace('/', '月')+'日' : rawDate;
+    return {date,weekday:block.weekday || '',count:normalizedRecords.length,summary,records:normalizedRecords};
+  }).filter(Boolean).reverse();
+}
+
 function SharedFeedingSummary({items, compact=false}){
   return <div className={'shared-feeding-summary'+(compact?' is-compact':'')}>{items.map(item=><span className={'is-'+item[0]} key={item[1]}><i></i>{item[1]}</span>)}</div>;
 }
 
-function SharedFeedingReviewCard({onOpen}){
-  const day = SHARED_FEEDING_DAYS[0];
+function SharedFeedingReviewCard({onOpen,day}){
+  const previewRecords = day ? day.records.slice(0, 2) : [];
   return (
     <article className="shared-feeding-review-card" role="button" tabIndex="0" onClick={onOpen} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpen();}}}>
       <header className="shared-feeding-card-head">
         <span className="shared-feeding-card-icon"><img src="assets/feeding-review-icon.png" alt=""/></span>
         <h2>喂养记录</h2>
+        <span className="shared-feeding-card-share-state">3位亲友共享</span>
       </header>
-      <section className="shared-feeding-day shared-feeding-card-day">
+      {day ? <section className="shared-feeding-day shared-feeding-card-day">
         <header><h2>{day.date} <small>{day.weekday}</small></h2></header>
         <SharedFeedingSummary items={day.summary}/>
         <div className="shared-feeding-ledger">
-          {day.records.map(record=><div className="shared-feeding-ledger-row" key={'card'+record[0]+record[2]}>
+          {previewRecords.map(record=><div className="shared-feeding-ledger-row" key={'card'+record[0]+record[2]}>
             <time>{record[0]}</time><span className={'shared-feeding-dot is-'+record[1]}></span>
             <img src={SHARED_FEEDING_ICONS[record[1]]} alt=""/>
             <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
           </div>)}
         </div>
-      </section>
-      <div className="review-card-more shared-feeding-card-more"><div className="review-card-more-main">查看完整喂养时间轴</div><ReviewChevron/></div>
+      </section> : <div className="shared-feeding-card-empty">暂无喂养记录</div>}
+      <div className="review-card-more shared-feeding-card-more"><div className="review-card-more-main">查看完整喂养记录</div><ReviewChevron/></div>
     </article>
   );
 }
 
-function SharedFeedingTimelinePage({open,onClose}){
+function SharedFeedingTimelinePage({open,onClose,timelineBlocks}){
+  const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
+  const days = liveDays;
   useEffect(()=>{
     const phone = document.querySelector('.phone');
     phone?.classList.toggle('is-shared-feeding-open', open);
@@ -1415,7 +1422,7 @@ function SharedFeedingTimelinePage({open,onClose}){
         <div className="shared-feeding-detail-title"><b>小豆苗</b><span>3位亲友共享</span></div>
       </header>
       <div className="shared-feeding-detail-scroll">
-        {SHARED_FEEDING_DAYS.map(day=><section className="shared-feeding-day" key={day.date}>
+        {days.length ? days.map(day=><section className="shared-feeding-day" key={day.date}>
           <header><h2>{day.date} <small>{day.weekday}</small></h2><span>{day.count} 条</span></header>
           <SharedFeedingSummary items={day.summary}/>
           <div className="shared-feeding-ledger">
@@ -1425,18 +1432,19 @@ function SharedFeedingTimelinePage({open,onClose}){
               <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
             </div>)}
           </div>
-        </section>)}
+        </section>) : <div className="shared-feeding-detail-empty">暂无喂养记录</div>}
       </div>
     </section>
   );
 }
 
-function ReviewPage(){
+function ReviewPage({timelineBlocks}){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [sharedFeedingOpen, setSharedFeedingOpen] = useState(false);
   const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
   const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
+  const sharedFeedingDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -1459,11 +1467,14 @@ function ReviewPage(){
     <main className="review-page" aria-label="回顾">
       <div className="review-nav">
         <span className="review-nav-title">回顾</span>
+        <button className="review-nav-share" type="button" aria-label="查看共享喂养记录" onClick={()=>setSharedFeedingOpen(true)}>
+          <ReviewShareIcon/><span>共享</span>
+        </button>
       </div>
       <div className="review-content">
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
 
-      <SharedFeedingReviewCard onOpen={()=>setSharedFeedingOpen(true)}/>
+      <SharedFeedingReviewCard day={sharedFeedingDays[0]} onOpen={()=>setSharedFeedingOpen(true)}/>
 
       <ReviewCard
         title="月经周期"
@@ -1556,7 +1567,7 @@ function ReviewPage(){
       <SupplementReviewCard onFullOpen={()=>openFeedingDetail('supplement')}/>
       <PumpReviewCard onFullOpen={()=>openFeedingDetail('pump')}/>
       </div>
-      <SharedFeedingTimelinePage open={sharedFeedingOpen} onClose={()=>setSharedFeedingOpen(false)}/>
+      <SharedFeedingTimelinePage open={sharedFeedingOpen} timelineBlocks={timelineBlocks} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
     </main>
@@ -1564,3 +1575,4 @@ function ReviewPage(){
 }
 
 window.ReviewPage = ReviewPage;
+window.SharedFeedingTimelinePage = SharedFeedingTimelinePage;

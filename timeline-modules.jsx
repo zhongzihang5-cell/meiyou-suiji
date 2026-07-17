@@ -943,48 +943,6 @@ function BabyFeedingTimelineCard({item, isNew}){
         ) : null}
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
       </div>
-      {summary && (
-        <div className={'tl-baby-feed-summary'+(summaryOpen ? ' is-open' : '')}>
-          <button
-            type="button"
-            className="tl-baby-feed-summary-toggle"
-            aria-expanded={summaryOpen}
-            onClick={(event)=>{
-              event.stopPropagation();
-              setSummaryOpen(v=>!v);
-            }}
-          >
-            <span className="tl-baby-feed-summary-spark" aria-hidden="true">✦</span>
-            <span className="tl-baby-feed-summary-title">{summary.title || '喂养小结'}</span>
-            {summary.meta ? <span className="tl-baby-feed-summary-meta">{summary.meta}</span> : null}
-            <span className={'tl-baby-feed-summary-chev'+(summaryOpen ? ' is-open' : '')} aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M6 15l6-6 6 6"/>
-              </svg>
-            </span>
-          </button>
-          <div className={'tl-baby-feed-summary-panel'+(summaryOpen ? ' is-open' : '')} aria-hidden={!summaryOpen}>
-            {Array.isArray(summary.items) && summary.items.length ? (
-              <div className="tl-baby-feed-summary-grid">
-                {summary.items.map((row, index)=>(
-                  <span
-                    key={row.label || index}
-                    className={'tl-baby-feed-summary-item'+(row.wide ? ' is-wide' : '')}
-                  >
-                    <i style={{background: row.color || '#ff6f91'}} aria-hidden="true"/>
-                    <span className="tl-baby-feed-summary-copy">
-                      <b>{row.label}</b>
-                      <em>{row.value}</em>
-                    </span>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="tl-baby-feed-summary-text">{summary.text}</span>
-            )}
-          </div>
-        </div>
-      )}
     </article>
   );
 }

@@ -3622,6 +3622,7 @@ html,body{
 .tl-baby-feeding-card{
   width:100%;
   border-radius:16px;
+  overflow:hidden;
   background:#fff;
   border:0.5px solid var(--my-line);
   box-shadow:none;
@@ -3950,6 +3951,8 @@ html,body{
   color:var(--my-text-secondary);
   font-style:normal;
 }
+.tl-baby-feed-history-link{width:calc(100% + 30px);min-height:58px;margin:12px -15px -14px;padding:0 15px;border:0;border-top:.5px solid var(--my-line);background:#fff;display:flex;align-items:center;color:var(--my-text-primary);font-family:inherit;font-size:14px;font-weight:400;line-height:1.3;text-align:left;cursor:pointer}.tl-baby-feed-history-link span{flex:1}.tl-baby-feed-history-link svg{width:18px;height:18px;fill:none;stroke:var(--my-text-tertiary);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.point-feeding-history-host{position:absolute;inset:44px 0 0;z-index:127;overflow:hidden}
 .tl-baby-feed-stream-in{
   opacity:0;
   transform:translateY(5px);
@@ -18234,6 +18237,7 @@ html,body{
   font-weight:500;
   color:var(--my-text-primary);
 }
+.review-nav-share{position:absolute;right:10px;top:2px;width:42px;height:40px;padding:2px 0 0;border:0;background:transparent;color:var(--my-text-secondary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer}.review-nav-share svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}.review-nav-share span{font-size:10px;line-height:13px}.review-nav-share:focus-visible{outline:2px solid rgba(255,77,136,.32);outline-offset:-2px;border-radius:6px}
 
 .review-content{
   flex:1 1 auto;
@@ -18426,9 +18430,23 @@ html,body{
 
 /* Feeding record review — restored from the reference layout */
 .feeding-detail-page{position:absolute;inset:0;z-index:126;display:flex;flex-direction:column;background:linear-gradient(180deg,#ffdceb 0,#fff 165px,#f4f4f7 360px);visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}.feeding-detail-page.is-sleep{background:linear-gradient(180deg,#f8e6ff 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-diaper{background:linear-gradient(180deg,#ffe7dc 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-food{background:linear-gradient(180deg,#fff0cf 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-all{background:linear-gradient(180deg,#ffe2ef 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
-.feeding-detail-nav{height:48px;flex:0 0 48px;position:relative;display:flex;align-items:center;justify-content:center}.feeding-detail-nav>button{position:absolute;left:0;width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center}.feeding-detail-nav>button svg{width:23px;height:23px;fill:none;stroke:#333;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.feeding-detail-nav>b{font-size:17px}.feeding-detail-nav>span{position:absolute;right:14px;color:#555;font-size:14px}.feeding-detail-content{flex:1;min-height:0;display:flex}.feeding-detail-content>.feeding-record-scroll,.feeding-detail-content>.sleep-record-scroll,.feeding-detail-content>.diaper-record-scroll,.feeding-detail-content>.food-record-scroll,.feeding-detail-content>.all-record-scroll{width:100%;height:100%}
+.feeding-detail-page.is-supplement{background:linear-gradient(180deg,#def7e9 0,#fff 165px,#f4f4f7 360px)}
+.feeding-detail-page.is-pump{background:linear-gradient(180deg,#f2ddf8 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-feeding.is-open){--feeding-detail-gradient:linear-gradient(180deg,#ffdceb 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-sleep.is-open){--feeding-detail-gradient:linear-gradient(180deg,#f8e6ff 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-diaper.is-open){--feeding-detail-gradient:linear-gradient(180deg,#ffe7dc 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-food.is-open){--feeding-detail-gradient:linear-gradient(180deg,#fff0cf 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-supplement.is-open){--feeding-detail-gradient:linear-gradient(180deg,#def7e9 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-pump.is-open){--feeding-detail-gradient:linear-gradient(180deg,#f2ddf8 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-all.is-open){--feeding-detail-gradient:linear-gradient(180deg,#ffe2ef 0,#fff 165px,#f4f4f7 360px)}
+.phone:has(.feeding-detail-page.is-open)>.statusbar{background:var(--feeding-detail-gradient);background-size:100% 360px;background-position:0 0}
+.feeding-detail-page.is-open{background:var(--feeding-detail-gradient);background-size:100% 360px;background-position:0 -44px}
+.feeding-detail-nav{height:48px;flex:0 0 48px;position:relative;z-index:14;display:flex;align-items:center;justify-content:center}.feeding-detail-nav .feeding-detail-back{position:absolute;left:0;width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center}.feeding-detail-nav .feeding-detail-back svg{width:23px;height:23px;fill:none;stroke:#333;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.feeding-detail-title-trigger{height:36px;padding:0 8px;border:0;background:transparent;display:inline-flex;align-items:center;gap:5px;color:#222;font:inherit}.feeding-detail-title-trigger b{font-size:17px}.feeding-detail-title-trigger svg{width:12px;height:12px;fill:none;stroke:#555;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}.feeding-detail-title-trigger.is-open svg{transform:rotate(180deg)}.feeding-detail-nav>span{position:absolute;right:14px;color:#555;font-size:14px}.feeding-detail-content{flex:1;min-height:0;display:flex}.feeding-detail-content>.feeding-record-scroll,.feeding-detail-content>.sleep-record-scroll,.feeding-detail-content>.diaper-record-scroll,.feeding-detail-content>.food-record-scroll,.feeding-detail-content>.all-record-scroll{width:100%;height:100%}
+.feeding-detail-picker{position:absolute;left:0;right:0;top:48px;bottom:0;z-index:13;visibility:hidden;pointer-events:none}.feeding-detail-picker.is-open{visibility:visible;pointer-events:auto}.feeding-detail-picker-scrim{position:absolute;inset:0;width:100%;height:100%;border:0;background:rgba(0,0,0,.34);opacity:0;transition:opacity .18s}.feeding-detail-picker.is-open .feeding-detail-picker-scrim{opacity:1}.feeding-detail-picker-panel{position:relative;padding:16px 14px 18px;background:#fff;border-radius:0 0 16px 16px;box-shadow:0 8px 18px rgba(0,0,0,.1);transform:translateY(-8px);opacity:0;transition:transform .2s ease,opacity .18s}.feeding-detail-picker.is-open .feeding-detail-picker-panel{transform:translateY(0);opacity:1}.feeding-detail-picker-panel>div{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 12px}.feeding-detail-picker-panel button{height:38px;padding:0 12px;border:0;border-radius:20px;background:#f5f5f6;position:relative;color:#555;font:500 14px/1 inherit}.feeding-detail-picker-panel button.is-active{background:#fff0f5;color:var(--my-brand-red);font-weight:700}.feeding-detail-picker-panel button i{position:absolute;right:11px;font-size:11px;font-style:normal}@media (prefers-reduced-motion:reduce){.feeding-detail-title-trigger svg,.feeding-detail-picker-scrim,.feeding-detail-picker-panel{transition:none}}
 .feeding-detail-content .feeding-smart-card,.feeding-detail-content .sleep-smart-card,.feeding-detail-content .feeding-record-module,.feeding-detail-content .sleep-record-module{margin-top:10px}
 .feeding-detail-content .feeding-record-scroll,.feeding-detail-content .sleep-record-scroll,.feeding-detail-content .diaper-record-scroll,.feeding-detail-content .food-record-scroll,.feeding-detail-content .all-record-scroll{padding-top:0}
+.feeding-detail-content>.supplement-record-scroll{width:100%;height:100%;padding-top:0}
+.feeding-detail-content>.pump-record-scroll{width:100%;height:100%;padding-top:0}
 .feeding-detail-content .feeding-record-module>h2,
 .feeding-detail-content .feeding-amount-module>header h2,
 .feeding-detail-content .sleep-record-module>h2,
@@ -18467,6 +18485,14 @@ html,body{
 .food-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#777;font-size:10px;text-align:center}.food-record-dates span.is-hot{color:var(--my-brand-red);font-weight:600}.food-record-legend{margin:20px 16px 0;display:flex;align-items:center;gap:6px;color:#555;font-size:12px}.food-record-legend i{font-style:normal}
 .food-amount-detail section h3{margin:22px 0 10px;padding:0 16px;display:flex;align-items:center;gap:7px;color:#f07c4d;font-size:14px}.food-amount-detail section h3 i{width:4px;height:16px;border-radius:3px;background:#ff7c4d}.food-count-row{display:grid;grid-template-columns:repeat(7,1fr);height:54px;margin:0 12px;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fff9f7 49px,#fff9f7 97px)}.food-count-row span{display:grid;place-items:center;color:#666;font-size:11px;border-bottom:.5px solid #f4efed}
 .food-amount-chart{height:340px;margin:0 12px;position:relative;display:grid;grid-template-columns:repeat(7,1fr);align-items:end;padding:58px 8px 0;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fff9f7 49px,#fff9f7 97px)}.food-average-badge{position:absolute;top:34px;left:50%;transform:translateX(-50%);padding:4px 7px;border:1px solid #f29a6f;border-radius:5px;color:#e47a4d;font-size:11px;white-space:nowrap}.food-amount-day{height:230px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}.food-amount-day b{color:#e97749;font-size:10px}.food-amount-day>i{width:26px;border-radius:13px 13px 4px 4px;background:linear-gradient(#ff7954,#ff9b66)}
+
+/* Nutrition supplement record review */
+.supplement-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.supplement-record-module{margin-top:10px;padding-bottom:18px;border-radius:14px;background:#fff;overflow:hidden}.supplement-record-module>h2{width:max-content;min-width:92px;height:34px;margin:0;padding:0 14px;display:flex;align-items:center;border-radius:0 18px 18px 0;background:linear-gradient(90deg,#43aa76,#65c68f);color:#fff;font-size:15px}.supplement-time-grid{height:520px;margin:16px 22px 0 12px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 42px,rgba(0,0,0,.055) 43px),repeating-linear-gradient(90deg,#fff 0,#fff 46px,#f7fcf9 47px,#f7fcf9 93px)}.supplement-time-days{position:absolute;inset:0 18px 0 0;display:grid;grid-template-columns:repeat(7,1fr)}.supplement-time-days>span{position:relative;border-right:.5px solid rgba(0,0,0,.025)}.supplement-time-days>span>i{position:absolute;left:34%;width:18px;height:18px;display:grid;place-items:center;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.16);transform:translate(-50%,-50%);color:#fff;font:700 6px/1 Arial,sans-serif;font-style:normal;white-space:nowrap}.supplement-time-days>span>i:nth-child(even){left:66%}.supplement-time-axis{position:absolute;right:-18px;inset-block:0;width:18px}.supplement-time-axis span{position:absolute;right:0;transform:translateY(-50%);color:#777;font-size:9px}.supplement-detail-legend{margin:18px 16px 0;display:flex;flex-wrap:wrap;gap:8px 15px;color:#555;font-size:11px}.supplement-detail-legend span{display:flex;align-items:center;gap:5px}.supplement-detail-legend i{width:8px;height:8px;border-radius:50%}
+.supplement-count-module>h3{margin:20px 0 8px;padding:0 16px;display:flex;align-items:center;gap:7px;color:#42a873;font-size:14px}.supplement-count-module>h3 i{width:4px;height:16px;border-radius:3px;background:#54bd82}.supplement-count-chart{height:250px;margin:0 12px;position:relative;display:grid;grid-template-columns:repeat(7,1fr);align-items:end;padding:58px 8px 0;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#f7fcf9 49px,#f7fcf9 97px)}.supplement-count-average{position:absolute;top:28px;left:50%;transform:translateX(-50%);padding:4px 7px;border:1px solid #71c99a;border-radius:5px;color:#399a69;font-size:11px;white-space:nowrap}.supplement-count-day{height:160px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}.supplement-count-day b{color:#399a69;font-size:10px}.supplement-count-day>i{width:24px;border-radius:12px 12px 4px 4px;background:linear-gradient(#54bd82,#7bd2a2)}.supplement-count-day>span{margin-bottom:10px;color:#e26a62;font-size:10px}.supplement-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#777;font-size:10px;text-align:center}.supplement-record-dates span.is-hot{color:#42a873;font-weight:700}
+
+/* Pump record review */
+.pump-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.pump-record-module{margin-top:10px;padding-bottom:18px;border-radius:14px;background:#fff;overflow:hidden}.pump-record-module>h2{width:max-content;min-width:92px;height:34px;margin:0;padding:0 14px;display:flex;align-items:center;border-radius:0 18px 18px 0;background:linear-gradient(90deg,#a849c2,#c76add);color:#fff;font-size:15px}.pump-time-grid{height:520px;margin:16px 22px 0 12px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 42px,rgba(0,0,0,.055) 43px),repeating-linear-gradient(90deg,#fff 0,#fff 46px,#fcf8fd 47px,#fcf8fd 93px)}.pump-time-days{position:absolute;inset:0 18px 0 0;display:grid;grid-template-columns:repeat(7,1fr)}.pump-time-days>span{position:relative;border-right:.5px solid rgba(0,0,0,.025)}.pump-time-days>span>i{position:absolute;left:50%;width:20px;height:20px;display:grid;place-items:center;border:2px solid #fff;border-radius:50%;background:#f1d9f7;box-shadow:0 1px 4px rgba(122,45,144,.2);transform:translate(-50%,-50%)}.pump-time-days>span>i img{width:14px;height:14px;object-fit:contain}.pump-time-axis{position:absolute;right:-18px;inset-block:0;width:18px}.pump-time-axis span{position:absolute;right:0;transform:translateY(-50%);color:#777;font-size:9px}.pump-record-dates{display:grid;grid-template-columns:repeat(7,1fr);margin:10px 12px 0;color:#777;font-size:10px;text-align:center}.pump-record-dates span.is-hot{color:#a849c2;font-weight:700}.pump-record-legend{margin:18px 16px 0;display:flex;align-items:center;gap:6px;color:#555;font-size:12px}.pump-record-legend i{width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:#f1d9f7}.pump-record-legend img{width:13px;height:13px;object-fit:contain}
+.pump-amount-module>h3{margin:20px 0 8px;padding:0 16px;display:flex;align-items:center;gap:7px;color:#a849c2;font-size:14px}.pump-amount-module>h3 i{width:4px;height:16px;border-radius:3px;background:#c05bd8}.pump-count-row{height:44px;margin:0 12px;display:grid;grid-template-columns:repeat(7,1fr);background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fcf8fd 49px,#fcf8fd 97px)}.pump-count-row span{display:grid;place-items:center;border-bottom:1px dashed #eee;color:#666;font-size:11px}.pump-amount-chart{height:270px;margin:0 12px;position:relative;padding-top:36px;background:repeating-linear-gradient(90deg,#fff 0,#fff 48px,#fcf8fd 49px,#fcf8fd 97px)}.pump-amount-average{position:absolute;z-index:1;top:8px;left:50%;transform:translateX(-50%);padding:4px 7px;border:1px solid #c77adc;border-radius:5px;background:#fff;color:#a849c2;font-size:11px;white-space:nowrap}.pump-amount-chart svg{display:block;width:100%;height:220px;overflow:visible}.pump-line-grid{stroke:rgba(0,0,0,.055);stroke-width:1}.pump-line-path{fill:none;stroke:#c05bd8;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}.pump-amount-chart circle{fill:#fff;stroke:#c05bd8;stroke-width:2.5}.pump-amount-chart circle.is-hot{fill:#c05bd8;stroke:#fff;stroke-width:2}.pump-amount-chart text{fill:#9340a9;font:600 9px/1 Arial,sans-serif}
 
 /* All feeding events review */
 .all-record-scroll{flex:1;overflow-y:auto;padding:0 12px calc(26px + var(--my-safe-bottom,0px));overscroll-behavior:contain}.all-record-module{margin-top:10px;padding-bottom:16px;border-radius:14px;background:#fff;overflow:hidden}.all-record-module>header{height:58px;display:flex;align-items:center;justify-content:space-between}.all-record-module>header h2{width:max-content;min-width:105px;height:42px;margin:0;padding:0 18px;display:flex;align-items:center;border-radius:0 24px 24px 0;background:linear-gradient(90deg,#ff3f7f,#ff5b94);color:#fff;font-size:17px}.all-record-module>header button{height:34px;margin-right:12px;padding:0 18px;border:1px solid var(--my-brand-red);border-radius:18px;background:#fff;color:var(--my-brand-red);font:500 13px/1 inherit}
@@ -19096,6 +19122,7 @@ html,body{
 /* Keep the feeding overview card in the same visual system as other review cards. */
 .shared-feeding-card-head{min-height:62px;padding:16px;gap:8px}
 .shared-feeding-card-head>h2{margin:0;color:var(--my-text-primary);font-size:16px;font-weight:600;line-height:20px}
+.shared-feeding-card-head>.shared-feeding-card-share-state{margin-left:auto;color:var(--my-text-tertiary);font-size:12px;font-weight:400;line-height:18px;white-space:nowrap}
 .shared-feeding-card-head>.shared-feeding-card-icon{width:30px;height:30px;flex:0 0 30px;margin-left:0;padding:0;border-radius:var(--r-sm);background:var(--my-brand-soft);display:grid;place-items:center;overflow:hidden}
 .shared-feeding-card-icon img{width:24px;height:24px;display:block;object-fit:contain}
 .shared-feeding-card-summary{margin:0 16px 14px;padding:10px 12px;border:0;border-radius:var(--r-sm);background:#fafafb}
@@ -19107,6 +19134,8 @@ html,body{
 .shared-feeding-card-day>.shared-feeding-summary{margin:0;padding:12px 14px 10px;border-bottom:1px solid #f3edef;border-radius:8px 8px 0 0;background:#fff}
 .shared-feeding-card-day>.shared-feeding-ledger{margin-top:0;padding:7px 14px 12px;border-radius:0 0 8px 8px;background:#fff}
 .shared-feeding-card-day>.shared-feeding-ledger::before{left:65px}
+.shared-feeding-card-empty{height:112px;display:grid;place-items:center;color:var(--my-text-tertiary);font-size:14px}
+.shared-feeding-detail-empty{height:240px;display:grid;place-items:center;color:#999;font-size:14px}
 
 
 .home-page{
@@ -20952,6 +20981,111 @@ function getTimelineEmpty(ctx){
   return [buildTodayDayBlock(ctx || SCENE_CONTEXT.period)];
 }
 
+const BABY_DEMO_RECORDS = {
+  formula:{recordType:'formula', feedType:'配方奶', color:'#FF7A66', icon:'🍼', iconSrc:'assets/baby-feeding-icons/formula.png'},
+  breast:{recordType:'breast', feedType:'母乳', color:'#FF8EB8', icon:'🤱', iconSrc:'assets/baby-feeding-icons/breast.png'},
+  sleep:{recordType:'sleep', feedType:'睡眠', color:'#8E7BD9', icon:'🌙', iconSrc:'assets/baby-feeding-icons/sleep.png'},
+  diaper:{recordType:'diaper', feedType:'换尿布', color:'#E8A23D', icon:'🧷', iconSrc:'assets/baby-feeding-icons/diaper.png'},
+  bottle:{recordType:'bottle-breast', feedType:'瓶喂母乳', color:'#FF8EB8', icon:'🍼', iconSrc:'assets/baby-feeding-icons/bottle-breast.png'},
+  solid:{recordType:'solid-food', feedType:'辅食', color:'#F2A65A', icon:'🥣', iconSrc:'assets/baby-feeding-icons/solid-food.png'},
+  water:{recordType:'water', feedType:'喝水', color:'#5B8DEF', icon:'💧', iconSrc:'assets/baby-feeding-icons/water.png'},
+  bath:{recordType:'bath', feedType:'洗澡', color:'#5FCAD1', icon:'🛁', iconSrc:'assets/baby-feeding-icons/bath.png'},
+  play:{recordType:'play', feedType:'玩耍', color:'#F4B45F', icon:'🧸', iconSrc:'assets/baby-feeding-icons/play.png'},
+  nutrition:{recordType:'nutrition', feedType:'营养补剂', color:'#3CB88C', icon:'💊', iconSrc:'assets/baby-feeding-icons/nutrition.png'},
+};
+
+function buildBabyDemoCard(dayOffset, index, spec){
+  const [time, type, value, note, durationMinutes] = spec;
+  const base = BABY_DEMO_RECORDS[type];
+  const text = `${base.feedType}：${value}`;
+  const card = {
+    kind:'baby-feeding-card',
+    id:`baby-demo-${dayOffset}-${index}`,
+    time,
+    ...base,
+    value,
+    text,
+    railDot:'baby',
+    creator:'妈妈',
+    creatorId:'self',
+    isOwnRecord:true,
+    showCreator:false,
+    showBabyTag:true,
+  };
+  if(note) card.noteText = note;
+  if(durationMinutes) card.statDurationMinutes = durationMinutes;
+  if(type === 'breast'){
+    const right = Math.max(1, Math.floor(durationMinutes / 2));
+    const left = Math.max(1, durationMinutes - right);
+    card.leftMinutes = left;
+    card.rightMinutes = right;
+    card.detailLines = [`母乳：左${left}分钟，右${right}分钟`];
+  }
+  if(['sleep','bath','play'].includes(type)) card.detailLines = [`${base.feedType}：${value}`];
+  return card;
+}
+
+function buildBabyDemoDay(dayOffset, specs){
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() - dayOffset);
+  return {
+    type:'day',
+    id:dayOffset === 0 ? 'd-today-baby-demo' : `d-baby-demo-minus-${dayOffset}`,
+    date:formatTodayDateLabel(date),
+    weekday:WEEKDAY_ZH[date.getDay()],
+    isToday:dayOffset === 0,
+    relativeLabel:dayOffset === 1 ? '昨天' : undefined,
+    relativeDaysAgo:dayOffset,
+    items:specs.map((spec, index)=>buildBabyDemoCard(dayOffset, index, spec)),
+  };
+}
+
+function buildBabyDemoDays(){
+  return [
+    buildBabyDemoDay(3, [
+      ['01:40','sleep','3小时10分钟','夜里睡得很安稳',190],
+      ['05:10','formula','120ml','一口气喝完了'],
+      ['07:35','diaper','臭臭 黄色、膏状','晨起换尿布'],
+      ['09:20','breast','18分钟','吃完很满足',18],
+      ['11:30','water','50ml','上午喝水'],
+      ['13:05','solid','米粉，菠菜，20g','第一次尝试菠菜米粉'],
+      ['15:25','diaper','嘘嘘','尿量正常'],
+      ['17:40','formula','140ml','傍晚奶量不错'],
+      ['20:10','bath','13分钟','洗完澡很开心',13],
+      ['21:35','sleep','8小时05分钟','夜间长睡眠',485],
+    ]),
+    buildBabyDemoDay(2, [
+      ['02:05','breast','20分钟','夜奶后很快睡着',20],
+      ['05:30','formula','130ml','清晨奶'],
+      ['07:50','diaper','臭臭 墨绿色、膏状','便便状态正常'],
+      ['09:40','sleep','1小时25分钟','上午小睡',85],
+      ['11:35','bottle','90ml','瓶喂母乳'],
+      ['13:15','solid','米粉，南瓜，25g','南瓜米粉吃得不错'],
+      ['15:10','water','60ml','午后补水'],
+      ['17:25','diaper','嘘嘘','换了1片尿布'],
+      ['20:00','formula','150ml','睡前奶'],
+      ['21:20','play','30分钟','和妈妈一起玩积木',30],
+    ]),
+    buildBabyDemoDay(1, [
+      ['01:55','sleep','3小时20分钟','后半夜睡眠',200],
+      ['05:25','formula','135ml','清晨喝奶'],
+      ['07:40','diaper','臭臭 黄绿色、软便','晨起便便'],
+      ['09:35','breast','22分钟','左右两侧都吃了',22],
+      ['11:50','solid','米粉，香蕉，30g','香蕉米粉'],
+      ['14:10','sleep','1小时40分钟','午睡',100],
+      ['16:20','water','50ml','睡醒后喝水'],
+      ['18:15','diaper','嘘嘘','傍晚换尿布'],
+      ['20:30','formula','150ml','睡前喝得很好'],
+      ['21:45','nutrition','维生素D3，50mg','今日营养补剂'],
+    ]),
+    buildBabyDemoDay(0, [
+      ['02:00','breast','20分钟','凌晨母乳，左10分钟，右10分钟',20],
+      ['05:00','formula','130ml','凌晨5点喝了130毫升配方奶'],
+    ]),
+  ];
+}
+
 // ---------- Scene context ----------
 const SCENE_CONTEXT = {
   period: {
@@ -21143,91 +21277,7 @@ const TIMELINE_BLOCKS = [
       },
     ],
   },
-  {
-    type:'day', id:'d-yesterday-baby', date:'5/17', weekday:'周二', relativeLabel:'昨天',
-    items:[
-      {
-        kind:'baby-feeding-card', id:'baby-feed-0338',
-        time:'03:38',
-        recordType:'formula',
-        feedType:'配方奶',
-        value:'155ml',
-        text:'配方奶：155ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        railDot:'baby',
-        voiceQuote:'三点半喂了155',
-        creator:'爸爸',
-        creatorId:'family',
-        isOwnRecord:false,
-        familyUnread:true,
-      },
-      {
-        kind:'baby-feeding-card', id:'baby-feed-0747',
-        time:'07:47',
-        recordType:'formula',
-        feedType:'配方奶',
-        value:'145ml',
-        text:'配方奶：145ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        railDot:'baby',
-        creator:'奶奶',
-        creatorId:'family',
-        isOwnRecord:false,
-        familyUnread:true,
-      },
-      {
-        kind:'baby-feeding-card', id:'baby-feed-1510',
-        time:'15:10',
-        recordType:'diaper',
-        feedType:'换尿布',
-        value:'臭臭',
-        text:'换尿布：臭臭',
-        icon:'🧷',
-        color:'#E8A23D',
-        railDot:'baby',
-        creator:'奶奶',
-        creatorId:'family',
-        isOwnRecord:false,
-        familyUnread:true,
-      },
-      {
-        kind:'record-group', id:'e-517-fit-g',
-        primary:{
-          id:'e-517-fit', time:'18:10', kind:'text',
-          text:'去健身房练了四十分钟，出了一身汗。',
-          tags:[{ cat:'运动', icon:'run' }],
-        },
-      },
-      {
-        kind:'record-group', id:'baby-sleep-note-g',
-        primary:{
-          id:'baby-sleep-note', time:'19:32', kind:'text',
-          text:'宝宝傍晚闹觉哭了快二十分钟，抱着走了两圈才睡着。',
-          tags:[
-            { cat:'睡眠', icon:'sleep' },
-            { cat:'心情', icon:'mood' },
-          ],
-        },
-      },
-      {
-        kind:'baby-feeding-card', id:'baby-feed-2046',
-        time:'20:46',
-        recordType:'formula',
-        feedType:'配方奶',
-        value:'130ml',
-        text:'配方奶：130ml',
-        icon:'🍼',
-        color:'#FF7A66',
-        railDot:'baby',
-        voiceQuote:'刚喂了130毫升，喝得有点慢',
-        creator:'妈妈',
-        creatorId:'self',
-        isOwnRecord:true,
-      },
-    ],
-  },
+  ...buildBabyDemoDays(),
 ];
 
 // 场景二：新用户空值 — 运行时生成「今天」分日（与场景一时间轴头一致）
@@ -21534,6 +21584,7 @@ function TabBar({
   active='note',
   onChange,
   noteUnread=false,
+  reviewUnread=false,
   noteLabel='点滴',
   onNoteVoiceStart,
   onNoteVoiceMove,
@@ -21588,7 +21639,7 @@ function TabBar({
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
     {id:'note', label:noteLabel, custom:<svg className="tab-note-mic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="13" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M5 11.5a7 7 0 0 0 14 0M12 18.5v3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>, notif: noteUnread},
-    {id:'cash', label:'回顾', custom:reviewIcon},
+    {id:'cash', label:'回顾', custom:reviewIcon, notif:reviewUnread},
     {id:'me', label:'我', custom:icon('me')},
   ];
   return (
@@ -30566,48 +30617,6 @@ function BabyFeedingTimelineCard({item, isNew}){
         ) : null}
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
       </div>
-      {summary && (
-        <div className={'tl-baby-feed-summary'+(summaryOpen ? ' is-open' : '')}>
-          <button
-            type="button"
-            className="tl-baby-feed-summary-toggle"
-            aria-expanded={summaryOpen}
-            onClick={(event)=>{
-              event.stopPropagation();
-              setSummaryOpen(v=>!v);
-            }}
-          >
-            <span className="tl-baby-feed-summary-spark" aria-hidden="true">✦</span>
-            <span className="tl-baby-feed-summary-title">{summary.title || '喂养小结'}</span>
-            {summary.meta ? <span className="tl-baby-feed-summary-meta">{summary.meta}</span> : null}
-            <span className={'tl-baby-feed-summary-chev'+(summaryOpen ? ' is-open' : '')} aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M6 15l6-6 6 6"/>
-              </svg>
-            </span>
-          </button>
-          <div className={'tl-baby-feed-summary-panel'+(summaryOpen ? ' is-open' : '')} aria-hidden={!summaryOpen}>
-            {Array.isArray(summary.items) && summary.items.length ? (
-              <div className="tl-baby-feed-summary-grid">
-                {summary.items.map((row, index)=>(
-                  <span
-                    key={row.label || index}
-                    className={'tl-baby-feed-summary-item'+(row.wide ? ' is-wide' : '')}
-                  >
-                    <i style={{background: row.color || '#ff6f91'}} aria-hidden="true"/>
-                    <span className="tl-baby-feed-summary-copy">
-                      <b>{row.label}</b>
-                      <em>{row.value}</em>
-                    </span>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="tl-baby-feed-summary-text">{summary.text}</span>
-            )}
-          </div>
-        </div>
-      )}
     </article>
   );
 }
@@ -33762,6 +33771,10 @@ function ReviewWaveIcon(){
   return <svg className="review-wave-icon" viewBox="0 0 20 14" aria-hidden="true"><path d="M1 9l4-5 4 6 4-7 6 5"/></svg>;
 }
 
+function ReviewShareIcon(){
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><circle cx="5.5" cy="10" r="2.2"/><circle cx="18.5" cy="10" r="2.2"/><path d="M7.5 19v-1.4c0-2.6 2-4.6 4.5-4.6s4.5 2 4.5 4.6V19M2.5 18v-1c0-1.9 1.3-3.5 3.1-3.8M21.5 18v-1c0-1.9-1.3-3.5-3.1-3.8"/></svg>;
+}
+
 function ReviewBabyIcon({kind}){
   if(kind === 'sleep') return <svg viewBox="0 0 24 24"><path d="M20 15.2A8 8 0 0 1 8.8 4 8 8 0 1 0 20 15.2z"/></svg>;
   if(kind === 'diaper') return <svg viewBox="0 0 24 24"><path d="M5 5.5h14v5.8c0 4.5-2.7 7.2-7 7.2s-7-2.7-7-7.2z"/><path d="M5 9.5c2.2.2 3.8 1.2 4.8 3M19 9.5c-2.2.2-3.8 1.2-4.8 3"/></svg>;
@@ -34103,7 +34116,7 @@ function SupplementReviewChart(){
   );
 }
 
-function SupplementReviewCard(){
+function SupplementReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="营养补剂"
@@ -34113,6 +34126,8 @@ function SupplementReviewCard(){
       legend={<>{SUPPLEMENT_TYPES.map(type=><span className="review-legend-item is-supplement" key={type.key}><i style={{background:type.color}}></i>{type.name}</span>)}</>}
       metrics={<><ReviewMetric value="AD" unit="1粒" label="最近补充"/><ReviewMetric value="7" unit="天" label="近7日连续"/><ReviewMetric value="6" unit="次" label="近30天日均"/></>}
       more="查看完整营养补剂变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
@@ -34142,7 +34157,7 @@ function PumpReviewChart(){
   );
 }
 
-function PumpReviewCard(){
+function PumpReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="吸奶"
@@ -34152,6 +34167,8 @@ function PumpReviewCard(){
       legend={<span className="review-legend-item is-pump"><i></i>吸奶量（ml）</span>}
       metrics={<><ReviewMetric value="150" unit="ml" label="最近吸奶"/><ReviewMetric value="165" unit="ml" label="近30天平均"/><div className="review-metric"><div className="review-metric-value is-trend is-wave"><ReviewWaveIcon/>波动</div><div className="review-metric-label">整体趋势</div></div></>}
       more="查看完整吸奶变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
@@ -34348,6 +34365,8 @@ function FeedingReviewTabs({active,onChange}){
       <button type="button" className={active==='sleep'?'is-active':''} aria-current={active==='sleep'?'page':undefined} onClick={()=>onChange('sleep')}>睡眠</button>
       <button type="button" className={active==='diaper'?'is-active':''} aria-current={active==='diaper'?'page':undefined} onClick={()=>onChange('diaper')}>换尿布</button>
       <button type="button" className={active==='food'?'is-active':''} aria-current={active==='food'?'page':undefined} onClick={()=>onChange('food')}>辅食</button>
+      <button type="button" className={active==='supplement'?'is-active':''} aria-current={active==='supplement'?'page':undefined} onClick={()=>onChange('supplement')}>营养补充</button>
+      <button type="button" className={active==='pump'?'is-active':''} aria-current={active==='pump'?'page':undefined} onClick={()=>onChange('pump')}>吸奶</button>
       <button type="button" className={active==='all'?'is-active':''} aria-current={active==='all'?'page':undefined} onClick={()=>onChange('all')}>全部</button>
     </nav>
   );
@@ -34485,6 +34504,94 @@ function FoodRecordReviewContent(){
   );
 }
 
+const SUPPLEMENT_DETAIL_DAYS = [
+  {date:'10.15',events:[{time:8.1,type:'ad'},{time:8.7,type:'d3'},{time:19.2,type:'probiotic'}]},
+  {date:'10.16',events:[{time:8.4,type:'ad'},{time:12.2,type:'calcium'},{time:19.5,type:'dha'}]},
+  {date:'10.17',events:[{time:7.8,type:'ad'},{time:8.5,type:'d3'},{time:18.8,type:'iron'}]},
+  {date:'10.18',events:[{time:8.3,type:'ad'},{time:13.1,type:'probiotic'},{time:19.1,type:'zinc'}]},
+  {date:'10.19',events:[{time:7.9,type:'ad'},{time:8.6,type:'d3'},{time:12.4,type:'calcium'},{time:19.4,type:'dha'}]},
+  {date:'10.20',events:[{time:8.2,type:'ad'},{time:13.3,type:'iron'},{time:19.0,type:'zinc'}]},
+  {date:'今天',hot:true,events:[{time:8.0,type:'ad'},{time:8.8,type:'d3'},{time:18.6,type:'probiotic'}]},
+];
+
+function SupplementRecordReviewContent(){
+  const recentDays = SUPPLEMENT_REVIEW_DAYS.slice(-7);
+  const maxCount = Math.max(...recentDays.map(day=>day.items.length),1);
+  const average = recentDays.reduce((sum,day)=>sum+day.items.length,0)/recentDays.length;
+  const typeByKey = Object.fromEntries(SUPPLEMENT_TYPES.map(type=>[type.key,type]));
+  return (
+    <div className="supplement-record-scroll" aria-label="营养补充分析内容">
+      <article className="supplement-record-module">
+        <h2>时间规律</h2>
+        <div className="supplement-time-grid">
+          <div className="supplement-time-days">{SUPPLEMENT_DETAIL_DAYS.map(day=><span key={day.date}>{day.events.map((event,index)=>{const type=typeByKey[event.type];return <i key={event.type+'-'+index} style={{top:(event.time/24*100)+'%',background:type.color}} aria-label={type.name+' '+event.time.toFixed(1)+'时'}>{type.short}</i>;})}</span>)}</div>
+          <div className="supplement-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="supplement-record-dates">{SUPPLEMENT_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="supplement-detail-legend">{SUPPLEMENT_TYPES.map(type=><span key={type.key}><i style={{background:type.color}}/>{type.name}</span>)}</div>
+      </article>
+      <article className="supplement-record-module supplement-count-module">
+        <h2>补充次数</h2>
+        <h3><i/>每日总次数</h3>
+        <div className="supplement-count-chart">
+          <div className="supplement-count-average">近7天平均每天{average.toFixed(1)}次</div>
+          {recentDays.map(day=><div className="supplement-count-day" key={day.date}>{day.items.length?<><b>{day.items.length}次</b><i style={{height:Math.round(day.items.length/maxCount*150)}}/></>:<span>漏服</span>}</div>)}
+        </div>
+        <div className="supplement-record-dates">{recentDays.map(day=><span key={day.date} className={day.date==='今天'?'is-hot':''}>{day.date}</span>)}</div>
+      </article>
+    </div>
+  );
+}
+
+const PUMP_DETAIL_DAYS = [
+  {date:'10.15',events:[{time:6.8,amount:85},{time:14.2,amount:70}]},
+  {date:'10.16',events:[{time:7.1,amount:70},{time:12.0,amount:48},{time:18.2,amount:50}]},
+  {date:'10.17',events:[{time:6.6,amount:82},{time:13.8,amount:72}]},
+  {date:'10.18',events:[{time:7.4,amount:75},{time:12.8,amount:45},{time:18.0,amount:55}]},
+  {date:'10.19',events:[{time:6.9,amount:88},{time:14.5,amount:76}]},
+  {date:'10.20',events:[{time:7.2,amount:92},{time:15.1,amount:81}]},
+  {date:'今天',hot:true,events:[{time:7.0,amount:150}]},
+];
+
+function PumpRecordReviewContent(){
+  const dailyAmounts = PUMP_DETAIL_DAYS.map(day=>day.events.reduce((sum,event)=>sum+event.amount,0));
+  const dailyCounts = PUMP_DETAIL_DAYS.map(day=>day.events.length);
+  const average = Math.round(dailyAmounts.reduce((sum,amount)=>sum+amount,0)/dailyAmounts.length);
+  const W=340,H=220,padL=34,padR=12,padT=48,padB=18;
+  const minAmount=Math.min(...dailyAmounts)-10,maxAmount=Math.max(...dailyAmounts)+10;
+  const X=index=>padL+(W-padL-padR)*(index/(dailyAmounts.length-1));
+  const Y=amount=>padT+(maxAmount-amount)/(maxAmount-minAmount)*(H-padT-padB);
+  const linePoints=dailyAmounts.map((amount,index)=>[X(index),Y(amount)]);
+  return (
+    <div className="pump-record-scroll" aria-label="吸奶分析内容">
+      <article className="pump-record-module">
+        <h2>时间规律</h2>
+        <div className="pump-time-grid">
+          <div className="pump-time-days">{PUMP_DETAIL_DAYS.map(day=><span key={day.date}>{day.events.map((event,index)=><i key={index} style={{top:(event.time/24*100)+'%'}} aria-label={event.time.toFixed(1)+'时吸奶'+event.amount+'毫升'}><img src="assets/baby-feeding-icons/pump.png" alt=""/></i>)}</span>)}</div>
+          <div className="pump-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="pump-record-dates">{PUMP_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="pump-record-legend"><i><img src="assets/baby-feeding-icons/pump.png" alt=""/></i>吸奶</div>
+      </article>
+      <article className="pump-record-module pump-amount-module">
+        <h2>吸奶量</h2>
+        <h3><i/>总次数</h3>
+        <div className="pump-count-row">{dailyCounts.map((count,index)=><span key={PUMP_DETAIL_DAYS[index].date}>{count}次</span>)}</div>
+        <h3><i/>每日总量</h3>
+        <div className="pump-amount-chart">
+          <div className="pump-amount-average">近7天平均每天{average}ml</div>
+          <svg viewBox={'0 0 '+W+' '+H} preserveAspectRatio="none" role="img" aria-label="近7天每日吸奶总量折线图">
+            {[minAmount,Math.round((minAmount+maxAmount)/2),maxAmount].map(tick=><line key={tick} x1={padL} y1={Y(tick)} x2={W-padR} y2={Y(tick)} className="pump-line-grid"/>)}
+            <path d={reviewSmoothPath(linePoints)} className="pump-line-path"/>
+            {dailyAmounts.map((amount,index)=><g key={PUMP_DETAIL_DAYS[index].date}><circle cx={X(index)} cy={Y(amount)} r={index===dailyAmounts.length-1?5:4} className={index===dailyAmounts.length-1?'is-hot':''}/><text x={X(index)} y={Y(amount)-10} textAnchor="middle">{amount}ml</text></g>)}
+          </svg>
+        </div>
+        <div className="pump-record-dates">{PUMP_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+      </article>
+    </div>
+  );
+}
+
 const ALL_EVENT_ICONS = {
   direct:'assets/baby-feeding-icons/breast.png', formula:'assets/baby-feeding-icons/formula.png', breast:'assets/baby-feeding-icons/bottle-breast.png',
   diaper:'assets/baby-feeding-icons/diaper.png', food:'assets/baby-feeding-icons/solid-food.png', pump:'assets/baby-feeding-icons/pump.png',
@@ -34535,12 +34642,36 @@ function AllRecordReviewContent(){
 }
 
 function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
+  const [pickerOpen,setPickerOpen] = useState(false);
+  const pickerItems = [
+    {id:'all',label:'全部'}, {id:'feeding',label:'喂奶'}, {id:'sleep',label:'睡眠'},
+    {id:'diaper',label:'换尿布'}, {id:'food',label:'辅食'}, {id:'supplement',label:'营养补充'}, {id:'pump',label:'吸奶'},
+  ];
+  const activeLabel = pickerItems.find(item=>item.id===activeTab)?.label || '喂养';
+  const pageTitle = activeTab==='all' ? '全部' : activeLabel+'分析';
+  React.useEffect(()=>{
+    if(!pickerOpen) return undefined;
+    const handleKey = event=>{ if(event.key==='Escape') setPickerOpen(false); };
+    window.addEventListener('keydown',handleKey);
+    return ()=>window.removeEventListener('keydown',handleKey);
+  },[pickerOpen]);
+  React.useEffect(()=>{ if(!open) setPickerOpen(false); },[open]);
+  const selectTab = tab=>{ onTabChange(tab); setPickerOpen(false); };
   return (
     <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
-      <header className="feeding-detail-nav"><button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button><b>喂养分析</b><span>参考表</span></header>
-      <FeedingReviewTabs active={activeTab} onChange={onTabChange}/>
+      <header className="feeding-detail-nav">
+        <button type="button" className="feeding-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <button type="button" className={'feeding-detail-title-trigger'+(pickerOpen?' is-open':'')} aria-expanded={pickerOpen} aria-label={'切换分析类型，当前'+activeLabel} onClick={()=>setPickerOpen(value=>!value)}><b>{pageTitle}</b><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
+        <span>参考表</span>
+      </header>
+      <div className={'feeding-detail-picker'+(pickerOpen?' is-open':'')} aria-hidden={!pickerOpen}>
+        <button type="button" className="feeding-detail-picker-scrim" aria-label="关闭分析类型筛选" onClick={()=>setPickerOpen(false)}/>
+        <section className="feeding-detail-picker-panel" aria-label="选择分析类型">
+          <div>{pickerItems.map(item=><button type="button" key={item.id} className={activeTab===item.id?'is-active':''} aria-current={activeTab===item.id?'page':undefined} onClick={()=>selectTab(item.id)}>{item.label}{activeTab===item.id?<i>✓</i>:null}</button>)}</div>
+        </section>
+      </div>
       <div className="feeding-detail-content" key={activeTab}>
-        {activeTab==='sleep' ? <SleepRecordReviewContent/> : (activeTab==='diaper' ? <DiaperRecordReviewContent/> : (activeTab==='food' ? <FoodRecordReviewContent/> : (activeTab==='all' ? <AllRecordReviewContent/> : <FeedingRecordReviewContent/>)))}
+        {activeTab==='sleep' ? <SleepRecordReviewContent/> : (activeTab==='diaper' ? <DiaperRecordReviewContent/> : (activeTab==='food' ? <FoodRecordReviewContent/> : (activeTab==='supplement' ? <SupplementRecordReviewContent/> : (activeTab==='pump' ? <PumpRecordReviewContent/> : (activeTab==='all' ? <AllRecordReviewContent/> : <FeedingRecordReviewContent/>)))))}
       </div>
     </section>
   );
@@ -34926,43 +35057,6 @@ function MoodChart(){
   );
 }
 
-const SHARED_FEEDING_DAYS = [
-  {
-    date:'7月13日', weekday:'第37天', count:2,
-    summary:[['breast','母乳 1次 28min（左0min｜右28min）'],['sleep','睡眠 1次 4min']],
-    records:[
-      ['12:04','sleep','睡眠','睡了4分钟｜12:04-12:08','奶奶'],
-      ['09:41','breast','母乳','右28分钟｜09:41-10:09','妈妈'],
-    ]
-  },
-  {
-    date:'7月12日', weekday:'第36天', count:7,
-    summary:[['breast','母乳 1次 23min（左9min｜右14min）'],['formula','配方奶 2次 180ml'],['sleep','睡眠 2次 5h39min'],['diaper','换尿布 2次']],
-    records:[
-      ['21:25','formula','配方奶','50ml','奶奶','宝宝一直哭，喝的很慢'],
-      ['21:20','diaper','换尿布','臭臭 绿色、膏状','爸爸','连续3天的便便都是绿色'],
-      ['18:26','sleep','睡眠','睡了2小时49分钟｜18:26-21:15','奶奶'],
-      ['17:35','breast','母乳','右14分钟 → 左9分钟｜17:35-17:58','妈妈'],
-      ['14:05','sleep','睡眠','睡了2小时50分钟｜14:05-16:55','妈妈'],
-      ['13:18','diaper','换尿布','嘘嘘','爸爸'],
-      ['13:03','formula','配方奶','130ml','妈妈'],
-    ]
-  },
-  {
-    date:'7月10日', weekday:'第34天', count:2,
-    summary:[['breast','母乳 1次 20min（左10min｜右10min）'],['bottle','瓶喂母乳 1次 50ml']],
-    records:[
-      ['10:33','bottle','瓶喂母乳','50ml','奶奶'],
-      ['10:33','breast','母乳','左10分钟，右10分钟｜10:33-10:53','妈妈'],
-    ]
-  },
-  {
-    date:'7月9日', weekday:'第33天', count:1,
-    summary:[['sleep','睡眠 1次 3min']],
-    records:[['19:03','sleep','睡眠','睡了3分钟｜19:03-19:06','爸爸']]
-  }
-];
-
 const SHARED_FEEDING_ICONS = {
   formula:'assets/baby-feeding-icons/formula.png',
   breast:'assets/baby-feeding-icons/breast.png',
@@ -34973,35 +35067,75 @@ const SHARED_FEEDING_ICONS = {
   bottle:'assets/baby-feeding-icons/bottle-breast.png'
 };
 
+const SHARED_FEEDING_KIND_BY_LABEL = {'配方奶':'formula','母乳':'breast','瓶喂母乳':'bottle','换尿布':'diaper','睡眠':'sleep','辅食':'food','喝水':'water'};
+
+function buildSharedFeedingDaysFromTimeline(blocks){
+  if(!Array.isArray(blocks)) return [];
+  return blocks.filter(block=>block?.type==='day').map(block=>{
+    const records = (block.items || block.entries || []).filter(item=>item?.kind==='baby-feeding-card');
+    if(!records.length) return null;
+    const latestSummary = [...records].reverse().find(item=>Array.isArray(item.summary?.items))?.summary;
+    const fallbackStats = new Map();
+    records.forEach(item=>{
+      const label = item.feedType || String(item.text || '').split('：')[0] || '其他事件';
+      const row = fallbackStats.get(label) || {label,count:0,value:[]};
+      row.count += 1;
+      if(item.value) row.value.push(item.value);
+      fallbackStats.set(label,row);
+    });
+    const summary = latestSummary?.items?.map(row=>[
+      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      `${row.label} ${row.value}`
+    ]) || [...fallbackStats.values()].map(row=>[
+      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      `${row.label} ${row.count}次${row.value[0] ? ` ${row.value[0]}` : ''}`
+    ]);
+    const normalizedRecords = [...records].sort((a,b)=>String(b.time || '').localeCompare(String(a.time || ''))).map(item=>{
+      const label = item.feedType || String(item.text || '').split('：')[0] || '喂养记录';
+      let core = item.value || String(item.text || '').replace(new RegExp(`^${label}：?`),'') || '';
+      if(Array.isArray(item.detailLines) && item.detailLines.length){
+        core = item.detailLines.map(line=>String(line).replace(new RegExp(`^${label}：?`),'')).join('｜');
+      }
+      return [item.time || '--:--',SHARED_FEEDING_KIND_BY_LABEL[label] || 'formula',label,core,item.creator || '妈妈',item.noteText || item.voiceQuote || ''];
+    });
+    const rawDate = block.isToday ? '今天' : (block.relativeLabel || block.date || '');
+    const date = /^\d{1,2}\/\d{1,2}$/.test(rawDate) ? rawDate.replace('/', '月')+'日' : rawDate;
+    return {date,weekday:block.weekday || '',count:normalizedRecords.length,summary,records:normalizedRecords};
+  }).filter(Boolean).reverse();
+}
+
 function SharedFeedingSummary({items, compact=false}){
   return <div className={'shared-feeding-summary'+(compact?' is-compact':'')}>{items.map(item=><span className={'is-'+item[0]} key={item[1]}><i></i>{item[1]}</span>)}</div>;
 }
 
-function SharedFeedingReviewCard({onOpen}){
-  const day = SHARED_FEEDING_DAYS[0];
+function SharedFeedingReviewCard({onOpen,day}){
+  const previewRecords = day ? day.records.slice(0, 2) : [];
   return (
     <article className="shared-feeding-review-card" role="button" tabIndex="0" onClick={onOpen} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpen();}}}>
       <header className="shared-feeding-card-head">
         <span className="shared-feeding-card-icon"><img src="assets/feeding-review-icon.png" alt=""/></span>
         <h2>喂养记录</h2>
+        <span className="shared-feeding-card-share-state">3位亲友共享</span>
       </header>
-      <section className="shared-feeding-day shared-feeding-card-day">
+      {day ? <section className="shared-feeding-day shared-feeding-card-day">
         <header><h2>{day.date} <small>{day.weekday}</small></h2></header>
         <SharedFeedingSummary items={day.summary}/>
         <div className="shared-feeding-ledger">
-          {day.records.map(record=><div className="shared-feeding-ledger-row" key={'card'+record[0]+record[2]}>
+          {previewRecords.map(record=><div className="shared-feeding-ledger-row" key={'card'+record[0]+record[2]}>
             <time>{record[0]}</time><span className={'shared-feeding-dot is-'+record[1]}></span>
             <img src={SHARED_FEEDING_ICONS[record[1]]} alt=""/>
             <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
           </div>)}
         </div>
-      </section>
-      <div className="review-card-more shared-feeding-card-more"><div className="review-card-more-main">查看完整喂养时间轴</div><ReviewChevron/></div>
+      </section> : <div className="shared-feeding-card-empty">暂无喂养记录</div>}
+      <div className="review-card-more shared-feeding-card-more"><div className="review-card-more-main">查看完整喂养记录</div><ReviewChevron/></div>
     </article>
   );
 }
 
-function SharedFeedingTimelinePage({open,onClose}){
+function SharedFeedingTimelinePage({open,onClose,timelineBlocks}){
+  const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
+  const days = liveDays;
   useEffect(()=>{
     const phone = document.querySelector('.phone');
     phone?.classList.toggle('is-shared-feeding-open', open);
@@ -35014,7 +35148,7 @@ function SharedFeedingTimelinePage({open,onClose}){
         <div className="shared-feeding-detail-title"><b>小豆苗</b><span>3位亲友共享</span></div>
       </header>
       <div className="shared-feeding-detail-scroll">
-        {SHARED_FEEDING_DAYS.map(day=><section className="shared-feeding-day" key={day.date}>
+        {days.length ? days.map(day=><section className="shared-feeding-day" key={day.date}>
           <header><h2>{day.date} <small>{day.weekday}</small></h2><span>{day.count} 条</span></header>
           <SharedFeedingSummary items={day.summary}/>
           <div className="shared-feeding-ledger">
@@ -35024,18 +35158,19 @@ function SharedFeedingTimelinePage({open,onClose}){
               <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
             </div>)}
           </div>
-        </section>)}
+        </section>) : <div className="shared-feeding-detail-empty">暂无喂养记录</div>}
       </div>
     </section>
   );
 }
 
-function ReviewPage(){
+function ReviewPage({timelineBlocks}){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [sharedFeedingOpen, setSharedFeedingOpen] = useState(false);
   const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
   const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
+  const sharedFeedingDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -35058,11 +35193,14 @@ function ReviewPage(){
     <main className="review-page" aria-label="回顾">
       <div className="review-nav">
         <span className="review-nav-title">回顾</span>
+        <button className="review-nav-share" type="button" aria-label="查看共享喂养记录" onClick={()=>setSharedFeedingOpen(true)}>
+          <ReviewShareIcon/><span>共享</span>
+        </button>
       </div>
       <div className="review-content">
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
 
-      <SharedFeedingReviewCard onOpen={()=>setSharedFeedingOpen(true)}/>
+      <SharedFeedingReviewCard day={sharedFeedingDays[0]} onOpen={()=>setSharedFeedingOpen(true)}/>
 
       <ReviewCard
         title="月经周期"
@@ -35152,10 +35290,10 @@ function ReviewPage(){
       <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
       <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
       <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
-      <SupplementReviewCard/>
-      <PumpReviewCard/>
+      <SupplementReviewCard onFullOpen={()=>openFeedingDetail('supplement')}/>
+      <PumpReviewCard onFullOpen={()=>openFeedingDetail('pump')}/>
       </div>
-      <SharedFeedingTimelinePage open={sharedFeedingOpen} onClose={()=>setSharedFeedingOpen(false)}/>
+      <SharedFeedingTimelinePage open={sharedFeedingOpen} timelineBlocks={timelineBlocks} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
     </main>
@@ -35163,6 +35301,7 @@ function ReviewPage(){
 }
 
 window.ReviewPage = ReviewPage;
+window.SharedFeedingTimelinePage = SharedFeedingTimelinePage;
 
 </script>
 
@@ -42661,6 +42800,7 @@ function App(){
   const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
   const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
+  const [sharedFeedingHistoryOpen, setSharedFeedingHistoryOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(()=>{
     if(IS_BABY_FEEDING_DEMO){
       return 'note';
@@ -42695,6 +42835,7 @@ function App(){
   const [periodDetailDraft, setPeriodDetailDraft] = useState({});
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [noteTabUnread, setNoteTabUnread] = useState(false);
+  const [reviewTabUnread, setReviewTabUnread] = useState(false);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
@@ -42726,6 +42867,9 @@ function App(){
   const babyVoiceSuccessTimerRef = useRef(null);
   const babyFeedingQuickGuardRef = useRef({id:null, at:0});
   const voiceDemoSequenceRef = useRef(0);
+  const babyRecordCountRef = useRef((initial.timeline || []).reduce((count, block)=>(
+    count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
+  ), 0));
   const lastAutoRevealedEntryRef = useRef(null);
   useEffect(()=>{
     const openFeedingDetail = event=>{
@@ -42831,6 +42975,10 @@ function App(){
     const next = window.getSceneInitialState(demoSceneId);
     setDraft(next.draft);
     setTimeline(next.timeline);
+    babyRecordCountRef.current = (next.timeline || []).reduce((count, block)=>(
+      count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
+    ), 0);
+    setReviewTabUnread(false);
     setShowAnalysisNotice(next.showAnalysisNotice);
     setAnalysisNoticeTitle(PERIOD_START_NOTICE_TITLE);
     setAnalysisNoticeKind('period-start');
@@ -42862,6 +43010,14 @@ function App(){
   useEffect(()=>{
     resetSceneState(t.demoScene);
   }, [t.demoScene]);
+
+  useEffect(()=>{
+    const nextCount = (timeline || []).reduce((count, block)=>(
+      count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
+    ), 0);
+    if(nextCount > babyRecordCountRef.current && activeTab !== 'cash') setReviewTabUnread(true);
+    babyRecordCountRef.current = nextCount;
+  }, [timeline, activeTab]);
 
   const scrollToSisterAnalysis = ()=>{
     const tryScroll = (attempt)=>{
@@ -42980,7 +43136,10 @@ function App(){
       voice: { duration: window.formatVoiceDur?.(durSec) || '0:03' },
     });
     delete entry.aiNote;
-    pushToTimeline(entry, text);
+    setTimeline(blocks=>{
+      const dayId = blocks.find(block=>block.type === 'day' && block.isToday)?.id || 'd-today';
+      return window.appendTimelineEntry(blocks, entry, {dayId});
+    });
   };
 
   const scrollTimelineToBottom = (behavior='auto')=>{
@@ -43268,6 +43427,7 @@ function App(){
   }, []);
 
   const handleTabChange = (tab)=>{
+    if(tab === 'cash') setReviewTabUnread(false);
     if(tab === 'note' && activeTab !== 'note'){
       recordEnterModeRef.current = 'manual';
       if(periodDetailRecordEnabled || periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
@@ -43650,13 +43810,7 @@ function App(){
   };
 
   const resolveBabyFeedingTargetDayId = (blocks)=>{
-    const days = (blocks || []).filter(block=>block.type === 'day');
-    for(let i = days.length - 1; i >= 0; i -= 1){
-      if(days[i].relativeLabel === '昨天') continue;
-      const items = days[i].items || days[i].entries || [];
-      if(items.some(item=>item.kind === 'baby-feeding-card')) return days[i].id;
-    }
-    return days.find(day=>day.isToday)?.id;
+    return (blocks || []).find(block=>block.type === 'day' && block.isToday)?.id || 'd-today';
   };
 
   const formatBabyFeedingRelativeTime = (timeText, dayBlock)=>{
@@ -44364,6 +44518,13 @@ function App(){
   const ReviewPage = window.ReviewPage;
   const HomePage = window.HomePage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
+  const SharedFeedingTimelinePage = window.SharedFeedingTimelinePage;
+
+  React.useEffect(()=>{
+    const openSharedFeedingHistory = ()=>setSharedFeedingHistoryOpen(true);
+    window.addEventListener('open-shared-feeding-history', openSharedFeedingHistory);
+    return ()=>window.removeEventListener('open-shared-feeding-history', openSharedFeedingHistory);
+  },[]);
 
   const toggleSearchPage = ()=>{
     setShowSearchPage((prev)=> !prev);
@@ -44517,13 +44678,13 @@ function App(){
           if(block.type !== 'day') return block;
           const items = block.items || block.entries || [];
           const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
-          if(block.relativeLabel === '昨天'){
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const weekday = ['周日','周一','周二','周三','周四','周五','周六'][yesterday.getDay()];
+          if(Number.isInteger(block.relativeDaysAgo) && block.relativeDaysAgo > 0){
+            const historicalDate = new Date();
+            historicalDate.setDate(historicalDate.getDate() - block.relativeDaysAgo);
+            const weekday = ['周日','周一','周二','周三','周四','周五','周六'][historicalDate.getDay()];
             return {
               ...block,
-              date:`${yesterday.getMonth() + 1}/${yesterday.getDate()}`,
+              date:`${historicalDate.getMonth() + 1}/${historicalDate.getDate()}`,
               weekday,
               isToday:false,
             };
@@ -44725,8 +44886,10 @@ function App(){
       )}
 
       {showReview && ReviewPage && (
-        <ReviewPage/>
+        <ReviewPage timelineBlocks={timeline}/>
       )}
+
+      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
 
       <div
         className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}
@@ -45211,6 +45374,7 @@ function App(){
           active={activeTab}
           onChange={handleTabChange}
           noteUnread={noteTabUnread}
+          reviewUnread={reviewTabUnread}
           noteLabel="点滴"
           onNoteVoiceStart={recordLifeMode === '育儿' ? startBabyVoiceHold : undefined}
           onNoteVoiceMove={recordLifeMode === '育儿' ? moveBabyVoiceHold : undefined}

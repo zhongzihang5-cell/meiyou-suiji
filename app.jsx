@@ -411,6 +411,7 @@ function App(){
   const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
   const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
+  const [sharedFeedingHistoryOpen, setSharedFeedingHistoryOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(()=>{
     if(IS_BABY_FEEDING_DEMO){
       return 'note';
@@ -445,6 +446,7 @@ function App(){
   const [periodDetailDraft, setPeriodDetailDraft] = useState({});
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [noteTabUnread, setNoteTabUnread] = useState(false);
+  const [reviewTabUnread, setReviewTabUnread] = useState(false);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
@@ -476,6 +478,9 @@ function App(){
   const babyVoiceSuccessTimerRef = useRef(null);
   const babyFeedingQuickGuardRef = useRef({id:null, at:0});
   const voiceDemoSequenceRef = useRef(0);
+  const babyRecordCountRef = useRef((initial.timeline || []).reduce((count, block)=>(
+    count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
+  ), 0));
   const lastAutoRevealedEntryRef = useRef(null);
   useEffect(()=>{
     const openFeedingDetail = event=>{
@@ -581,6 +586,10 @@ function App(){
     const next = window.getSceneInitialState(demoSceneId);
     setDraft(next.draft);
     setTimeline(next.timeline);
+    babyRecordCountRef.current = (next.timeline || []).reduce((count, block)=>(
+      count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
+    ), 0);
+    setReviewTabUnread(false);
     setShowAnalysisNotice(next.showAnalysisNotice);
     setAnalysisNoticeTitle(PERIOD_START_NOTICE_TITLE);
     setAnalysisNoticeKind('period-start');
@@ -612,6 +621,14 @@ function App(){
   useEffect(()=>{
     resetSceneState(t.demoScene);
   }, [t.demoScene]);
+
+  useEffect(()=>{
+    const nextCount = (timeline || []).reduce((count, block)=>(
+      count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
+    ), 0);
+    if(nextCount > babyRecordCountRef.current && activeTab !== 'cash') setReviewTabUnread(true);
+    babyRecordCountRef.current = nextCount;
+  }, [timeline, activeTab]);
 
   const scrollToSisterAnalysis = ()=>{
     const tryScroll = (attempt)=>{
@@ -730,7 +747,10 @@ function App(){
       voice: { duration: window.formatVoiceDur?.(durSec) || '0:03' },
     });
     delete entry.aiNote;
-    pushToTimeline(entry, text);
+    setTimeline(blocks=>{
+      const dayId = blocks.find(block=>block.type === 'day' && block.isToday)?.id || 'd-today';
+      return window.appendTimelineEntry(blocks, entry, {dayId});
+    });
   };
 
   const scrollTimelineToBottom = (behavior='auto')=>{
@@ -1018,6 +1038,7 @@ function App(){
   }, []);
 
   const handleTabChange = (tab)=>{
+    if(tab === 'cash') setReviewTabUnread(false);
     if(tab === 'note' && activeTab !== 'note'){
       recordEnterModeRef.current = 'manual';
       if(periodDetailRecordEnabled || periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
@@ -1400,13 +1421,7 @@ function App(){
   };
 
   const resolveBabyFeedingTargetDayId = (blocks)=>{
-    const days = (blocks || []).filter(block=>block.type === 'day');
-    for(let i = days.length - 1; i >= 0; i -= 1){
-      if(days[i].relativeLabel === '昨天') continue;
-      const items = days[i].items || days[i].entries || [];
-      if(items.some(item=>item.kind === 'baby-feeding-card')) return days[i].id;
-    }
-    return days.find(day=>day.isToday)?.id;
+    return (blocks || []).find(block=>block.type === 'day' && block.isToday)?.id || 'd-today';
   };
 
   const formatBabyFeedingRelativeTime = (timeText, dayBlock)=>{
@@ -2114,6 +2129,13 @@ function App(){
   const ReviewPage = window.ReviewPage;
   const HomePage = window.HomePage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
+  const SharedFeedingTimelinePage = window.SharedFeedingTimelinePage;
+
+  React.useEffect(()=>{
+    const openSharedFeedingHistory = ()=>setSharedFeedingHistoryOpen(true);
+    window.addEventListener('open-shared-feeding-history', openSharedFeedingHistory);
+    return ()=>window.removeEventListener('open-shared-feeding-history', openSharedFeedingHistory);
+  },[]);
 
   const toggleSearchPage = ()=>{
     setShowSearchPage((prev)=> !prev);
@@ -2267,13 +2289,13 @@ function App(){
           if(block.type !== 'day') return block;
           const items = block.items || block.entries || [];
           const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
-          if(block.relativeLabel === '昨天'){
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const weekday = ['周日','周一','周二','周三','周四','周五','周六'][yesterday.getDay()];
+          if(Number.isInteger(block.relativeDaysAgo) && block.relativeDaysAgo > 0){
+            const historicalDate = new Date();
+            historicalDate.setDate(historicalDate.getDate() - block.relativeDaysAgo);
+            const weekday = ['周日','周一','周二','周三','周四','周五','周六'][historicalDate.getDay()];
             return {
               ...block,
-              date:`${yesterday.getMonth() + 1}/${yesterday.getDate()}`,
+              date:`${historicalDate.getMonth() + 1}/${historicalDate.getDate()}`,
               weekday,
               isToday:false,
             };
@@ -2475,8 +2497,10 @@ function App(){
       )}
 
       {showReview && ReviewPage && (
-        <ReviewPage/>
+        <ReviewPage timelineBlocks={timeline}/>
       )}
+
+      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
 
       <div
         className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}
@@ -2961,6 +2985,7 @@ function App(){
           active={activeTab}
           onChange={handleTabChange}
           noteUnread={noteTabUnread}
+          reviewUnread={reviewTabUnread}
           noteLabel="点滴"
           onNoteVoiceStart={recordLifeMode === '育儿' ? startBabyVoiceHold : undefined}
           onNoteVoiceMove={recordLifeMode === '育儿' ? moveBabyVoiceHold : undefined}
