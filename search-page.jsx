@@ -715,16 +715,16 @@ function XhsStyleSearchPage({
     ? (recordSpace === 'combined'
       ? [
           {
-            id:'elder',
-            title:'宝宝记录',
-            options:BABY_FEEDING_PERSON_OPTIONS,
+            id:'self',
+            title:'自己',
+            options:PERSONAL_TIMELINE_OPTIONS,
             default:'全部',
             grid:true,
           },
           {
-            id:'self',
-            title:'我的记录',
-            options:PERSONAL_TIMELINE_OPTIONS,
+            id:'elder',
+            title:'宝宝',
+            options:BABY_FEEDING_PERSON_OPTIONS,
             default:'全部',
             grid:true,
           },

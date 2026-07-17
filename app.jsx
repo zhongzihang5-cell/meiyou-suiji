@@ -14,6 +14,18 @@ const IS_BABY_FEEDING_DEMO = typeof window !== 'undefined' && (
   || new URLSearchParams(location.search).get('feeding') === '1'
 );
 
+function SharedUsersIcon({size=20}){
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="7" r="3"/>
+      <circle cx="5.5" cy="9" r="2.2"/>
+      <circle cx="18.5" cy="9" r="2.2"/>
+      <path d="M6.5 21a5.5 5.5 0 0 1 11 0"/>
+      <path d="M1.5 19a4 4 0 0 1 5.3-3.8M22.5 19a4 4 0 0 0-5.3-3.8"/>
+    </svg>
+  );
+}
+
 function inferVoiceRecordSpace(transcript, fallback='personal'){
   const text = String(transcript || '').trim();
   if(BABY_RECORD_VOICE_PATTERN.test(text)) return 'shared';
@@ -441,6 +453,10 @@ function App(){
   const [relationshipScheme, setRelationshipScheme] = useState('without-family');
   const [relationshipSchemeOpen, setRelationshipSchemeOpen] = useState(false);
   const [relationshipTransitionOpen, setRelationshipTransitionOpen] = useState(false);
+  const [relationshipPlan2TransitionOpen, setRelationshipPlan2TransitionOpen] = useState(false);
+  const [sharedTimelineView, setSharedTimelineView] = useState(false);
+  const [babyShareSyncNotice, setBabyShareSyncNotice] = useState(0);
+  const [familyShareUnread, setFamilyShareUnread] = useState(3);
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -448,6 +464,7 @@ function App(){
   const recordEnterModeRef = useRef('idle');
   const periodRecordRef = useRef(null);
   const firstRecordAnimDoneRef = useRef(false);
+  const babyShareSyncNoticeTimerRef = useRef(null);
   const moodGuideQueueRef = useRef(null);
   const dropLandRevealRef = useRef(false);
   const [firstDropAnim, setFirstDropAnim] = useState(null);
@@ -1408,6 +1425,13 @@ function App(){
     return minutes ? `${hours}小时${minutes}分钟前` : `${hours}小时前`;
   };
 
+  const notifyBabyShareSync = ()=>{
+    if(relationshipScheme !== 'with-family-2') return;
+    clearTimeout(babyShareSyncNoticeTimerRef.current);
+    setBabyShareSyncNotice(Date.now());
+    babyShareSyncNoticeTimerRef.current = setTimeout(()=>setBabyShareSyncNotice(0), 3200);
+  };
+
   const appendBabyFeedingTimelineCard = (recordType='formula')=>{
     const timestamp = Date.now();
     const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
@@ -1443,6 +1467,7 @@ function App(){
       const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
       return refreshBabyFeedingLatestMarks(next, dayId);
     });
+    notifyBabyShareSync();
   };
 
   const handleBabyFeedingQuickSelect = (item)=>{
@@ -1490,6 +1515,7 @@ function App(){
       const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
       return refreshBabyFeedingLatestMarks(next, dayId);
     });
+    notifyBabyShareSync();
     setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
   };
 
@@ -2148,8 +2174,11 @@ function App(){
   const applyRelationshipScheme = (nextScheme)=>{
     setRelationshipScheme(nextScheme);
     if(nextScheme === 'with-family') setRecordSpace('personal');
+    if(nextScheme === 'with-family-2') setFamilyShareUnread(3);
+    setSharedTimelineView(false);
     setRelationshipSchemeOpen(false);
     setRelationshipTransitionOpen(false);
+    setRelationshipPlan2TransitionOpen(false);
     setBabyFeedingPanelMode(null);
     setSearchCriteria(null);
     scrollTimelineToFirstItem('auto');
@@ -2164,7 +2193,18 @@ function App(){
       setRelationshipTransitionOpen(true);
       return;
     }
+    if(relationshipScheme === 'without-family' && nextScheme === 'with-family-2'){
+      setRelationshipPlan2TransitionOpen(true);
+      return;
+    }
     applyRelationshipScheme(nextScheme);
+  };
+  const openPlan2SharedTimeline = ()=>{
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
+    setFamilyShareUnread(0);
+    setSharedTimelineView(true);
+    requestAnimationFrame(()=>scrollTimelineToFirstItem('auto'));
   };
   const restoreSearchCloseScroll = React.useCallback(()=>{
     const saved = searchCloseScrollRef.current;
@@ -2251,7 +2291,10 @@ function App(){
         });
       const projected = normalized.map(block=>{
         if(block.type !== 'day'){
-          return relationshipScheme === 'with-family' && recordSpace === 'shared' ? null : block;
+          return (relationshipScheme === 'with-family' && recordSpace === 'shared')
+            || (relationshipScheme === 'with-family-2' && sharedTimelineView)
+            ? null
+            : block;
         }
         const items = block.items || block.entries || [];
         const visibleItems = relationshipScheme === 'without-family'
@@ -2265,6 +2308,12 @@ function App(){
                 showBabyTag:true,
               }
             : item)
+          : relationshipScheme === 'with-family-2'
+            ? sharedTimelineView
+              ? items.filter(item=>item.kind === 'baby-feeding-card').map(item=>({...item, showCreator:true, showBabyTag:false, readOnly:true}))
+              : items.filter(item=>item.kind !== 'baby-feeding-card' || item.creatorId !== 'family').map(item=>item.kind === 'baby-feeding-card'
+                ? {...item, creator:'妈妈', creatorId:'self', isOwnRecord:true, showCreator:false, showBabyTag:true}
+                : item)
           : recordSpace === 'shared'
             ? items.filter(item=>item.kind === 'baby-feeding-card').map(item=>({...item, showCreator:true, showBabyTag:false}))
             : items.filter(item=>item.kind !== 'baby-feeding-card');
@@ -2272,7 +2321,9 @@ function App(){
         return {...block, items:visibleItems, entries:undefined};
       }).filter(Boolean);
       const refreshed = refreshBabyFeedingLatestMarks(projected);
-      source = relationshipScheme === 'without-family' || recordSpace === 'shared'
+      source = relationshipScheme === 'without-family'
+        || (relationshipScheme === 'with-family' && recordSpace === 'shared')
+        || (relationshipScheme === 'with-family-2' && sharedTimelineView)
         ? refreshed
         : refreshed.map(block=>{
             if(block.type !== 'day') return block;
@@ -2287,7 +2338,7 @@ function App(){
     }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
@@ -2329,7 +2380,8 @@ function App(){
   }, [searchCriteria, restoreSearchCloseScroll]);
 
   const [homeDetailOpen, setHomeDetailOpen] = React.useState(false);
-  const showBottomTabBar = !homeDetailOpen;
+  const isPlan2SharedTimeline = relationshipScheme === 'with-family-2' && sharedTimelineView;
+  const showBottomTabBar = !homeDetailOpen && !isPlan2SharedTimeline;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
@@ -2346,7 +2398,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
-  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || relationshipTransitionOpen);
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
@@ -2370,7 +2422,7 @@ function App(){
               aria-expanded={relationshipSchemeOpen}
               onClick={()=>setRelationshipSchemeOpen(open=>!open)}
             >
-              <span>{relationshipScheme === 'with-family' ? '有亲友' : '无亲友'}</span>
+              <span>{relationshipScheme === 'with-family' ? '有亲友-方案1' : relationshipScheme === 'with-family-2' ? '有亲友-方案2' : '无亲友'}</span>
               <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
                 <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -2379,7 +2431,8 @@ function App(){
               <div className="relationship-scheme-menu" role="menu" aria-label="切换亲友方案">
                 {[
                   {id:'without-family', label:'无亲友'},
-                  {id:'with-family', label:'有亲友'},
+                  {id:'with-family-2', label:'有亲友-方案2'},
+                  {id:'with-family', label:'有亲友-方案1'},
                 ].map(option=>(
                   <button
                     key={option.id}
@@ -2525,9 +2578,22 @@ function App(){
         ) : (
         <>
         {showStreamHeader ? (
-        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (showBabyFeedingHeader && relationshipScheme === 'without-family' ? ' is-single-timeline' : '')}>
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (showBabyFeedingHeader && relationshipScheme !== 'with-family' ? ' is-single-timeline' : '') + (relationshipScheme === 'with-family-2' && !sharedTimelineView ? ' is-plan2-main' : '') + (isPlan2SharedTimeline ? ' is-shared-timeline-header' : '')}>
           {showBabyFeedingHeader ? (
-            relationshipScheme === 'without-family' ? (
+            isPlan2SharedTimeline ? (
+            <>
+              <div className="stream-actions is-left">
+                <button className="stream-action" aria-label="返回全部时间轴" type="button" onClick={()=>setSharedTimelineView(false)}>
+                  <I name="arrow-left" size={21} stroke={1.8}/>
+                </button>
+              </div>
+              <div className="stream-shared-title">
+                <h1 className="stream-title">小豆苗</h1>
+                <span>3位亲友可见</span>
+              </div>
+              <div className="stream-header-side"/>
+            </>
+            ) : relationshipScheme === 'without-family' || relationshipScheme === 'with-family-2' ? (
             <>
               <div className="stream-actions is-left">
                 <button
@@ -2538,17 +2604,25 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
-              <h1 className="stream-title">我的点滴</h1>
+              <button
+                type="button"
+                className={'stream-title stream-filter-title' + (babyFeedingPanelMode === 'all' ? ' is-open' : '')}
+                aria-label="筛选全部记录"
+                aria-expanded={babyFeedingPanelMode === 'all'}
+                onClick={toggleBabyFeedingFilterPanel}
+              >
+                <span>全部</span>
+                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
               <div className="stream-actions">
-                <button
-                  className={'stream-action' + (isSearchActive ? ' is-active' : '')}
-                  aria-label="筛选记录项"
-                  aria-pressed={babyFeedingPanelMode === 'all'}
-                  type="button"
-                  onClick={toggleBabyFeedingFilterPanel}
-                >
-                  <I name="filter" size={20} stroke={1.7}/>
-                </button>
+                {relationshipScheme === 'with-family-2' ? (
+                  <button className={'stream-action stream-share-action' + (babyShareSyncNotice ? ' is-sync-target' : '')} aria-label={familyShareUnread ? `打开小豆苗共享时间轴，${familyShareUnread}条新记录` : '打开小豆苗共享时间轴'} type="button" onClick={openPlan2SharedTimeline}>
+                    <img className="stream-share-avatar" src="assets/baby-shared-avatar.png" alt="小豆苗" />
+                    {familyShareUnread ? <span className="stream-share-unread" aria-hidden="true">{familyShareUnread}</span> : null}
+                  </button>
+                ) : null}
               </div>
             </>
             ) : (
@@ -2616,11 +2690,24 @@ function App(){
           )}
         </div>
         ) : null}
+        {babyShareSyncNotice && !isPlan2SharedTimeline ? (
+          <div key={babyShareSyncNotice} className="baby-share-sync-notice" role="status" aria-live="polite">
+            <span className="baby-share-sync-notice-icon" aria-hidden="true"><SharedUsersIcon size={18}/></span>
+            <span><b>小豆苗的记录已同步</b><em>3位亲友可见</em></span>
+          </div>
+        ) : null}
+        {relationshipScheme === 'with-family-2' && !isPlan2SharedTimeline && familyShareUnread > 0 && !babyShareSyncNotice ? (
+          <button type="button" className="family-share-update-notice" onClick={openPlan2SharedTimeline}>
+            <span className="family-share-update-icon" aria-hidden="true"><SharedUsersIcon size={18}/></span>
+            <span className="family-share-update-copy"><b>亲友新增{familyShareUnread}条小豆苗记录</b><em>爸爸、奶奶刚刚记录了喂养情况</em></span>
+            <span className="family-share-update-arrow" aria-hidden="true" />
+          </button>
+        ) : null}
         <div
           className={
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
-            + (showBabyFeedingQuickStrip ? ' has-baby-feeding-strip' : '')
+            + (showBabyFeedingQuickStrip && !isPlan2SharedTimeline ? ' has-baby-feeding-strip' : '')
             + (showBabyFeedingHeader && relationshipScheme === 'with-family' ? ' has-record-space-segment' : '')
             + (babyFeedingDetailOpen ? ' is-detail-scroll-locked' : '')
           }
@@ -2656,7 +2743,7 @@ function App(){
           )}
         </div>
 
-        {!voiceTranscribe && (
+        {!voiceTranscribe && !isPlan2SharedTimeline && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -2684,7 +2771,7 @@ function App(){
           <XhsStyleSearchPage
             intent={babyFeedingPanelMode}
             variant="baby-feeding"
-            recordSpace={relationshipScheme === 'without-family' ? 'combined' : recordSpace}
+            recordSpace={relationshipScheme === 'without-family' || relationshipScheme === 'with-family-2' ? 'combined' : recordSpace}
             activeFilter={searchCriteria?.personPanelFilter}
             onClose={closeBabyFeedingPanel}
             onSearch={handleTimelineSearch}
@@ -2741,6 +2828,42 @@ function App(){
         </div>
       ) : null}
 
+      {relationshipPlan2TransitionOpen ? (
+        <div className="relationship-transition-overlay" role="presentation">
+          <section className="relationship-transition-sheet" role="dialog" aria-modal="true" aria-labelledby="relationship-plan2-transition-title">
+            <div className="relationship-transition-handle" aria-hidden="true" />
+            <button type="button" className="relationship-transition-close" aria-label="关闭" onClick={()=>setRelationshipPlan2TransitionOpen(false)}>
+              <I name="close" size={19} stroke={1.8}/>
+            </button>
+            <header className="relationship-transition-header">
+              <span className="relationship-transition-privacy-icon" aria-hidden="true">共享空间</span>
+              <h2 id="relationship-plan2-transition-title">已为小豆苗创建共享时间轴</h2>
+              <p>亲友加入后，宝宝记录会集中到独立的共享时间轴，你的个人记录仍安全保留在“全部”中。</p>
+            </header>
+            <div className="relationship-transition-spaces">
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-personal" aria-hidden="true"><I name="user" size={23} stroke={1.8}/></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>全部</strong><span>你的个人视图</span></div>
+                  <p>个人记录，以及你记录的宝宝动态</p>
+                </div>
+              </div>
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-baby" aria-hidden="true"><SharedUsersIcon size={23}/></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>小豆苗</strong><span>与3位亲友共享</span></div>
+                  <p>你和亲友记录的全部宝宝动态</p>
+                </div>
+              </div>
+            </div>
+            <p className="relationship-transition-note">亲友只能进入小豆苗，无法查看你的月经、症状、心情等个人记录</p>
+            <button type="button" className="relationship-transition-confirm" onClick={()=>applyRelationshipScheme('with-family-2')}>
+              知道了，进入全部
+            </button>
+          </section>
+        </div>
+      ) : null}
+
       {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note})=>{
         if(formulaDetailEntry.isQuickDraft){
           const {isQuickDraft, ...draftEntry}=formulaDetailEntry;
@@ -2756,8 +2879,9 @@ function App(){
             const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
             return refreshBabyFeedingLatestMarks(next,dayId);
           });
+          notifyBabyShareSync();
           setFormulaDetailEntry(null);
-          pushToast({text:'已保存',placement:'center'});
+          if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});
           setTimeout(()=>scrollTimelineToBottom('smooth'),80);
           return;
         }
@@ -2780,7 +2904,8 @@ function App(){
             const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
             return refreshBabyFeedingLatestMarks(next,dayId);
           });
-          setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});setTimeout(()=>scrollTimelineToBottom('smooth'),80);return;
+          notifyBabyShareSync();
+          setBreastDetailEntry(null);if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});setTimeout(()=>scrollTimelineToBottom('smooth'),80);return;
         }
         setTimeline(blocks=>blocks.map(block=>{
           if(block.type!=='day') return block;
@@ -2835,8 +2960,9 @@ function App(){
             const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),draftEntry,{dayId});
             return refreshBabyFeedingLatestMarks(next,dayId);
           });
+          notifyBabyShareSync();
           setSleepDetailEntry(null);
-          pushToast({text:'已保存',placement:'center'});
+          if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});
           setTimeout(()=>scrollTimelineToBottom('smooth'),80);
           return;
         }
@@ -2845,8 +2971,9 @@ function App(){
           const items=(block.items||block.entries||[]).map(item=>item.id===sleepDetailEntry.id?finalEntry:item);
           return {...block,items,entries:undefined};
         })));
+        if(sleepDetailEntry.sleeping) notifyBabyShareSync();
         setSleepDetailEntry(null);
-        pushToast({text:'已保存',placement:'center'});
+        if(relationshipScheme !== 'with-family-2' || !sleepDetailEntry.sleeping) pushToast({text:'已保存',placement:'center'});
       }}/>:null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (

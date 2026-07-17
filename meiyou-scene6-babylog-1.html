@@ -12,7 +12,7 @@
 <title>美柚 · 场景六 · 宝宝喂养记录 · 方案一</title>
 <!--
   宝宝喂养记录：点滴时间轴与快捷记录面板
-  生成日期: 2026-07-16
+  生成日期: 2026-07-17
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -4527,6 +4527,30 @@ html,body{
   min-width:0;
   padding:0 8px;
 }
+.stream-header.is-baby-feeding-header.is-single-timeline.is-plan2-main{
+  grid-template-columns:32px minmax(0,1fr) 44px;
+}
+.stream-header.is-baby-feeding-header.is-plan2-main .stream-actions{
+  width:44px;
+  gap:0;
+}
+.stream-filter-title{display:inline-flex;align-items:center;justify-content:center;justify-self:center;gap:5px;width:auto;padding:0 8px;border:0;background:transparent;font-family:inherit;cursor:pointer}.stream-filter-title svg{flex:0 0 auto;color:#777;transition:transform .18s ease}.stream-filter-title.is-open svg{transform:rotate(180deg)}
+.baby-share-sync-notice{position:absolute;top:56px;left:50%;z-index:24;display:flex;align-items:center;min-width:238px;max-width:calc(100% - 40px);min-height:52px;gap:10px;padding:8px 14px;border:1px solid rgba(255,79,136,.14);border-radius:8px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(49,39,52,.14);transform:translateX(-50%);transform-origin:center;animation:babyShareSyncNotice 3.2s cubic-bezier(.22,.8,.32,1) both;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.baby-share-sync-notice-icon{display:grid;flex:0 0 34px;width:34px;height:34px;place-items:center;border-radius:50%;color:#ff4f88;background:#fff0f5}.baby-share-sync-notice-icon svg{display:block;width:18px;height:18px;stroke:currentColor}.baby-share-sync-notice>span:last-child{display:flex;min-width:0;flex-direction:column;gap:3px}.baby-share-sync-notice b{color:#37343a;font-size:14px;font-weight:600;line-height:1.2}.baby-share-sync-notice em{color:#8b8790;font-size:11px;font-style:normal;line-height:1.2}.stream-share-action.is-sync-target{animation:sharedSyncTargetPulse .5s ease 2.68s both}@keyframes babyShareSyncNotice{0%{opacity:0;transform:translate(-50%,-8px) scale(.98)}8%,78%{opacity:1;transform:translate(-50%,0) scale(1)}88%{opacity:1;transform:translate(calc(-50% + 70px),-18px) scale(.72)}100%{opacity:.08;transform:translate(calc(-50% + 142px),-46px) scale(.18)}}@keyframes sharedSyncTargetPulse{0%,100%{color:#4f4f4f;transform:scale(1)}45%{color:#ff4f88;transform:scale(1.18)}}
+.stream-header.is-baby-feeding-header .stream-share-action{
+  position:relative;
+  flex-direction:column;
+  gap:0;
+  font-size:9px;
+  line-height:1;
+}
+.stream-header.is-baby-feeding-header .stream-share-action svg{
+  width:18px;
+  height:18px;
+}
+.stream-header.is-baby-feeding-header .stream-share-action span{
+  margin-top:1px;
+  white-space:nowrap;
+}
 .suiji-stream.has-record-space-segment{
   padding-top:64px;
 }
@@ -4574,7 +4598,7 @@ html,body{
   position:absolute;
   top:35px;
   left:50%;
-  width:116px;
+  width:148px;
   overflow:hidden;
   padding:4px;
   border:0.5px solid rgba(0,0,0,0.08);
@@ -7444,6 +7468,11 @@ html,body{
 .baby-sleep-foot{padding:8px 18px calc(12px + var(--my-safe-bottom));background:transparent}.baby-sleep-foot button{width:100%;height:50px;border:0;border-radius:25px;background:#b86cff;color:#fff;font:600 22px/1 inherit}
 
 .relationship-transition-overlay{position:fixed;inset:0;z-index:760;display:flex;align-items:flex-end;width:100%;max-width:390px;margin:0 auto;background:rgba(31,29,34,.34);animation:relationshipTransitionFade .2s ease-out}
+.baby-share-sync-notice{width:max-content;min-width:0;gap:9px;padding-left:12px;padding-right:12px}
+.relationship-transition-space-icon.is-baby svg{display:block;color:#ff6c9d;stroke:currentColor}
+.stream-share-action .stream-share-unread{position:absolute;top:1px;right:-2px;display:grid;min-width:15px;height:15px;margin:0;padding:0 4px;place-items:center;border:2px solid var(--my-bg);border-radius:9px;color:#fff;background:#ff4f88;font-size:9px;font-weight:600;line-height:1;box-sizing:border-box}.family-share-update-notice{position:absolute;top:56px;left:16px;right:16px;z-index:23;display:flex;align-items:center;min-height:58px;gap:10px;padding:8px 12px;border:1px solid rgba(255,79,136,.14);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(49,39,52,.12);color:inherit;font-family:inherit;text-align:left;animation:familyShareUpdateIn .24s ease-out both;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.family-share-update-icon{display:grid;flex:0 0 36px;width:36px;height:36px;place-items:center;border-radius:50%;color:#ff4f88;background:#fff0f5}.family-share-update-icon svg{display:block;stroke:currentColor}.family-share-update-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}.family-share-update-copy b{overflow:hidden;color:#37343a;font-size:13px;font-weight:600;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.family-share-update-copy em{overflow:hidden;color:#8b8790;font-size:10px;font-style:normal;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.family-share-update-action{flex:0 0 auto;color:#ff4f88;font-size:12px;font-weight:600}@keyframes familyShareUpdateIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.stream-share-avatar{display:block;width:30px;height:30px;border:2px solid #fff;border-radius:50%;object-fit:cover;box-shadow:0 1px 5px rgba(61,48,57,.2);box-sizing:border-box}.family-share-update-arrow{position:absolute;top:-11px;right:14px;width:22px;height:12px;pointer-events:none}.family-share-update-arrow::before,.family-share-update-arrow::after{content:'';position:absolute;left:50%;width:0;height:0;transform:translateX(-50%);border-left:11px solid transparent;border-right:11px solid transparent}.family-share-update-arrow::before{top:0;border-bottom:12px solid rgba(255,79,136,.22)}.family-share-update-arrow::after{top:2px;border-left-width:9px;border-right-width:9px;border-bottom:10px solid #fff}
+.stream-shared-title{display:flex;min-width:0;align-items:center;justify-content:center;flex-direction:column;gap:1px}.stream-shared-title .stream-title{flex:0 0 auto;line-height:1.15}.stream-shared-title span{color:#9a969e;font-size:9.5px;line-height:1.2;white-space:nowrap}
 .relationship-transition-sheet{position:relative;width:100%;min-height:58%;padding:12px 24px calc(24px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -8px 30px rgba(42,35,46,.12);animation:relationshipTransitionRise .28s cubic-bezier(.22,.8,.32,1)}
 .relationship-transition-handle{width:42px;height:5px;margin:0 auto 8px;border-radius:3px;background:#dedde2}
 .relationship-transition-close{position:absolute;top:18px;right:18px;display:grid;width:34px;height:34px;padding:0;place-items:center;border:0;border-radius:50%;color:#77747b;background:#f5f4f6}
@@ -18285,6 +18314,9 @@ html,body{
   background:rgba(255,77,136,0.11);
   color:var(--my-brand-red);
 }
+.review-card-icon.is-supplement{background:rgba(84,189,130,.12);color:#42a873}
+.review-card-icon.is-pump{background:rgba(192,91,216,0.12);color:#a849c2}
+.review-pump-icon{width:20px;height:20px;display:block;object-fit:contain}
 .review-card-icon svg{
   width:18px;
   height:18px;
@@ -18378,6 +18410,11 @@ html,body{
 .review-legend-item.is-feeding-breast i{background:#ff8fb3}
 .review-legend-item.is-feeding-formula i{background:#ff9a45}
 .review-legend-item.is-feeding-direct i{border-top:2px solid var(--my-brand-red)}
+.review-card:has(.review-card-icon.is-supplement) .review-legend{flex-wrap:wrap;gap:6px 10px;line-height:14px}
+.review-legend-item.is-supplement i{width:7px;height:7px;border-radius:50%}
+.review-card:has(.review-card-icon.is-supplement) .review-metric:first-child .review-metric-value{font-size:14px;white-space:nowrap}
+.review-card:has(.review-card-icon.is-supplement) .review-metric:first-child .review-metric-unit{font-size:10px}
+.review-legend-item.is-pump i{border-top:2px solid #c05bd8}
 
 /* Feeding record review — restored from the reference layout */
 .feeding-detail-page{position:absolute;inset:0;z-index:126;display:flex;flex-direction:column;background:linear-gradient(180deg,#ffdceb 0,#fff 165px,#f4f4f7 360px);visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}.feeding-detail-page.is-sleep{background:linear-gradient(180deg,#f8e6ff 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-diaper{background:linear-gradient(180deg,#ffe7dc 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-food{background:linear-gradient(180deg,#fff0cf 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-all{background:linear-gradient(180deg,#ffe2ef 0,#fff 165px,#f4f4f7 360px)}.feeding-detail-page.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
@@ -18517,6 +18554,8 @@ html,body{
   font-size:15px;
   color:var(--my-warning);
 }
+.review-metric-value.is-wave{display:flex;align-items:center;justify-content:center;gap:4px}
+.review-wave-icon{width:17px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .review-metric-value.is-diet-trend{
   font-size:15px;
   color:var(--my-text-primary);
@@ -20434,7 +20473,7 @@ const TWEAK_DEFAULTS = {
   "demoScene": "note-quick-record"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-window.__BUILD__ = "2026-07-16-nomask";
+window.__BUILD__ = "2026-07-17-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 window.__BABY_FEEDING_MODE = true;
 </script>
@@ -20570,6 +20609,15 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
       <svg {...common}>
         <circle cx="12" cy="8" r="4"/>
         <path d="M4 21a8 8 0 0 1 16 0"/>
+      </svg>
+    );
+    case 'users': return (
+      <svg {...common}>
+        <circle cx="12" cy="7" r="3"/>
+        <circle cx="5.5" cy="9" r="2.2"/>
+        <circle cx="18.5" cy="9" r="2.2"/>
+        <path d="M6.5 21a5.5 5.5 0 0 1 11 0"/>
+        <path d="M1.5 19a4 4 0 0 1 5.3-3.8M22.5 19a4 4 0 0 0-5.3-3.8"/>
       </svg>
     );
     case 'pen': return (
@@ -30378,7 +30426,7 @@ function BabyFeedingTimelineCard({item, isNew}){
     setSummaryOpen(item.summaryOpen !== false);
   }, [item.id, item.summaryOpen]);
 
-  const canOpenFeedingDetail = title === '配方奶' || title === '母乳' || title === '睡眠';
+  const canOpenFeedingDetail = !item.readOnly && (title === '配方奶' || title === '母乳' || title === '睡眠');
   const openFeedingDetail = ()=>{
     if(!canOpenFeedingDetail) return;
     window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {detail:item}));
@@ -33399,16 +33447,16 @@ function XhsStyleSearchPage({
     ? (recordSpace === 'combined'
       ? [
           {
-            id:'elder',
-            title:'宝宝记录',
-            options:BABY_FEEDING_PERSON_OPTIONS,
+            id:'self',
+            title:'自己',
+            options:PERSONAL_TIMELINE_OPTIONS,
             default:'全部',
             grid:true,
           },
           {
-            id:'self',
-            title:'我的记录',
-            options:PERSONAL_TIMELINE_OPTIONS,
+            id:'elder',
+            title:'宝宝',
+            options:BABY_FEEDING_PERSON_OPTIONS,
             default:'全部',
             grid:true,
           },
@@ -33628,6 +33676,14 @@ function ReviewMoodIcon(){
 
 function ReviewDietIcon(){
   return <svg viewBox="0 0 24 24"><path d="M6 3v7a3 3 0 0 0 6 0V3"/><path d="M9 3v18"/><path d="M17 3c-1.5 1-2.5 3-2.5 5.5S15.5 13 17 14v7"/></svg>;
+}
+
+function ReviewSupplementIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M8.2 5.2a4.2 4.2 0 0 1 5.9 0l4.7 4.7a4.2 4.2 0 0 1-5.9 5.9l-4.7-4.7a4.2 4.2 0 0 1 0-5.9z"/><path d="M10.6 13.5l5.9-5.9"/></svg>;
+}
+
+function ReviewWaveIcon(){
+  return <svg className="review-wave-icon" viewBox="0 0 20 14" aria-hidden="true"><path d="M1 9l4-5 4 6 4-7 6 5"/></svg>;
 }
 
 function ReviewBabyIcon({kind}){
@@ -33918,6 +33974,108 @@ function FoodReviewCard({onFullOpen}){
       more="查看完整辅食变化"
       onOpen={onFullOpen}
       onMore={onFullOpen}
+    />
+  );
+}
+
+const SUPPLEMENT_TYPES = [
+  {key:'ad', name:'AD', short:'AD', color:'#ff7f9f'},
+  {key:'d3', name:'D3', short:'D3', color:'#f3a638'},
+  {key:'probiotic', name:'益生菌', short:'益', color:'#54bd82'},
+  {key:'calcium', name:'钙', short:'钙', color:'#6f9ee8'},
+  {key:'iron', name:'铁', short:'铁', color:'#e26a62'},
+  {key:'zinc', name:'锌', short:'锌', color:'#8b75d1'},
+  {key:'dha', name:'DHA', short:'DHA', color:'#42aeb7'},
+];
+
+const SUPPLEMENT_REVIEW_DAYS = Array.from({length:30}, (_item,index)=>{
+  const patterns = [
+    ['ad','d3','probiotic'], ['ad','calcium','dha'], ['ad','d3','iron'],
+    ['ad','probiotic','zinc'], ['ad','d3','calcium','dha'], ['ad','iron','zinc'],
+  ];
+  const missed = index === 6 || index === 18;
+  return {
+    date:index === 29 ? '今天' : (index < 10 ? '9.' + (22 + index) : '10.' + (index - 9)),
+    items:missed ? [] : patterns[index % patterns.length],
+    missed,
+  };
+});
+
+function SupplementReviewChart(){
+  const W=340,H=176,padL=42,padR=10,padT=10,padB=27;
+  const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
+  const band=(x1-x0)/SUPPLEMENT_REVIEW_DAYS.length;
+  const row=(y1-y0)/SUPPLEMENT_TYPES.length;
+  const X=index=>x0+band*index+band/2;
+  const Y=index=>y0+row*index+row/2;
+  const dateMarks={0:true,7:true,14:true,21:true,29:true};
+  const supplementRuns=SUPPLEMENT_TYPES.map(type=>{
+    const activeIndexes=SUPPLEMENT_REVIEW_DAYS.reduce((indexes,day,index)=>day.items.includes(type.key)?indexes.concat(index):indexes,[]);
+    return activeIndexes.reduce((runs,index)=>{
+      const current=runs[runs.length-1];
+      if(current&&index===current[current.length-1]+1) current.push(index);
+      else runs.push([index]);
+      return runs;
+    },[]);
+  });
+  return (
+    <svg viewBox="0 0 340 176" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天营养补剂服用类型与漏服记录图">
+      {SUPPLEMENT_TYPES.map((type,index)=><React.Fragment key={type.key}><line x1={x0} y1={Y(index)} x2={x1} y2={Y(index)} stroke="rgba(0,0,0,.045)" strokeWidth="1"/><text x={x0-6} y={Y(index)+3} textAnchor="end" fontSize="8.5" fill="#9999a0" fontFamily="PingFang SC">{type.short}</text></React.Fragment>)}
+      {SUPPLEMENT_TYPES.map((type,typeIndex)=>supplementRuns[typeIndex].map((run,runIndex)=><line key={type.key+'-'+runIndex} x1={X(run[0])-band*.28} y1={Y(typeIndex)} x2={X(run[run.length-1])+band*.28} y2={Y(typeIndex)} stroke={type.color} strokeWidth="4.6" strokeLinecap="round"/>))}
+      {SUPPLEMENT_REVIEW_DAYS.map((day,dayIndex)=>dateMarks[dayIndex]?<text key={day.date} x={X(dayIndex)} y={H-8} textAnchor={dayIndex===0?'start':(dayIndex===29?'end':'middle')} fontSize="9" fontWeight={dayIndex===29?'600':'400'} fill={dayIndex===29?'#e86686':'#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>:null)}
+    </svg>
+  );
+}
+
+function SupplementReviewCard(){
+  return (
+    <ReviewCard
+      title="营养补剂"
+      iconClass="is-supplement"
+      icon={<ReviewSupplementIcon/>}
+      chart={<SupplementReviewChart/>}
+      legend={<>{SUPPLEMENT_TYPES.map(type=><span className="review-legend-item is-supplement" key={type.key}><i style={{background:type.color}}></i>{type.name}</span>)}</>}
+      metrics={<><ReviewMetric value="AD" unit="1粒" label="最近补充"/><ReviewMetric value="7" unit="天" label="近7日连续"/><ReviewMetric value="6" unit="次" label="近30天日均"/></>}
+      more="查看完整营养补剂变化"
+    />
+  );
+}
+
+const PUMP_REVIEW_DATA = [
+  148,156,162,158,171,166,174,169,160,155,164,172,168,176,170,
+  163,159,167,173,165,178,171,166,160,169,174,168,162,156,150,
+];
+
+function PumpReviewChart(){
+  const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
+  const x0 = padL, x1 = W-padR, y1 = H-padB;
+  const yMin = 120, yMax = 190;
+  const X = index=>x0+(x1-x0)*(index/(PUMP_REVIEW_DATA.length-1));
+  const Y = value=>y1-(value-yMin)/(yMax-yMin)*(y1-padT);
+  const points = PUMP_REVIEW_DATA.map((value,index)=>[X(index),Y(value)]);
+  const dateMarks = [{index:0,label:'9.22'},{index:7,label:'9.29'},{index:14,label:'10.6'},{index:21,label:'10.13'},{index:29,label:'今天'}];
+  return (
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天吸奶量折线图">
+      {[140,160,180].map(tick=><React.Fragment key={tick}><line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/><text x={x0-5} y={Y(tick)+3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text></React.Fragment>)}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+      <path d={reviewSmoothPath(points)} fill="none" stroke="#c05bd8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {PUMP_REVIEW_DATA.map((value,index)=><circle key={index} cx={X(index)} cy={Y(value)} r={index===PUMP_REVIEW_DATA.length-1?4:2.2} fill="#c05bd8" stroke={index===PUMP_REVIEW_DATA.length-1?'#fff':'none'} strokeWidth="2"/>)}
+      <text x={X(29)-3} y={Y(PUMP_REVIEW_DATA[29])-9} textAnchor="end" fontSize="9.5" fontWeight="600" fill="#a849c2" fontFamily="PingFang SC">150ml</text>
+      {dateMarks.map(mark=><text key={mark.index} x={X(mark.index)} y={H-8} textAnchor={mark.index===0?'start':(mark.index===29?'end':'middle')} fontSize="9" fontWeight={mark.index===29?'600':'400'} fill={mark.index===29?'#a849c2':'#bbbbbf'} fontFamily="PingFang SC">{mark.label}</text>)}
+    </svg>
+  );
+}
+
+function PumpReviewCard(){
+  return (
+    <ReviewCard
+      title="吸奶"
+      iconClass="is-pump"
+      icon={<img className="review-pump-icon" src="assets/baby-feeding-icons/pump.png" alt=""/>}
+      chart={<PumpReviewChart/>}
+      legend={<span className="review-legend-item is-pump"><i></i>吸奶量（ml）</span>}
+      metrics={<><ReviewMetric value="150" unit="ml" label="最近吸奶"/><ReviewMetric value="165" unit="ml" label="近30天平均"/><div className="review-metric"><div className="review-metric-value is-trend is-wave"><ReviewWaveIcon/>波动</div><div className="review-metric-label">整体趋势</div></div></>}
+      more="查看完整吸奶变化"
     />
   );
 }
@@ -34811,6 +34969,8 @@ function ReviewPage(){
       <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
       <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
       <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
+      <SupplementReviewCard/>
+      <PumpReviewCard/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
@@ -35929,7 +36089,7 @@ function DockPublisher({
                       </div>
                     </section>
                     <section className="dock-feeding-group" aria-labelledby="dock-feeding-mine-title">
-                      <h3 id="dock-feeding-mine-title" className="dock-feeding-group-title">我的</h3>
+                      <h3 id="dock-feeding-mine-title" className="dock-feeding-group-title">自己</h3>
                       <div className="dock-feeding-quick-scroll">
                         {feedingMineItems.map(renderFeedingQuickItem)}
                       </div>
@@ -41920,6 +42080,18 @@ const IS_BABY_FEEDING_DEMO = typeof window !== 'undefined' && (
   || new URLSearchParams(location.search).get('feeding') === '1'
 );
 
+function SharedUsersIcon({size=20}){
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="7" r="3"/>
+      <circle cx="5.5" cy="9" r="2.2"/>
+      <circle cx="18.5" cy="9" r="2.2"/>
+      <path d="M6.5 21a5.5 5.5 0 0 1 11 0"/>
+      <path d="M1.5 19a4 4 0 0 1 5.3-3.8M22.5 19a4 4 0 0 0-5.3-3.8"/>
+    </svg>
+  );
+}
+
 function inferVoiceRecordSpace(transcript, fallback='personal'){
   const text = String(transcript || '').trim();
   if(BABY_RECORD_VOICE_PATTERN.test(text)) return 'shared';
@@ -42347,6 +42519,10 @@ function App(){
   const [relationshipScheme, setRelationshipScheme] = useState('without-family');
   const [relationshipSchemeOpen, setRelationshipSchemeOpen] = useState(false);
   const [relationshipTransitionOpen, setRelationshipTransitionOpen] = useState(false);
+  const [relationshipPlan2TransitionOpen, setRelationshipPlan2TransitionOpen] = useState(false);
+  const [sharedTimelineView, setSharedTimelineView] = useState(false);
+  const [babyShareSyncNotice, setBabyShareSyncNotice] = useState(0);
+  const [familyShareUnread, setFamilyShareUnread] = useState(3);
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -42354,6 +42530,7 @@ function App(){
   const recordEnterModeRef = useRef('idle');
   const periodRecordRef = useRef(null);
   const firstRecordAnimDoneRef = useRef(false);
+  const babyShareSyncNoticeTimerRef = useRef(null);
   const moodGuideQueueRef = useRef(null);
   const dropLandRevealRef = useRef(false);
   const [firstDropAnim, setFirstDropAnim] = useState(null);
@@ -43314,6 +43491,13 @@ function App(){
     return minutes ? `${hours}小时${minutes}分钟前` : `${hours}小时前`;
   };
 
+  const notifyBabyShareSync = ()=>{
+    if(relationshipScheme !== 'with-family-2') return;
+    clearTimeout(babyShareSyncNoticeTimerRef.current);
+    setBabyShareSyncNotice(Date.now());
+    babyShareSyncNoticeTimerRef.current = setTimeout(()=>setBabyShareSyncNotice(0), 3200);
+  };
+
   const appendBabyFeedingTimelineCard = (recordType='formula')=>{
     const timestamp = Date.now();
     const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
@@ -43349,6 +43533,7 @@ function App(){
       const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
       return refreshBabyFeedingLatestMarks(next, dayId);
     });
+    notifyBabyShareSync();
   };
 
   const handleBabyFeedingQuickSelect = (item)=>{
@@ -43396,6 +43581,7 @@ function App(){
       const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
       return refreshBabyFeedingLatestMarks(next, dayId);
     });
+    notifyBabyShareSync();
     setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
   };
 
@@ -44054,8 +44240,11 @@ function App(){
   const applyRelationshipScheme = (nextScheme)=>{
     setRelationshipScheme(nextScheme);
     if(nextScheme === 'with-family') setRecordSpace('personal');
+    if(nextScheme === 'with-family-2') setFamilyShareUnread(3);
+    setSharedTimelineView(false);
     setRelationshipSchemeOpen(false);
     setRelationshipTransitionOpen(false);
+    setRelationshipPlan2TransitionOpen(false);
     setBabyFeedingPanelMode(null);
     setSearchCriteria(null);
     scrollTimelineToFirstItem('auto');
@@ -44070,7 +44259,18 @@ function App(){
       setRelationshipTransitionOpen(true);
       return;
     }
+    if(relationshipScheme === 'without-family' && nextScheme === 'with-family-2'){
+      setRelationshipPlan2TransitionOpen(true);
+      return;
+    }
     applyRelationshipScheme(nextScheme);
+  };
+  const openPlan2SharedTimeline = ()=>{
+    setBabyFeedingPanelMode(null);
+    setSearchCriteria(null);
+    setFamilyShareUnread(0);
+    setSharedTimelineView(true);
+    requestAnimationFrame(()=>scrollTimelineToFirstItem('auto'));
   };
   const restoreSearchCloseScroll = React.useCallback(()=>{
     const saved = searchCloseScrollRef.current;
@@ -44157,7 +44357,10 @@ function App(){
         });
       const projected = normalized.map(block=>{
         if(block.type !== 'day'){
-          return relationshipScheme === 'with-family' && recordSpace === 'shared' ? null : block;
+          return (relationshipScheme === 'with-family' && recordSpace === 'shared')
+            || (relationshipScheme === 'with-family-2' && sharedTimelineView)
+            ? null
+            : block;
         }
         const items = block.items || block.entries || [];
         const visibleItems = relationshipScheme === 'without-family'
@@ -44171,6 +44374,12 @@ function App(){
                 showBabyTag:true,
               }
             : item)
+          : relationshipScheme === 'with-family-2'
+            ? sharedTimelineView
+              ? items.filter(item=>item.kind === 'baby-feeding-card').map(item=>({...item, showCreator:true, showBabyTag:false, readOnly:true}))
+              : items.filter(item=>item.kind !== 'baby-feeding-card' || item.creatorId !== 'family').map(item=>item.kind === 'baby-feeding-card'
+                ? {...item, creator:'妈妈', creatorId:'self', isOwnRecord:true, showCreator:false, showBabyTag:true}
+                : item)
           : recordSpace === 'shared'
             ? items.filter(item=>item.kind === 'baby-feeding-card').map(item=>({...item, showCreator:true, showBabyTag:false}))
             : items.filter(item=>item.kind !== 'baby-feeding-card');
@@ -44178,7 +44387,9 @@ function App(){
         return {...block, items:visibleItems, entries:undefined};
       }).filter(Boolean);
       const refreshed = refreshBabyFeedingLatestMarks(projected);
-      source = relationshipScheme === 'without-family' || recordSpace === 'shared'
+      source = relationshipScheme === 'without-family'
+        || (relationshipScheme === 'with-family' && recordSpace === 'shared')
+        || (relationshipScheme === 'with-family-2' && sharedTimelineView)
         ? refreshed
         : refreshed.map(block=>{
             if(block.type !== 'day') return block;
@@ -44193,7 +44404,7 @@ function App(){
     }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
@@ -44235,7 +44446,8 @@ function App(){
   }, [searchCriteria, restoreSearchCloseScroll]);
 
   const [homeDetailOpen, setHomeDetailOpen] = React.useState(false);
-  const showBottomTabBar = !homeDetailOpen;
+  const isPlan2SharedTimeline = relationshipScheme === 'with-family-2' && sharedTimelineView;
+  const showBottomTabBar = !homeDetailOpen && !isPlan2SharedTimeline;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
@@ -44252,7 +44464,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
-  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || relationshipTransitionOpen);
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
@@ -44276,7 +44488,7 @@ function App(){
               aria-expanded={relationshipSchemeOpen}
               onClick={()=>setRelationshipSchemeOpen(open=>!open)}
             >
-              <span>{relationshipScheme === 'with-family' ? '有亲友' : '无亲友'}</span>
+              <span>{relationshipScheme === 'with-family' ? '有亲友-方案1' : relationshipScheme === 'with-family-2' ? '有亲友-方案2' : '无亲友'}</span>
               <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
                 <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -44285,7 +44497,8 @@ function App(){
               <div className="relationship-scheme-menu" role="menu" aria-label="切换亲友方案">
                 {[
                   {id:'without-family', label:'无亲友'},
-                  {id:'with-family', label:'有亲友'},
+                  {id:'with-family-2', label:'有亲友-方案2'},
+                  {id:'with-family', label:'有亲友-方案1'},
                 ].map(option=>(
                   <button
                     key={option.id}
@@ -44431,9 +44644,22 @@ function App(){
         ) : (
         <>
         {showStreamHeader ? (
-        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (showBabyFeedingHeader && relationshipScheme === 'without-family' ? ' is-single-timeline' : '')}>
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (showBabyFeedingHeader && relationshipScheme !== 'with-family' ? ' is-single-timeline' : '') + (relationshipScheme === 'with-family-2' && !sharedTimelineView ? ' is-plan2-main' : '') + (isPlan2SharedTimeline ? ' is-shared-timeline-header' : '')}>
           {showBabyFeedingHeader ? (
-            relationshipScheme === 'without-family' ? (
+            isPlan2SharedTimeline ? (
+            <>
+              <div className="stream-actions is-left">
+                <button className="stream-action" aria-label="返回全部时间轴" type="button" onClick={()=>setSharedTimelineView(false)}>
+                  <I name="arrow-left" size={21} stroke={1.8}/>
+                </button>
+              </div>
+              <div className="stream-shared-title">
+                <h1 className="stream-title">小豆苗</h1>
+                <span>3位亲友可见</span>
+              </div>
+              <div className="stream-header-side"/>
+            </>
+            ) : relationshipScheme === 'without-family' || relationshipScheme === 'with-family-2' ? (
             <>
               <div className="stream-actions is-left">
                 <button
@@ -44444,17 +44670,25 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
-              <h1 className="stream-title">我的点滴</h1>
+              <button
+                type="button"
+                className={'stream-title stream-filter-title' + (babyFeedingPanelMode === 'all' ? ' is-open' : '')}
+                aria-label="筛选全部记录"
+                aria-expanded={babyFeedingPanelMode === 'all'}
+                onClick={toggleBabyFeedingFilterPanel}
+              >
+                <span>全部</span>
+                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
               <div className="stream-actions">
-                <button
-                  className={'stream-action' + (isSearchActive ? ' is-active' : '')}
-                  aria-label="筛选记录项"
-                  aria-pressed={babyFeedingPanelMode === 'all'}
-                  type="button"
-                  onClick={toggleBabyFeedingFilterPanel}
-                >
-                  <I name="filter" size={20} stroke={1.7}/>
-                </button>
+                {relationshipScheme === 'with-family-2' ? (
+                  <button className={'stream-action stream-share-action' + (babyShareSyncNotice ? ' is-sync-target' : '')} aria-label={familyShareUnread ? `打开小豆苗共享时间轴，${familyShareUnread}条新记录` : '打开小豆苗共享时间轴'} type="button" onClick={openPlan2SharedTimeline}>
+                    <img className="stream-share-avatar" src="assets/baby-shared-avatar.png" alt="小豆苗" />
+                    {familyShareUnread ? <span className="stream-share-unread" aria-hidden="true">{familyShareUnread}</span> : null}
+                  </button>
+                ) : null}
               </div>
             </>
             ) : (
@@ -44522,11 +44756,24 @@ function App(){
           )}
         </div>
         ) : null}
+        {babyShareSyncNotice && !isPlan2SharedTimeline ? (
+          <div key={babyShareSyncNotice} className="baby-share-sync-notice" role="status" aria-live="polite">
+            <span className="baby-share-sync-notice-icon" aria-hidden="true"><SharedUsersIcon size={18}/></span>
+            <span><b>小豆苗的记录已同步</b><em>3位亲友可见</em></span>
+          </div>
+        ) : null}
+        {relationshipScheme === 'with-family-2' && !isPlan2SharedTimeline && familyShareUnread > 0 && !babyShareSyncNotice ? (
+          <button type="button" className="family-share-update-notice" onClick={openPlan2SharedTimeline}>
+            <span className="family-share-update-icon" aria-hidden="true"><SharedUsersIcon size={18}/></span>
+            <span className="family-share-update-copy"><b>亲友新增{familyShareUnread}条小豆苗记录</b><em>爸爸、奶奶刚刚记录了喂养情况</em></span>
+            <span className="family-share-update-arrow" aria-hidden="true" />
+          </button>
+        ) : null}
         <div
           className={
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
-            + (showBabyFeedingQuickStrip ? ' has-baby-feeding-strip' : '')
+            + (showBabyFeedingQuickStrip && !isPlan2SharedTimeline ? ' has-baby-feeding-strip' : '')
             + (showBabyFeedingHeader && relationshipScheme === 'with-family' ? ' has-record-space-segment' : '')
             + (babyFeedingDetailOpen ? ' is-detail-scroll-locked' : '')
           }
@@ -44562,7 +44809,7 @@ function App(){
           )}
         </div>
 
-        {!voiceTranscribe && (
+        {!voiceTranscribe && !isPlan2SharedTimeline && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -44590,7 +44837,7 @@ function App(){
           <XhsStyleSearchPage
             intent={babyFeedingPanelMode}
             variant="baby-feeding"
-            recordSpace={relationshipScheme === 'without-family' ? 'combined' : recordSpace}
+            recordSpace={relationshipScheme === 'without-family' || relationshipScheme === 'with-family-2' ? 'combined' : recordSpace}
             activeFilter={searchCriteria?.personPanelFilter}
             onClose={closeBabyFeedingPanel}
             onSearch={handleTimelineSearch}
@@ -44647,6 +44894,42 @@ function App(){
         </div>
       ) : null}
 
+      {relationshipPlan2TransitionOpen ? (
+        <div className="relationship-transition-overlay" role="presentation">
+          <section className="relationship-transition-sheet" role="dialog" aria-modal="true" aria-labelledby="relationship-plan2-transition-title">
+            <div className="relationship-transition-handle" aria-hidden="true" />
+            <button type="button" className="relationship-transition-close" aria-label="关闭" onClick={()=>setRelationshipPlan2TransitionOpen(false)}>
+              <I name="close" size={19} stroke={1.8}/>
+            </button>
+            <header className="relationship-transition-header">
+              <span className="relationship-transition-privacy-icon" aria-hidden="true">共享空间</span>
+              <h2 id="relationship-plan2-transition-title">已为小豆苗创建共享时间轴</h2>
+              <p>亲友加入后，宝宝记录会集中到独立的共享时间轴，你的个人记录仍安全保留在“全部”中。</p>
+            </header>
+            <div className="relationship-transition-spaces">
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-personal" aria-hidden="true"><I name="user" size={23} stroke={1.8}/></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>全部</strong><span>你的个人视图</span></div>
+                  <p>个人记录，以及你记录的宝宝动态</p>
+                </div>
+              </div>
+              <div className="relationship-transition-space">
+                <span className="relationship-transition-space-icon is-baby" aria-hidden="true"><SharedUsersIcon size={23}/></span>
+                <div className="relationship-transition-space-copy">
+                  <div><strong>小豆苗</strong><span>与3位亲友共享</span></div>
+                  <p>你和亲友记录的全部宝宝动态</p>
+                </div>
+              </div>
+            </div>
+            <p className="relationship-transition-note">亲友只能进入小豆苗，无法查看你的月经、症状、心情等个人记录</p>
+            <button type="button" className="relationship-transition-confirm" onClick={()=>applyRelationshipScheme('with-family-2')}>
+              知道了，进入全部
+            </button>
+          </section>
+        </div>
+      ) : null}
+
       {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note})=>{
         if(formulaDetailEntry.isQuickDraft){
           const {isQuickDraft, ...draftEntry}=formulaDetailEntry;
@@ -44662,8 +44945,9 @@ function App(){
             const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
             return refreshBabyFeedingLatestMarks(next,dayId);
           });
+          notifyBabyShareSync();
           setFormulaDetailEntry(null);
-          pushToast({text:'已保存',placement:'center'});
+          if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});
           setTimeout(()=>scrollTimelineToBottom('smooth'),80);
           return;
         }
@@ -44686,7 +44970,8 @@ function App(){
             const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
             return refreshBabyFeedingLatestMarks(next,dayId);
           });
-          setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});setTimeout(()=>scrollTimelineToBottom('smooth'),80);return;
+          notifyBabyShareSync();
+          setBreastDetailEntry(null);if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});setTimeout(()=>scrollTimelineToBottom('smooth'),80);return;
         }
         setTimeline(blocks=>blocks.map(block=>{
           if(block.type!=='day') return block;
@@ -44741,8 +45026,9 @@ function App(){
             const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),draftEntry,{dayId});
             return refreshBabyFeedingLatestMarks(next,dayId);
           });
+          notifyBabyShareSync();
           setSleepDetailEntry(null);
-          pushToast({text:'已保存',placement:'center'});
+          if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});
           setTimeout(()=>scrollTimelineToBottom('smooth'),80);
           return;
         }
@@ -44751,8 +45037,9 @@ function App(){
           const items=(block.items||block.entries||[]).map(item=>item.id===sleepDetailEntry.id?finalEntry:item);
           return {...block,items,entries:undefined};
         })));
+        if(sleepDetailEntry.sleeping) notifyBabyShareSync();
         setSleepDetailEntry(null);
-        pushToast({text:'已保存',placement:'center'});
+        if(relationshipScheme !== 'with-family-2' || !sleepDetailEntry.sleeping) pushToast({text:'已保存',placement:'center'});
       }}/>:null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (

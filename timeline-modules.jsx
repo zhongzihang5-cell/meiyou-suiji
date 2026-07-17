@@ -879,7 +879,7 @@ function BabyFeedingTimelineCard({item, isNew}){
     setSummaryOpen(item.summaryOpen !== false);
   }, [item.id, item.summaryOpen]);
 
-  const canOpenFeedingDetail = title === '配方奶' || title === '母乳' || title === '睡眠';
+  const canOpenFeedingDetail = !item.readOnly && (title === '配方奶' || title === '母乳' || title === '睡眠');
   const openFeedingDetail = ()=>{
     if(!canOpenFeedingDetail) return;
     window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {detail:item}));

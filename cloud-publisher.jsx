@@ -597,7 +597,7 @@ function DockPublisher({
                       </div>
                     </section>
                     <section className="dock-feeding-group" aria-labelledby="dock-feeding-mine-title">
-                      <h3 id="dock-feeding-mine-title" className="dock-feeding-group-title">我的</h3>
+                      <h3 id="dock-feeding-mine-title" className="dock-feeding-group-title">自己</h3>
                       <div className="dock-feeding-quick-scroll">
                         {feedingMineItems.map(renderFeedingQuickItem)}
                       </div>

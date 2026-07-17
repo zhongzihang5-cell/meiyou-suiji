@@ -1251,6 +1251,30 @@
   min-width:0;
   padding:0 8px;
 }
+.stream-header.is-baby-feeding-header.is-single-timeline.is-plan2-main{
+  grid-template-columns:32px minmax(0,1fr) 44px;
+}
+.stream-header.is-baby-feeding-header.is-plan2-main .stream-actions{
+  width:44px;
+  gap:0;
+}
+.stream-filter-title{display:inline-flex;align-items:center;justify-content:center;justify-self:center;gap:5px;width:auto;padding:0 8px;border:0;background:transparent;font-family:inherit;cursor:pointer}.stream-filter-title svg{flex:0 0 auto;color:#777;transition:transform .18s ease}.stream-filter-title.is-open svg{transform:rotate(180deg)}
+.baby-share-sync-notice{position:absolute;top:56px;left:50%;z-index:24;display:flex;align-items:center;min-width:238px;max-width:calc(100% - 40px);min-height:52px;gap:10px;padding:8px 14px;border:1px solid rgba(255,79,136,.14);border-radius:8px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(49,39,52,.14);transform:translateX(-50%);transform-origin:center;animation:babyShareSyncNotice 3.2s cubic-bezier(.22,.8,.32,1) both;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.baby-share-sync-notice-icon{display:grid;flex:0 0 34px;width:34px;height:34px;place-items:center;border-radius:50%;color:#ff4f88;background:#fff0f5}.baby-share-sync-notice-icon svg{display:block;width:18px;height:18px;stroke:currentColor}.baby-share-sync-notice>span:last-child{display:flex;min-width:0;flex-direction:column;gap:3px}.baby-share-sync-notice b{color:#37343a;font-size:14px;font-weight:600;line-height:1.2}.baby-share-sync-notice em{color:#8b8790;font-size:11px;font-style:normal;line-height:1.2}.stream-share-action.is-sync-target{animation:sharedSyncTargetPulse .5s ease 2.68s both}@keyframes babyShareSyncNotice{0%{opacity:0;transform:translate(-50%,-8px) scale(.98)}8%,78%{opacity:1;transform:translate(-50%,0) scale(1)}88%{opacity:1;transform:translate(calc(-50% + 70px),-18px) scale(.72)}100%{opacity:.08;transform:translate(calc(-50% + 142px),-46px) scale(.18)}}@keyframes sharedSyncTargetPulse{0%,100%{color:#4f4f4f;transform:scale(1)}45%{color:#ff4f88;transform:scale(1.18)}}
+.stream-header.is-baby-feeding-header .stream-share-action{
+  position:relative;
+  flex-direction:column;
+  gap:0;
+  font-size:9px;
+  line-height:1;
+}
+.stream-header.is-baby-feeding-header .stream-share-action svg{
+  width:18px;
+  height:18px;
+}
+.stream-header.is-baby-feeding-header .stream-share-action span{
+  margin-top:1px;
+  white-space:nowrap;
+}
 .suiji-stream.has-record-space-segment{
   padding-top:64px;
 }
@@ -1298,7 +1322,7 @@
   position:absolute;
   top:35px;
   left:50%;
-  width:116px;
+  width:148px;
   overflow:hidden;
   padding:4px;
   border:0.5px solid rgba(0,0,0,0.08);
@@ -4168,6 +4192,11 @@
 .baby-sleep-foot{padding:8px 18px calc(12px + var(--my-safe-bottom));background:transparent}.baby-sleep-foot button{width:100%;height:50px;border:0;border-radius:25px;background:#b86cff;color:#fff;font:600 22px/1 inherit}
 
 .relationship-transition-overlay{position:fixed;inset:0;z-index:760;display:flex;align-items:flex-end;width:100%;max-width:390px;margin:0 auto;background:rgba(31,29,34,.34);animation:relationshipTransitionFade .2s ease-out}
+.baby-share-sync-notice{width:max-content;min-width:0;gap:9px;padding-left:12px;padding-right:12px}
+.relationship-transition-space-icon.is-baby svg{display:block;color:#ff6c9d;stroke:currentColor}
+.stream-share-action .stream-share-unread{position:absolute;top:1px;right:-2px;display:grid;min-width:15px;height:15px;margin:0;padding:0 4px;place-items:center;border:2px solid var(--my-bg);border-radius:9px;color:#fff;background:#ff4f88;font-size:9px;font-weight:600;line-height:1;box-sizing:border-box}.family-share-update-notice{position:absolute;top:56px;left:16px;right:16px;z-index:23;display:flex;align-items:center;min-height:58px;gap:10px;padding:8px 12px;border:1px solid rgba(255,79,136,.14);border-radius:8px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(49,39,52,.12);color:inherit;font-family:inherit;text-align:left;animation:familyShareUpdateIn .24s ease-out both;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.family-share-update-icon{display:grid;flex:0 0 36px;width:36px;height:36px;place-items:center;border-radius:50%;color:#ff4f88;background:#fff0f5}.family-share-update-icon svg{display:block;stroke:currentColor}.family-share-update-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}.family-share-update-copy b{overflow:hidden;color:#37343a;font-size:13px;font-weight:600;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.family-share-update-copy em{overflow:hidden;color:#8b8790;font-size:10px;font-style:normal;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.family-share-update-action{flex:0 0 auto;color:#ff4f88;font-size:12px;font-weight:600}@keyframes familyShareUpdateIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.stream-share-avatar{display:block;width:30px;height:30px;border:2px solid #fff;border-radius:50%;object-fit:cover;box-shadow:0 1px 5px rgba(61,48,57,.2);box-sizing:border-box}.family-share-update-arrow{position:absolute;top:-11px;right:14px;width:22px;height:12px;pointer-events:none}.family-share-update-arrow::before,.family-share-update-arrow::after{content:'';position:absolute;left:50%;width:0;height:0;transform:translateX(-50%);border-left:11px solid transparent;border-right:11px solid transparent}.family-share-update-arrow::before{top:0;border-bottom:12px solid rgba(255,79,136,.22)}.family-share-update-arrow::after{top:2px;border-left-width:9px;border-right-width:9px;border-bottom:10px solid #fff}
+.stream-shared-title{display:flex;min-width:0;align-items:center;justify-content:center;flex-direction:column;gap:1px}.stream-shared-title .stream-title{flex:0 0 auto;line-height:1.15}.stream-shared-title span{color:#9a969e;font-size:9.5px;line-height:1.2;white-space:nowrap}
 .relationship-transition-sheet{position:relative;width:100%;min-height:58%;padding:12px 24px calc(24px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -8px 30px rgba(42,35,46,.12);animation:relationshipTransitionRise .28s cubic-bezier(.22,.8,.32,1)}
 .relationship-transition-handle{width:42px;height:5px;margin:0 auto 8px;border-radius:3px;background:#dedde2}
 .relationship-transition-close{position:absolute;top:18px;right:18px;display:grid;width:34px;height:34px;padding:0;place-items:center;border:0;border-radius:50%;color:#77747b;background:#f5f4f6}
