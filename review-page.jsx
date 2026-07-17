@@ -386,7 +386,7 @@ function SupplementReviewChart(){
   );
 }
 
-function SupplementReviewCard(){
+function SupplementReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="营养补剂"
@@ -396,6 +396,8 @@ function SupplementReviewCard(){
       legend={<>{SUPPLEMENT_TYPES.map(type=><span className="review-legend-item is-supplement" key={type.key}><i style={{background:type.color}}></i>{type.name}</span>)}</>}
       metrics={<><ReviewMetric value="AD" unit="1粒" label="最近补充"/><ReviewMetric value="7" unit="天" label="近7日连续"/><ReviewMetric value="6" unit="次" label="近30天日均"/></>}
       more="查看完整营养补剂变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
@@ -425,7 +427,7 @@ function PumpReviewChart(){
   );
 }
 
-function PumpReviewCard(){
+function PumpReviewCard({onFullOpen}){
   return (
     <ReviewCard
       title="吸奶"
@@ -435,6 +437,8 @@ function PumpReviewCard(){
       legend={<span className="review-legend-item is-pump"><i></i>吸奶量（ml）</span>}
       metrics={<><ReviewMetric value="150" unit="ml" label="最近吸奶"/><ReviewMetric value="165" unit="ml" label="近30天平均"/><div className="review-metric"><div className="review-metric-value is-trend is-wave"><ReviewWaveIcon/>波动</div><div className="review-metric-label">整体趋势</div></div></>}
       more="查看完整吸奶变化"
+      onOpen={onFullOpen}
+      onMore={onFullOpen}
     />
   );
 }
@@ -631,6 +635,8 @@ function FeedingReviewTabs({active,onChange}){
       <button type="button" className={active==='sleep'?'is-active':''} aria-current={active==='sleep'?'page':undefined} onClick={()=>onChange('sleep')}>睡眠</button>
       <button type="button" className={active==='diaper'?'is-active':''} aria-current={active==='diaper'?'page':undefined} onClick={()=>onChange('diaper')}>换尿布</button>
       <button type="button" className={active==='food'?'is-active':''} aria-current={active==='food'?'page':undefined} onClick={()=>onChange('food')}>辅食</button>
+      <button type="button" className={active==='supplement'?'is-active':''} aria-current={active==='supplement'?'page':undefined} onClick={()=>onChange('supplement')}>营养补充</button>
+      <button type="button" className={active==='pump'?'is-active':''} aria-current={active==='pump'?'page':undefined} onClick={()=>onChange('pump')}>吸奶</button>
       <button type="button" className={active==='all'?'is-active':''} aria-current={active==='all'?'page':undefined} onClick={()=>onChange('all')}>全部</button>
     </nav>
   );
@@ -768,6 +774,94 @@ function FoodRecordReviewContent(){
   );
 }
 
+const SUPPLEMENT_DETAIL_DAYS = [
+  {date:'10.15',events:[{time:8.1,type:'ad'},{time:8.7,type:'d3'},{time:19.2,type:'probiotic'}]},
+  {date:'10.16',events:[{time:8.4,type:'ad'},{time:12.2,type:'calcium'},{time:19.5,type:'dha'}]},
+  {date:'10.17',events:[{time:7.8,type:'ad'},{time:8.5,type:'d3'},{time:18.8,type:'iron'}]},
+  {date:'10.18',events:[{time:8.3,type:'ad'},{time:13.1,type:'probiotic'},{time:19.1,type:'zinc'}]},
+  {date:'10.19',events:[{time:7.9,type:'ad'},{time:8.6,type:'d3'},{time:12.4,type:'calcium'},{time:19.4,type:'dha'}]},
+  {date:'10.20',events:[{time:8.2,type:'ad'},{time:13.3,type:'iron'},{time:19.0,type:'zinc'}]},
+  {date:'今天',hot:true,events:[{time:8.0,type:'ad'},{time:8.8,type:'d3'},{time:18.6,type:'probiotic'}]},
+];
+
+function SupplementRecordReviewContent(){
+  const recentDays = SUPPLEMENT_REVIEW_DAYS.slice(-7);
+  const maxCount = Math.max(...recentDays.map(day=>day.items.length),1);
+  const average = recentDays.reduce((sum,day)=>sum+day.items.length,0)/recentDays.length;
+  const typeByKey = Object.fromEntries(SUPPLEMENT_TYPES.map(type=>[type.key,type]));
+  return (
+    <div className="supplement-record-scroll" aria-label="营养补充分析内容">
+      <article className="supplement-record-module">
+        <h2>时间规律</h2>
+        <div className="supplement-time-grid">
+          <div className="supplement-time-days">{SUPPLEMENT_DETAIL_DAYS.map(day=><span key={day.date}>{day.events.map((event,index)=>{const type=typeByKey[event.type];return <i key={event.type+'-'+index} style={{top:(event.time/24*100)+'%',background:type.color}} aria-label={type.name+' '+event.time.toFixed(1)+'时'}>{type.short}</i>;})}</span>)}</div>
+          <div className="supplement-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="supplement-record-dates">{SUPPLEMENT_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="supplement-detail-legend">{SUPPLEMENT_TYPES.map(type=><span key={type.key}><i style={{background:type.color}}/>{type.name}</span>)}</div>
+      </article>
+      <article className="supplement-record-module supplement-count-module">
+        <h2>补充次数</h2>
+        <h3><i/>每日总次数</h3>
+        <div className="supplement-count-chart">
+          <div className="supplement-count-average">近7天平均每天{average.toFixed(1)}次</div>
+          {recentDays.map(day=><div className="supplement-count-day" key={day.date}>{day.items.length?<><b>{day.items.length}次</b><i style={{height:Math.round(day.items.length/maxCount*150)}}/></>:<span>漏服</span>}</div>)}
+        </div>
+        <div className="supplement-record-dates">{recentDays.map(day=><span key={day.date} className={day.date==='今天'?'is-hot':''}>{day.date}</span>)}</div>
+      </article>
+    </div>
+  );
+}
+
+const PUMP_DETAIL_DAYS = [
+  {date:'10.15',events:[{time:6.8,amount:85},{time:14.2,amount:70}]},
+  {date:'10.16',events:[{time:7.1,amount:70},{time:12.0,amount:48},{time:18.2,amount:50}]},
+  {date:'10.17',events:[{time:6.6,amount:82},{time:13.8,amount:72}]},
+  {date:'10.18',events:[{time:7.4,amount:75},{time:12.8,amount:45},{time:18.0,amount:55}]},
+  {date:'10.19',events:[{time:6.9,amount:88},{time:14.5,amount:76}]},
+  {date:'10.20',events:[{time:7.2,amount:92},{time:15.1,amount:81}]},
+  {date:'今天',hot:true,events:[{time:7.0,amount:150}]},
+];
+
+function PumpRecordReviewContent(){
+  const dailyAmounts = PUMP_DETAIL_DAYS.map(day=>day.events.reduce((sum,event)=>sum+event.amount,0));
+  const dailyCounts = PUMP_DETAIL_DAYS.map(day=>day.events.length);
+  const average = Math.round(dailyAmounts.reduce((sum,amount)=>sum+amount,0)/dailyAmounts.length);
+  const W=340,H=220,padL=34,padR=12,padT=48,padB=18;
+  const minAmount=Math.min(...dailyAmounts)-10,maxAmount=Math.max(...dailyAmounts)+10;
+  const X=index=>padL+(W-padL-padR)*(index/(dailyAmounts.length-1));
+  const Y=amount=>padT+(maxAmount-amount)/(maxAmount-minAmount)*(H-padT-padB);
+  const linePoints=dailyAmounts.map((amount,index)=>[X(index),Y(amount)]);
+  return (
+    <div className="pump-record-scroll" aria-label="吸奶分析内容">
+      <article className="pump-record-module">
+        <h2>时间规律</h2>
+        <div className="pump-time-grid">
+          <div className="pump-time-days">{PUMP_DETAIL_DAYS.map(day=><span key={day.date}>{day.events.map((event,index)=><i key={index} style={{top:(event.time/24*100)+'%'}} aria-label={event.time.toFixed(1)+'时吸奶'+event.amount+'毫升'}><img src="assets/baby-feeding-icons/pump.png" alt=""/></i>)}</span>)}</div>
+          <div className="pump-time-axis">{[0,2,4,6,8,10,12,14,16,18,20,22,24].map(hour=><span key={hour} style={{top:(hour/24*100)+'%'}}>{hour}</span>)}</div>
+        </div>
+        <div className="pump-record-dates">{PUMP_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+        <div className="pump-record-legend"><i><img src="assets/baby-feeding-icons/pump.png" alt=""/></i>吸奶</div>
+      </article>
+      <article className="pump-record-module pump-amount-module">
+        <h2>吸奶量</h2>
+        <h3><i/>总次数</h3>
+        <div className="pump-count-row">{dailyCounts.map((count,index)=><span key={PUMP_DETAIL_DAYS[index].date}>{count}次</span>)}</div>
+        <h3><i/>每日总量</h3>
+        <div className="pump-amount-chart">
+          <div className="pump-amount-average">近7天平均每天{average}ml</div>
+          <svg viewBox={'0 0 '+W+' '+H} preserveAspectRatio="none" role="img" aria-label="近7天每日吸奶总量折线图">
+            {[minAmount,Math.round((minAmount+maxAmount)/2),maxAmount].map(tick=><line key={tick} x1={padL} y1={Y(tick)} x2={W-padR} y2={Y(tick)} className="pump-line-grid"/>)}
+            <path d={reviewSmoothPath(linePoints)} className="pump-line-path"/>
+            {dailyAmounts.map((amount,index)=><g key={PUMP_DETAIL_DAYS[index].date}><circle cx={X(index)} cy={Y(amount)} r={index===dailyAmounts.length-1?5:4} className={index===dailyAmounts.length-1?'is-hot':''}/><text x={X(index)} y={Y(amount)-10} textAnchor="middle">{amount}ml</text></g>)}
+          </svg>
+        </div>
+        <div className="pump-record-dates">{PUMP_DETAIL_DAYS.map(day=><span key={day.date} className={day.hot?'is-hot':''}>{day.date}</span>)}</div>
+      </article>
+    </div>
+  );
+}
+
 const ALL_EVENT_ICONS = {
   direct:'assets/baby-feeding-icons/breast.png', formula:'assets/baby-feeding-icons/formula.png', breast:'assets/baby-feeding-icons/bottle-breast.png',
   diaper:'assets/baby-feeding-icons/diaper.png', food:'assets/baby-feeding-icons/solid-food.png', pump:'assets/baby-feeding-icons/pump.png',
@@ -818,12 +912,37 @@ function AllRecordReviewContent(){
 }
 
 function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
+  const [pickerOpen,setPickerOpen] = useState(false);
+  const pickerItems = [
+    {id:'all',label:'全部'}, {id:'feeding',label:'喂奶'}, {id:'sleep',label:'睡眠'},
+    {id:'diaper',label:'换尿布'}, {id:'food',label:'辅食'}, {id:'supplement',label:'营养补充'}, {id:'pump',label:'吸奶'},
+  ];
+  const activeLabel = pickerItems.find(item=>item.id===activeTab)?.label || '喂养';
+  const pageTitle = activeTab==='all' ? '全部' : activeLabel+'分析';
+  React.useEffect(()=>{
+    if(!pickerOpen) return undefined;
+    const handleKey = event=>{ if(event.key==='Escape') setPickerOpen(false); };
+    window.addEventListener('keydown',handleKey);
+    return ()=>window.removeEventListener('keydown',handleKey);
+  },[pickerOpen]);
+  React.useEffect(()=>{ if(!open) setPickerOpen(false); },[open]);
+  const selectTab = tab=>{ onTabChange(tab); setPickerOpen(false); };
   return (
     <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
-      <header className="feeding-detail-nav"><button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button><b>喂养分析</b><span>参考表</span></header>
-      <FeedingReviewTabs active={activeTab} onChange={onTabChange}/>
+      <StatusBar/>
+      <header className="feeding-detail-nav">
+        <button type="button" className="feeding-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <button type="button" className={'feeding-detail-title-trigger'+(pickerOpen?' is-open':'')} aria-expanded={pickerOpen} aria-label={'切换分析类型，当前'+activeLabel} onClick={()=>setPickerOpen(value=>!value)}><b>{pageTitle}</b><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
+        <span>参考表</span>
+      </header>
+      <div className={'feeding-detail-picker'+(pickerOpen?' is-open':'')} aria-hidden={!pickerOpen}>
+        <button type="button" className="feeding-detail-picker-scrim" aria-label="关闭分析类型筛选" onClick={()=>setPickerOpen(false)}/>
+        <section className="feeding-detail-picker-panel" aria-label="选择分析类型">
+          <div>{pickerItems.map(item=><button type="button" key={item.id} className={activeTab===item.id?'is-active':''} aria-current={activeTab===item.id?'page':undefined} onClick={()=>selectTab(item.id)}>{item.label}{activeTab===item.id?<i>✓</i>:null}</button>)}</div>
+        </section>
+      </div>
       <div className="feeding-detail-content" key={activeTab}>
-        {activeTab==='sleep' ? <SleepRecordReviewContent/> : (activeTab==='diaper' ? <DiaperRecordReviewContent/> : (activeTab==='food' ? <FoodRecordReviewContent/> : (activeTab==='all' ? <AllRecordReviewContent/> : <FeedingRecordReviewContent/>)))}
+        {activeTab==='sleep' ? <SleepRecordReviewContent/> : (activeTab==='diaper' ? <DiaperRecordReviewContent/> : (activeTab==='food' ? <FoodRecordReviewContent/> : (activeTab==='supplement' ? <SupplementRecordReviewContent/> : (activeTab==='pump' ? <PumpRecordReviewContent/> : (activeTab==='all' ? <AllRecordReviewContent/> : <FeedingRecordReviewContent/>)))))}
       </div>
     </section>
   );
@@ -1328,8 +1447,8 @@ function ReviewPage(){
       <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
       <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
       <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
-      <SupplementReviewCard/>
-      <PumpReviewCard/>
+      <SupplementReviewCard onFullOpen={()=>openFeedingDetail('supplement')}/>
+      <PumpReviewCard onFullOpen={()=>openFeedingDetail('pump')}/>
       </div>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
