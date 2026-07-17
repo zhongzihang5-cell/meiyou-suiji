@@ -918,7 +918,7 @@ function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
     {id:'diaper',label:'换尿布'}, {id:'food',label:'辅食'}, {id:'supplement',label:'营养补充'}, {id:'pump',label:'吸奶'},
   ];
   const activeLabel = pickerItems.find(item=>item.id===activeTab)?.label || '喂养';
-  const pageTitle = activeTab==='all' ? '全部' : activeLabel+'分析';
+  const pageTitle = activeLabel;
   React.useEffect(()=>{
     if(!pickerOpen) return undefined;
     const handleKey = event=>{ if(event.key==='Escape') setPickerOpen(false); };
