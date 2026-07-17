@@ -1209,8 +1209,113 @@ function MoodChart(){
   );
 }
 
+const SHARED_FEEDING_DAYS = [
+  {
+    date:'7月13日', weekday:'第37天', count:2,
+    summary:[['breast','母乳 1次 28min（左0min｜右28min）'],['sleep','睡眠 1次 4min']],
+    records:[
+      ['12:04','sleep','睡眠','睡了4分钟｜12:04-12:08','奶奶'],
+      ['09:41','breast','母乳','右28分钟｜09:41-10:09','妈妈'],
+    ]
+  },
+  {
+    date:'7月12日', weekday:'第36天', count:7,
+    summary:[['breast','母乳 1次 23min（左9min｜右14min）'],['formula','配方奶 2次 180ml'],['sleep','睡眠 2次 5h39min'],['diaper','换尿布 2次']],
+    records:[
+      ['21:25','formula','配方奶','50ml','奶奶','宝宝一直哭，喝的很慢'],
+      ['21:20','diaper','换尿布','臭臭 绿色、膏状','爸爸','连续3天的便便都是绿色'],
+      ['18:26','sleep','睡眠','睡了2小时49分钟｜18:26-21:15','奶奶'],
+      ['17:35','breast','母乳','右14分钟 → 左9分钟｜17:35-17:58','妈妈'],
+      ['14:05','sleep','睡眠','睡了2小时50分钟｜14:05-16:55','妈妈'],
+      ['13:18','diaper','换尿布','嘘嘘','爸爸'],
+      ['13:03','formula','配方奶','130ml','妈妈'],
+    ]
+  },
+  {
+    date:'7月10日', weekday:'第34天', count:2,
+    summary:[['breast','母乳 1次 20min（左10min｜右10min）'],['bottle','瓶喂母乳 1次 50ml']],
+    records:[
+      ['10:33','bottle','瓶喂母乳','50ml','奶奶'],
+      ['10:33','breast','母乳','左10分钟，右10分钟｜10:33-10:53','妈妈'],
+    ]
+  },
+  {
+    date:'7月9日', weekday:'第33天', count:1,
+    summary:[['sleep','睡眠 1次 3min']],
+    records:[['19:03','sleep','睡眠','睡了3分钟｜19:03-19:06','爸爸']]
+  }
+];
+
+const SHARED_FEEDING_ICONS = {
+  formula:'assets/baby-feeding-icons/formula.png',
+  breast:'assets/baby-feeding-icons/breast.png',
+  diaper:'assets/baby-feeding-icons/diaper.png',
+  sleep:'assets/baby-feeding-icons/sleep.png',
+  food:'assets/baby-feeding-icons/solid-food.png',
+  water:'assets/baby-feeding-icons/water.png',
+  bottle:'assets/baby-feeding-icons/bottle-breast.png'
+};
+
+function SharedFeedingSummary({items, compact=false}){
+  return <div className={'shared-feeding-summary'+(compact?' is-compact':'')}>{items.map(item=><span className={'is-'+item[0]} key={item[1]}><i></i>{item[1]}</span>)}</div>;
+}
+
+function SharedFeedingReviewCard({onOpen}){
+  const day = SHARED_FEEDING_DAYS[0];
+  return (
+    <article className="shared-feeding-review-card" role="button" tabIndex="0" onClick={onOpen} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpen();}}}>
+      <header className="shared-feeding-card-head">
+        <span className="shared-feeding-card-icon"><img src="assets/feeding-review-icon.png" alt=""/></span>
+        <h2>喂养记录</h2>
+      </header>
+      <section className="shared-feeding-day shared-feeding-card-day">
+        <header><h2>{day.date} <small>{day.weekday}</small></h2></header>
+        <SharedFeedingSummary items={day.summary}/>
+        <div className="shared-feeding-ledger">
+          {day.records.map(record=><div className="shared-feeding-ledger-row" key={'card'+record[0]+record[2]}>
+            <time>{record[0]}</time><span className={'shared-feeding-dot is-'+record[1]}></span>
+            <img src={SHARED_FEEDING_ICONS[record[1]]} alt=""/>
+            <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
+          </div>)}
+        </div>
+      </section>
+      <div className="review-card-more shared-feeding-card-more"><div className="review-card-more-main">查看完整喂养时间轴</div><ReviewChevron/></div>
+    </article>
+  );
+}
+
+function SharedFeedingTimelinePage({open,onClose}){
+  useEffect(()=>{
+    const phone = document.querySelector('.phone');
+    phone?.classList.toggle('is-shared-feeding-open', open);
+    return ()=>phone?.classList.remove('is-shared-feeding-open');
+  },[open]);
+  return (
+    <section className={'shared-feeding-timeline-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="小豆苗共享喂养时间轴">
+      <header className="shared-feeding-detail-nav">
+        <button type="button" aria-label="返回回顾" onClick={onClose}><ReviewBackIcon/></button>
+        <div className="shared-feeding-detail-title"><b>小豆苗</b><span>3位亲友共享</span></div>
+      </header>
+      <div className="shared-feeding-detail-scroll">
+        {SHARED_FEEDING_DAYS.map(day=><section className="shared-feeding-day" key={day.date}>
+          <header><h2>{day.date} <small>{day.weekday}</small></h2><span>{day.count} 条</span></header>
+          <SharedFeedingSummary items={day.summary}/>
+          <div className="shared-feeding-ledger">
+            {day.records.map(record=><div className="shared-feeding-ledger-row" key={day.date+record[0]+record[2]}>
+              <time>{record[0]}</time><span className={'shared-feeding-dot is-'+record[1]}></span>
+              <img src={SHARED_FEEDING_ICONS[record[1]]} alt=""/>
+              <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
+            </div>)}
+          </div>
+        </section>)}
+      </div>
+    </section>
+  );
+}
+
 function ReviewPage(){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
+  const [sharedFeedingOpen, setSharedFeedingOpen] = useState(false);
   const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
   const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
@@ -1238,7 +1343,9 @@ function ReviewPage(){
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>3 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
+
+      <SharedFeedingReviewCard onOpen={()=>setSharedFeedingOpen(true)}/>
 
       <ReviewCard
         title="月经周期"
@@ -1331,6 +1438,7 @@ function ReviewPage(){
       <SupplementReviewCard/>
       <PumpReviewCard/>
       </div>
+      <SharedFeedingTimelinePage open={sharedFeedingOpen} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
     </main>

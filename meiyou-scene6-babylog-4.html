@@ -18215,8 +18215,6 @@ html,body{
   height:calc(100vh - 44px - var(--my-tabbar-h));
   display:flex;
   flex-direction:column;
-  position:relative;
-  overflow:hidden;
   background:var(--my-bg);
 }
 
@@ -18259,7 +18257,6 @@ html,body{
   overflow:hidden;
 }
 .review-card + .review-card{margin-top:16px}
-.shared-feeding-review-card + .review-card{margin-top:16px}
 .review-card.is-sample{position:relative}
 .review-card.is-actionable{
   cursor:pointer;
@@ -18268,11 +18265,6 @@ html,body{
   outline:2px solid rgba(255,77,136,0.38);
   outline-offset:2px;
 }
-
-/* Shared baby feeding: a compact family ledger, deliberately distinct from 点滴 cards. */
-.shared-feeding-review-card{overflow:hidden;border:1px solid #f4e2e6;border-radius:8px;background:#fff;box-shadow:0 3px 12px rgba(97,58,68,.06);cursor:pointer}.shared-feeding-review-card:focus-visible{outline:2px solid rgba(255,77,136,.38);outline-offset:2px}.shared-feeding-card-head{min-height:62px;padding:11px 14px;display:flex;align-items:center;gap:9px;background:#fff}.shared-feeding-card-head>img{width:36px;height:36px;border:2px solid #fff;border-radius:50%;object-fit:cover;box-shadow:0 1px 4px rgba(0,0,0,.12)}.shared-feeding-card-head>div{min-width:0}.shared-feeding-card-head h2{margin:0;color:#333;font-size:16px;line-height:21px}.shared-feeding-card-head p{margin:1px 0 0;color:#aaa;font-size:10px;line-height:15px}.shared-feeding-card-head>span{margin-left:auto;color:#999;font-size:10px;white-space:nowrap}.shared-feeding-card-summary{padding:9px 14px;border-block:1px solid #f3edef;background:#fffafb}.shared-feeding-card-summary>strong{display:none}.shared-feeding-preview{position:relative;padding:8px 14px 7px}.shared-feeding-preview::before{content:"";position:absolute;left:52px;top:17px;bottom:15px;width:1px;background:#eadfe2}.shared-feeding-preview-row{min-height:40px;display:grid;grid-template-columns:36px 8px 24px auto 1fr auto;align-items:center;column-gap:6px;color:#555}.shared-feeding-preview-row time{color:#888;font-size:11px}.shared-feeding-preview-row>i{z-index:1;width:5px;height:5px;border:1px solid #fff;border-radius:50%;background:#ff8098}.shared-feeding-preview-row img{width:23px;height:23px;object-fit:contain}.shared-feeding-preview-row b{font-size:12px;font-weight:500;white-space:nowrap}.shared-feeding-preview-row em{overflow:hidden;color:#666;font-size:11px;font-style:normal;text-overflow:ellipsis;white-space:nowrap}.shared-feeding-preview-row small{color:#bbb;font-size:9px}.shared-feeding-summary{display:flex;flex-wrap:wrap;gap:5px 14px;padding:9px 12px;background:#fff}.shared-feeding-summary span{display:flex;align-items:center;gap:5px;color:#555;font-size:11px;line-height:18px;white-space:nowrap}.shared-feeding-summary span i{width:5px;height:5px;border-radius:50%;background:#ff7a70}.shared-feeding-summary .is-breast i{background:#f17cac}.shared-feeding-summary .is-diaper i{background:#eaa52d}.shared-feeding-summary .is-sleep i{background:#9d73df}.shared-feeding-summary .is-food i{background:#f28b56}.shared-feeding-summary .is-water i{background:#52aee9}.shared-feeding-summary.is-compact{padding:0;background:transparent;gap:4px 12px}.shared-feeding-summary.is-compact span{font-size:11px}.shared-feeding-card-more{height:36px;padding:0 14px;border-top:1px solid #f3edef;display:flex;align-items:center;justify-content:flex-end;color:#f05f7b;font-size:11px}.shared-feeding-card-more svg{width:14px;height:14px;margin-left:2px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-
-.shared-feeding-timeline-page{position:absolute;inset:0;z-index:128;display:flex;flex-direction:column;background:#fff3f6;visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}.shared-feeding-timeline-page.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}.shared-feeding-detail-nav{height:58px;flex:0 0 58px;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #f2e6e9;background:#fff}.shared-feeding-detail-nav>button{position:absolute;left:4px;width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center}.shared-feeding-detail-nav>button svg{width:23px;height:23px;fill:none;stroke:#333;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.shared-feeding-detail-nav>div{text-align:center}.shared-feeding-detail-nav b{display:block;color:#333;font-size:17px;line-height:21px}.shared-feeding-detail-nav span{display:block;margin-top:1px;color:#999;font-size:10px;line-height:14px}.shared-feeding-detail-status{height:34px;flex:0 0 34px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:#fff8fa;color:#a18088;font-size:10px}.shared-feeding-detail-scroll{flex:1;min-height:0;overflow-y:auto;padding:2px 12px 28px;overscroll-behavior:contain}.shared-feeding-day{margin-top:8px;background:transparent}.shared-feeding-day+ .shared-feeding-day{margin-top:12px}.shared-feeding-day>header{height:38px;padding:0 8px;display:flex;align-items:center}.shared-feeding-day>header h2{margin:0;color:#333;font-size:15px}.shared-feeding-day>header h2 small{margin-left:5px;color:#777;font-size:10px;font-weight:400}.shared-feeding-day>header>span{display:none}.shared-feeding-day>.shared-feeding-summary{margin:0;padding:10px 12px 8px;border-radius:8px 8px 0 0;border-bottom:1px solid #f3edef;background:#fff}.shared-feeding-ledger{position:relative;padding:6px 12px 10px;border-radius:0 0 8px 8px;background:#fff}.shared-feeding-ledger::before{content:"";position:absolute;left:55px;top:22px;bottom:22px;width:1px;background:#e9e2e4}.shared-feeding-ledger-row{min-height:56px;display:grid;grid-template-columns:35px 7px 27px minmax(0,1fr);align-items:center;column-gap:6px}.shared-feeding-ledger-row time{color:#777;font-size:11px}.shared-feeding-dot{z-index:1;width:5px;height:5px;border:1px solid #fff;border-radius:50%;background:#ff7a70;box-shadow:0 0 0 1px #f2dfe3}.shared-feeding-dot.is-breast{background:#f17cac}.shared-feeding-dot.is-diaper{background:#eaa52d}.shared-feeding-dot.is-sleep{background:#9d73df}.shared-feeding-dot.is-food{background:#f28b56}.shared-feeding-dot.is-water{background:#52aee9}.shared-feeding-ledger-row>img{width:25px;height:25px;object-fit:contain}.shared-feeding-ledger-row>div{min-width:0;display:grid;grid-template-columns:80px minmax(0,1fr);align-items:start;column-gap:4px}.shared-feeding-ledger-row b{display:block;color:#444;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap}.shared-feeding-ledger-row p{overflow:hidden;margin:0;color:#666;font-size:11px;line-height:18px;text-overflow:ellipsis;white-space:nowrap}.shared-feeding-ledger-row p small{margin-left:4px;color:#c0b9bb;font-size:8px}
 
 .review-card-pad{padding:16px}
 .review-card-head{
@@ -19039,74 +19031,6 @@ html,body{
   line-height:21px;
   color:var(--my-text-primary);
 }
-
-/* Exact feeding-history detail layout from the legacy feeding record. */
-.shared-feeding-summary .is-bottle i,.shared-feeding-dot.is-bottle{background:#ff72a1}
-.phone.is-shared-feeding-open .review-page{height:calc(100vh - 44px)}
-.phone.is-shared-feeding-open .tabbar{display:none}
-.shared-feeding-timeline-page{inset:0}
-.shared-feeding-detail-nav{height:48px;flex-basis:48px;border-bottom:1px solid #efdfe4;background:#f4f4f7}
-.shared-feeding-detail-nav>button{left:2px;width:42px;height:42px}
-.shared-feeding-detail-nav>button svg{stroke:#444}
-.shared-feeding-detail-filter{display:flex!important;align-items:center;gap:2px;text-align:center}
-.shared-feeding-detail-filter b{display:block;color:#333;font-size:17px;line-height:21px}
-.shared-feeding-detail-filter svg{width:15px!important;height:15px!important;fill:none;stroke:#555!important;stroke-width:1.8!important;stroke-linecap:round;stroke-linejoin:round}
-.shared-feeding-detail-actions{position:absolute;right:10px;display:flex!important;align-items:center;gap:15px!important}
-.shared-feeding-detail-actions svg{width:23px!important;height:23px!important;fill:none;stroke:#444!important;stroke-width:1.6!important;stroke-linecap:round;stroke-linejoin:round}
-.shared-feeding-detail-title{text-align:center}
-.shared-feeding-detail-title b{display:block;color:#333;font-size:17px;line-height:20px}
-.shared-feeding-detail-title span{display:block;margin-top:1px;color:#999;font-size:10px;line-height:13px}
-.shared-feeding-day{margin-top:7px}
-.shared-feeding-day>header h2 small{color:#555}
-.shared-feeding-ledger-row p{white-space:normal;line-height:17px}.shared-feeding-ledger-row p small{white-space:nowrap}
-
-/* Match the type scale used by the 点滴 timeline. */
-.shared-feeding-preview-row{grid-template-columns:40px 8px 28px auto minmax(0,1fr);min-height:46px}
-.shared-feeding-preview-row time{font-size:13.5px}
-.shared-feeding-preview-row img{width:28px;height:28px}
-.shared-feeding-preview-row b{font-size:15px}
-.shared-feeding-preview-row em{font-size:14px}
-.shared-feeding-preview::before{left:56px}
-.shared-feeding-summary{gap:7px 16px;padding:11px 13px}
-.shared-feeding-summary span{font-size:13px;line-height:21px}
-.shared-feeding-summary.is-compact span{font-size:13px}
-.shared-feeding-day>header{height:44px}
-.shared-feeding-day>header h2{font-size:17px}
-.shared-feeding-day>header h2 small{font-size:13px}
-.shared-feeding-day>.shared-feeding-summary{padding:12px 14px 10px}
-.shared-feeding-ledger{padding:7px 14px 12px}
-.shared-feeding-ledger::before{left:65px;top:25px;bottom:25px}
-.shared-feeding-ledger-row{min-height:68px;grid-template-columns:43px 8px 32px minmax(0,1fr);column-gap:7px}
-.shared-feeding-ledger-row time{font-size:13.5px}
-.shared-feeding-ledger-row>img{width:30px;height:30px}
-.shared-feeding-ledger-row>div{grid-template-columns:96px minmax(0,1fr);column-gap:5px}
-.shared-feeding-ledger-row b{font-size:15px;line-height:22px}
-.shared-feeding-ledger-row p{font-size:14px;line-height:22px}
-
-/* Align every record to its first text line and tighten the label/value columns. */
-.shared-feeding-ledger-row{align-items:start;padding:13px 0;min-height:0}
-.shared-feeding-ledger-row time{margin-top:1px;line-height:22px}
-.shared-feeding-dot{margin-top:8px}
-.shared-feeding-ledger-row>img{align-self:start;margin-top:-4px}
-.shared-feeding-ledger-row>div{grid-template-columns:64px minmax(0,1fr);column-gap:0;align-items:start}
-.shared-feeding-ledger-row p{color:#333}
-.shared-feeding-record-copy{display:block;min-width:0}
-.shared-feeding-record-copy>small{display:block;overflow:hidden;margin-top:1px;color:#999;font-size:14px;line-height:22px;text-overflow:ellipsis;white-space:nowrap}
-
-/* Keep the feeding overview card in the same visual system as other review cards. */
-.shared-feeding-card-head{min-height:62px;padding:16px;gap:8px}
-.shared-feeding-card-head>h2{margin:0;color:var(--my-text-primary);font-size:16px;font-weight:600;line-height:20px}
-.shared-feeding-card-head>.shared-feeding-card-icon{width:30px;height:30px;flex:0 0 30px;margin-left:0;padding:0;border-radius:var(--r-sm);background:var(--my-brand-soft);display:grid;place-items:center;overflow:hidden}
-.shared-feeding-card-icon img{width:24px;height:24px;display:block;object-fit:contain}
-.shared-feeding-card-summary{margin:0 16px 14px;padding:10px 12px;border:0;border-radius:var(--r-sm);background:#fafafb}
-.shared-feeding-card-more{height:auto;padding:13px 16px;border-top:.5px solid var(--my-line);color:inherit;justify-content:initial}
-.shared-feeding-card-more .review-card-more-main{color:var(--my-text-primary)}
-.shared-feeding-card-more svg{width:18px;height:18px;margin-left:auto;stroke:var(--my-text-tertiary)}
-.shared-feeding-card-day{margin:0;background:#fff8fa}
-.shared-feeding-card-day>header{padding:0 8px}
-.shared-feeding-card-day>.shared-feeding-summary{margin:0;padding:12px 14px 10px;border-bottom:1px solid #f3edef;border-radius:8px 8px 0 0;background:#fff}
-.shared-feeding-card-day>.shared-feeding-ledger{margin-top:0;padding:7px 14px 12px;border-radius:0 0 8px 8px;background:#fff}
-.shared-feeding-card-day>.shared-feeding-ledger::before{left:65px}
 
 
 .home-page{
@@ -34926,113 +34850,8 @@ function MoodChart(){
   );
 }
 
-const SHARED_FEEDING_DAYS = [
-  {
-    date:'7月13日', weekday:'第37天', count:2,
-    summary:[['breast','母乳 1次 28min（左0min｜右28min）'],['sleep','睡眠 1次 4min']],
-    records:[
-      ['12:04','sleep','睡眠','睡了4分钟｜12:04-12:08','奶奶'],
-      ['09:41','breast','母乳','右28分钟｜09:41-10:09','妈妈'],
-    ]
-  },
-  {
-    date:'7月12日', weekday:'第36天', count:7,
-    summary:[['breast','母乳 1次 23min（左9min｜右14min）'],['formula','配方奶 2次 180ml'],['sleep','睡眠 2次 5h39min'],['diaper','换尿布 2次']],
-    records:[
-      ['21:25','formula','配方奶','50ml','奶奶','宝宝一直哭，喝的很慢'],
-      ['21:20','diaper','换尿布','臭臭 绿色、膏状','爸爸','连续3天的便便都是绿色'],
-      ['18:26','sleep','睡眠','睡了2小时49分钟｜18:26-21:15','奶奶'],
-      ['17:35','breast','母乳','右14分钟 → 左9分钟｜17:35-17:58','妈妈'],
-      ['14:05','sleep','睡眠','睡了2小时50分钟｜14:05-16:55','妈妈'],
-      ['13:18','diaper','换尿布','嘘嘘','爸爸'],
-      ['13:03','formula','配方奶','130ml','妈妈'],
-    ]
-  },
-  {
-    date:'7月10日', weekday:'第34天', count:2,
-    summary:[['breast','母乳 1次 20min（左10min｜右10min）'],['bottle','瓶喂母乳 1次 50ml']],
-    records:[
-      ['10:33','bottle','瓶喂母乳','50ml','奶奶'],
-      ['10:33','breast','母乳','左10分钟，右10分钟｜10:33-10:53','妈妈'],
-    ]
-  },
-  {
-    date:'7月9日', weekday:'第33天', count:1,
-    summary:[['sleep','睡眠 1次 3min']],
-    records:[['19:03','sleep','睡眠','睡了3分钟｜19:03-19:06','爸爸']]
-  }
-];
-
-const SHARED_FEEDING_ICONS = {
-  formula:'assets/baby-feeding-icons/formula.png',
-  breast:'assets/baby-feeding-icons/breast.png',
-  diaper:'assets/baby-feeding-icons/diaper.png',
-  sleep:'assets/baby-feeding-icons/sleep.png',
-  food:'assets/baby-feeding-icons/solid-food.png',
-  water:'assets/baby-feeding-icons/water.png',
-  bottle:'assets/baby-feeding-icons/bottle-breast.png'
-};
-
-function SharedFeedingSummary({items, compact=false}){
-  return <div className={'shared-feeding-summary'+(compact?' is-compact':'')}>{items.map(item=><span className={'is-'+item[0]} key={item[1]}><i></i>{item[1]}</span>)}</div>;
-}
-
-function SharedFeedingReviewCard({onOpen}){
-  const day = SHARED_FEEDING_DAYS[0];
-  return (
-    <article className="shared-feeding-review-card" role="button" tabIndex="0" onClick={onOpen} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpen();}}}>
-      <header className="shared-feeding-card-head">
-        <span className="shared-feeding-card-icon"><img src="assets/feeding-review-icon.png" alt=""/></span>
-        <h2>喂养记录</h2>
-      </header>
-      <section className="shared-feeding-day shared-feeding-card-day">
-        <header><h2>{day.date} <small>{day.weekday}</small></h2></header>
-        <SharedFeedingSummary items={day.summary}/>
-        <div className="shared-feeding-ledger">
-          {day.records.map(record=><div className="shared-feeding-ledger-row" key={'card'+record[0]+record[2]}>
-            <time>{record[0]}</time><span className={'shared-feeding-dot is-'+record[1]}></span>
-            <img src={SHARED_FEEDING_ICONS[record[1]]} alt=""/>
-            <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
-          </div>)}
-        </div>
-      </section>
-      <div className="review-card-more shared-feeding-card-more"><div className="review-card-more-main">查看完整喂养时间轴</div><ReviewChevron/></div>
-    </article>
-  );
-}
-
-function SharedFeedingTimelinePage({open,onClose}){
-  useEffect(()=>{
-    const phone = document.querySelector('.phone');
-    phone?.classList.toggle('is-shared-feeding-open', open);
-    return ()=>phone?.classList.remove('is-shared-feeding-open');
-  },[open]);
-  return (
-    <section className={'shared-feeding-timeline-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="小豆苗共享喂养时间轴">
-      <header className="shared-feeding-detail-nav">
-        <button type="button" aria-label="返回回顾" onClick={onClose}><ReviewBackIcon/></button>
-        <div className="shared-feeding-detail-title"><b>小豆苗</b><span>3位亲友共享</span></div>
-      </header>
-      <div className="shared-feeding-detail-scroll">
-        {SHARED_FEEDING_DAYS.map(day=><section className="shared-feeding-day" key={day.date}>
-          <header><h2>{day.date} <small>{day.weekday}</small></h2><span>{day.count} 条</span></header>
-          <SharedFeedingSummary items={day.summary}/>
-          <div className="shared-feeding-ledger">
-            {day.records.map(record=><div className="shared-feeding-ledger-row" key={day.date+record[0]+record[2]}>
-              <time>{record[0]}</time><span className={'shared-feeding-dot is-'+record[1]}></span>
-              <img src={SHARED_FEEDING_ICONS[record[1]]} alt=""/>
-              <div><b>{record[2]}</b><span className="shared-feeding-record-copy"><p>{record[3].split('｜').map((part,index)=><React.Fragment key={part}>{index ? <br/> : null}{part}</React.Fragment>)}</p>{record[5] ? <small>{record[5]}</small> : null}</span></div>
-            </div>)}
-          </div>
-        </section>)}
-      </div>
-    </section>
-  );
-}
-
 function ReviewPage(){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
-  const [sharedFeedingOpen, setSharedFeedingOpen] = useState(false);
   const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
   const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
@@ -35060,9 +34879,7 @@ function ReviewPage(){
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
-
-      <SharedFeedingReviewCard onOpen={()=>setSharedFeedingOpen(true)}/>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>3 项</b>可回顾</p>
 
       <ReviewCard
         title="月经周期"
@@ -35155,7 +34972,6 @@ function ReviewPage(){
       <SupplementReviewCard/>
       <PumpReviewCard/>
       </div>
-      <SharedFeedingTimelinePage open={sharedFeedingOpen} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
     </main>
@@ -44663,6 +44479,43 @@ function App(){
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
+        {showBabyFeedingHeader ? (
+          <div className={'relationship-scheme-switch' + (relationshipSchemeOpen ? ' is-open' : '')}>
+            <button
+              type="button"
+              className="relationship-scheme-trigger"
+              aria-haspopup="menu"
+              aria-expanded={relationshipSchemeOpen}
+              onClick={()=>setRelationshipSchemeOpen(open=>!open)}
+            >
+              <span>{relationshipScheme === 'with-family' ? '有亲友-方案1' : relationshipScheme === 'with-family-2' ? '有亲友-方案2' : '无亲友'}</span>
+              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+                <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {relationshipSchemeOpen ? (
+              <div className="relationship-scheme-menu" role="menu" aria-label="切换亲友方案">
+                {[
+                  {id:'without-family', label:'无亲友'},
+                  {id:'with-family-2', label:'有亲友-方案2'},
+                  {id:'with-family', label:'有亲友-方案1'},
+                ].map(option=>(
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={relationshipScheme === option.id}
+                    className={relationshipScheme === option.id ? 'is-active' : ''}
+                    onClick={()=>selectRelationshipScheme(option.id)}
+                  >
+                    <span>{option.label}</span>
+                    {relationshipScheme === option.id ? <span aria-hidden="true">✓</span> : null}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
       {showHome && HomePage && (
         <HomePage

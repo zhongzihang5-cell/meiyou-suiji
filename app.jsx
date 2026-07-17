@@ -2413,43 +2413,6 @@ function App(){
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
-        {showBabyFeedingHeader ? (
-          <div className={'relationship-scheme-switch' + (relationshipSchemeOpen ? ' is-open' : '')}>
-            <button
-              type="button"
-              className="relationship-scheme-trigger"
-              aria-haspopup="menu"
-              aria-expanded={relationshipSchemeOpen}
-              onClick={()=>setRelationshipSchemeOpen(open=>!open)}
-            >
-              <span>{relationshipScheme === 'with-family' ? '有亲友-方案1' : relationshipScheme === 'with-family-2' ? '有亲友-方案2' : '无亲友'}</span>
-              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
-                <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            {relationshipSchemeOpen ? (
-              <div className="relationship-scheme-menu" role="menu" aria-label="切换亲友方案">
-                {[
-                  {id:'without-family', label:'无亲友'},
-                  {id:'with-family-2', label:'有亲友-方案2'},
-                  {id:'with-family', label:'有亲友-方案1'},
-                ].map(option=>(
-                  <button
-                    key={option.id}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={relationshipScheme === option.id}
-                    className={relationshipScheme === option.id ? 'is-active' : ''}
-                    onClick={()=>selectRelationshipScheme(option.id)}
-                  >
-                    <span>{option.label}</span>
-                    {relationshipScheme === option.id ? <span aria-hidden="true">✓</span> : null}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
 
       {showHome && HomePage && (
         <HomePage
