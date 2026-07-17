@@ -929,7 +929,6 @@ function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
   const selectTab = tab=>{ onTabChange(tab); setPickerOpen(false); };
   return (
     <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
-      <StatusBar/>
       <header className="feeding-detail-nav">
         <button type="button" className="feeding-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
         <button type="button" className={'feeding-detail-title-trigger'+(pickerOpen?' is-open':'')} aria-expanded={pickerOpen} aria-label={'切换分析类型，当前'+activeLabel} onClick={()=>setPickerOpen(value=>!value)}><b>{pageTitle}</b><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
