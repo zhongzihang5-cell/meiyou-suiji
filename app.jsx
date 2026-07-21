@@ -447,7 +447,6 @@ function App(){
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [noteTabUnread, setNoteTabUnread] = useState(false);
   const [reviewTabUnread, setReviewTabUnread] = useState(false);
-  const [feedingOverviewScheme, setFeedingOverviewScheme] = useState(1);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
@@ -2363,19 +2362,10 @@ function App(){
             });
             return {...block, items, entries:undefined};
           });
-      source = source.map(block=>{
-        if(block.type !== 'day') return block;
-        const items = (block.items || block.entries || []).map(item=>(
-          item.kind === 'baby-feeding-card' && item.summary
-            ? {...item, overviewScheme:feedingOverviewScheme}
-            : item
-        ));
-        return {...block, items, entries:undefined};
-      });
     }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView, feedingOverviewScheme]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
@@ -2450,18 +2440,6 @@ function App(){
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
-        {showRecordShell && showBabyFeedingHeader ? (
-          <div className="feeding-overview-scheme-switch" role="group" aria-label="今日喂养入口方案切换">
-            {[1,2,3].map(scheme=><button
-              key={scheme}
-              type="button"
-              className={feedingOverviewScheme === scheme ? 'is-active' : ''}
-              aria-pressed={feedingOverviewScheme === scheme}
-              onClick={()=>setFeedingOverviewScheme(scheme)}
-            >方案{scheme}</button>)}
-          </div>
-        ) : null}
-
       {showHome && HomePage && (
         <HomePage
           mode={recordLifeMode}

@@ -896,7 +896,6 @@ function BabyFeedingTimelineCard({item, isNew}){
     window.dispatchEvent(new CustomEvent('open-shared-feeding-history'));
   };
   const showTodayFeedingOverview = !!summary && summary.title === '今日喂养小计';
-  const overviewScheme = Number(item.overviewScheme) || 1;
 
   return (
     <article
@@ -913,9 +912,6 @@ function BabyFeedingTimelineCard({item, isNew}){
     >
       <div className="tl-baby-feed-head">
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
-        {showTodayFeedingOverview && overviewScheme === 3 ? (
-          <button className="tl-baby-feed-overview-corner" type="button" onClick={openTodayFeedingOverview}>喂养记录 <i aria-hidden="true">›</i></button>
-        ) : null}
       </div>
       <div className={'tl-baby-feed-main'+(hasDetail ? ' is-detail' : '')}>
         <span className={'tl-baby-feed-icon'+(iconSrc ? ' is-image' : '')} style={iconSrc ? undefined : {background: color}}>
@@ -951,13 +947,8 @@ function BabyFeedingTimelineCard({item, isNew}){
           <span className={'tl-baby-feed-creator' + (item.creatorId === 'family' ? ' is-family' : '')}>{creator}记录</span>
         ) : null}
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
-        {showTodayFeedingOverview && overviewScheme === 2 ? (
-          <button className="tl-baby-feed-chip is-summary" type="button" onClick={openTodayFeedingOverview}>
-            <img src="assets/feeding-review-icon.png" alt="" aria-hidden="true"/>喂养记录
-          </button>
-        ) : null}
       </div>
-      {showTodayFeedingOverview && overviewScheme === 1 ? (
+      {showTodayFeedingOverview ? (
         <button className="tl-baby-feed-overview-link" type="button" onClick={openTodayFeedingOverview}>
           <span>进入小豆苗的喂养记录</span><i aria-hidden="true">›</i>
         </button>

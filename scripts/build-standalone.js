@@ -259,6 +259,15 @@ const BUILDS = [
     comment: '宝宝喂养记录：点滴时间轴与快捷记录面板',
   },
   {
+    outfile: 'meiyou-scene6-babylog-5.html',
+    pagesName: null,
+    title: '美柚 · 场景六 · 宝宝喂养记录 · 版本五',
+    demoScene: 'note-quick-record',
+    locked: true,
+    babyFeedingMode: true,
+    comment: '宝宝喂养记录：当前版本存档（含喂养记录入口三方案）',
+  },
+  {
     outfile: 'meiyou-record-standalone.html',
     pagesName: null,
     title: '美柚 · 记录 · 场景原型',
