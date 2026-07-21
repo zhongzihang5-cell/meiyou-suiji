@@ -23,7 +23,7 @@
   font-weight:500;
   color:var(--my-text-primary);
 }
-.review-nav-share{position:absolute;right:10px;top:2px;width:42px;height:40px;padding:2px 0 0;border:0;background:transparent;color:var(--my-text-secondary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer}.review-nav-share svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}.review-nav-share span{font-size:10px;line-height:13px}.review-nav-share:focus-visible{outline:2px solid rgba(255,77,136,.32);outline-offset:-2px;border-radius:6px}
+.review-nav-share{position:absolute;right:10px;top:2px;width:42px;height:40px;padding:2px 0 0;border:0;background:transparent;color:var(--my-text-secondary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:default}.review-nav-share svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}.review-nav-share span{font-size:10px;line-height:13px}
 
 .review-content{
   flex:1 1 auto;
@@ -866,7 +866,8 @@
 .shared-feeding-timeline-page.is-point-sheet{transform:translateY(100%);transition:transform .32s cubic-bezier(.2,0,0,1),visibility 0s linear .32s}
 .shared-feeding-timeline-page.is-point-sheet.is-open{transform:translateY(0);transition:transform .32s cubic-bezier(.2,0,0,1)}
 .shared-feeding-detail-nav .shared-feeding-close-icon{display:block;margin:0;color:#333;font:300 32px/1 Arial,sans-serif;transform:translateY(-1px)}
-.shared-feeding-detail-nav{height:48px;flex-basis:48px;border-bottom:1px solid #efdfe4;background:#f4f4f7}
+.shared-feeding-detail-title{width:190px}.shared-feeding-baby-switch{width:184px;height:32px;margin:0 auto;padding:2px;border-radius:9px;background:#e9e9ed;display:grid;grid-template-columns:repeat(2,1fr);gap:2px}.shared-feeding-baby-switch button{min-width:0;padding:0;border:0;border-radius:7px;background:transparent;color:#777;font:400 14px/1 inherit;cursor:pointer}.shared-feeding-baby-switch button.is-active{background:#fff;color:#333;font-weight:500;box-shadow:0 1px 5px rgba(60,50,55,.14)}.shared-feeding-detail-title>span{margin-top:2px!important}
+.shared-feeding-detail-nav{height:62px;flex-basis:62px;border-bottom:1px solid #efdfe4;background:#f4f4f7}
 .shared-feeding-detail-nav>button{left:2px;width:42px;height:42px}
 .shared-feeding-detail-nav>button svg{stroke:#444}
 .shared-feeding-detail-filter{display:flex!important;align-items:center;gap:2px;text-align:center}

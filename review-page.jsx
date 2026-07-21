@@ -1376,10 +1376,10 @@ const SHARED_FEEDING_KIND_BY_LABEL = {
 
 const getSharedFeedingKind = label=>SHARED_FEEDING_KIND_BY_LABEL[label] || 'other';
 
-function buildSharedFeedingDaysFromTimeline(blocks){
+function buildSharedFeedingDaysFromTimeline(blocks,babyName){
   if(!Array.isArray(blocks)) return [];
   return blocks.filter(block=>block?.type==='day').map(block=>{
-    const records = (block.items || block.entries || []).filter(item=>item?.kind==='baby-feeding-card');
+    const records = (block.items || block.entries || []).filter(item=>item?.kind==='baby-feeding-card' && (!babyName || (item.babyName || '小豆苗') === babyName));
     if(!records.length) return null;
     const latestSummary = [...records].reverse().find(item=>Array.isArray(item.summary?.items))?.summary;
     const fallbackStats = new Map();
@@ -1440,10 +1440,12 @@ function SharedFeedingReviewCard({onOpen,day}){
   );
 }
 
-function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='page'}){
-  const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
+function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='page',babyName='小豆苗'}){
+  const [activeBaby, setActiveBaby] = useState(babyName);
+  const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks,activeBaby);
   const days = liveDays;
   const isSheet = presentation === 'sheet';
+  useEffect(()=>setActiveBaby(babyName),[babyName,open]);
   useEffect(()=>{
     const phone = document.querySelector('.phone');
     phone?.classList.toggle('is-shared-feeding-open', open);
@@ -1455,7 +1457,12 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
         <button type="button" aria-label={isSheet?'关闭':'返回回顾'} onClick={onClose}>
           {isSheet ? <span className="shared-feeding-close-icon" aria-hidden="true">×</span> : <ReviewBackIcon/>}
         </button>
-        <div className="shared-feeding-detail-title"><b>小豆苗</b><span>3位亲友共享</span></div>
+        <div className="shared-feeding-detail-title">
+          <div className="shared-feeding-baby-switch" role="group" aria-label="切换宝宝">
+            {['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={activeBaby===name?'is-active':''} aria-pressed={activeBaby===name} onClick={()=>setActiveBaby(name)}>{name}</button>)}
+          </div>
+          <span>3位亲友共享</span>
+        </div>
       </header>
       <div className="shared-feeding-detail-scroll">
         {days.length ? days.map(day=><section className="shared-feeding-day" key={day.date}>
@@ -1527,9 +1534,9 @@ function ReviewPage({timelineBlocks}){
     <main className="review-page" aria-label="回顾">
       <div className="review-nav">
         <span className="review-nav-title">回顾</span>
-        <button className="review-nav-share" type="button" aria-label="查看共享喂养记录" onClick={()=>setSharedFeedingOpen(true)}>
+        <div className="review-nav-share" aria-hidden="true">
           <ReviewShareIcon/><span>共享</span>
-        </button>
+        </div>
       </div>
       <div className="review-content">
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>

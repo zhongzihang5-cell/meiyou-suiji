@@ -893,9 +893,9 @@ function BabyFeedingTimelineCard({item, isNew}){
   };
   const openTodayFeedingOverview = (event)=>{
     event.stopPropagation();
-    window.dispatchEvent(new CustomEvent('open-shared-feeding-history'));
+    window.dispatchEvent(new CustomEvent('open-shared-feeding-history', {detail:{babyName:item.babyName || '小豆苗'}}));
   };
-  const showTodayFeedingOverview = !!summary && summary.title === '今日喂养小计';
+  const showTodayFeedingOverview = item.showFeedingHistoryEntry === true;
 
   return (
     <article
@@ -942,7 +942,7 @@ function BabyFeedingTimelineCard({item, isNew}){
         </div>
       ) : null}
       <div className="tl-baby-feed-tags">
-        {item.showBabyTag !== false ? <span className="tl-baby-feed-tag-main">小豆苗</span> : null}
+        {item.showBabyTag !== false ? <span className="tl-baby-feed-tag-main">{item.babyName || '小豆苗'}</span> : null}
         {item.showCreator ? (
           <span className={'tl-baby-feed-creator' + (item.creatorId === 'family' ? ' is-family' : '')}>{creator}记录</span>
         ) : null}
@@ -950,7 +950,7 @@ function BabyFeedingTimelineCard({item, isNew}){
       </div>
       {showTodayFeedingOverview ? (
         <button className="tl-baby-feed-overview-link" type="button" onClick={openTodayFeedingOverview}>
-          <span>进入小豆苗的喂养记录</span><i aria-hidden="true">›</i>
+          <span>进入{item.babyName || '小豆苗'}的喂养记录</span><i aria-hidden="true">›</i>
         </button>
       ) : null}
     </article>

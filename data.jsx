@@ -213,7 +213,7 @@ const BABY_DEMO_RECORDS = {
 };
 
 function buildBabyDemoCard(dayOffset, index, spec){
-  const [time, type, value, note, durationMinutes] = spec;
+  const [time, type, value, note, durationMinutes, babyName] = spec;
   const base = BABY_DEMO_RECORDS[type];
   const text = `${base.feedType}：${value}`;
   const card = {
@@ -229,6 +229,7 @@ function buildBabyDemoCard(dayOffset, index, spec){
     isOwnRecord:true,
     showCreator:false,
     showBabyTag:true,
+    babyName:babyName || '小豆苗',
   };
   if(note) card.noteText = note;
   if(durationMinutes) card.statDurationMinutes = durationMinutes;
@@ -264,42 +265,50 @@ function buildBabyDemoDays(){
     buildBabyDemoDay(3, [
       ['01:40','sleep','3小时10分钟','夜里睡得很安稳',190],
       ['05:10','formula','120ml','一口气喝完了'],
+      ['06:20','breast','16分钟','小豆芽清晨母乳，左8分钟，右8分钟',16,'小豆芽'],
       ['07:35','diaper','臭臭 黄色、膏状','晨起换尿布'],
       ['09:20','breast','18分钟','吃完很满足',18],
       ['11:30','water','50ml','上午喝水'],
       ['13:05','solid','米粉，菠菜，20g','第一次尝试菠菜米粉'],
       ['15:25','diaper','嘘嘘','尿量正常'],
       ['17:40','formula','140ml','傍晚奶量不错'],
+      ['18:50','diaper','嘘嘘','小豆芽傍晚换尿布',undefined,'小豆芽'],
       ['20:10','bath','13分钟','洗完澡很开心',13],
       ['21:35','sleep','8小时05分钟','夜间长睡眠',485],
     ]),
     buildBabyDemoDay(2, [
       ['02:05','breast','20分钟','夜奶后很快睡着',20],
       ['05:30','formula','130ml','清晨奶'],
+      ['06:40','formula','110ml','小豆芽清晨配方奶',undefined,'小豆芽'],
       ['07:50','diaper','臭臭 墨绿色、膏状','便便状态正常'],
       ['09:40','sleep','1小时25分钟','上午小睡',85],
       ['11:35','bottle','90ml','瓶喂母乳'],
       ['13:15','solid','米粉，南瓜，25g','南瓜米粉吃得不错'],
       ['15:10','water','60ml','午后补水'],
       ['17:25','diaper','嘘嘘','换了1片尿布'],
+      ['18:40','sleep','1小时10分钟','小豆芽傍晚小睡',70,'小豆芽'],
       ['20:00','formula','150ml','睡前奶'],
       ['21:20','play','30分钟','和妈妈一起玩积木',30],
     ]),
     buildBabyDemoDay(1, [
       ['01:55','sleep','3小时20分钟','后半夜睡眠',200],
       ['05:25','formula','135ml','清晨喝奶'],
+      ['06:30','breast','18分钟','小豆芽清晨母乳，左9分钟，右9分钟',18,'小豆芽'],
       ['07:40','diaper','臭臭 黄绿色、软便','晨起便便'],
       ['09:35','breast','22分钟','左右两侧都吃了',22],
       ['11:50','solid','米粉，香蕉，30g','香蕉米粉'],
       ['14:10','sleep','1小时40分钟','午睡',100],
       ['16:20','water','50ml','睡醒后喝水'],
+      ['17:10','solid','米粉，南瓜，20g','小豆芽吃了南瓜米粉',undefined,'小豆芽'],
       ['18:15','diaper','嘘嘘','傍晚换尿布'],
       ['20:30','formula','150ml','睡前喝得很好'],
       ['21:45','nutrition','维生素D3，50mg','今日营养补剂'],
     ]),
     buildBabyDemoDay(0, [
       ['02:00','breast','20分钟','凌晨母乳，左10分钟，右10分钟',20],
+      ['03:00','breast','16分钟','小豆芽凌晨母乳，左8分钟，右8分钟',16,'小豆芽'],
       ['05:00','formula','130ml','凌晨5点喝了130毫升配方奶'],
+      ['06:00','formula','110ml','小豆芽早上6点喝了110毫升配方奶',undefined,'小豆芽'],
     ]),
   ];
 }

@@ -1,9 +1,11 @@
 const { useState, useEffect, useRef } = React;
 const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
 const BABY_VOICE_DEMO_TEXT = '刚刚喝了120毫升奶粉';
-const VOICE_DEMO_SEQUENCE = ['personal', 'formula', 'sleep', 'breast'];
+const BABY_MULTI_VOICE_DEMO_TEXT = '小豆苗喝了130毫升配方奶，小豆芽喝了110毫升配方奶';
+const VOICE_DEMO_SEQUENCE = ['personal', 'formula-both', 'sleep', 'breast'];
 const BABY_VOICE_DEMO_QUOTES = {
   formula: BABY_VOICE_DEMO_TEXT,
+  'formula-both': BABY_MULTI_VOICE_DEMO_TEXT,
   sleep: '宝宝睡了4小时52分钟',
   breast: '左边喂了10分钟，右边喂了10分钟',
 };
@@ -76,7 +78,7 @@ function BabyVoiceOverlay({session, success}){
     delay: (i * 0.05).toFixed(2) + 's',
     duration: (0.72 + (i % 5) * 0.08).toFixed(2) + 's',
   })), []);
-  const text = BABY_VOICE_DEMO_TEXT.slice(0, session.textLength || 0);
+  const text = (session.demoText || BABY_VOICE_DEMO_TEXT).slice(0, session.textLength || 0);
   return (
     <>
       <div
@@ -249,13 +251,15 @@ function BabyFeedingDiscoverCard({onClose}){
 function BabyFormulaDetailPage({entry, onClose, onSave}){
   const initialAmount = Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130;
   const [amount, setAmount] = useState(initialAmount);
+  const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
   const [noteOpen, setNoteOpen] = useState(true);
   const [note, setNote] = useState(entry?.voiceQuote || entry?.noteText || '');
   const now = new Date();
   const options = [amount - 15, amount - 10, amount - 5, amount, amount + 5, amount + 10, amount + 15].filter(value=>value > 0);
-  useEffect(()=>{ setAmount(Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130); setNote(entry?.voiceQuote || entry?.noteText || ''); setNoteOpen(true); }, [entry?.id]);
+  const lastRecordByBaby = {'小豆苗':entry?.lastRecordLabel || '3小时47分钟前','小豆芽':'1小时12分钟前'};
+  useEffect(()=>{ setAmount(Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130); setBabyName(entry?.babyName || '小豆苗'); setNote(entry?.voiceQuote || entry?.noteText || ''); setNoteOpen(true); }, [entry?.id]);
   return <section className="baby-formula-detail" role="dialog" aria-modal="true" aria-label="配方奶记录详情">
-    <header className="baby-formula-detail-nav"><button type="button" className="baby-formula-close" aria-label="关闭" onClick={onClose}>×</button><div><h1>配方奶</h1><p>上次：{entry?.lastRecordLabel || '3小时47分钟前'}</p></div><span/></header>
+    <header className="baby-formula-detail-nav"><button type="button" className="baby-formula-close" aria-label="关闭" onClick={onClose}>×</button><div><h1>配方奶</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></div><span/></header>
     <main className="baby-formula-detail-body"><section className="baby-formula-form">
       <div className="baby-formula-row"><span>开始时间</span><button type="button" className="baby-formula-value">{now.getMonth()+1}月{now.getDate()}日 {entry?.time || '13:35'}<b>›</b></button></div>
       <div className="baby-formula-amount-head"><span>奶量</span><button type="button" className="baby-formula-keyboard"><span>⠿</span>键盘输入</button></div>
@@ -263,7 +267,7 @@ function BabyFormulaDetailPage({entry, onClose, onSave}){
       <div className="baby-formula-row"><span>结束时间</span><button type="button" className="baby-formula-value is-placeholder">请选择<b>›</b></button></div>
       <div className="baby-formula-note"><button type="button" className="baby-formula-note-toggle" aria-expanded={noteOpen} onClick={()=>setNoteOpen(open=>!open)}><span>备注</span><b>{noteOpen?'⌃':'⌄'}</b></button>{noteOpen?<textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/>:null}</div>
     </section></main>
-    <footer className="baby-formula-detail-foot"><button type="button" onClick={()=>onSave({amount,note})}>保存</button></footer>
+    <footer className="baby-formula-detail-foot"><button type="button" onClick={()=>onSave({amount,note,babyName})}>保存</button></footer>
   </section>;
 }
 
@@ -274,8 +278,10 @@ function BabyBreastDetailPage({entry, onClose, onSave}){
   const [right, setRight] = useState(entry?.rightMinutes || 10);
   const [running, setRunning] = useState('');
   const [seconds, setSeconds] = useState({left:0,right:0});
+  const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
   const [note, setNote] = useState(entry?.noteText || entry?.voiceQuote || '');
-  useEffect(()=>{ setMode(lockedManual ? 'manual' : 'timer'); setLeft(entry?.leftMinutes || 10); setRight(entry?.rightMinutes || 10); setRunning(''); setSeconds({left:0,right:0}); setNote(entry?.noteText || entry?.voiceQuote || ''); }, [entry?.id]);
+  const lastRecordByBaby = {'小豆苗':'3小时47分钟前','小豆芽':'2小时18分钟前'};
+  useEffect(()=>{ setMode(lockedManual ? 'manual' : 'timer'); setLeft(entry?.leftMinutes || 10); setRight(entry?.rightMinutes || 10); setRunning(''); setSeconds({left:0,right:0}); setBabyName(entry?.babyName || '小豆苗'); setNote(entry?.noteText || entry?.voiceQuote || ''); }, [entry?.id]);
   useEffect(()=>{
     if(!running) return undefined;
     const timer=setInterval(()=>setSeconds(value=>({...value,[running]:value[running]+1})),1000);
@@ -285,7 +291,7 @@ function BabyBreastDetailPage({entry, onClose, onSave}){
   const now=new Date();
   const manual=mode==='manual';
   return <section className="baby-breast-detail" role="dialog" aria-modal="true" aria-label="母乳记录详情">
-    <header className="baby-breast-nav"><button type="button" aria-label="关闭" onClick={onClose}>×</button><div><h1>母乳</h1><p>上次：3小时47分钟前</p></div><span/></header>
+    <header className="baby-breast-nav"><button type="button" aria-label="关闭" onClick={onClose}>×</button><div><h1>母乳</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></div><span/></header>
     <main className="baby-breast-body"><section className="baby-breast-form">
       {!lockedManual ? <div className="baby-breast-mode"><button type="button" className={!manual?'is-active':''} onClick={()=>setMode('timer')}>计时</button><button type="button" className={manual?'is-active':''} onClick={()=>setMode('manual')}>手动输入</button></div> : null}
       {!manual ? <div className="baby-breast-timer">
@@ -297,7 +303,7 @@ function BabyBreastDetailPage({entry, onClose, onSave}){
       </div>}
       <div className="baby-breast-note"><label>备注</label><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/></div>
     </section></main>
-    <footer className="baby-breast-foot"><button type="button" onClick={()=>onSave({left:manual?left:Math.max(1,Math.ceil(seconds.left/60)),right:manual?right:Math.max(1,Math.ceil(seconds.right/60)),note})}>保存</button></footer>
+    <footer className="baby-breast-foot"><button type="button" onClick={()=>onSave({left:manual?left:Math.max(1,Math.ceil(seconds.left/60)),right:manual?right:Math.max(1,Math.ceil(seconds.right/60)),note,babyName})}>保存</button></footer>
   </section>;
 }
 
@@ -305,11 +311,13 @@ function BabySleepDetailPage({entry, onClose, onStart, onSave}){
   const [mode, setMode] = useState(entry?.sleepMode || 'timer');
   const [seconds, setSeconds] = useState(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
   const [running, setRunning] = useState(false);
+  const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
   const [note, setNote] = useState(entry?.noteText || '');
   useEffect(()=>{
     setMode(entry?.sleepMode || 'timer');
     setSeconds(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
     setRunning(false);
+    setBabyName(entry?.babyName || '小豆苗');
     setNote(entry?.noteText || '');
   }, [entry?.id]);
   useEffect(()=>{
@@ -323,12 +331,13 @@ function BabySleepDetailPage({entry, onClose, onStart, onSave}){
   const activeTimer = !!entry?.sleeping;
   const minutes = Math.max(1, Math.ceil(seconds / 60));
   const formatClock = (value)=>`${String(Math.floor(value / 60)).padStart(2,'0')}:${String(value % 60).padStart(2,'0')}`;
-  const handleStart = ()=>onStart?.({seconds:Math.max(1, seconds || 1), note});
-  const handleSave = ()=>onSave?.({minutes, seconds:Math.max(seconds, 60), note, mode});
+  const lastRecordByBaby = {'小豆苗':'14小时49分钟前','小豆芽':'8小时26分钟前'};
+  const handleStart = ()=>onStart?.({seconds:Math.max(1, seconds || 1), note, babyName});
+  const handleSave = ()=>onSave?.({minutes, seconds:Math.max(seconds, 60), note, mode, babyName});
   return <section className="baby-sleep-detail" role="dialog" aria-modal="true" aria-label="睡眠记录详情">
     <header className="baby-sleep-nav">
       <button type="button" aria-label={activeTimer ? '收起' : '关闭'} onClick={onClose}>{activeTimer ? '收起' : '×'}</button>
-      <div><h1>睡眠</h1><p>{activeTimer ? `妈妈 今天 ${timeText} 创建 ◌` : '上次：14小时49分钟前'}</p></div><span/>
+      <div><h1>睡眠</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{activeTimer ? `${babyName} · 妈妈 今天 ${timeText} 创建` : `${babyName}上次：${lastRecordByBaby[babyName]}`}</p></div><span/>
     </header>
     <main className="baby-sleep-body"><section className="baby-sleep-form">
       <div className="baby-sleep-mode">
@@ -412,6 +421,7 @@ function App(){
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
   const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
   const [sharedFeedingHistoryOpen, setSharedFeedingHistoryOpen] = useState(false);
+  const [sharedFeedingHistoryBaby, setSharedFeedingHistoryBaby] = useState('小豆苗');
   const [activeTab, setActiveTab] = useState(()=>{
     if(IS_BABY_FEEDING_DEMO){
       return 'note';
@@ -1156,19 +1166,22 @@ function App(){
   };
 
   const activateBabyVoiceHold = ()=>{
+    const sequenceStep = VOICE_DEMO_SEQUENCE[voiceDemoSequenceRef.current % VOICE_DEMO_SEQUENCE.length];
+    const demoText = sequenceStep === 'formula-both' ? BABY_MULTI_VOICE_DEMO_TEXT : BABY_VOICE_DEMO_TEXT;
     setBabyVoiceCoachHidden(true);
     babyVoiceActiveRef.current = true;
     stopBabyVoiceTyping();
     clearTimeout(babyVoiceSuccessTimerRef.current);
     setBabyVoiceSuccess({show:false});
-    setBabyVoiceSession({active:true, cancel:false, textLength:0});
+    setBabyVoiceSession({active:true, cancel:false, textLength:0, demoText});
     babyVoiceTimerRef.current = setInterval(()=>{
       setBabyVoiceSession((current)=>{
         if(!current.active){
           stopBabyVoiceTyping();
           return current;
         }
-        if(current.textLength >= BABY_VOICE_DEMO_TEXT.length){
+        const fullText = current.demoText || BABY_VOICE_DEMO_TEXT;
+        if(current.textLength >= fullText.length){
           stopBabyVoiceTyping();
           return current;
         }
@@ -1334,10 +1347,11 @@ function App(){
   const clearBabyFeedingLatestMarks = (blocks)=>blocks.map(block=>{
     if(block.type !== 'day') return block;
     const items = (block.items || block.entries || []).map(item=>{
-      if(item.kind !== 'baby-feeding-card' || (!item.summary && !item.relativeTime)) return item;
+      if(item.kind !== 'baby-feeding-card' || (!item.summary && !item.relativeTime && !item.showFeedingHistoryEntry)) return item;
       const next = {...item};
       delete next.summary;
       delete next.relativeTime;
+      delete next.showFeedingHistoryEntry;
       return next;
     });
     return {...block, items, entries:undefined};
@@ -1350,25 +1364,27 @@ function App(){
     return dayRank * 10000000 + minutes * 1000 + blockIndex * 100 + itemIndex;
   };
 
-  const getLatestBabyFeedingIdsByType = (blocks)=>{
-    const latestByType = new Map();
+  const getLatestBabyFeedingIdsByBabyAndType = (blocks)=>{
+    const latestByBabyAndType = new Map();
     (blocks || []).forEach((block, blockIndex)=>{
       if(block.type !== 'day') return;
       (block.items || block.entries || []).forEach((item, itemIndex)=>{
         if(item.kind !== 'baby-feeding-card') return;
         const type = item.feedType || String(item.text || '').split('：')[0];
         if(!type) return;
+        const babyName = item.babyName || '小豆苗';
+        const key = `${babyName}::${type}`;
         const score = getBabyFeedingTimeScore(block, item, blockIndex, itemIndex);
-        const current = latestByType.get(type);
-        if(!current || score > current.score) latestByType.set(type, {id:item.id, score});
+        const current = latestByBabyAndType.get(key);
+        if(!current || score > current.score) latestByBabyAndType.set(key, {id:item.id, score});
       });
     });
-    return new Set([...latestByType.values()].map(item=>item.id));
+    return new Set([...latestByBabyAndType.values()].map(item=>item.id));
   };
 
   const refreshBabyFeedingLatestMarks = (blocks, targetDayId)=>{
     const cleaned = clearBabyFeedingLatestMarks(blocks);
-    const latestIdsByType = getLatestBabyFeedingIdsByType(cleaned);
+    const latestIdsByType = getLatestBabyFeedingIdsByBabyAndType(cleaned);
     let latestDayId = targetDayId;
     if(!latestDayId){
       for(let i = cleaned.length - 1; i >= 0; i -= 1){
@@ -1405,16 +1421,26 @@ function App(){
         item.kind === 'baby-feeding-card' ? index : found
       ), -1);
       if(latestIndex < 0) return {...block, items:itemsWithRelativeTime, entries:undefined};
+      const latestIndexByBaby = new Map();
+      items.forEach((item, index)=>{
+        if(item.kind !== 'baby-feeding-card') return;
+        latestIndexByBaby.set(item.babyName || '小豆苗', index);
+      });
       const summary = {
         ...buildBabyFeedingDailySummary(items),
         title:block.relativeLabel === '昨天' ? '昨日喂养小计' : '今日喂养小计',
       };
       return {
         ...block,
-        items:itemsWithRelativeTime.map((item, index)=>index === latestIndex ? {
-          ...item,
-          summary,
-        } : item),
+        items:itemsWithRelativeTime.map((item, index)=>{
+          if(item.kind !== 'baby-feeding-card') return item;
+          const isLatestForBaby = latestIndexByBaby.get(item.babyName || '小豆苗') === index;
+          return {
+            ...item,
+            ...(index === latestIndex ? {summary} : {}),
+            ...(isLatestForBaby ? {showFeedingHistoryEntry:true} : {}),
+          };
+        }),
         entries:undefined,
       };
     });
@@ -1450,6 +1476,39 @@ function App(){
   const appendBabyFeedingTimelineCard = (recordType='formula')=>{
     const timestamp = Date.now();
     const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
+    if(recordType === 'formula-both'){
+      const sourceItem = BABY_FEEDING_QUICK_ITEMS.find(item=>item.id === 'formula') || BABY_FEEDING_QUICK_ITEMS[0];
+      const entries = [
+        {babyName:'小豆苗', amount:130, voiceQuote:'小豆苗喝了130毫升配方奶'},
+        {babyName:'小豆芽', amount:110, voiceQuote:'小豆芽喝了110毫升配方奶'},
+      ].map((record,index)=>({
+        id:`baby-feeding-voice-formula-both-${timestamp}-${index}`,
+        kind:'baby-feeding-card',
+        time,
+        text:`配方奶：${record.amount}ml`,
+        voice:{duration:'10″'},
+        feedType:'配方奶',
+        value:`${record.amount}ml`,
+        icon:sourceItem.cardIcon || '🍼',
+        iconSrc:sourceItem.iconSrc,
+        color:sourceItem.color || '#FF7A66',
+        voiceQuote:record.voiceQuote,
+        babyName:record.babyName,
+        railDot:'baby',
+        creator:'妈妈',
+        creatorId:'self',
+        isOwnRecord:true,
+        isNew:true,
+      }));
+      setTimeline(blocks=>{
+        const dayId = resolveBabyFeedingTargetDayId(blocks);
+        const cleared = clearBabyFeedingLatestMarks(blocks);
+        const next = entries.reduce((current,entry)=>window.appendTimelineEntry(current,entry,{dayId}),cleared);
+        return refreshBabyFeedingLatestMarks(next,dayId);
+      });
+      notifyBabyShareSync();
+      return;
+    }
     const sourceItem = BABY_FEEDING_QUICK_ITEMS.find(item=>item.id === recordType)
       || BABY_FEEDING_QUICK_ITEMS[0];
     const value = recordType === 'formula' ? '120ml' : sourceItem.value;
@@ -2137,7 +2196,10 @@ function App(){
   const SharedFeedingTimelinePage = window.SharedFeedingTimelinePage;
 
   React.useEffect(()=>{
-    const openSharedFeedingHistory = ()=>setSharedFeedingHistoryOpen(true);
+    const openSharedFeedingHistory = (event)=>{
+      setSharedFeedingHistoryBaby(event.detail?.babyName || '小豆苗');
+      setSharedFeedingHistoryOpen(true);
+    };
     window.addEventListener('open-shared-feeding-history', openSharedFeedingHistory);
     return ()=>window.removeEventListener('open-shared-feeding-history', openSharedFeedingHistory);
   },[]);
@@ -2504,7 +2566,7 @@ function App(){
         <ReviewPage timelineBlocks={timeline}/>
       )}
 
-      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open presentation="sheet" timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
+      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open presentation="sheet" babyName={sharedFeedingHistoryBaby} timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
 
       <div
         className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}
@@ -2855,13 +2917,14 @@ function App(){
         </div>
       ) : null}
 
-      {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note})=>{
+      {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note,babyName})=>{
         if(formulaDetailEntry.isQuickDraft){
           const {isQuickDraft, ...draftEntry}=formulaDetailEntry;
           const entry={
             ...draftEntry,
             value:`${amount}ml`,
             text:`配方奶：${amount}ml`,
+            babyName,
             voiceQuote:note || undefined,
             noteText:note || undefined,
           };
@@ -2878,18 +2941,18 @@ function App(){
         }
         setTimeline(blocks=>blocks.map(block=>{
           if(block.type !=='day') return block;
-          const items=(block.items||block.entries||[]).map(item=>item.id===formulaDetailEntry.id?{...item,value:`${amount}ml`,text:`配方奶：${amount}ml`,voiceQuote:note,noteText:note}:item);
+          const items=(block.items||block.entries||[]).map(item=>item.id===formulaDetailEntry.id?{...item,value:`${amount}ml`,text:`配方奶：${amount}ml`,babyName,voiceQuote:note,noteText:note}:item);
           return {...block,items,entries:undefined};
         }));
         setFormulaDetailEntry(null);
         pushToast({text:'已保存',placement:'center'});
       }}/>:null}
-      {breastDetailEntry ? <BabyBreastDetailPage entry={breastDetailEntry} onClose={()=>setBreastDetailEntry(null)} onSave={({left,right,note})=>{
+      {breastDetailEntry ? <BabyBreastDetailPage entry={breastDetailEntry} onClose={()=>setBreastDetailEntry(null)} onSave={({left,right,note,babyName})=>{
         const total=left+right;
         const detailLines=[`母乳：左${left}分钟，右${right}分钟`, `${breastDetailEntry.time || '12:32'}–${breastDetailEntry.time || '12:32'}`];
         if(breastDetailEntry.isQuickDraft){
           const {isQuickDraft,...draftEntry}=breastDetailEntry;
-          const entry={...draftEntry,value:`${total}分钟`,text:'母乳',leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined};
+          const entry={...draftEntry,value:`${total}分钟`,text:'母乳',babyName,leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined};
           setTimeline(blocks=>{
             const dayId=resolveBabyFeedingTargetDayId(blocks);
             const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),entry,{dayId});
@@ -2900,12 +2963,12 @@ function App(){
         }
         setTimeline(blocks=>blocks.map(block=>{
           if(block.type!=='day') return block;
-          const items=(block.items||block.entries||[]).map(item=>item.id===breastDetailEntry.id?{...item,value:`${total}分钟`,text:'母乳',leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined}:item);
+          const items=(block.items||block.entries||[]).map(item=>item.id===breastDetailEntry.id?{...item,value:`${total}分钟`,text:'母乳',babyName,leftMinutes:left,rightMinutes:right,detailLines,statDurationMinutes:total,noteText:note || undefined}:item);
           return {...block,items,entries:undefined};
         }));
         setBreastDetailEntry(null);pushToast({text:'已保存',placement:'center'});
       }}/>:null}
-      {sleepDetailEntry ? <BabySleepDetailPage entry={sleepDetailEntry} onClose={()=>setSleepDetailEntry(null)} onStart={({seconds,note})=>{
+      {sleepDetailEntry ? <BabySleepDetailPage entry={sleepDetailEntry} onClose={()=>setSleepDetailEntry(null)} onStart={({seconds,note,babyName})=>{
         const draftEntry = sleepDetailEntry;
         const {isQuickDraft, ...runningEntry} = draftEntry;
         const time = draftEntry.time || window.formatNowTime?.() || '12:04';
@@ -2916,6 +2979,7 @@ function App(){
           text:'睡眠',
           feedType:'睡眠',
           value:'宝宝睡觉中',
+          babyName,
           detailLines:null,
           statDurationMinutes:undefined,
           sleeping:true,
@@ -2931,7 +2995,7 @@ function App(){
         setSleepDetailEntry(null);
         pushToast({text:'睡眠计时已开始',placement:'center'});
         setTimeout(()=>scrollTimelineToBottom('smooth'),80);
-      }} onSave={({minutes, seconds, note, mode})=>{
+      }} onSave={({minutes, seconds, note, mode,babyName})=>{
         const duration = minutes || 1;
         const time = sleepDetailEntry.time || window.formatNowTime?.() || '12:04';
         const finalEntry = {
@@ -2939,6 +3003,7 @@ function App(){
           sleeping:false,
           value:formatBabyFeedingDurationText(duration),
           text:'睡眠',
+          babyName,
           detailLines:[`睡眠：睡了${formatBabyFeedingDurationText(duration)}`, `${time}-${addMinutesToBabyTime(time, duration)}`],
           statDurationMinutes:duration,
           elapsedSeconds:seconds,
