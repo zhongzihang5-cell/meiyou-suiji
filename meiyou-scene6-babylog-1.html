@@ -7485,6 +7485,14 @@ html,body{
 @keyframes relationshipTransitionFade{from{background:rgba(31,29,34,0)}to{background:rgba(31,29,34,.34)}}
 @keyframes relationshipTransitionRise{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
+.ai-record-processing{position:absolute;left:50%;bottom:184px;z-index:650;display:flex;width:max-content;min-width:238px;max-width:calc(100% - 44px);align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(255,79,136,.18);border-radius:12px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(54,43,57,.14);color:#37343a;transform:translateX(-50%);animation:aiRecordProcessingIn .22s cubic-bezier(.22,1,.36,1) both;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.ai-record-processing-icon{display:grid;flex:0 0 34px;width:34px;height:34px;place-items:center;border-radius:50%;background:#fff0f5;color:#ff4f88;font-size:18px;animation:aiRecordProcessingPulse 1s ease-in-out infinite}
+.ai-record-processing-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:3px}.ai-record-processing-copy b{font-size:14px;font-weight:600;line-height:1.2}.ai-record-processing-copy em{color:#96919a;font-size:11px;font-style:normal;line-height:1.2}
+.ai-record-processing-dots{display:flex;flex:0 0 auto;align-items:center;gap:3px}.ai-record-processing-dots i{width:4px;height:4px;border-radius:50%;background:#ff6f9e;animation:aiRecordDot .9s ease-in-out infinite}.ai-record-processing-dots i:nth-child(2){animation-delay:.15s}.ai-record-processing-dots i:nth-child(3){animation-delay:.3s}
+@keyframes aiRecordProcessingIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes aiRecordProcessingPulse{50%{transform:scale(.92);opacity:.72}}
+@keyframes aiRecordDot{0%,70%,100%{transform:translateY(0);opacity:.35}35%{transform:translateY(-3px);opacity:1}}
+
 
 /* ============ 日历 Tab（经期记录页） ============ */
 .cal-page{
@@ -42898,6 +42906,7 @@ function App(){
   const [draft, setDraft] = useState(initial.draft);
   const [timeline, setTimeline] = useState(initial.timeline);
   const [toasts, setToasts] = useState([]);
+  const [aiRecordProcessing, setAiRecordProcessing] = useState(null);
   const [showPhoto, setShowPhoto] = useState(false);
   const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
@@ -42958,6 +42967,8 @@ function App(){
   const recordEnterModeRef = useRef('idle');
   const periodRecordRef = useRef(null);
   const firstRecordAnimDoneRef = useRef(false);
+  const aiRecordProcessingRef = useRef(false);
+  const aiRecordProcessingTimersRef = useRef([]);
   const babyShareSyncNoticeTimerRef = useRef(null);
   const moodGuideQueueRef = useRef(null);
   const dropLandRevealRef = useRef(false);
@@ -43955,6 +43966,29 @@ function App(){
     babyShareSyncNoticeTimerRef.current = setTimeout(()=>setBabyShareSyncNotice(0), 3200);
   };
 
+  const runAiRecordProcessing = (source, onComplete)=>{
+    if(aiRecordProcessingRef.current) return false;
+    aiRecordProcessingRef.current = true;
+    aiRecordProcessingTimersRef.current.forEach(clearTimeout);
+    aiRecordProcessingTimersRef.current = [];
+    setAiRecordProcessing({source,stage:0});
+    aiRecordProcessingTimersRef.current.push(
+      setTimeout(()=>setAiRecordProcessing({source,stage:1}),500),
+      setTimeout(()=>setAiRecordProcessing({source,stage:2}),1000),
+      setTimeout(()=>{
+        onComplete?.();
+        setAiRecordProcessing(null);
+        aiRecordProcessingRef.current = false;
+      },1500),
+    );
+    return true;
+  };
+
+  useEffect(()=>()=>{
+    aiRecordProcessingTimersRef.current.forEach(clearTimeout);
+    aiRecordProcessingRef.current = false;
+  },[]);
+
   const appendBabyFeedingTimelineCard = (recordType='formula')=>{
     const timestamp = Date.now();
     const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
@@ -44085,6 +44119,7 @@ function App(){
   };
 
   const submitBabyFeedingVoice = (transcript, durSec)=>{
+    if(aiRecordProcessingRef.current) return;
     const sequenceStep = VOICE_DEMO_SEQUENCE[voiceDemoSequenceRef.current % VOICE_DEMO_SEQUENCE.length];
     voiceDemoSequenceRef.current += 1;
     const nextSpace = sequenceStep === 'personal' ? 'personal' : 'shared';
@@ -44095,9 +44130,11 @@ function App(){
     clearTimeout(babyVoiceSuccessTimerRef.current);
     setBabyVoiceSuccess({show:false});
     setNoteTabUnread(false);
-    if(sequenceStep === 'personal') appendPersonalVoiceTimelineCard(transcript, durSec);
-    else appendBabyFeedingTimelineCard(sequenceStep);
-    setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
+    runAiRecordProcessing('voice',()=>{
+      if(sequenceStep === 'personal') appendPersonalVoiceTimelineCard(transcript, durSec);
+      else appendBabyFeedingTimelineCard(sequenceStep);
+      setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
+    });
   };
 
   const endBabyVoiceHold = ()=>{
@@ -44203,7 +44240,7 @@ function App(){
     return true;
   };
 
-  const submitText = (textOverride, opts={})=>{
+  const commitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
 
@@ -44239,6 +44276,17 @@ function App(){
     const entry = buildTimelineEntry(text, hits, opts);
     if(recordFeedback && tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
+  };
+
+  const submitText = (textOverride, opts={})=>{
+    const text = (textOverride || draft).trim();
+    if(!text || aiRecordProcessingRef.current) return;
+    if(recordLifeMode !== '育儿'){
+      commitText(text, opts);
+      return;
+    }
+    setDraft('');
+    runAiRecordProcessing('text',()=>commitText(text, opts));
   };
 
   // ====== 清除上一轮演示卡片 ======
@@ -45237,6 +45285,16 @@ function App(){
             <span className="family-share-update-copy"><b>亲友新增{familyShareUnread}条小豆苗记录</b><em>爸爸、奶奶刚刚记录了喂养情况</em></span>
             <span className="family-share-update-arrow" aria-hidden="true" />
           </button>
+        ) : null}
+        {aiRecordProcessing ? (
+          <div className="ai-record-processing" role="status" aria-live="polite">
+            <span className="ai-record-processing-icon" aria-hidden="true">✦</span>
+            <span className="ai-record-processing-copy">
+              <b>{['正在理解记录','正在提取记录项','正在整理到时间轴'][aiRecordProcessing.stage]}</b>
+              <em>{aiRecordProcessing.source === 'voice' ? 'AI 正在理解这段语音' : 'AI 正在理解这段文字'}</em>
+            </span>
+            <span className="ai-record-processing-dots" aria-hidden="true"><i/><i/><i/></span>
+          </div>
         ) : null}
         <div
           className={

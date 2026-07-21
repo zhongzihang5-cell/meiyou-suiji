@@ -964,7 +964,19 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   );
 
   let body = null;
-  if(item.kind === 'diet-photo-feedback'){
+  if(item.kind === 'ai-record-processing'){
+    const stageText = ['正在提取记录','正在整理到时间轴'][item.processingStage] || '正在智能记录';
+    body = (
+      <div className="tl-ai-record-processing-card" role="status" aria-live="polite">
+        <span className="tl-ai-record-processing-icon" aria-hidden="true">✦</span>
+        <span className="tl-ai-record-processing-copy">
+          <b>{stageText}</b>
+          <em>{item.processingSource === 'voice' ? 'AI 正在处理这段语音' : 'AI 正在处理这段文字'}</em>
+        </span>
+        <span className="tl-ai-record-processing-dots" aria-hidden="true"><i/><i/><i/></span>
+      </div>
+    );
+  } else if(item.kind === 'diet-photo-feedback'){
     const DietPhotoFeedbackCard = window.DietPhotoFeedbackCard;
     const card = DietPhotoFeedbackCard
       ? <DietPhotoFeedbackCard

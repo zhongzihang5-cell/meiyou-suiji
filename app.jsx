@@ -416,6 +416,7 @@ function App(){
   const [draft, setDraft] = useState(initial.draft);
   const [timeline, setTimeline] = useState(initial.timeline);
   const [toasts, setToasts] = useState([]);
+  const [aiRecordProcessing, setAiRecordProcessing] = useState(null);
   const [showPhoto, setShowPhoto] = useState(false);
   const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
@@ -476,6 +477,8 @@ function App(){
   const recordEnterModeRef = useRef('idle');
   const periodRecordRef = useRef(null);
   const firstRecordAnimDoneRef = useRef(false);
+  const aiRecordProcessingRef = useRef(false);
+  const aiRecordProcessingTimersRef = useRef([]);
   const babyShareSyncNoticeTimerRef = useRef(null);
   const moodGuideQueueRef = useRef(null);
   const dropLandRevealRef = useRef(false);
@@ -1473,6 +1476,28 @@ function App(){
     babyShareSyncNoticeTimerRef.current = setTimeout(()=>setBabyShareSyncNotice(0), 3200);
   };
 
+  const runAiRecordProcessing = (source, onComplete)=>{
+    if(aiRecordProcessingRef.current) return false;
+    aiRecordProcessingRef.current = true;
+    aiRecordProcessingTimersRef.current.forEach(clearTimeout);
+    aiRecordProcessingTimersRef.current = [];
+    setAiRecordProcessing({source,stage:0});
+    aiRecordProcessingTimersRef.current.push(
+      setTimeout(()=>setAiRecordProcessing({source,stage:1}),1000),
+      setTimeout(()=>{
+        onComplete?.();
+        setAiRecordProcessing(null);
+        aiRecordProcessingRef.current = false;
+      },2000),
+    );
+    return true;
+  };
+
+  useEffect(()=>()=>{
+    aiRecordProcessingTimersRef.current.forEach(clearTimeout);
+    aiRecordProcessingRef.current = false;
+  },[]);
+
   const appendBabyFeedingTimelineCard = (recordType='formula')=>{
     const timestamp = Date.now();
     const time = window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
@@ -1603,6 +1628,7 @@ function App(){
   };
 
   const submitBabyFeedingVoice = (transcript, durSec)=>{
+    if(aiRecordProcessingRef.current) return;
     const sequenceStep = VOICE_DEMO_SEQUENCE[voiceDemoSequenceRef.current % VOICE_DEMO_SEQUENCE.length];
     voiceDemoSequenceRef.current += 1;
     const nextSpace = sequenceStep === 'personal' ? 'personal' : 'shared';
@@ -1613,9 +1639,11 @@ function App(){
     clearTimeout(babyVoiceSuccessTimerRef.current);
     setBabyVoiceSuccess({show:false});
     setNoteTabUnread(false);
-    if(sequenceStep === 'personal') appendPersonalVoiceTimelineCard(transcript, durSec);
-    else appendBabyFeedingTimelineCard(sequenceStep);
-    setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
+    runAiRecordProcessing('voice',()=>{
+      if(sequenceStep === 'personal') appendPersonalVoiceTimelineCard(transcript, durSec);
+      else appendBabyFeedingTimelineCard(sequenceStep);
+      setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
+    });
   };
 
   const endBabyVoiceHold = ()=>{
@@ -1721,7 +1749,7 @@ function App(){
     return true;
   };
 
-  const submitText = (textOverride, opts={})=>{
+  const commitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text) return;
 
@@ -1757,6 +1785,17 @@ function App(){
     const entry = buildTimelineEntry(text, hits, opts);
     if(recordFeedback && tryStartFirstDrop(entry, text)) return;
     pushToTimeline(entry, text);
+  };
+
+  const submitText = (textOverride, opts={})=>{
+    const text = (textOverride || draft).trim();
+    if(!text || aiRecordProcessingRef.current) return;
+    if(recordLifeMode !== '育儿'){
+      commitText(text, opts);
+      return;
+    }
+    setDraft('');
+    runAiRecordProcessing('text',()=>commitText(text, opts));
   };
 
   // ====== 清除上一轮演示卡片 ======
@@ -2425,9 +2464,26 @@ function App(){
             return {...block, items, entries:undefined};
           });
     }
+    if(aiRecordProcessing && !isSearchActive){
+      const now = new Date();
+      const processingItem = {
+        id:'ai-record-processing',
+        kind:'ai-record-processing',
+        time:`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+        processingSource:aiRecordProcessing.source,
+        processingStage:aiRecordProcessing.stage,
+        railDot:'feed',
+      };
+      let inserted = false;
+      source = source.map(block=>{
+        if(inserted || block.type !== 'day' || !block.isToday) return block;
+        inserted = true;
+        return {...block, items:[...(block.items || block.entries || []), processingItem], entries:undefined};
+      });
+    }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView, aiRecordProcessing]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
