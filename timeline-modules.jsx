@@ -96,7 +96,7 @@ function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, d
   const RecordBlankAxisDropAnim = window.RecordBlankAxisDropAnim;
   const isDrop = !!dropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(isDrop?' is-axis-drop':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(nodeKind==='ai-record-processing'?' is-ai-record-processing':'')+(isDrop?' is-axis-drop':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
         {isDrop && RecordBlankAxisDropAnim ? (
           <RecordBlankAxisDropAnim onLand={onDropLand} onComplete={onDropComplete}/>

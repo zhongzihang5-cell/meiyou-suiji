@@ -2472,7 +2472,7 @@ function App(){
         time:`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
         processingSource:aiRecordProcessing.source,
         processingStage:aiRecordProcessing.stage,
-        railDot:'feed',
+        railDot:'baby',
       };
       let inserted = false;
       source = source.map(block=>{
