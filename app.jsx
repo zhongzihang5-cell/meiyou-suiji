@@ -447,6 +447,7 @@ function App(){
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [noteTabUnread, setNoteTabUnread] = useState(false);
   const [reviewTabUnread, setReviewTabUnread] = useState(false);
+  const [feedingOverviewScheme, setFeedingOverviewScheme] = useState(1);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
@@ -1564,7 +1565,12 @@ function App(){
       clearTimeout(babyVoiceHoldTimerRef.current);
       babyVoiceHoldTimerRef.current = null;
       babyVoiceCancelRef.current = false;
-      // 短按点滴 tab：进入点滴并清除记录成功提示与小红点
+      // 短按点滴 tab：与首页喂养记录入口保持一致。
+      setBabyFeedingEntryActive(true);
+      setBabyDiscoverVisible(false);
+      setBabyFeedingPanelMode(null);
+      setSearchCriteria(null);
+      recordEnterModeRef.current = 'feeding-entry';
       setNoteTabUnread(false);
       clearTimeout(babyVoiceSuccessTimerRef.current);
       setBabyVoiceSuccess({show:false});
@@ -2357,10 +2363,19 @@ function App(){
             });
             return {...block, items, entries:undefined};
           });
+      source = source.map(block=>{
+        if(block.type !== 'day') return block;
+        const items = (block.items || block.entries || []).map(item=>(
+          item.kind === 'baby-feeding-card' && item.summary
+            ? {...item, overviewScheme:feedingOverviewScheme}
+            : item
+        ));
+        return {...block, items, entries:undefined};
+      });
     }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView, feedingOverviewScheme]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
@@ -2435,6 +2450,17 @@ function App(){
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
+        {showRecordShell && showBabyFeedingHeader ? (
+          <div className="feeding-overview-scheme-switch" role="group" aria-label="今日喂养入口方案切换">
+            {[1,2,3].map(scheme=><button
+              key={scheme}
+              type="button"
+              className={feedingOverviewScheme === scheme ? 'is-active' : ''}
+              aria-pressed={feedingOverviewScheme === scheme}
+              onClick={()=>setFeedingOverviewScheme(scheme)}
+            >方案{scheme}</button>)}
+          </div>
+        ) : null}
 
       {showHome && HomePage && (
         <HomePage
@@ -2500,7 +2526,7 @@ function App(){
         <ReviewPage timelineBlocks={timeline}/>
       )}
 
-      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
+      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open presentation="sheet" timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
 
       <div
         className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}

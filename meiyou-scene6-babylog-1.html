@@ -12,7 +12,7 @@
 <title>美柚 · 场景六 · 宝宝喂养记录 · 方案一</title>
 <!--
   宝宝喂养记录：点滴时间轴与快捷记录面板
-  生成日期: 2026-07-17
+  生成日期: 2026-07-21
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -3635,6 +3635,7 @@ html,body{
   gap:8px;
   margin-bottom:10px;
 }
+.tl-baby-feed-overview-corner{margin-left:auto;padding:2px 0;border:0;background:transparent;color:var(--my-text-tertiary);font:400 13px/18px inherit;cursor:pointer}.tl-baby-feed-overview-corner i{font:300 20px/1 Arial,sans-serif;font-style:normal;vertical-align:-1px}.tl-baby-feed-overview-corner:active{color:var(--my-text-secondary)}
 .tl-baby-feeding-card.is-clickable{cursor:pointer}
 .tl-baby-feeding-card.is-clickable:active{transform:scale(0.992)}
 .tl-baby-feed-time{
@@ -3666,6 +3667,7 @@ html,body{
 .tl-baby-feed-main.is-detail{
   align-items:flex-start;
 }
+.tl-baby-feed-content{min-width:0;flex:1;display:flex;flex-direction:column;justify-content:center}
 .tl-baby-feed-icon{
   width:40px;
   height:40px;
@@ -3705,16 +3707,13 @@ html,body{
 .tl-baby-feed-note-preview{
   min-width:0;
   overflow:hidden;
-  margin:-12px 0 0 51px;
+  margin:1px 0 0;
   color:var(--my-text-tertiary);
   font-size:13px;
   font-weight:400;
   line-height:1.45;
   text-overflow:ellipsis;
   white-space:nowrap;
-}
-.tl-baby-feed-note-preview.is-after-detail{
-  margin-top:4px;
 }
 .tl-baby-feed-detail{
   min-width:0;
@@ -3764,6 +3763,9 @@ html,body{
   color:#ff4d88;
   background:rgba(255,77,136,0.10);
 }
+.tl-baby-feed-chip.is-summary{appearance:none;box-sizing:border-box;border:0;font-family:inherit;color:#666;background:#f5f5f6;cursor:pointer;display:inline-flex;align-items:center;gap:4px}.tl-baby-feed-chip.is-summary img{width:15px;height:15px;object-fit:contain}.tl-baby-feed-chip.is-summary:active{background:#ededf0}.tl-baby-feed-chip.is-summary:focus-visible,.tl-baby-feed-overview-corner:focus-visible{outline:2px solid rgba(255,77,136,.3);outline-offset:1px}
+.tl-baby-feed-overview-link{width:calc(100% + 30px);height:48px;margin:12px -15px -14px;padding:0 15px;border:0;border-top:.5px solid var(--my-line);background:#fff;color:var(--my-text-primary);display:flex;align-items:center;justify-content:space-between;text-align:left;cursor:pointer}.tl-baby-feed-overview-link span{font-size:14px;font-weight:400;line-height:20px}.tl-baby-feed-overview-link i{color:var(--my-text-tertiary);font:300 28px/1 Arial,sans-serif;font-style:normal}.tl-baby-feed-overview-link:active{background:#fafafb}.tl-baby-feed-overview-link:focus-visible{outline:2px solid rgba(255,77,136,.32);outline-offset:-3px}
+.feeding-overview-scheme-switch{position:absolute;z-index:180;top:6px;left:50%;width:180px;height:32px;padding:2px;transform:translateX(-50%);border:.5px solid rgba(0,0,0,.08);border-radius:8px;background:rgba(238,238,241,.94);box-shadow:0 2px 8px rgba(0,0,0,.08);display:grid;grid-template-columns:repeat(3,1fr);gap:1px}.feeding-overview-scheme-switch button{min-width:0;border:0;border-radius:6px;background:transparent;color:#777;font:400 12px/1 inherit;cursor:pointer}.feeding-overview-scheme-switch button.is-active{background:#111;color:#fff;font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .tl-baby-feed-creator{
   display:inline-flex;
   align-items:center;
@@ -18222,6 +18224,8 @@ html,body{
   overflow:hidden;
   background:var(--my-bg);
 }
+.phone.is-feeding-review-detail-open .review-page{height:calc(100vh - 44px)}
+.phone.is-feeding-review-detail-open .tabbar{display:none}
 
 .review-nav{
   height:44px;
@@ -19068,9 +19072,18 @@ html,body{
 
 /* Exact feeding-history detail layout from the legacy feeding record. */
 .shared-feeding-summary .is-bottle i,.shared-feeding-dot.is-bottle{background:#ff72a1}
+.shared-feeding-summary .is-nutrition i,.shared-feeding-dot.is-nutrition{background:#54cfae}
+.shared-feeding-summary .is-pump i,.shared-feeding-dot.is-pump{background:#d763e8}
+.shared-feeding-summary .is-bath i,.shared-feeding-dot.is-bath{background:#55bee7}
+.shared-feeding-summary .is-play i,.shared-feeding-dot.is-play{background:#78ca38}
+.shared-feeding-summary .is-swim i,.shared-feeding-dot.is-swim{background:#5b9de9}
+.shared-feeding-summary .is-other i,.shared-feeding-dot.is-other{background:#b971e8}
 .phone.is-shared-feeding-open .review-page{height:calc(100vh - 44px)}
 .phone.is-shared-feeding-open .tabbar{display:none}
 .shared-feeding-timeline-page{inset:0}
+.shared-feeding-timeline-page.is-point-sheet{transform:translateY(100%);transition:transform .32s cubic-bezier(.2,0,0,1),visibility 0s linear .32s}
+.shared-feeding-timeline-page.is-point-sheet.is-open{transform:translateY(0);transition:transform .32s cubic-bezier(.2,0,0,1)}
+.shared-feeding-detail-nav .shared-feeding-close-icon{display:block;margin:0;color:#333;font:300 32px/1 Arial,sans-serif;transform:translateY(-1px)}
 .shared-feeding-detail-nav{height:48px;flex-basis:48px;border-bottom:1px solid #efdfe4;background:#f4f4f7}
 .shared-feeding-detail-nav>button{left:2px;width:42px;height:42px}
 .shared-feeding-detail-nav>button svg{stroke:#444}
@@ -20578,7 +20591,7 @@ const TWEAK_DEFAULTS = {
   "demoScene": "note-quick-record"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-window.__BUILD__ = "2026-07-17-nomask";
+window.__BUILD__ = "2026-07-21-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 window.__BABY_FEEDING_MODE = true;
 </script>
@@ -30565,6 +30578,12 @@ function BabyFeedingTimelineCard({item, isNew}){
       detail:{...item, elapsedSeconds:item.elapsedSeconds || 60, sleepMode:'timer'}
     }));
   };
+  const openTodayFeedingOverview = (event)=>{
+    event.stopPropagation();
+    window.dispatchEvent(new CustomEvent('open-shared-feeding-history'));
+  };
+  const showTodayFeedingOverview = !!summary && summary.title === '今日喂养小计';
+  const overviewScheme = Number(item.overviewScheme) || 1;
 
   return (
     <article
@@ -30581,24 +30600,30 @@ function BabyFeedingTimelineCard({item, isNew}){
     >
       <div className="tl-baby-feed-head">
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
+        {showTodayFeedingOverview && overviewScheme === 3 ? (
+          <button className="tl-baby-feed-overview-corner" type="button" onClick={openTodayFeedingOverview}>喂养记录 <i aria-hidden="true">›</i></button>
+        ) : null}
       </div>
       <div className={'tl-baby-feed-main'+(hasDetail ? ' is-detail' : '')}>
         <span className={'tl-baby-feed-icon'+(iconSrc ? ' is-image' : '')} style={iconSrc ? undefined : {background: color}}>
           {iconSrc ? <img src={iconSrc} alt="" /> : icon}
         </span>
-        {hasDetail ? (
-          <span className="tl-baby-feed-detail">
-            {detailLines.map((line, index)=>(
-              <span key={index}>{line}</span>
-            ))}
-          </span>
-        ) : (
-          <span className="tl-baby-feed-text">
-            {isNew && TypewriterText ? (
-              <TypewriterText text={text} active charMs={55} followScroll/>
-            ) : text}
-          </span>
-        )}
+        <div className="tl-baby-feed-content">
+          {hasDetail ? (
+            <span className="tl-baby-feed-detail">
+              {detailLines.map((line, index)=>(
+                <span key={index}>{line}</span>
+              ))}
+            </span>
+          ) : (
+            <span className="tl-baby-feed-text">
+              {isNew && TypewriterText ? (
+                <TypewriterText text={text} active charMs={55} followScroll/>
+              ) : text}
+            </span>
+          )}
+          {notePreview ? <p className="tl-baby-feed-note-preview">{notePreview}</p> : null}
+        </div>
       </div>
       {item.sleeping ? (
         <div className="tl-baby-sleep-live">
@@ -30607,16 +30632,23 @@ function BabyFeedingTimelineCard({item, isNew}){
           <button type="button" onClick={openSleepWakeSheet}>宝宝醒了</button>
         </div>
       ) : null}
-      {notePreview ? (
-        <p className={'tl-baby-feed-note-preview'+(hasDetail ? ' is-after-detail' : '')}>{notePreview}</p>
-      ) : null}
       <div className="tl-baby-feed-tags">
         {item.showBabyTag !== false ? <span className="tl-baby-feed-tag-main">小豆苗</span> : null}
         {item.showCreator ? (
           <span className={'tl-baby-feed-creator' + (item.creatorId === 'family' ? ' is-family' : '')}>{creator}记录</span>
         ) : null}
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
+        {showTodayFeedingOverview && overviewScheme === 2 ? (
+          <button className="tl-baby-feed-chip is-summary" type="button" onClick={openTodayFeedingOverview}>
+            <img src="assets/feeding-review-icon.png" alt="" aria-hidden="true"/>喂养记录
+          </button>
+        ) : null}
       </div>
+      {showTodayFeedingOverview && overviewScheme === 1 ? (
+        <button className="tl-baby-feed-overview-link" type="button" onClick={openTodayFeedingOverview}>
+          <span>进入小豆苗的喂养记录</span><i aria-hidden="true">›</i>
+        </button>
+      ) : null}
     </article>
   );
 }
@@ -34648,7 +34680,7 @@ function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
     {id:'diaper',label:'换尿布'}, {id:'food',label:'辅食'}, {id:'supplement',label:'营养补充'}, {id:'pump',label:'吸奶'},
   ];
   const activeLabel = pickerItems.find(item=>item.id===activeTab)?.label || '喂养';
-  const pageTitle = activeTab==='all' ? '全部' : activeLabel+'分析';
+  const pageTitle = activeLabel;
   React.useEffect(()=>{
     if(!pickerOpen) return undefined;
     const handleKey = event=>{ if(event.key==='Escape') setPickerOpen(false); };
@@ -34656,6 +34688,11 @@ function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
     return ()=>window.removeEventListener('keydown',handleKey);
   },[pickerOpen]);
   React.useEffect(()=>{ if(!open) setPickerOpen(false); },[open]);
+  React.useEffect(()=>{
+    const phone = document.querySelector('.phone');
+    phone?.classList.toggle('is-feeding-review-detail-open', open);
+    return ()=>phone?.classList.remove('is-feeding-review-detail-open');
+  },[open]);
   const selectTab = tab=>{ onTabChange(tab); setPickerOpen(false); };
   return (
     <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
@@ -35060,14 +35097,42 @@ function MoodChart(){
 const SHARED_FEEDING_ICONS = {
   formula:'assets/baby-feeding-icons/formula.png',
   breast:'assets/baby-feeding-icons/breast.png',
+  bottle:'assets/baby-feeding-icons/bottle-breast.png',
   diaper:'assets/baby-feeding-icons/diaper.png',
   sleep:'assets/baby-feeding-icons/sleep.png',
   food:'assets/baby-feeding-icons/solid-food.png',
+  nutrition:'assets/baby-feeding-icons/nutrition.png',
   water:'assets/baby-feeding-icons/water.png',
-  bottle:'assets/baby-feeding-icons/bottle-breast.png'
+  pump:'assets/baby-feeding-icons/pump.png',
+  bath:'assets/baby-feeding-icons/bath.png',
+  play:'assets/baby-feeding-icons/play.png',
+  swim:'assets/baby-feeding-icons/swim.png',
+  other:'assets/baby-feeding-icons/other-event.png'
 };
 
-const SHARED_FEEDING_KIND_BY_LABEL = {'配方奶':'formula','母乳':'breast','瓶喂母乳':'bottle','换尿布':'diaper','睡眠':'sleep','辅食':'food','喝水':'water'};
+const SHARED_FEEDING_KIND_BY_LABEL = {
+  '配方奶':'formula',
+  '母乳':'breast',
+  '瓶喂母乳':'bottle',
+  '换尿布':'diaper',
+  '睡眠':'sleep',
+  '辅食':'food',
+  '营养补剂':'nutrition',
+  '营养补充':'nutrition',
+  '喝水':'water',
+  '吸奶':'pump',
+  '洗澡':'bath',
+  '玩耍':'play',
+  '游泳':'swim',
+  '其他事件':'other',
+  '心情':'other',
+  '体重':'other',
+  '饮食':'other',
+  '体温':'other',
+  '症状':'other'
+};
+
+const getSharedFeedingKind = label=>SHARED_FEEDING_KIND_BY_LABEL[label] || 'other';
 
 function buildSharedFeedingDaysFromTimeline(blocks){
   if(!Array.isArray(blocks)) return [];
@@ -35084,10 +35149,10 @@ function buildSharedFeedingDaysFromTimeline(blocks){
       fallbackStats.set(label,row);
     });
     const summary = latestSummary?.items?.map(row=>[
-      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      getSharedFeedingKind(row.label),
       `${row.label} ${row.value}`
     ]) || [...fallbackStats.values()].map(row=>[
-      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      getSharedFeedingKind(row.label),
       `${row.label} ${row.count}次${row.value[0] ? ` ${row.value[0]}` : ''}`
     ]);
     const normalizedRecords = [...records].sort((a,b)=>String(b.time || '').localeCompare(String(a.time || ''))).map(item=>{
@@ -35096,7 +35161,7 @@ function buildSharedFeedingDaysFromTimeline(blocks){
       if(Array.isArray(item.detailLines) && item.detailLines.length){
         core = item.detailLines.map(line=>String(line).replace(new RegExp(`^${label}：?`),'')).join('｜');
       }
-      return [item.time || '--:--',SHARED_FEEDING_KIND_BY_LABEL[label] || 'formula',label,core,item.creator || '妈妈',item.noteText || item.voiceQuote || ''];
+      return [item.time || '--:--',getSharedFeedingKind(label),label,core,item.creator || '妈妈',item.noteText || item.voiceQuote || ''];
     });
     const rawDate = block.isToday ? '今天' : (block.relativeLabel || block.date || '');
     const date = /^\d{1,2}\/\d{1,2}$/.test(rawDate) ? rawDate.replace('/', '月')+'日' : rawDate;
@@ -35133,18 +35198,21 @@ function SharedFeedingReviewCard({onOpen,day}){
   );
 }
 
-function SharedFeedingTimelinePage({open,onClose,timelineBlocks}){
+function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='page'}){
   const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
   const days = liveDays;
+  const isSheet = presentation === 'sheet';
   useEffect(()=>{
     const phone = document.querySelector('.phone');
     phone?.classList.toggle('is-shared-feeding-open', open);
     return ()=>phone?.classList.remove('is-shared-feeding-open');
   },[open]);
   return (
-    <section className={'shared-feeding-timeline-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="小豆苗共享喂养时间轴">
+    <section className={'shared-feeding-timeline-page'+(isSheet?' is-point-sheet':'')+(open?' is-open':'')} aria-hidden={!open} aria-label="小豆苗共享喂养时间轴">
       <header className="shared-feeding-detail-nav">
-        <button type="button" aria-label="返回回顾" onClick={onClose}><ReviewBackIcon/></button>
+        <button type="button" aria-label={isSheet?'关闭':'返回回顾'} onClick={onClose}>
+          {isSheet ? <span className="shared-feeding-close-icon" aria-hidden="true">×</span> : <ReviewBackIcon/>}
+        </button>
         <div className="shared-feeding-detail-title"><b>小豆苗</b><span>3位亲友共享</span></div>
       </header>
       <div className="shared-feeding-detail-scroll">
@@ -35171,6 +35239,30 @@ function ReviewPage({timelineBlocks}){
   const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
   const sharedFeedingDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
+  const babyReviewTypeByRecord = {
+    '配方奶':'feeding','母乳':'feeding','瓶喂母乳':'feeding',
+    '睡眠':'sleep','换尿布':'diaper','辅食':'food','营养补剂':'supplement','吸奶':'pump',
+  };
+  let latestBabyReviewType = null;
+  (timelineBlocks || []).forEach(block=>{
+    if(block?.type !== 'day') return;
+    (block.items || block.entries || []).forEach(item=>{
+      if(item?.kind !== 'baby-feeding-card') return;
+      const type = babyReviewTypeByRecord[item.feedType || String(item.text || '').split('：')[0]];
+      if(type) latestBabyReviewType = type;
+    });
+  });
+  const babyReviewCards = [
+    {id:'feeding',node:<FeedingReviewCard onFullOpen={()=>openFeedingDetail('feeding')}/>},
+    {id:'sleep',node:<SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>},
+    {id:'diaper',node:<DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>},
+    {id:'food',node:<FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>},
+    {id:'supplement',node:<SupplementReviewCard onFullOpen={()=>openFeedingDetail('supplement')}/>},
+    {id:'pump',node:<PumpReviewCard onFullOpen={()=>openFeedingDetail('pump')}/>},
+  ];
+  const orderedBabyReviewCards = latestBabyReviewType
+    ? [...babyReviewCards.filter(card=>card.id === latestBabyReviewType), ...babyReviewCards.filter(card=>card.id !== latestBabyReviewType)]
+    : babyReviewCards;
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -35201,6 +35293,8 @@ function ReviewPage({timelineBlocks}){
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
 
       <SharedFeedingReviewCard day={sharedFeedingDays[0]} onOpen={()=>setSharedFeedingOpen(true)}/>
+
+      {orderedBabyReviewCards.map(card=><React.Fragment key={card.id}>{card.node}</React.Fragment>)}
 
       <ReviewCard
         title="月经周期"
@@ -35286,12 +35380,6 @@ function ReviewPage({timelineBlocks}){
         )}
       />
 
-      <FeedingReviewCard onFullOpen={()=>openFeedingDetail('feeding')}/>
-      <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
-      <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
-      <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
-      <SupplementReviewCard onFullOpen={()=>openFeedingDetail('supplement')}/>
-      <PumpReviewCard onFullOpen={()=>openFeedingDetail('pump')}/>
       </div>
       <SharedFeedingTimelinePage open={sharedFeedingOpen} timelineBlocks={timelineBlocks} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
@@ -42836,6 +42924,7 @@ function App(){
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [noteTabUnread, setNoteTabUnread] = useState(false);
   const [reviewTabUnread, setReviewTabUnread] = useState(false);
+  const [feedingOverviewScheme, setFeedingOverviewScheme] = useState(1);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
@@ -43953,7 +44042,12 @@ function App(){
       clearTimeout(babyVoiceHoldTimerRef.current);
       babyVoiceHoldTimerRef.current = null;
       babyVoiceCancelRef.current = false;
-      // 短按点滴 tab：进入点滴并清除记录成功提示与小红点
+      // 短按点滴 tab：与首页喂养记录入口保持一致。
+      setBabyFeedingEntryActive(true);
+      setBabyDiscoverVisible(false);
+      setBabyFeedingPanelMode(null);
+      setSearchCriteria(null);
+      recordEnterModeRef.current = 'feeding-entry';
       setNoteTabUnread(false);
       clearTimeout(babyVoiceSuccessTimerRef.current);
       setBabyVoiceSuccess({show:false});
@@ -44746,10 +44840,19 @@ function App(){
             });
             return {...block, items, entries:undefined};
           });
+      source = source.map(block=>{
+        if(block.type !== 'day') return block;
+        const items = (block.items || block.entries || []).map(item=>(
+          item.kind === 'baby-feeding-card' && item.summary
+            ? {...item, overviewScheme:feedingOverviewScheme}
+            : item
+        ));
+        return {...block, items, entries:undefined};
+      });
     }
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView, feedingOverviewScheme]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
@@ -44824,6 +44927,17 @@ function App(){
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
+        {showRecordShell && showBabyFeedingHeader ? (
+          <div className="feeding-overview-scheme-switch" role="group" aria-label="今日喂养入口方案切换">
+            {[1,2,3].map(scheme=><button
+              key={scheme}
+              type="button"
+              className={feedingOverviewScheme === scheme ? 'is-active' : ''}
+              aria-pressed={feedingOverviewScheme === scheme}
+              onClick={()=>setFeedingOverviewScheme(scheme)}
+            >方案{scheme}</button>)}
+          </div>
+        ) : null}
 
       {showHome && HomePage && (
         <HomePage
@@ -44889,7 +45003,7 @@ function App(){
         <ReviewPage timelineBlocks={timeline}/>
       )}
 
-      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
+      {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open presentation="sheet" timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
 
       <div
         className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}

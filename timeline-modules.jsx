@@ -891,6 +891,12 @@ function BabyFeedingTimelineCard({item, isNew}){
       detail:{...item, elapsedSeconds:item.elapsedSeconds || 60, sleepMode:'timer'}
     }));
   };
+  const openTodayFeedingOverview = (event)=>{
+    event.stopPropagation();
+    window.dispatchEvent(new CustomEvent('open-shared-feeding-history'));
+  };
+  const showTodayFeedingOverview = !!summary && summary.title === '今日喂养小计';
+  const overviewScheme = Number(item.overviewScheme) || 1;
 
   return (
     <article
@@ -907,24 +913,30 @@ function BabyFeedingTimelineCard({item, isNew}){
     >
       <div className="tl-baby-feed-head">
         <span className="tl-baby-feed-time">{item.time || '08:15'}</span>
+        {showTodayFeedingOverview && overviewScheme === 3 ? (
+          <button className="tl-baby-feed-overview-corner" type="button" onClick={openTodayFeedingOverview}>喂养记录 <i aria-hidden="true">›</i></button>
+        ) : null}
       </div>
       <div className={'tl-baby-feed-main'+(hasDetail ? ' is-detail' : '')}>
         <span className={'tl-baby-feed-icon'+(iconSrc ? ' is-image' : '')} style={iconSrc ? undefined : {background: color}}>
           {iconSrc ? <img src={iconSrc} alt="" /> : icon}
         </span>
-        {hasDetail ? (
-          <span className="tl-baby-feed-detail">
-            {detailLines.map((line, index)=>(
-              <span key={index}>{line}</span>
-            ))}
-          </span>
-        ) : (
-          <span className="tl-baby-feed-text">
-            {isNew && TypewriterText ? (
-              <TypewriterText text={text} active charMs={55} followScroll/>
-            ) : text}
-          </span>
-        )}
+        <div className="tl-baby-feed-content">
+          {hasDetail ? (
+            <span className="tl-baby-feed-detail">
+              {detailLines.map((line, index)=>(
+                <span key={index}>{line}</span>
+              ))}
+            </span>
+          ) : (
+            <span className="tl-baby-feed-text">
+              {isNew && TypewriterText ? (
+                <TypewriterText text={text} active charMs={55} followScroll/>
+              ) : text}
+            </span>
+          )}
+          {notePreview ? <p className="tl-baby-feed-note-preview">{notePreview}</p> : null}
+        </div>
       </div>
       {item.sleeping ? (
         <div className="tl-baby-sleep-live">
@@ -933,16 +945,23 @@ function BabyFeedingTimelineCard({item, isNew}){
           <button type="button" onClick={openSleepWakeSheet}>宝宝醒了</button>
         </div>
       ) : null}
-      {notePreview ? (
-        <p className={'tl-baby-feed-note-preview'+(hasDetail ? ' is-after-detail' : '')}>{notePreview}</p>
-      ) : null}
       <div className="tl-baby-feed-tags">
         {item.showBabyTag !== false ? <span className="tl-baby-feed-tag-main">小豆苗</span> : null}
         {item.showCreator ? (
           <span className={'tl-baby-feed-creator' + (item.creatorId === 'family' ? ' is-family' : '')}>{creator}记录</span>
         ) : null}
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
+        {showTodayFeedingOverview && overviewScheme === 2 ? (
+          <button className="tl-baby-feed-chip is-summary" type="button" onClick={openTodayFeedingOverview}>
+            <img src="assets/feeding-review-icon.png" alt="" aria-hidden="true"/>喂养记录
+          </button>
+        ) : null}
       </div>
+      {showTodayFeedingOverview && overviewScheme === 1 ? (
+        <button className="tl-baby-feed-overview-link" type="button" onClick={openTodayFeedingOverview}>
+          <span>进入小豆苗的喂养记录</span><i aria-hidden="true">›</i>
+        </button>
+      ) : null}
     </article>
   );
 }

@@ -930,6 +930,11 @@ function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
     return ()=>window.removeEventListener('keydown',handleKey);
   },[pickerOpen]);
   React.useEffect(()=>{ if(!open) setPickerOpen(false); },[open]);
+  React.useEffect(()=>{
+    const phone = document.querySelector('.phone');
+    phone?.classList.toggle('is-feeding-review-detail-open', open);
+    return ()=>phone?.classList.remove('is-feeding-review-detail-open');
+  },[open]);
   const selectTab = tab=>{ onTabChange(tab); setPickerOpen(false); };
   return (
     <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
@@ -1334,14 +1339,42 @@ function MoodChart(){
 const SHARED_FEEDING_ICONS = {
   formula:'assets/baby-feeding-icons/formula.png',
   breast:'assets/baby-feeding-icons/breast.png',
+  bottle:'assets/baby-feeding-icons/bottle-breast.png',
   diaper:'assets/baby-feeding-icons/diaper.png',
   sleep:'assets/baby-feeding-icons/sleep.png',
   food:'assets/baby-feeding-icons/solid-food.png',
+  nutrition:'assets/baby-feeding-icons/nutrition.png',
   water:'assets/baby-feeding-icons/water.png',
-  bottle:'assets/baby-feeding-icons/bottle-breast.png'
+  pump:'assets/baby-feeding-icons/pump.png',
+  bath:'assets/baby-feeding-icons/bath.png',
+  play:'assets/baby-feeding-icons/play.png',
+  swim:'assets/baby-feeding-icons/swim.png',
+  other:'assets/baby-feeding-icons/other-event.png'
 };
 
-const SHARED_FEEDING_KIND_BY_LABEL = {'配方奶':'formula','母乳':'breast','瓶喂母乳':'bottle','换尿布':'diaper','睡眠':'sleep','辅食':'food','喝水':'water'};
+const SHARED_FEEDING_KIND_BY_LABEL = {
+  '配方奶':'formula',
+  '母乳':'breast',
+  '瓶喂母乳':'bottle',
+  '换尿布':'diaper',
+  '睡眠':'sleep',
+  '辅食':'food',
+  '营养补剂':'nutrition',
+  '营养补充':'nutrition',
+  '喝水':'water',
+  '吸奶':'pump',
+  '洗澡':'bath',
+  '玩耍':'play',
+  '游泳':'swim',
+  '其他事件':'other',
+  '心情':'other',
+  '体重':'other',
+  '饮食':'other',
+  '体温':'other',
+  '症状':'other'
+};
+
+const getSharedFeedingKind = label=>SHARED_FEEDING_KIND_BY_LABEL[label] || 'other';
 
 function buildSharedFeedingDaysFromTimeline(blocks){
   if(!Array.isArray(blocks)) return [];
@@ -1358,10 +1391,10 @@ function buildSharedFeedingDaysFromTimeline(blocks){
       fallbackStats.set(label,row);
     });
     const summary = latestSummary?.items?.map(row=>[
-      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      getSharedFeedingKind(row.label),
       `${row.label} ${row.value}`
     ]) || [...fallbackStats.values()].map(row=>[
-      SHARED_FEEDING_KIND_BY_LABEL[row.label] || 'formula',
+      getSharedFeedingKind(row.label),
       `${row.label} ${row.count}次${row.value[0] ? ` ${row.value[0]}` : ''}`
     ]);
     const normalizedRecords = [...records].sort((a,b)=>String(b.time || '').localeCompare(String(a.time || ''))).map(item=>{
@@ -1370,7 +1403,7 @@ function buildSharedFeedingDaysFromTimeline(blocks){
       if(Array.isArray(item.detailLines) && item.detailLines.length){
         core = item.detailLines.map(line=>String(line).replace(new RegExp(`^${label}：?`),'')).join('｜');
       }
-      return [item.time || '--:--',SHARED_FEEDING_KIND_BY_LABEL[label] || 'formula',label,core,item.creator || '妈妈',item.noteText || item.voiceQuote || ''];
+      return [item.time || '--:--',getSharedFeedingKind(label),label,core,item.creator || '妈妈',item.noteText || item.voiceQuote || ''];
     });
     const rawDate = block.isToday ? '今天' : (block.relativeLabel || block.date || '');
     const date = /^\d{1,2}\/\d{1,2}$/.test(rawDate) ? rawDate.replace('/', '月')+'日' : rawDate;
@@ -1407,18 +1440,21 @@ function SharedFeedingReviewCard({onOpen,day}){
   );
 }
 
-function SharedFeedingTimelinePage({open,onClose,timelineBlocks}){
+function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='page'}){
   const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
   const days = liveDays;
+  const isSheet = presentation === 'sheet';
   useEffect(()=>{
     const phone = document.querySelector('.phone');
     phone?.classList.toggle('is-shared-feeding-open', open);
     return ()=>phone?.classList.remove('is-shared-feeding-open');
   },[open]);
   return (
-    <section className={'shared-feeding-timeline-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="小豆苗共享喂养时间轴">
+    <section className={'shared-feeding-timeline-page'+(isSheet?' is-point-sheet':'')+(open?' is-open':'')} aria-hidden={!open} aria-label="小豆苗共享喂养时间轴">
       <header className="shared-feeding-detail-nav">
-        <button type="button" aria-label="返回回顾" onClick={onClose}><ReviewBackIcon/></button>
+        <button type="button" aria-label={isSheet?'关闭':'返回回顾'} onClick={onClose}>
+          {isSheet ? <span className="shared-feeding-close-icon" aria-hidden="true">×</span> : <ReviewBackIcon/>}
+        </button>
         <div className="shared-feeding-detail-title"><b>小豆苗</b><span>3位亲友共享</span></div>
       </header>
       <div className="shared-feeding-detail-scroll">
@@ -1445,6 +1481,30 @@ function ReviewPage({timelineBlocks}){
   const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
   const sharedFeedingDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
+  const babyReviewTypeByRecord = {
+    '配方奶':'feeding','母乳':'feeding','瓶喂母乳':'feeding',
+    '睡眠':'sleep','换尿布':'diaper','辅食':'food','营养补剂':'supplement','吸奶':'pump',
+  };
+  let latestBabyReviewType = null;
+  (timelineBlocks || []).forEach(block=>{
+    if(block?.type !== 'day') return;
+    (block.items || block.entries || []).forEach(item=>{
+      if(item?.kind !== 'baby-feeding-card') return;
+      const type = babyReviewTypeByRecord[item.feedType || String(item.text || '').split('：')[0]];
+      if(type) latestBabyReviewType = type;
+    });
+  });
+  const babyReviewCards = [
+    {id:'feeding',node:<FeedingReviewCard onFullOpen={()=>openFeedingDetail('feeding')}/>},
+    {id:'sleep',node:<SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>},
+    {id:'diaper',node:<DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>},
+    {id:'food',node:<FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>},
+    {id:'supplement',node:<SupplementReviewCard onFullOpen={()=>openFeedingDetail('supplement')}/>},
+    {id:'pump',node:<PumpReviewCard onFullOpen={()=>openFeedingDetail('pump')}/>},
+  ];
+  const orderedBabyReviewCards = latestBabyReviewType
+    ? [...babyReviewCards.filter(card=>card.id === latestBabyReviewType), ...babyReviewCards.filter(card=>card.id !== latestBabyReviewType)]
+    : babyReviewCards;
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -1475,6 +1535,8 @@ function ReviewPage({timelineBlocks}){
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
 
       <SharedFeedingReviewCard day={sharedFeedingDays[0]} onOpen={()=>setSharedFeedingOpen(true)}/>
+
+      {orderedBabyReviewCards.map(card=><React.Fragment key={card.id}>{card.node}</React.Fragment>)}
 
       <ReviewCard
         title="月经周期"
@@ -1560,12 +1622,6 @@ function ReviewPage({timelineBlocks}){
         )}
       />
 
-      <FeedingReviewCard onFullOpen={()=>openFeedingDetail('feeding')}/>
-      <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
-      <DiaperReviewCard onFullOpen={()=>openFeedingDetail('diaper')}/>
-      <FoodReviewCard onFullOpen={()=>openFeedingDetail('food')}/>
-      <SupplementReviewCard onFullOpen={()=>openFeedingDetail('supplement')}/>
-      <PumpReviewCard onFullOpen={()=>openFeedingDetail('pump')}/>
       </div>
       <SharedFeedingTimelinePage open={sharedFeedingOpen} timelineBlocks={timelineBlocks} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
