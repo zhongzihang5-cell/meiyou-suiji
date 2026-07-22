@@ -130,6 +130,8 @@
   font-weight:600;
   color:var(--my-text-primary);
 }
+.review-metrics.is-two-column{grid-template-columns:repeat(2,minmax(0,1fr))}
+.review-card-head>.shared-feeding-card-baby{min-width:0;margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:0;transform:translateY(2px)}
 
 .review-chart{
   margin-top:14px;
@@ -512,25 +514,6 @@
   line-height:18px;
   white-space:nowrap;
   font-variant-numeric:tabular-nums;
-}
-.review-feeding-recent-value{
-  gap:5px;
-}
-.review-feeding-formula-icon{
-  width:19px;
-  height:19px;
-  display:grid;
-  place-items:center;
-  color:#ff8a3d;
-}
-.review-feeding-formula-icon svg{
-  width:19px;
-  height:19px;
-  fill:rgba(255,138,61,0.16);
-  stroke:currentColor;
-  stroke-width:1.7;
-  stroke-linecap:round;
-  stroke-linejoin:round;
 }
 .review-feeding-recent-value b,
 .review-feeding-average-value b{
@@ -919,18 +902,22 @@
 .shared-feeding-record-copy>small{display:block;overflow:hidden;margin-top:1px;color:#999;font-size:14px;line-height:22px;text-overflow:ellipsis;white-space:nowrap}
 
 /* Keep the feeding overview card in the same visual system as other review cards. */
-.shared-feeding-card-head{min-height:62px;padding:16px;gap:8px}
+.shared-feeding-card-head{min-height:62px;padding:10px 16px;gap:8px}
 .shared-feeding-card-head>h2{margin:0;color:var(--my-text-primary);font-size:16px;font-weight:600;line-height:20px}
-.shared-feeding-card-head>.shared-feeding-card-share-state{margin-left:auto;color:var(--my-text-tertiary);font-size:12px;font-weight:400;line-height:18px;white-space:nowrap}
+.shared-feeding-card-head>.shared-feeding-card-baby{min-width:0;margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:0;transform:translateY(2px)}
+.shared-feeding-card-identity{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.shared-feeding-card-identity>.tl-baby-feed-tag-main{min-height:24px;padding:4px 9px;border-radius:999px;background:rgba(255,159,67,.10);color:#8a5b24;font-size:12px;font-weight:500;line-height:1.25}
 .shared-feeding-card-head>.shared-feeding-card-icon{width:30px;height:30px;flex:0 0 30px;margin-left:0;padding:0;border-radius:var(--r-sm);background:var(--my-brand-soft);display:grid;place-items:center;overflow:hidden}
 .shared-feeding-card-icon img{width:24px;height:24px;display:block;object-fit:contain}
 .shared-feeding-card-summary{margin:0 16px 14px;padding:10px 12px;border:0;border-radius:var(--r-sm);background:#fafafb}
 .shared-feeding-card-more{height:auto;padding:13px 16px;border-top:.5px solid var(--my-line);color:inherit;justify-content:initial}
 .shared-feeding-card-more .review-card-more-main{color:var(--my-text-primary)}
 .shared-feeding-card-more svg{width:18px;height:18px;margin-left:auto;stroke:var(--my-text-tertiary)}
-.shared-feeding-card-day{margin:0;background:#fff8fa}
-.shared-feeding-card-day>header{padding:0 8px}
-.shared-feeding-card-day>.shared-feeding-summary{margin:0;padding:12px 14px 10px;border-bottom:1px solid #f3edef;border-radius:8px 8px 0 0;background:#fff}
+.shared-feeding-card-day{margin:0;background:#fff}
+.shared-feeding-card-day>header{height:35px;padding:0 8px;border-bottom:.5px solid #f5eff1}
+.shared-feeding-card-day>header h2{font-size:15px;font-weight:600;line-height:20px}
+.shared-feeding-card-day>header h2 small{font-size:12px;font-weight:400}
+.shared-feeding-card-day>.shared-feeding-summary{margin:0;padding:12px 14px 10px;border-bottom:1px solid #f3edef;border-radius:0;background:#fff8fa}
 .shared-feeding-card-day>.shared-feeding-ledger{margin-top:0;padding:7px 14px 12px;border-radius:0 0 8px 8px;background:#fff}
 .shared-feeding-card-day>.shared-feeding-ledger::before{left:65px}
 .shared-feeding-card-empty{height:112px;display:grid;place-items:center;color:var(--my-text-tertiary);font-size:14px}

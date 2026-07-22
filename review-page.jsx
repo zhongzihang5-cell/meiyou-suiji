@@ -56,10 +56,6 @@ function ReviewBabyIcon({kind}){
   return <svg viewBox="0 0 24 24"><path d="M9 3h6v3l2 2v10a3 3 0 0 1-3 3h-4a3 3 0 0 1-3-3V8l2-2z"/><path d="M9 9h6M9 14h3"/></svg>;
 }
 
-function ReviewFormulaRecordIcon(){
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v3l1.8 2.2v9.3A3.5 3.5 0 0 1 14.3 21h-4.6a3.5 3.5 0 0 1-3.5-3.5V8.2L8 6z"/><path d="M8 9h8M9 14h3.5M17.8 12.5h1.1a2.1 2.1 0 0 1 0 4.2h-1.1"/></svg>;
-}
-
 function ReviewPlaceholderChart(){
   return (
     <div className="review-placeholder-chart" aria-label="图表占位">
@@ -103,6 +99,9 @@ function SleepReviewChart(){
   const barWidth = 22;
   const X = i => x0 + band * i + band / 2;
   const Y = hours => y1 - hours / yMax * (y1 - y0);
+  const totals = days.map(day=>day.hours + day.minutes / 60);
+  const maxIndex = totals.indexOf(Math.max(...totals));
+  const minIndex = totals.indexOf(Math.min(...totals));
   return (
     <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天睡眠总时长柱状图">
       {[8,12,16].map(tick=>(
@@ -118,6 +117,8 @@ function SleepReviewChart(){
         return (
           <React.Fragment key={day.date}>
             <rect x={X(i) - barWidth / 2} y={barY} width={barWidth} height={y1 - barY} rx="10" fill="#b263e8"/>
+            {i===maxIndex ? <text x={X(i)} y={barY-6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#9d4ed4" fontFamily="PingFang SC">{day.hours}小时{day.minutes}分 最高</text> : null}
+            {i===minIndex ? <text x={X(i)-2} y={barY-6} textAnchor="end" fontSize="9" fontWeight="600" fill="#9d4ed4" fontFamily="PingFang SC">{day.hours}小时{day.minutes}分 最低</text> : null}
             <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#a85ee0' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
           </React.Fragment>
         );
@@ -154,10 +155,12 @@ function SleepReviewCard({onFullOpen}){
         <>
           <SleepReviewMetric major="1" majorUnit="小时" minor="2" minorUnit="分" label="最近记录"/>
           <SleepReviewMetric major="15" majorUnit="小时" minor="10" minorUnit="分钟" label="近7天平均"/>
-          <SleepReviewMetric label="整体趋势" trend/>
         </>
       )}
+      metricsClass="is-two-column"
+      babyName="小豆芽"
       more="查看完整睡眠变化"
+      babyInfo
       onOpen={onFullOpen}
       onMore={onFullOpen}
     />
@@ -259,10 +262,11 @@ function DiaperReviewCard({onFullOpen}){
         <>
           <DiaperReviewMetric kind="empty" label="最近记录"/>
           <DiaperReviewMetric kind="average" label="近30天平均"/>
-          <DiaperReviewMetric kind="trend" label="整体趋势"/>
         </>
       )}
+      metricsClass="is-two-column"
       more="查看完整换尿布变化"
+      babyInfo
       onOpen={onFullOpen}
       onMore={onFullOpen}
     />
@@ -286,6 +290,9 @@ function FoodReviewChart(){
   const barWidth = 22;
   const X = i => x0 + band * i + band / 2;
   const Y = grams => y1 - grams / yMax * (y1 - y0);
+  const amounts = days.map(day=>day.grams);
+  const maxIndex = amounts.indexOf(Math.max(...amounts));
+  const minIndex = amounts.indexOf(Math.min(...amounts));
   return (
     <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天辅食总量柱状图">
       {[200,400,600].map(tick=>(
@@ -300,6 +307,8 @@ function FoodReviewChart(){
         return (
           <React.Fragment key={day.date}>
             <rect x={X(i) - barWidth / 2} y={barY} width={barWidth} height={y1 - barY} rx="10" fill="#ff8a4c"/>
+            {i===maxIndex ? <text x={X(i)} y={barY-6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#e87635" fontFamily="PingFang SC">{day.grams}g 最高</text> : null}
+            {i===minIndex ? <text x={X(i)} y={barY-6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#e87635" fontFamily="PingFang SC">{day.grams}g 最低</text> : null}
             <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e87635' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
           </React.Fragment>
         );
@@ -331,10 +340,12 @@ function FoodReviewCard({onFullOpen}){
         <>
           <FoodReviewMetric kind="recent" label="最近记录"/>
           <FoodReviewMetric kind="average" label="近7天平均"/>
-          <FoodReviewMetric kind="trend" label="整体趋势"/>
         </>
       )}
+      metricsClass="is-two-column"
       more="查看完整辅食变化"
+      babyInfo
+      babyName="小豆芽"
       onOpen={onFullOpen}
       onMore={onFullOpen}
     />
@@ -400,6 +411,7 @@ function SupplementReviewCard({onFullOpen}){
       legend={<>{SUPPLEMENT_TYPES.map(type=><span className="review-legend-item is-supplement" key={type.key}><i style={{background:type.color}}></i>{type.name}</span>)}</>}
       metrics={<><ReviewMetric value="AD" unit="1粒" label="最近补充"/><ReviewMetric value="7" unit="天" label="近7日连续"/><ReviewMetric value="6" unit="次" label="近30天日均"/></>}
       more="查看完整营养补剂变化"
+      babyInfo
       onOpen={onFullOpen}
       onMore={onFullOpen}
     />
@@ -418,6 +430,8 @@ function PumpReviewChart(){
   const X = index=>x0+(x1-x0)*(index/(PUMP_REVIEW_DATA.length-1));
   const Y = value=>y1-(value-yMin)/(yMax-yMin)*(y1-padT);
   const points = PUMP_REVIEW_DATA.map((value,index)=>[X(index),Y(value)]);
+  const maxIndex = PUMP_REVIEW_DATA.indexOf(Math.max(...PUMP_REVIEW_DATA));
+  const minIndex = PUMP_REVIEW_DATA.indexOf(Math.min(...PUMP_REVIEW_DATA));
   const dateMarks = [{index:0,label:'9.22'},{index:7,label:'9.29'},{index:14,label:'10.6'},{index:21,label:'10.13'},{index:29,label:'今天'}];
   return (
     <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天吸奶量折线图">
@@ -425,6 +439,8 @@ function PumpReviewChart(){
       <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
       <path d={reviewSmoothPath(points)} fill="none" stroke="#c05bd8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
       {PUMP_REVIEW_DATA.map((value,index)=><circle key={index} cx={X(index)} cy={Y(value)} r={index===PUMP_REVIEW_DATA.length-1?4:2.2} fill="#c05bd8" stroke={index===PUMP_REVIEW_DATA.length-1?'#fff':'none'} strokeWidth="2"/>)}
+      <text x={X(maxIndex)} y={Y(PUMP_REVIEW_DATA[maxIndex])-9} textAnchor="middle" fontSize="9" fontWeight="600" fill="#a849c2" fontFamily="PingFang SC">{PUMP_REVIEW_DATA[maxIndex]}ml 最高</text>
+      <text x={X(minIndex)+4} y={Y(PUMP_REVIEW_DATA[minIndex])+15} textAnchor="start" fontSize="9" fontWeight="600" fill="#a849c2" fontFamily="PingFang SC">{PUMP_REVIEW_DATA[minIndex]}ml 最低</text>
       <text x={X(29)-3} y={Y(PUMP_REVIEW_DATA[29])-9} textAnchor="end" fontSize="9.5" fontWeight="600" fill="#a849c2" fontFamily="PingFang SC">150ml</text>
       {dateMarks.map(mark=><text key={mark.index} x={X(mark.index)} y={H-8} textAnchor={mark.index===0?'start':(mark.index===29?'end':'middle')} fontSize="9" fontWeight={mark.index===29?'600':'400'} fill={mark.index===29?'#a849c2':'#bbbbbf'} fontFamily="PingFang SC">{mark.label}</text>)}
     </svg>
@@ -441,6 +457,7 @@ function PumpReviewCard({onFullOpen}){
       legend={<span className="review-legend-item is-pump"><i></i>吸奶量（ml）</span>}
       metrics={<><ReviewMetric value="150" unit="ml" label="最近吸奶"/><ReviewMetric value="165" unit="ml" label="近30天平均"/><div className="review-metric"><div className="review-metric-value is-trend is-wave"><ReviewWaveIcon/>波动</div><div className="review-metric-label">整体趋势</div></div></>}
       more="查看完整吸奶变化"
+      babyInfo
       onOpen={onFullOpen}
       onMore={onFullOpen}
     />
@@ -518,7 +535,7 @@ function FeedingReviewMetric({kind, label}){
   return (
     <div className="review-metric review-feeding-metric">
       {kind === 'recent' ? (
-        <div className="review-feeding-recent-value"><span className="review-feeding-formula-icon" aria-label="瓶喂配方奶"><ReviewFormulaRecordIcon/></span><div><b>120</b><i>ml</i></div></div>
+        <div className="review-feeding-recent-value"><div><b>120</b><i>ml</i></div></div>
       ) : null}
       {kind === 'average' ? (
         <div className="review-feeding-average-value"><b>599</b><i>ml</i></div>
@@ -553,6 +570,7 @@ function FeedingReviewCard({onFullOpen}){
         </>
       )}
       more="查看完整喂奶变化"
+      babyInfo
       onOpen={onFullOpen}
       onMore={onFullOpen}
     />
@@ -581,7 +599,15 @@ function ReviewBackIcon(){
   return <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>;
 }
 
-function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sample, onOpen, onMore}){
+function FeedingCardBabyInfo({babyName='小豆苗'}){
+  return (
+    <div className="shared-feeding-card-baby">
+      <span className="shared-feeding-card-identity"><b className="tl-baby-feed-tag-main">{babyName}</b></span>
+    </div>
+  );
+}
+
+function ReviewCard({title, iconClass='', icon, chart, legend, metrics, metricsClass='', more, sample, onOpen, onMore, babyInfo=false, babyName='小豆苗'}){
   const isActionable = typeof onOpen === 'function';
   const isMoreActionable = typeof onMore === 'function';
   const handleKeyDown = (event)=>{
@@ -611,10 +637,11 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, sa
         <div className="review-card-head">
           <div className={'review-card-icon ' + iconClass} aria-hidden="true">{icon}</div>
           <div className="review-card-title">{title}</div>
+          {babyInfo ? <FeedingCardBabyInfo babyName={babyName}/> : null}
         </div>
         <div className="review-chart">{chart}</div>
         <div className="review-legend">{legend}</div>
-        <div className="review-metrics">{metrics}</div>
+        <div className={'review-metrics' + (metricsClass ? ' ' + metricsClass : '')}>{metrics}</div>
       </div>
       <div
         className={'review-card-more'+(isMoreActionable?' is-actionable':'')}
@@ -1422,7 +1449,7 @@ function SharedFeedingReviewCard({onOpen,day}){
       <header className="shared-feeding-card-head">
         <span className="shared-feeding-card-icon"><img src="assets/feeding-review-icon.png" alt=""/></span>
         <h2>喂养记录</h2>
-        <span className="shared-feeding-card-share-state">3位亲友共享</span>
+        <FeedingCardBabyInfo/>
       </header>
       {day ? <section className="shared-feeding-day shared-feeding-card-day">
         <header><h2>{day.date} <small>{day.weekday}</small></h2></header>
