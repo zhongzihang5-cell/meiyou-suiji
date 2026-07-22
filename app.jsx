@@ -371,6 +371,110 @@ function BabySleepDetailPage({entry, onClose, onStart, onSave}){
   </section>;
 }
 
+const BABY_OTHER_RECORD_CONFIG = {
+  '瓶喂母乳': {kind:'volume', accent:'#ff65a3', soft:'#fff0f7', unit:'ml', defaultAmount:90, amountLabel:'奶量'},
+  '吸奶': {kind:'volume', accent:'#c74ee7', soft:'#fbecff', unit:'ml', defaultAmount:100, amountLabel:'奶量'},
+  '喝水': {kind:'volume', accent:'#4ba8f7', soft:'#edf7ff', unit:'ml', defaultAmount:50, amountLabel:'水量'},
+  '换尿布': {kind:'diaper', accent:'#ffad18', soft:'#fff6df'},
+  '辅食': {kind:'food', accent:'#ff8a55', soft:'#fff0e8'},
+  '营养补剂': {kind:'nutrition', accent:'#2bc7c5', soft:'#eafbfb'},
+  '洗澡': {kind:'activity', accent:'#50c5ee', soft:'#eaf9ff'},
+  '玩耍': {kind:'activity', accent:'#08c9a6', soft:'#e8fbf7'},
+  '游泳': {kind:'activity', accent:'#4a91f7', soft:'#ebf3ff'},
+};
+
+function BabyOtherRecordDetailPage({entry, onClose, onSave}){
+  const config = BABY_OTHER_RECORD_CONFIG[entry?.feedType] || BABY_OTHER_RECORD_CONFIG['喝水'];
+  const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
+  const [note, setNote] = useState(entry?.noteText || '');
+  const [amount, setAmount] = useState(Number(String(entry?.value || config.defaultAmount || 50).match(/\d+/)?.[0]) || config.defaultAmount || 50);
+  const [diaperState, setDiaperState] = useState(entry?.diaperState || (String(entry?.value || '').includes('嘘嘘') ? '嘘嘘' : '臭臭'));
+  const [redBottom, setRedBottom] = useState(!!entry?.redBottom);
+  const [foodName, setFoodName] = useState(entry?.foodName || (entry?.isQuickDraft ? '' : '米粉，菠菜'));
+  const [foodWeight, setFoodWeight] = useState(entry?.foodWeight || (entry?.isQuickDraft ? '' : '20'));
+  const [allergy, setAllergy] = useState(entry?.allergy || '无');
+  const [supplement, setSupplement] = useState(entry?.supplement || (entry?.isQuickDraft ? '' : '维生素D3'));
+  const [dose, setDose] = useState(entry?.dose || (entry?.isQuickDraft ? '' : '50mg'));
+  const [mode, setMode] = useState(entry?.activityMode || 'timer');
+  const [running, setRunning] = useState(false);
+  const [seconds, setSeconds] = useState(entry?.elapsedSeconds || 0);
+  const [manualMinutes, setManualMinutes] = useState(entry?.durationMinutes || Number.parseInt(entry?.value,10) || 20);
+  const now = new Date();
+  const time = entry?.time || window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
+  const dateLabel = `${now.getMonth()+1}月${now.getDate()}日 ${time}`;
+  const iconSrc = entry?.iconSrc || BABY_FEEDING_QUICK_ITEMS.find(item=>item.label === entry?.feedType)?.iconSrc;
+  const useMilkAmountWheel = entry?.feedType === '瓶喂母乳' || entry?.feedType === '吸奶';
+  const showBabySwitcher = entry?.feedType !== '吸奶';
+  const amountOptions = [amount-15,amount-10,amount-5,amount,amount+5,amount+10,amount+15].filter(value=>value>0);
+  const lastRecordByBaby = {'小豆苗':entry?.lastRecordLabel || '3小时47分钟前','小豆芽':'1小时12分钟前'};
+  useEffect(()=>{
+    if(!running) return undefined;
+    const timer=setInterval(()=>setSeconds(value=>value+1),1000);
+    return ()=>clearInterval(timer);
+  },[running]);
+  const timerText = `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;
+  const submit = ()=>{
+    if(config.kind === 'volume') onSave({babyName,note,amount});
+    else if(config.kind === 'diaper') onSave({babyName,note,diaperState,redBottom});
+    else if(config.kind === 'food') onSave({babyName,note,foodName:foodName.trim() || '米粉',foodWeight:foodWeight || '20',allergy});
+    else if(config.kind === 'nutrition') onSave({babyName,note,supplement:supplement.trim() || '维生素D3',dose:dose.trim() || '1粒'});
+    else onSave({babyName,note,activityMode:mode,durationMinutes:Math.max(1,mode === 'timer' ? Math.ceil(seconds/60) : Number(manualMinutes) || 1),elapsedSeconds:seconds});
+  };
+  const renderNote = ()=> <div className="baby-other-note"><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/><span>▣</span></div>;
+  return <section className="baby-other-detail" style={{'--baby-accent':config.accent,'--baby-soft':config.soft}} role="dialog" aria-modal="true" aria-label={`${entry?.feedType || '宝宝'}记录详情`}>
+    <header className="baby-other-nav">
+      <button type="button" aria-label="关闭" onClick={onClose}>×</button>
+      <div><h1>{entry?.feedType}</h1>{showBabySwitcher ? <><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></> : null}</div><span/>
+    </header>
+    <main className="baby-other-body"><section className={`baby-other-card is-${config.kind}`}>
+      {config.kind === 'volume' ? <>
+        <div className="baby-other-row"><span>开始时间</span><em>{dateLabel} ›</em></div>
+        <div className="baby-other-section-head"><span>{config.amountLabel}</span><small>⠿<br/>键盘输入</small></div>
+        {useMilkAmountWheel ? <div className="baby-milk-amount-picker">
+          <img src={iconSrc} alt=""/>
+          <div className="baby-milk-amount-values">{amountOptions.map(value=><button key={value} type="button" className={value===amount?'is-selected':''} onClick={()=>setAmount(value)}>{value} ml</button>)}</div>
+        </div> : <div className="baby-volume-picker">
+          <img src={iconSrc} alt=""/>
+          <button type="button" onClick={()=>setAmount(value=>Math.max(5,value-5))}>−</button>
+          <strong>{amount}<small> ml</small></strong>
+          <button type="button" onClick={()=>setAmount(value=>value+5)}>＋</button>
+        </div>}
+        <div className="baby-other-row"><span>结束时间</span><em>请选择 ›</em></div>
+        {renderNote()}
+      </> : null}
+      {config.kind === 'diaper' ? <>
+        <div className="baby-other-hero"><img src={iconSrc} alt=""/></div>
+        <div className="baby-other-row"><span>更换时间</span><em>{dateLabel} ›</em></div>
+        <div className="baby-other-choice-block"><h2>尿布状态</h2><div className="baby-diaper-options">{['臭臭','嘘嘘','嘘嘘+臭臭'].map((value,index)=><button key={value} type="button" className={diaperState===value?'is-active':''} onClick={()=>setDiaperState(value)}><b>{index===0?'💩':index===1?'💧':'💩💧'}</b><span>{value}</span></button>)}</div></div>
+        <div className="baby-other-row"><span>红屁屁</span><div className="baby-yes-no"><button type="button" className={redBottom?'is-active':''} onClick={()=>setRedBottom(true)}>是</button><button type="button" className={!redBottom?'is-active':''} onClick={()=>setRedBottom(false)}>否</button></div></div>
+        {renderNote()}
+      </> : null}
+      {config.kind === 'food' ? <>
+        <div className="baby-other-row"><span>时间</span><em>{dateLabel} ›</em></div>
+        <label className="baby-other-field"><span>辅食名称</span><input value={foodName} onChange={event=>setFoodName(event.target.value)} placeholder="输入辅食名称"/></label>
+        <div className="baby-quick-chips"><span>最近添加</span><div>{['土豆泥','南瓜泥混鳕鱼、土豆泥'].map(value=><button key={value} type="button" onClick={()=>setFoodName(value)}>{value}</button>)}</div></div>
+        <label className="baby-other-inline-field"><span>重量</span><input inputMode="decimal" value={foodWeight} onChange={event=>setFoodWeight(event.target.value.replace(/[^\d.]/g,''))} placeholder="请输入"/><em>g</em></label>
+        <div className="baby-other-inline-field"><span>宝宝过敏</span><div className="baby-allergy-options">{['无','轻微','明显'].map(value=><button key={value} type="button" className={allergy===value?'is-active':''} onClick={()=>setAllergy(value)}>{value}</button>)}</div></div>
+        {renderNote()}
+      </> : null}
+      {config.kind === 'nutrition' ? <>
+        <div className="baby-other-row"><span>时间</span><em>{dateLabel} ›</em></div>
+        <div className="baby-other-section-head"><span>营养补剂</span><button type="button" onClick={()=>{setSupplement('');setDose('')}}>＋ 添加</button></div>
+        <div className="baby-supplement-input"><input value={supplement} onChange={event=>setSupplement(event.target.value)} placeholder="输入补剂名称"/><input value={dose} onChange={event=>setDose(event.target.value)} placeholder="用量"/></div>
+        <div className="baby-quick-chips"><span>常见补剂</span><div>{['维生素AD','维生素D3','益生菌','钙','锌','铁','DHA'].map(value=><button key={value} type="button" onClick={()=>setSupplement(value)}>{value}</button>)}</div></div>
+        {renderNote()}
+      </> : null}
+      {config.kind === 'activity' ? <>
+        <div className="baby-activity-mode"><button type="button" className={mode==='timer'?'is-active':''} onClick={()=>setMode('timer')}>计时</button><button type="button" className={mode==='manual'?'is-active':''} onClick={()=>setMode('manual')}>手动输入</button></div>
+        <div className="baby-other-hero is-activity"><img src={iconSrc} alt=""/></div>
+        {mode === 'timer' ? <div className="baby-activity-timer"><strong>{timerText}</strong><button type="button" className={running?'is-running':''} onClick={()=>setRunning(value=>!value)}><span>{running?'暂停':'开始'}</span><i>{running?'Ⅱ':'▶'}</i></button></div> : <div className="baby-activity-manual"><label><span>开始时间</span><input type="time" defaultValue={time}/></label><label><span>结束时间</span><input type="time"/></label><label><span>时长</span><input type="number" min="1" value={manualMinutes} onChange={event=>setManualMinutes(event.target.value)}/><em>分钟</em></label></div>}
+        {renderNote()}
+      </> : null}
+    </section></main>
+    <footer className="baby-other-foot"><button type="button" onClick={submit}>保存</button></footer>
+  </section>;
+}
+
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
@@ -421,6 +525,7 @@ function App(){
   const [formulaDetailEntry, setFormulaDetailEntry] = useState(null);
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
   const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
+  const [otherBabyDetailEntry, setOtherBabyDetailEntry] = useState(null);
   const [sharedFeedingHistoryOpen, setSharedFeedingHistoryOpen] = useState(false);
   const [sharedFeedingHistoryBaby, setSharedFeedingHistoryBaby] = useState('小豆苗');
   const [activeTab, setActiveTab] = useState(()=>{
@@ -500,7 +605,8 @@ function App(){
       const entry=event.detail || null;
       if(entry?.feedType === '母乳') setBreastDetailEntry(entry);
       else if(entry?.feedType === '睡眠') setSleepDetailEntry(entry);
-      else setFormulaDetailEntry(entry);
+      else if(entry?.feedType === '配方奶') setFormulaDetailEntry(entry);
+      else setOtherBabyDetailEntry(entry);
     };
     window.addEventListener('open-baby-feeding-detail', openFeedingDetail);
     return ()=>window.removeEventListener('open-baby-feeding-detail', openFeedingDetail);
@@ -1609,13 +1715,7 @@ function App(){
       setSleepDetailEntry({...entry, isQuickDraft:true, sleepMode:'timer', noteText:''});
       return;
     }
-    setTimeline(blocks=>{
-      const dayId = resolveBabyFeedingTargetDayId(blocks);
-      const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
-      return refreshBabyFeedingLatestMarks(next, dayId);
-    });
-    notifyBabyShareSync();
-    setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
+    setOtherBabyDetailEntry({...entry, isQuickDraft:true, noteText:''});
   };
 
   React.useEffect(()=>{
@@ -2543,7 +2643,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
-  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen);
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || otherBabyDetailEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
@@ -3086,6 +3186,54 @@ function App(){
         if(sleepDetailEntry.sleeping) notifyBabyShareSync();
         setSleepDetailEntry(null);
         if(relationshipScheme !== 'with-family-2' || !sleepDetailEntry.sleeping) pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
+      {otherBabyDetailEntry ? <BabyOtherRecordDetailPage entry={otherBabyDetailEntry} onClose={()=>setOtherBabyDetailEntry(null)} onSave={(payload)=>{
+        const source=otherBabyDetailEntry;
+        const config=BABY_OTHER_RECORD_CONFIG[source.feedType] || {};
+        const time=source.time || window.formatNowTime?.() || '08:15';
+        let value=source.value || '已记录';
+        let text=source.text || `${source.feedType}：${value}`;
+        let detailLines=null;
+        let extra={};
+        if(config.kind === 'volume'){
+          value=`${payload.amount}ml`;
+          text=`${source.feedType}：${value}`;
+        }else if(config.kind === 'diaper'){
+          value=`${payload.diaperState}${payload.redBottom?'，红屁屁':''}`;
+          text=`换尿布：${value}`;
+          extra={diaperState:payload.diaperState,redBottom:payload.redBottom};
+        }else if(config.kind === 'food'){
+          value=`${payload.foodName}，${payload.foodWeight}g`;
+          text=`辅食：${value}`;
+          extra={foodName:payload.foodName,foodWeight:payload.foodWeight,allergy:payload.allergy};
+        }else if(config.kind === 'nutrition'){
+          value=`${payload.supplement}，${payload.dose}`;
+          text=`营养补剂：${value}`;
+          extra={supplement:payload.supplement,dose:payload.dose};
+        }else if(config.kind === 'activity'){
+          value=formatBabyFeedingDurationText(payload.durationMinutes);
+          text=source.feedType;
+          detailLines=[`${source.feedType}：${value}`,`${time}-${addMinutesToBabyTime(time,payload.durationMinutes)}`];
+          extra={durationMinutes:payload.durationMinutes,statDurationMinutes:payload.durationMinutes,activityMode:payload.activityMode,elapsedSeconds:payload.elapsedSeconds};
+        }
+        const {isQuickDraft,...base}=source;
+        const saved={...base,...extra,value,text,detailLines,babyName:payload.babyName,noteText:payload.note || undefined};
+        setTimeline(blocks=>{
+          if(isQuickDraft){
+            const dayId=resolveBabyFeedingTargetDayId(blocks);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),saved,{dayId});
+            return refreshBabyFeedingLatestMarks(next,dayId);
+          }
+          return refreshBabyFeedingLatestMarks(blocks.map(block=>{
+            if(block.type!=='day') return block;
+            const items=(block.items||block.entries||[]).map(item=>item.id===source.id?saved:item);
+            return {...block,items,entries:undefined};
+          }));
+        });
+        if(isQuickDraft) notifyBabyShareSync();
+        setOtherBabyDetailEntry(null);
+        if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});
+        setTimeout(()=>scrollTimelineToBottom('smooth'),80);
       }}/>:null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (

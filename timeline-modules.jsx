@@ -879,7 +879,8 @@ function BabyFeedingTimelineCard({item, isNew}){
     setSummaryOpen(item.summaryOpen !== false);
   }, [item.id, item.summaryOpen]);
 
-  const canOpenFeedingDetail = !item.readOnly && (title === '配方奶' || title === '母乳' || title === '睡眠');
+  const editableFeedingTypes = ['配方奶','母乳','睡眠','瓶喂母乳','换尿布','吸奶','辅食','洗澡','玩耍','游泳','营养补剂','喝水'];
+  const canOpenFeedingDetail = !item.readOnly && editableFeedingTypes.includes(title);
   const openFeedingDetail = ()=>{
     if(!canOpenFeedingDetail) return;
     window.dispatchEvent(new CustomEvent('open-baby-feeding-detail', {detail:item}));
