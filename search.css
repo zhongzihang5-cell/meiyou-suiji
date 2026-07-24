@@ -36,13 +36,14 @@
 .xhs-search-page.is-filter-only{
   top:60px;
   bottom:auto;
-  max-height:calc(100% - 60px);
+  height:68%;
+  max-height:540px;
   border-radius:0 0 16px 16px;
   box-shadow:0 8px 24px rgba(0,0,0,0.08);
 }
 .xhs-search-page.is-filter-only .xhs-search-body{
   padding-top:16px;
-  max-height:calc(100vh - 60px - 52px);
+  min-height:0;
 }
 .xhs-search-top{
   display:flex;

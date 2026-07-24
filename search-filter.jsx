@@ -223,6 +223,9 @@ function itemMatchesPersonPanelFilter(item, { personId, option }) {
 
   if (personId === 'elder' || personId === 'younger') {
     if (!isBabyFeedingEntry(row, primary)) return false;
+    const targetBabyName = personId === 'elder' ? '小豆苗' : '小豆芽';
+    const babyName = primary?.babyName || row?.babyName || '小豆苗';
+    if (babyName !== targetBabyName) return false;
     if (option === '全部') return true;
     const matcher = BABY_PANEL_MATCHERS[option];
     return matcher ? matcher(row, primary) : entryText(row, primary).includes(option);

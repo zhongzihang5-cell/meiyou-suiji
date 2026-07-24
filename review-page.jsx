@@ -1445,10 +1445,14 @@ function SharedFeedingReviewCard({onOpen,day}){
 
 function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='page',babyName='小豆苗'}){
   const [activeBaby, setActiveBaby] = useState(babyName);
+  const [moreOpen, setMoreOpen] = useState(false);
   const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks,activeBaby);
   const days = liveDays;
   const isSheet = presentation === 'sheet';
-  useEffect(()=>setActiveBaby(babyName),[babyName,open]);
+  useEffect(()=>{
+    setActiveBaby(babyName);
+    setMoreOpen(false);
+  },[babyName,open]);
   useEffect(()=>{
     const phone = document.querySelector('.phone');
     phone?.classList.toggle('is-shared-feeding-open', open);
@@ -1462,11 +1466,35 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
         </button>
         <div className="shared-feeding-detail-title">
           <div className="shared-feeding-baby-switch" role="group" aria-label="切换宝宝">
-            {['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={activeBaby===name?'is-active':''} aria-pressed={activeBaby===name} onClick={()=>setActiveBaby(name)}>{name}</button>)}
+            {['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={activeBaby===name?'is-active':''} aria-pressed={activeBaby===name} onClick={()=>{setActiveBaby(name);setMoreOpen(false);}}>{name}</button>)}
           </div>
           <span>{activeBaby==='小豆芽'?'5位':'3位'}亲友共享</span>
         </div>
+        <button type="button" className="shared-feeding-more-trigger" aria-label="更多" aria-expanded={moreOpen} onClick={()=>setMoreOpen((prev)=>!prev)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="4" cy="12" r="1.35"/>
+            <circle cx="12" cy="12" r="1.35"/>
+            <circle cx="20" cy="12" r="1.35"/>
+          </svg>
+        </button>
       </header>
+      {moreOpen ? (
+        <>
+          <button type="button" className="shared-feeding-more-scrim" aria-label="关闭更多菜单" onClick={()=>setMoreOpen(false)}/>
+          <div className="shared-feeding-more-picker" role="menu" aria-label="更多功能">
+            <button type="button" role="menuitem" onClick={()=>setMoreOpen(false)}>
+              <span className="shared-feeding-more-icon" aria-hidden="true">☾</span>
+              <span>深色模式</span>
+            </button>
+            <button type="button" role="menuitem" onClick={()=>setMoreOpen(false)}>
+              <span className="shared-feeding-more-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              </span>
+              <span>按日期查找</span>
+            </button>
+          </div>
+        </>
+      ) : null}
       <div className="shared-feeding-detail-scroll">
         {days.length ? days.map(day=><section className="shared-feeding-day" key={day.date}>
           <header><h2>{day.date} <small>{day.weekday}</small></h2><span>{day.count} 条</span></header>

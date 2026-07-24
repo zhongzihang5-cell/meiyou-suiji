@@ -723,7 +723,14 @@ function XhsStyleSearchPage({
           },
           {
             id:'elder',
-            title:'宝宝',
+            title:'小豆苗',
+            options:BABY_FEEDING_PERSON_OPTIONS,
+            default:'全部',
+            grid:true,
+          },
+          {
+            id:'younger',
+            title:'小豆芽',
             options:BABY_FEEDING_PERSON_OPTIONS,
             default:'全部',
             grid:true,
