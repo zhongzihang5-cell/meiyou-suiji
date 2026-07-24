@@ -132,9 +132,27 @@ const BABY_FEEDING_QUICK_ITEMS = [
   { id: 'diet', group:'mine', label: '饮食', iconSrc:'assets/quick-icon-diet.png' },
   { id: 'temperature', group:'mine', label: '体温', iconSrc:'assets/record-temp.png' },
   { id: 'symptom', group:'mine', label: '症状', iconSrc:'assets/quick-icon-symptom.png' },
+  { id: 'custom', group:'mine', label: '自定义', cardIcon:'＋', color:'#FF4D88', isCreateEntry:true },
 ];
 
+function CustomQuickItemIcon({label}){
+  const iconMap={
+    '晒太阳':'☀️',
+    '跳绳':'🪢',
+    '阅读':'📖',
+  };
+  return <span className="custom-quick-semantic-icon" aria-hidden="true">{iconMap[label] || '✦'}</span>;
+}
+
 function BabyFeedingQuickIcon({type}){
+  if(type === 'custom'){
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <rect width="48" height="48" rx="24" fill="#fff0f5"/>
+        <path d="M24 15v18M15 24h18" fill="none" stroke="#ff4d88" strokeWidth="2.6" strokeLinecap="round"/>
+      </svg>
+    );
+  }
   if(type === 'breast'){
     return (
       <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -475,6 +493,74 @@ function BabyOtherRecordDetailPage({entry, onClose, onSave}){
   </section>;
 }
 
+function CustomRecordStructureSheet({draft, onClose, onSave}){
+  const [name,setName]=useState(draft.name || '跳绳');
+  const [owner,setOwner]=useState(draft.owner || '自己');
+  const [structure,setStructure]=useState(draft.structure || 'duration');
+  const [unit,setUnit]=useState(draft.unit ?? '分钟');
+  const [value,setValue]=useState(draft.value ?? '30');
+  const [note,setNote]=useState(draft.note || '');
+  const [recordTime,setRecordTime]=useState(draft.time || window.formatNowTime?.() || new Date().toTimeString().slice(0,5));
+  const [recordDate,setRecordDate]=useState(()=>{
+    const now=new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  });
+  const selectStructure=(next)=>{
+    setStructure(next);
+    if(next==='duration'){setName('阅读');setOwner('自己');setUnit('分钟');setValue('30');setNote('知识进入了我的脑子');}
+    if(next==='number'){setName('跳绳');setOwner('自己');setUnit('');setValue('100');setNote('燃烧我的卡路里');}
+    if(next==='event'){setName('晒太阳');setOwner('小豆苗');setUnit('');setValue('');setNote('黄疸消退中');}
+  };
+  const structureOptions=[
+    ['event','只记发生','仅记录这件事发生了','✓'],
+    ['number','记录数值','记录一个具体数字','#'],
+    ['duration','记录时长','记录持续了多少分钟','◷'],
+  ];
+  return <div className="custom-record-overlay" role="presentation">
+    <section className="custom-record-sheet" role="dialog" aria-modal="true" aria-label="创建自定义记录">
+      <header className="custom-record-head"><button type="button" onClick={onClose} aria-label="关闭">×</button><div><h1>自定义</h1></div><span/></header>
+      <main className="custom-record-body">
+        <section className="custom-record-section custom-record-basic">
+          <div className="custom-record-field"><span>记录对象</span><div className="custom-record-segments">{['自己','小豆苗','小豆芽'].map(v=><button type="button" key={v} className={owner===v?'is-active':''} onClick={()=>setOwner(v)}>{v}</button>)}</div></div>
+          <h2 className="custom-record-name-title">记录什么</h2>
+          <label className="custom-record-name"><span className="custom-record-name-icon">＋</span><input value={name} onChange={e=>setName(e.target.value)} maxLength="10" placeholder="输入记录项名称"/><small>{name.length}/10</small></label>
+          <div className="custom-record-section-divider" aria-hidden="true" />
+          <div className="custom-record-structure">
+          <label className="custom-record-time-row"><span>记录时间</span><div><em>{Number(recordDate.slice(5,7))}月{Number(recordDate.slice(8,10))}日&nbsp; {recordTime}</em><i>›</i></div><input className="custom-record-datetime-input" type="datetime-local" value={`${recordDate}T${recordTime}`} onChange={e=>{const [date,time]=(e.target.value||'T').split('T');if(date)setRecordDate(date);if(time)setRecordTime(time.slice(0,5))}}/></label>
+          <h2 className="custom-record-content-title">记录什么信息</h2>
+          <div className="custom-record-types">{structureOptions.map(([id,label,tip,icon])=><button type="button" key={id} className={structure===id?'is-active':''} onClick={()=>selectStructure(id)}><b>{icon}</b><span>{label}</span><small>{tip}</small></button>)}</div>
+          {structure==='number'||structure==='duration'?<div className={`custom-record-value custom-record-content-value is-${structure}`}><input value={value} onChange={e=>setValue(e.target.value.replace(/[^\d.]/g,''))} inputMode="decimal"/>{structure==='duration'?<span>分钟</span>:null}</div>:null}
+          </div>
+        </section>
+        <section className="custom-record-section custom-record-note-section"><h2>备注</h2><textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="添加备注（选填）"/><button type="button" aria-label="添加图片">▣</button></section>
+      </main>
+      <footer className="custom-record-foot"><button type="button" disabled={!name.trim() || ((structure==='number'||structure==='duration')&&!value)} onClick={()=>onSave({name:name.trim(),owner,structure,unit,value,note,recordTime,recordDate})}>保存</button></footer>
+    </section>
+  </div>;
+}
+
+function CustomQuickRecordSheet({item,onClose,onSave}){
+  const definition=item.customDefinition || {};
+  const isEvent=definition.structure==='event';
+  const editEntry=item.editEntry;
+  const [value,setValue]=useState(editEntry?.value ?? definition.defaultValue ?? (definition.structure==='duration'?'30':'100'));
+  const [note,setNote]=useState(editEntry?.noteText || '');
+  const [recordTime,setRecordTime]=useState(editEntry?.time || window.formatNowTime?.() || new Date().toTimeString().slice(0,5));
+  return <div className="custom-record-overlay" role="presentation"><section className="custom-record-sheet custom-repeat-sheet" role="dialog" aria-modal="true" aria-label={`记录${item.label}`}>
+    <header className="custom-record-head"><button type="button" onClick={onClose} aria-label="关闭">×</button><div><h1>{item.label}</h1></div><span/></header>
+    <main className="custom-record-body">
+      <section className="custom-record-section">
+        <div className="custom-repeat-summary"><span className="custom-record-name-icon">＋</span><div><strong>{item.label}</strong>{definition.owner!=='自己'?<small>{definition.owner}</small>:null}</div></div>
+        <label className="custom-record-time-row"><span>记录时间</span><div><em>今天&nbsp; {recordTime}</em><i>›</i></div><input className="custom-record-datetime-input" type="time" value={recordTime} onChange={e=>setRecordTime(e.target.value)}/></label>
+        {!isEvent?<React.Fragment><h2>{definition.structure==='duration'?'本次时长':'本次数值'}</h2>
+        <div className={`custom-record-value custom-record-content-value is-${definition.structure}`}><input value={value} onChange={e=>setValue(e.target.value.replace(/[^\d.]/g,''))} inputMode="decimal"/>{definition.structure==='duration'?<span>分钟</span>:null}</div></React.Fragment>:null}
+      </section>
+      <section className="custom-record-section custom-record-note-section"><h2>备注</h2><textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="添加备注（选填）"/><button type="button" aria-label="添加图片">▣</button></section>
+    </main>
+    <footer className="custom-record-foot"><button type="button" disabled={!isEvent&&!value} onClick={()=>onSave({value:isEvent?'':value,note,recordTime})}>保存</button></footer>
+  </section></div>;
+}
+
 function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
@@ -526,6 +612,10 @@ function App(){
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
   const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
   const [otherBabyDetailEntry, setOtherBabyDetailEntry] = useState(null);
+  const [customRecordDraft, setCustomRecordDraft] = useState(null);
+  const [customQuickItems, setCustomQuickItems] = useState([]);
+  const [customRepeatDraft, setCustomRepeatDraft] = useState(null);
+  const [customEditEntry, setCustomEditEntry] = useState(null);
   const [sharedFeedingHistoryOpen, setSharedFeedingHistoryOpen] = useState(false);
   const [sharedFeedingHistoryBaby, setSharedFeedingHistoryBaby] = useState('小豆苗');
   const [activeTab, setActiveTab] = useState(()=>{
@@ -596,6 +686,10 @@ function App(){
   const babyVoiceSuccessTimerRef = useRef(null);
   const babyFeedingQuickGuardRef = useRef({id:null, at:0});
   const voiceDemoSequenceRef = useRef(0);
+  React.useEffect(()=>{
+    window.openCustomRecordEditor=(entry)=>setCustomEditEntry(entry);
+    return ()=>{delete window.openCustomRecordEditor;};
+  },[]);
   const babyRecordCountRef = useRef((initial.timeline || []).reduce((count, block)=>(
     count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
   ), 0));
@@ -1683,6 +1777,22 @@ function App(){
     babyFeedingQuickGuardRef.current = {id:item.id, at:now};
     setBabyDiscoverVisible(false);
     setNoteTabUnread(false);
+    if(item.customDefinition){
+      setCustomRepeatDraft(item);
+      return;
+    }
+    if(item.id === 'custom'){
+      setCustomRecordDraft({
+        id:`custom-record-draft-${Date.now()}`,
+        name:'晒太阳',
+        owner:'小豆苗',
+        structure:'event',
+        unit:'',
+        value:'',
+        note:'黄疸消退中',
+      });
+      return;
+    }
     const time = window.formatNowTime?.() || '08:15';
     const entry = {
       id:'baby-feeding-quick-'+item.id+'-'+Date.now(),
@@ -2643,14 +2753,16 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
-  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || otherBabyDetailEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen);
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || otherBabyDetailEntry || customRecordDraft || customRepeatDraft || customEditEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
-    ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
+    ? [...BABY_FEEDING_QUICK_ITEMS.filter(item=>item.id!=='custom'),...customQuickItems,...BABY_FEEDING_QUICK_ITEMS.filter(item=>item.id==='custom')].map(item=>({
         ...item,
         iconNode:item.iconSrc
           ? <img src={item.iconSrc} alt="" />
-          : <BabyFeedingQuickIcon type={item.id}/>,
+          : item.customDefinition
+            ? <CustomQuickItemIcon label={item.label}/>
+            : <BabyFeedingQuickIcon type={item.id}/>,
       }))
     : null;
 
@@ -3073,6 +3185,32 @@ function App(){
         </div>
       ) : null}
 
+      {customRecordDraft ? <CustomRecordStructureSheet draft={customRecordDraft} onClose={()=>setCustomRecordDraft(null)} onSave={(payload)=>{
+        const time=payload.recordTime || window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
+        const entry={id:`custom-record-${Date.now()}`,kind:'custom-record-card',time,recordName:payload.name,owner:payload.owner,structure:payload.structure,unit:payload.unit,value:payload.value,noteText:payload.note,railDot:payload.owner==='自己'?undefined:'baby',isNew:true};
+        setTimeline(blocks=>window.appendTimelineEntry(blocks,entry,{dayId:resolveBabyFeedingTargetDayId(blocks)}));
+        setCustomQuickItems(items=>[...items.filter(item=>item.label!==payload.name),{id:`custom-quick-${Date.now()}`,group:payload.owner==='自己'?'mine':'baby',label:payload.name,customDefinition:{owner:payload.owner,structure:payload.structure,unit:payload.unit,defaultValue:payload.value}}]);
+        setCustomRecordDraft(null);
+        pushToast({text:`“${payload.name}”已添加到快捷记录`,placement:'center'});
+        setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+      }}/>:null}
+      {customRepeatDraft ? <CustomQuickRecordSheet item={customRepeatDraft} onClose={()=>setCustomRepeatDraft(null)} onSave={({value,note,recordTime})=>{
+        const definition=customRepeatDraft.customDefinition;
+        const entry={id:`custom-record-${Date.now()}`,kind:'custom-record-card',time:recordTime||window.formatNowTime?.()||'08:15',recordName:customRepeatDraft.label,owner:definition.owner,structure:definition.structure,unit:definition.unit,value,noteText:note,railDot:definition.owner==='自己'?undefined:'baby',isNew:true};
+        setTimeline(blocks=>window.appendTimelineEntry(blocks,entry,{dayId:resolveBabyFeedingTargetDayId(blocks)}));
+        setCustomRepeatDraft(null);
+        pushToast({text:`已记录“${customRepeatDraft.label}”`,placement:'center'});
+        setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+      }}/>:null}
+      {customEditEntry ? <CustomQuickRecordSheet item={{label:customEditEntry.recordName,customDefinition:{owner:customEditEntry.owner,structure:customEditEntry.structure,unit:customEditEntry.unit,defaultValue:customEditEntry.value},editEntry:customEditEntry}} onClose={()=>setCustomEditEntry(null)} onSave={({value,note,recordTime})=>{
+        setTimeline(blocks=>blocks.map(block=>{
+          if(block.type!=='day') return block;
+          const items=(block.items||block.entries||[]).map(item=>item.id===customEditEntry.id?{...item,time:recordTime,value,noteText:note}:item);
+          return {...block,items,entries:undefined};
+        }));
+        setCustomEditEntry(null);
+        pushToast({text:'已保存',placement:'center'});
+      }}/>:null}
       {formulaDetailEntry ? <BabyFormulaDetailPage entry={formulaDetailEntry} onClose={()=>setFormulaDetailEntry(null)} onSave={({amount,note,babyName})=>{
         if(formulaDetailEntry.isQuickDraft){
           const {isQuickDraft, ...draftEntry}=formulaDetailEntry;

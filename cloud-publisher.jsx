@@ -434,6 +434,15 @@ function DockPublisher({
   const feedingMineItems = showFeedingQuick
     ? feedingQuickItems.filter(item=>item.group === 'mine')
     : [];
+  const feedingCommonItems = showFeedingQuick ? feedingQuickItems.slice(0, 6) : [];
+  const feedingCommonIds = new Set(feedingCommonItems.map(item=>item.id));
+  const feedingOrderedItems = showFeedingQuick ? [
+    ...feedingCommonItems,
+    ...feedingBabyItems.filter(item=>!feedingCommonIds.has(item.id) && !item.customDefinition && !item.isCreateEntry),
+    ...feedingMineItems.filter(item=>!feedingCommonIds.has(item.id) && !item.customDefinition && !item.isCreateEntry),
+    ...feedingQuickItems.filter(item=>!feedingCommonIds.has(item.id) && item.customDefinition),
+    ...feedingQuickItems.filter(item=>!feedingCommonIds.has(item.id) && item.isCreateEntry),
+  ] : [];
   const MoodOverlay = window.MoodQuickOverlay || (()=>null);
   const SymptomOverlay = window.SymptomQuickOverlay || (()=>null);
 
@@ -455,6 +464,10 @@ function DockPublisher({
     setFeedingExpanded(false);
     onRecordSpaceChange?.(item.group === 'mine' ? 'personal' : 'shared');
     if(item.group !== 'mine'){
+      onFeedingQuickSelect?.(item);
+      return;
+    }
+    if(item.id === 'custom' || item.customDefinition){
       onFeedingQuickSelect?.(item);
       return;
     }
@@ -484,11 +497,12 @@ function DockPublisher({
     <button
       key={item.id}
       type="button"
-      className={'dock-feeding-quick-item is-' + (item.group === 'mine' ? 'mine' : 'baby')}
+      className={'dock-feeding-quick-item is-' + (item.group === 'mine' ? 'mine' : 'baby')+(item.customDefinition?' is-custom-created':'')+(item.isCreateEntry?' is-create-entry':'')}
       onClick={(event)=>handleGroupedQuickSelect(item, event.currentTarget)}
     >
       <span className="dock-feeding-quick-icon" aria-hidden="true">
-        {item.iconNode || item.icon || '🍼'}
+        <span className="dock-feeding-quick-art">{item.iconNode || item.icon || '🍼'}</span>
+        {item.group !== 'mine' ? <span className="dock-feeding-object-badge"><img src="assets/baby-shared-avatar.png" alt=""/></span> : null}
       </span>
       <span className="dock-feeding-quick-label">{item.label}</span>
     </button>
@@ -589,23 +603,14 @@ function DockPublisher({
                   <span/>
                 </button>
                 {feedingExpanded ? (
-                  <div className="dock-feeding-groups">
-                    <section className="dock-feeding-group" aria-labelledby="dock-feeding-baby-title">
-                      <h3 id="dock-feeding-baby-title" className="dock-feeding-group-title">宝宝</h3>
-                      <div className="dock-feeding-quick-scroll">
-                        {feedingBabyItems.map(renderFeedingQuickItem)}
-                      </div>
-                    </section>
-                    <section className="dock-feeding-group" aria-labelledby="dock-feeding-mine-title">
-                      <h3 id="dock-feeding-mine-title" className="dock-feeding-group-title">自己</h3>
-                      <div className="dock-feeding-quick-scroll">
-                        {feedingMineItems.map(renderFeedingQuickItem)}
-                      </div>
-                    </section>
+                  <div className="dock-feeding-groups is-unified" aria-label="全部快捷记录">
+                    <div className="dock-feeding-quick-scroll">
+                      {feedingOrderedItems.map(renderFeedingQuickItem)}
+                    </div>
                   </div>
                 ) : (
                   <div className="dock-feeding-quick-scroll is-collapsed">
-                    {feedingBabyItems.slice(0, 6).map(renderFeedingQuickItem)}
+                    {feedingOrderedItems.slice(0, 6).map(renderFeedingQuickItem)}
                   </div>
                 )}
               </div>

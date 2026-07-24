@@ -1023,6 +1023,14 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
     body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
   } else if(item.kind === 'mood-insight'){
     body = item.pendingDrop ? null : <MoodInsightCard item={item} isNew={isNew}/>;
+  } else if(item.kind === 'custom-record-card'){
+    const result=item.structure==='event'?'':item.structure==='option'?(item.value||'已完成'):`${item.value||0}${item.unit||''}`;
+    const openCustomEditor=()=>window.openCustomRecordEditor?.(item);
+    body=<article className={`tl-custom-record-card${isNew?' is-new':''} is-clickable`} role="button" tabIndex="0" onClick={openCustomEditor} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openCustomEditor();}}}>
+      <time>{item.time}</time>
+      <div className="tl-custom-record-main"><span className="tl-custom-record-icon">✦</span><div><p><b>{item.recordName}{item.structure==='event'?'':'：'}</b>{result}</p>{item.noteText?<small>{item.noteText}</small>:null}</div></div>
+      {item.owner && item.owner !== '自己' ? <div className="tl-baby-feed-tags"><span className="tl-baby-feed-tag-main">{item.owner}</span></div> : null}
+    </article>;
   } else if(item.kind === 'baby-feeding-card'){
     body = <BabyFeedingTimelineCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
