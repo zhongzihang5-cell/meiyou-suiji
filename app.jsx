@@ -528,7 +528,7 @@ function CustomRecordStructureSheet({draft, onClose, onSave}){
           <div className="custom-record-structure">
           <label className="custom-record-time-row"><span>记录时间</span><div><em>{Number(recordDate.slice(5,7))}月{Number(recordDate.slice(8,10))}日&nbsp; {recordTime}</em><i>›</i></div><input className="custom-record-datetime-input" type="datetime-local" value={`${recordDate}T${recordTime}`} onChange={e=>{const [date,time]=(e.target.value||'T').split('T');if(date)setRecordDate(date);if(time)setRecordTime(time.slice(0,5))}}/></label>
           <h2 className="custom-record-content-title">记录什么信息</h2>
-          <div className="custom-record-types">{structureOptions.map(([id,label,tip,icon])=><button type="button" key={id} className={structure===id?'is-active':''} onClick={()=>selectStructure(id)}><b>{icon}</b><span>{label}</span><small>{tip}</small></button>)}</div>
+          <div className="custom-record-types">{structureOptions.map(([id,label,,icon])=><button type="button" key={id} className={structure===id?'is-active':''} onClick={()=>selectStructure(id)}><b>{icon}</b><span>{label}</span></button>)}</div>
           {structure==='number'||structure==='duration'?<div className={`custom-record-value custom-record-content-value is-${structure}`}><input value={value} onChange={e=>setValue(e.target.value.replace(/[^\d.]/g,''))} inputMode="decimal"/>{structure==='duration'?<span>分钟</span>:null}</div>:null}
           </div>
         </section>
