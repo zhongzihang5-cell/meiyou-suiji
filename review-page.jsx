@@ -99,9 +99,6 @@ function SleepReviewChart(){
   const barWidth = 22;
   const X = i => x0 + band * i + band / 2;
   const Y = hours => y1 - hours / yMax * (y1 - y0);
-  const totals = days.map(day=>day.hours + day.minutes / 60);
-  const maxIndex = totals.indexOf(Math.max(...totals));
-  const minIndex = totals.indexOf(Math.min(...totals));
   return (
     <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天睡眠总时长柱状图">
       {[8,12,16].map(tick=>(
@@ -117,8 +114,6 @@ function SleepReviewChart(){
         return (
           <React.Fragment key={day.date}>
             <rect x={X(i) - barWidth / 2} y={barY} width={barWidth} height={y1 - barY} rx="10" fill="#b263e8"/>
-            {i===maxIndex ? <text x={X(i)} y={barY-6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#9d4ed4" fontFamily="PingFang SC">{day.hours}小时{day.minutes}分 最高</text> : null}
-            {i===minIndex ? <text x={X(i)-2} y={barY-6} textAnchor="end" fontSize="9" fontWeight="600" fill="#9d4ed4" fontFamily="PingFang SC">{day.hours}小时{day.minutes}分 最低</text> : null}
             <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#a85ee0' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
           </React.Fragment>
         );
@@ -290,9 +285,6 @@ function FoodReviewChart(){
   const barWidth = 22;
   const X = i => x0 + band * i + band / 2;
   const Y = grams => y1 - grams / yMax * (y1 - y0);
-  const amounts = days.map(day=>day.grams);
-  const maxIndex = amounts.indexOf(Math.max(...amounts));
-  const minIndex = amounts.indexOf(Math.min(...amounts));
   return (
     <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天辅食总量柱状图">
       {[200,400,600].map(tick=>(
@@ -307,8 +299,6 @@ function FoodReviewChart(){
         return (
           <React.Fragment key={day.date}>
             <rect x={X(i) - barWidth / 2} y={barY} width={barWidth} height={y1 - barY} rx="10" fill="#ff8a4c"/>
-            {i===maxIndex ? <text x={X(i)} y={barY-6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#e87635" fontFamily="PingFang SC">{day.grams}g 最高</text> : null}
-            {i===minIndex ? <text x={X(i)} y={barY-6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#e87635" fontFamily="PingFang SC">{day.grams}g 最低</text> : null}
             <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e87635' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
           </React.Fragment>
         );
@@ -943,40 +933,26 @@ function AllRecordReviewContent(){
 }
 
 function FeedingDetailPage({open,onClose,activeTab,onTabChange}){
-  const [pickerOpen,setPickerOpen] = useState(false);
-  const pickerItems = [
-    {id:'all',label:'全部'}, {id:'feeding',label:'喂奶'}, {id:'sleep',label:'睡眠'},
-    {id:'diaper',label:'换尿布'}, {id:'food',label:'辅食'}, {id:'supplement',label:'营养补充'}, {id:'pump',label:'吸奶'},
-  ];
-  const activeLabel = pickerItems.find(item=>item.id===activeTab)?.label || '喂养';
-  const pageTitle = activeLabel;
-  React.useEffect(()=>{
-    if(!pickerOpen) return undefined;
-    const handleKey = event=>{ if(event.key==='Escape') setPickerOpen(false); };
-    window.addEventListener('keydown',handleKey);
-    return ()=>window.removeEventListener('keydown',handleKey);
-  },[pickerOpen]);
-  React.useEffect(()=>{ if(!open) setPickerOpen(false); },[open]);
+  const [activeBaby,setActiveBaby] = useState('小豆苗');
   React.useEffect(()=>{
     const phone = document.querySelector('.phone');
     phone?.classList.toggle('is-feeding-review-detail-open', open);
     return ()=>phone?.classList.remove('is-feeding-review-detail-open');
   },[open]);
-  const selectTab = tab=>{ onTabChange(tab); setPickerOpen(false); };
   return (
     <section className={'feeding-detail-page is-'+activeTab+(open?' is-open':'')} aria-hidden={!open} aria-label="喂养分析">
       <header className="feeding-detail-nav">
         <button type="button" className="feeding-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
-        <button type="button" className={'feeding-detail-title-trigger'+(pickerOpen?' is-open':'')} aria-expanded={pickerOpen} aria-label={'切换分析类型，当前'+activeLabel} onClick={()=>setPickerOpen(value=>!value)}><b>{pageTitle}</b><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
+        <div className="shared-feeding-detail-title feeding-detail-baby-title">
+          <div className="shared-feeding-baby-switch feeding-detail-baby-switch" role="group" aria-label="切换宝宝">
+            {['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={activeBaby===name?'is-active':''} aria-pressed={activeBaby===name} onClick={()=>setActiveBaby(name)}>{name}</button>)}
+          </div>
+          <span>{activeBaby==='小豆芽'?'5位':'3位'}亲友共享</span>
+        </div>
         <span>参考表</span>
       </header>
-      <div className={'feeding-detail-picker'+(pickerOpen?' is-open':'')} aria-hidden={!pickerOpen}>
-        <button type="button" className="feeding-detail-picker-scrim" aria-label="关闭分析类型筛选" onClick={()=>setPickerOpen(false)}/>
-        <section className="feeding-detail-picker-panel" aria-label="选择分析类型">
-          <div>{pickerItems.map(item=><button type="button" key={item.id} className={activeTab===item.id?'is-active':''} aria-current={activeTab===item.id?'page':undefined} onClick={()=>selectTab(item.id)}>{item.label}{activeTab===item.id?<i>✓</i>:null}</button>)}</div>
-        </section>
-      </div>
-      <div className="feeding-detail-content" key={activeTab}>
+      <FeedingReviewTabs active={activeTab} onChange={onTabChange}/>
+      <div className="feeding-detail-content" key={activeBaby+'-'+activeTab} aria-label={activeBaby+'喂养分析内容'}>
         {activeTab==='sleep' ? <SleepRecordReviewContent/> : (activeTab==='diaper' ? <DiaperRecordReviewContent/> : (activeTab==='food' ? <FoodRecordReviewContent/> : (activeTab==='supplement' ? <SupplementRecordReviewContent/> : (activeTab==='pump' ? <PumpRecordReviewContent/> : (activeTab==='all' ? <AllRecordReviewContent/> : <FeedingRecordReviewContent/>)))))}
       </div>
     </section>
@@ -1479,7 +1455,7 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
     return ()=>phone?.classList.remove('is-shared-feeding-open');
   },[open]);
   return (
-    <section className={'shared-feeding-timeline-page'+(isSheet?' is-point-sheet':'')+(open?' is-open':'')} aria-hidden={!open} aria-label="小豆苗共享喂养时间轴">
+    <section className={'shared-feeding-timeline-page'+(isSheet?' is-point-sheet':'')+(open?' is-open':'')} aria-hidden={!open} aria-label={activeBaby+'共享喂养时间轴'}>
       <header className="shared-feeding-detail-nav">
         <button type="button" aria-label={isSheet?'关闭':'返回回顾'} onClick={onClose}>
           {isSheet ? <span className="shared-feeding-close-icon" aria-hidden="true">×</span> : <ReviewBackIcon/>}
@@ -1488,7 +1464,7 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
           <div className="shared-feeding-baby-switch" role="group" aria-label="切换宝宝">
             {['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={activeBaby===name?'is-active':''} aria-pressed={activeBaby===name} onClick={()=>setActiveBaby(name)}>{name}</button>)}
           </div>
-          <span>3位亲友共享</span>
+          <span>{activeBaby==='小豆芽'?'5位':'3位'}亲友共享</span>
         </div>
       </header>
       <div className="shared-feeding-detail-scroll">
