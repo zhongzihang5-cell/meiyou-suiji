@@ -8,6 +8,10 @@
 }
 .phone.is-feeding-review-detail-open .review-page{height:calc(100vh - 44px)}
 .phone.is-feeding-review-detail-open .tabbar{display:none}
+.phone.is-vip-analysis-open{--vip-analysis-gradient:linear-gradient(135deg,#ffd9ed 0,#f5e2fa 112px,#f4f3f6 235px)}
+.phone.is-vip-analysis-open .review-page{height:calc(100vh - 44px)}
+.phone.is-vip-analysis-open .tabbar{display:none}
+.phone.is-vip-analysis-open>.statusbar{background:var(--vip-analysis-gradient);background-size:100% 235px;background-position:0 0}
 
 .review-nav{
   height:44px;
@@ -50,6 +54,10 @@
 }
 .review-card + .review-card{margin-top:16px}
 .shared-feeding-review-card + .review-card{margin-top:16px}
+.shared-feeding-review-card + .feeding-rhythm-card,
+.feeding-rhythm-card + .feeding-rhythm-insight-card,
+.feeding-rhythm-insight-card + .sleep-analysis-card,
+.feeding-rhythm-insight-card + .review-card{margin-top:16px}
 .review-card.is-sample{position:relative}
 .review-card.is-actionable{
   cursor:pointer;
@@ -133,6 +141,134 @@
 .review-metrics.is-two-column{grid-template-columns:repeat(2,minmax(0,1fr))}
 .review-card-head>.shared-feeding-card-baby{min-width:0;margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:0;transform:translateY(2px)}
 
+.feeding-rhythm-card{overflow:hidden;border:1px solid rgba(255,77,136,.1);border-radius:var(--r-md);background:#fff;box-shadow:var(--shadow-1)}
+.feeding-rhythm-pad{padding:16px}
+.feeding-rhythm-head{display:flex;align-items:center}
+.feeding-rhythm-head h2{margin:0;color:#323232;font-size:16px;line-height:22px;font-weight:600}
+.feeding-rhythm-head h2 span{display:inline-flex;height:18px;margin-left:5px;padding:0 7px;align-items:center;border-radius:9px;background:linear-gradient(110deg,#2f2934,#5b4655);color:#f9dba4;font:700 9px/18px "SF Pro Text","PingFang SC",sans-serif;letter-spacing:.4px;vertical-align:2px}
+.feeding-rhythm-head>.shared-feeding-card-baby{min-width:0;margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:0}
+.feeding-rhythm-chart{margin-top:14px}
+.feeding-rhythm-chart svg{display:block;width:100%;height:auto}
+.feeding-rhythm-legend{justify-content:flex-start}
+.review-legend-item.is-feeding-rhythm i{width:8px;height:8px;border-radius:50%;background:#ff5b91}
+.review-legend-item.is-feeding-night i{width:8px;height:8px;border-radius:2px;background:rgba(89,99,139,.1)}
+.feeding-rhythm-metrics{display:flex}
+.feeding-rhythm-metrics .review-feeding-average-value b{font-size:18px}
+.feeding-rhythm-metrics .review-metric-label{white-space:nowrap}
+.feeding-rhythm-more{width:100%;height:45px;padding:0 16px;border:0;border-top:.5px solid var(--my-line);background:#fff;display:flex;align-items:center;color:var(--my-text-primary);font:500 14px/18px inherit;text-align:left}
+.feeding-rhythm-more:active{background:#fafafb}
+.feeding-rhythm-more svg{width:18px;height:18px;margin-left:auto;fill:none;stroke:#999;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.feeding-rhythm-insight-card{overflow:hidden;border:1px solid rgba(255,77,136,.1);border-radius:var(--r-md);background:#fff;box-shadow:var(--shadow-1)}
+.feeding-rhythm-insight-head{width:100%;min-height:64px;padding:14px 14px 10px;background:#fff;display:flex;align-items:center;gap:9px;color:var(--my-text-primary);text-align:left}
+.feeding-rhythm-ai{width:28px;height:28px;flex:0 0 28px;border-radius:5px;background:#ff4d88;display:grid;place-items:center;color:#fff;font:500 11px/1 "SF Pro Text","PingFang SC",sans-serif}
+.feeding-rhythm-insight-head h2{min-width:0;margin:0;font-size:16px;line-height:22px;font-weight:600;white-space:nowrap}
+.feeding-rhythm-insight-vip{height:22px;padding:0 9px;border-radius:11px;background:#ffd6e5;color:#ff4d88;font-size:11px;font-weight:600;line-height:22px}
+.feeding-rhythm-insight-head>.shared-feeding-card-baby{min-width:0;margin-left:auto;display:flex;align-items:center}
+.feeding-rhythm-insight-body{padding:8px 20px 20px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:20px;align-items:center}
+.feeding-rhythm-week-card{height:150px;padding:20px 16px 16px;border:1px solid #ffd6e5;border-radius:14px;background:#fff;box-shadow:0 4px 10px rgba(255,77,136,.07);display:flex;flex-direction:column}
+.feeding-rhythm-week-card strong{font-size:17px;line-height:23px;font-weight:600;color:#333}
+.feeding-rhythm-week-card>div{margin-top:auto;display:flex;align-items:baseline;gap:4px}
+.feeding-rhythm-week-card b{color:#ff4d88;font-size:30px;line-height:34px;font-weight:600}
+.feeding-rhythm-week-card span{color:#666;font-size:13px}
+.feeding-rhythm-week-card em{color:#666;font-size:13px;font-style:normal}
+.feeding-rhythm-week-card small{margin-top:4px;color:#555;font-size:13px;line-height:18px}
+.feeding-rhythm-status{min-width:0}
+.feeding-rhythm-status dl{margin:0}
+.feeding-rhythm-status dl>div{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:8px;min-height:34px}
+.feeding-rhythm-status dt{color:#666;font-size:12px;line-height:18px;white-space:nowrap}
+.feeding-rhythm-status dd{width:max-content;max-width:100%;margin:0;padding:4px 6px;border-radius:4px;font-size:12px;line-height:18px;white-space:nowrap}
+.feeding-rhythm-status dd.is-normal{background:#eaf9ef;color:#26b567}
+.feeding-rhythm-status dd.is-attention{background:#fff3df;color:#f19a2a}
+.feeding-rhythm-status dd.is-empty{padding-inline:0;background:transparent;color:#aaa}
+.feeding-rhythm-insight-more{width:100%;height:45px;padding:0 16px;border:0;border-top:.5px solid var(--my-line);background:#fff;display:flex;align-items:center;color:var(--my-text-primary);text-align:left}
+.feeding-rhythm-insight-more:active{background:#fafafb}
+.feeding-rhythm-insight-more svg{width:18px;height:18px;margin-left:auto;fill:none;stroke:var(--my-text-tertiary);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sleep-analysis-ai{background:linear-gradient(145deg,#bd5df2,#8d54ff)}
+.sleep-analysis-week-card{border-color:#ead4fa;box-shadow:0 4px 10px rgba(141,84,255,.07)}
+.sleep-analysis-week-card b,
+.sleep-analysis-week-card em{color:#a855e0}
+
+.feeding-rhythm-insight-card.is-actionable{cursor:pointer}
+.feeding-rhythm-insight-card.is-actionable:focus-visible{outline:2px solid rgba(255,77,136,.38);outline-offset:2px}
+.vip-analysis-page{position:absolute;inset:0;z-index:140;display:flex;flex-direction:column;background:var(--vip-analysis-gradient);background-size:100% 235px;background-position:0 -44px;visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}
+.vip-analysis-page.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
+.vip-analysis-nav{height:62px;flex:0 0 62px;position:relative;display:flex;align-items:center;justify-content:center}
+.vip-analysis-back{position:absolute;left:0;width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center}
+.vip-analysis-back svg{width:24px;height:24px;fill:none;stroke:#333;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.vip-analysis-baby-title{width:190px}
+.vip-analysis-tabs{height:40px;flex:0 0 40px;display:flex;align-items:stretch;justify-content:center;gap:24px}
+.vip-analysis-tabs button{min-width:44px;padding:0 4px;border:0;background:transparent;position:relative;color:#666;font:500 14px/40px inherit}
+.vip-analysis-tabs button.is-active{color:#ff4d88;font-weight:600}
+.vip-analysis-tabs button.is-active::after{content:"";position:absolute;left:50%;bottom:2px;width:20px;height:3px;border-radius:2px;background:#ff4d88;transform:translateX(-50%)}
+.vip-analysis-weeks{height:40px;flex:0 0 40px;padding:4px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.vip-analysis-weeks button{height:27px;min-width:57px;padding:0 10px;border:0;border-radius:14px;background:rgba(255,255,255,.46);color:#777;font:400 11px/27px inherit;white-space:nowrap}
+.vip-analysis-weeks button.is-active{background:#ffd1e6;color:#ff4d88}
+.vip-analysis-scroll{flex:1;min-height:0;overflow-y:auto;padding:0 16px 24px;overscroll-behavior:contain;scrollbar-width:none}
+.vip-analysis-scroll::-webkit-scrollbar{display:none}
+.vip-analysis-card{border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(74,51,65,.035)}
+.vip-analysis-card+.vip-analysis-card{margin-top:12px}
+.vip-report-title{height:48px;padding:0 16px;display:flex;align-items:center;gap:8px}
+.vip-report-title b,.vip-weekly-analysis header b,.vip-sleep-rules>header b,.vip-day-nap>header b{color:#333;font-size:16px;line-height:22px;font-weight:600}
+.vip-report-title small{color:#999;font-size:11px}
+.vip-report-icon{width:15px;height:17px;border-radius:3px;background:#ff4d88;display:grid;place-items:center;color:#fff;font-size:7px;font-weight:600}
+.vip-report-icon.is-purple{background:#b65cf0}
+.vip-date-rings{height:68px;padding:0 12px;display:grid;grid-template-columns:repeat(7,1fr);align-items:center}
+.vip-date-rings>span{height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#666}
+.vip-date-rings>span.is-today{border-radius:28px;background:#fff3f8;color:#ff4d88}
+.vip-date-rings b{font-size:12px;font-weight:400}
+.vip-date-rings i{width:21px;height:21px;border:2px solid #ff75aa;border-left-color:#ffd2e2;border-radius:50%;display:grid;place-items:center;color:#ffc83d;font-size:8px;font-style:normal}
+.vip-date-rings i.has-star{border-color:#ff75aa}
+.vip-feeding-overview{height:70px;margin:0 16px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:8px;background:linear-gradient(90deg,#fff9fb,#fff)}
+.vip-feeding-score{width:48px;height:48px;padding:5px;border-radius:50%;background:conic-gradient(#ff75aa 0 78%,#f4e5eb 78%)}
+.vip-feeding-score>span{width:38px;height:38px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:22px}
+.vip-feeding-overview>div:nth-child(2){display:flex;flex-direction:column}
+.vip-feeding-overview b{font-size:12px;font-weight:500;color:#444}
+.vip-feeding-overview strong{font-size:21px;font-weight:600;color:#222}
+.vip-feeding-overview small{margin-top:2px;color:#aaa;font-size:10px}
+.vip-feeding-overview>svg{width:16px;height:16px;margin-left:auto;fill:none;stroke:#ccc;stroke-width:1.6}
+.vip-feeding-timeline{padding:4px 24px 12px}
+.vip-feeding-timeline>div{height:22px;display:flex;align-items:center;justify-content:space-between}
+.vip-feeding-timeline i{width:8px;height:8px;position:relative;border-radius:50%;background:#e9e8eb}
+.vip-feeding-timeline i.is-hot{background:#ff77aa}
+.vip-feeding-timeline i em{position:absolute;left:50%;bottom:9px;color:#ff4d88;font-size:7px;font-style:normal;transform:translateX(-50%)}
+.vip-feeding-timeline p{margin:0;display:flex;justify-content:space-between;color:#aaa;font-size:9px}
+.vip-feeding-metric-grid{padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vip-feeding-metric-grid section{height:99px;padding:12px;position:relative;border-radius:8px;background:#fffdf6}
+.vip-feeding-metric-grid section.is-night{background:#fdf9ff}
+.vip-feeding-metric-grid section>span{display:block;color:#777;font-size:11px}
+.vip-feeding-metric-grid section>b{display:block;margin-top:3px;color:#333;font-size:14px;font-weight:600}
+.vip-feeding-metric-grid section>b small{color:#aaa;font-size:8px;font-weight:400}
+.vip-feeding-metric-grid section>i{position:absolute;right:10px;top:12px;color:#bbb;font-size:18px;font-style:normal}
+.vip-mini-bars,.vip-mini-blocks,.vip-mini-dots,.vip-mini-purple{height:31px;margin-top:8px;display:flex;align-items:flex-end;gap:6px}
+.vip-mini-bars em{width:5px;border-radius:3px;background:#ffca28}
+.vip-mini-blocks em{width:10px;height:15px;border-radius:3px;background:#ffca28}
+.vip-mini-dots em{width:8px;height:8px;border-radius:50%;background:#e5dcec}.vip-mini-dots em.is-hot{background:#c56aef}
+.vip-mini-purple em{width:12px;height:14px;border-radius:2px;background:#c56aef}
+.vip-stat-period{margin:12px 16px 0;padding-bottom:16px;color:#aaa;font-size:10px}.vip-stat-period span{display:inline-grid;width:13px;height:13px;border:1px solid #bbb;border-radius:50%;place-items:center}
+.vip-weekly-analysis{min-height:220px;padding:16px}
+.vip-weekly-analysis header,.vip-sleep-rules>header,.vip-day-nap>header{display:flex;align-items:center;gap:8px}
+.vip-weekly-analysis>p{margin:11px 0;color:#aaa;font-size:10px;line-height:17px}
+.vip-weekly-analysis h3{margin:12px 0;color:#333;font-size:14px}.vip-weekly-analysis h3 i,.vip-sleep-advice h3 i{display:inline-block;width:5px;height:5px;margin:0 8px 2px 0;border-radius:50%;background:#ff78ad}
+.vip-weekly-analysis h4{margin:10px 0 0;font-size:13px}.vip-weekly-analysis h4+ p{color:#777}
+.vip-sleep-rules{padding:16px}
+.vip-sleep-range{margin:11px 0 9px;color:#777;font-size:12px}
+.vip-sleep-table{overflow:hidden;border:1px solid #ead8f5;border-radius:12px}
+.vip-sleep-table>div{min-height:37px;display:grid;grid-template-columns:1.1fr 1.1fr .9fr;align-items:center;border-top:1px solid #f1e8f6}
+.vip-sleep-table>div:first-child{border-top:0}
+.vip-sleep-table span,.vip-sleep-table b{height:100%;padding:0 8px;display:flex;align-items:center;border-left:1px solid #f1e8f6;color:#555;font-size:10px;font-weight:400}
+.vip-sleep-table span:first-child,.vip-sleep-table b:first-child{border-left:0}
+.vip-sleep-table .is-head{min-height:39px;background:#fbf7fe}.vip-sleep-table .is-head b{color:#444;font-weight:600}
+.vip-sleep-table span.is-alert{color:#ff5b79}
+.vip-sleep-rules>h2{margin:19px 0 9px;color:#333;font-size:15px}
+.vip-sleep-advice h3{margin:10px 0;color:#555;font-size:13px;font-weight:500}.vip-sleep-advice h3 i{background:#be65ef}
+.vip-sleep-advice p{margin:0 0 18px;color:#777;font-size:12px;line-height:22px;text-align:justify}
+.vip-day-nap{min-height:190px;padding:16px}
+.vip-day-nap>header small{color:#999}
+.vip-day-nap h3{margin:15px 0;color:#ad53e0;font-size:11px}.vip-day-nap h3 i{display:inline-block;width:3px;height:12px;margin-right:5px;border-radius:2px;background:#b55be9;vertical-align:-2px}
+.vip-nap-placeholder{height:80px;padding-top:14px;display:flex;justify-content:space-around;background:linear-gradient(#fdfaff,#fff)}
+.vip-nap-placeholder span{color:#777;font-size:9px}
+
 .review-chart{
   margin-top:14px;
 }
@@ -201,6 +337,7 @@
   border-radius:2px;
   background:#ff8a4c;
 }
+.review-legend-item.is-food-count i{border-top:2px solid #ff8a4c}
 .review-legend-item.is-feeding-breast i,
 .review-legend-item.is-feeding-formula i{
   width:8px;
@@ -210,6 +347,7 @@
 .review-legend-item.is-feeding-breast i{background:#ff8fb3}
 .review-legend-item.is-feeding-formula i{background:#ff9a45}
 .review-legend-item.is-feeding-direct i{border-top:2px solid var(--my-brand-red)}
+.review-card:has(.review-card-icon.is-diaper) .review-legend{flex-wrap:wrap;gap:6px 12px}
 .review-card:has(.review-card-icon.is-supplement) .review-legend{flex-wrap:wrap;gap:6px 10px;line-height:14px}
 .review-legend-item.is-supplement i{width:7px;height:7px;border-radius:50%}
 .review-card:has(.review-card-icon.is-supplement) .review-metric:first-child .review-metric-value{font-size:14px;white-space:nowrap}
