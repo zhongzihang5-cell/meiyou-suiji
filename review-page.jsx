@@ -145,7 +145,7 @@ function SleepReviewCard({onFullOpen}){
       iconClass="is-sleep"
       icon={<ReviewBabyIcon kind="sleep"/>}
       chart={<SleepReviewChart/>}
-      legend={<span className="review-legend-item is-sleep"><i></i>睡眠总时长</span>}
+      legend={<span className="review-legend-item is-sleep"><i></i>睡眠时长</span>}
       metrics={(
         <>
           <SleepReviewMetric major="1" majorUnit="小时" minor="2" minorUnit="分" label="最近记录"/>
@@ -163,38 +163,25 @@ function SleepReviewCard({onFullOpen}){
 }
 
 function DiaperReviewChart(){
-  const recordPatterns = [
-    ['pee','pee','poop','pee','both'],
-    ['pee','poop','pee','pee','pee'],
-    ['both','pee','pee','poop','pee','pee'],
-    ['pee','pee','both','pee','poop'],
-    ['poop','pee','pee','pee','both'],
-    ['pee','both','pee','poop','pee'],
+  const days = [
+    {date:'10.15', records:['pee','pee','poop','pee','both']},
+    {date:'10.16', records:['pee','poop','pee','pee','pee']},
+    {date:'10.17', records:['both','pee','pee','poop','pee','pee']},
+    {date:'10.18', records:['pee','pee','both','pee','poop']},
+    {date:'10.19', records:['poop','pee','pee','pee','both']},
+    {date:'10.20', records:['pee','both','pee','poop','pee']},
+    {date:'今天', records:[], highlight:true},
   ];
-  const dateLabels = [
-    '9.22','9.23','9.24','9.25','9.26','9.27','9.28','9.29','9.30',
-    '10.1','10.2','10.3','10.4','10.5','10.6','10.7','10.8','10.9','10.10','10.11',
-    '10.12','10.13','10.14','10.15','10.16','10.17','10.18','10.19','10.20','今天',
-  ];
-  const days = Array.from({length:30}, (_item, index)=>(
-    {
-      key:'diaper-day-' + index,
-      date:dateLabels[index],
-      records:index === 29 ? [] : recordPatterns[index % recordPatterns.length],
-      highlight:index === 29,
-    }
-  ));
   const W = 340, H = 168, padL = 28, padR = 12, padT = 14, padB = 27;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const yMax = 6.8;
   const band = (x1 - x0) / days.length;
-  const segmentWidth = 5.6;
+  const segmentWidth = 18;
   const X = i => x0 + band * i + band / 2;
   const Y = count => y1 - count / yMax * (y1 - y0);
   const colors = {pee:'#f5b335', poop:'#45c978', both:'#4b91ed'};
-  const visibleDateIndexes = {0:true, 7:true, 14:true, 21:true, 29:true};
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天换尿布分类次数图">
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天换尿布分类次数图">
       {[2,4,6].map(tick=>(
         <React.Fragment key={tick}>
           <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
@@ -208,7 +195,7 @@ function DiaperReviewChart(){
         )).filter(segment=>segment.count > 0);
         let stackedCount = 0;
         return (
-          <React.Fragment key={day.key}>
+          <React.Fragment key={day.date}>
             {segments.map(segment=>{
               const segmentBottom = Y(stackedCount);
               stackedCount += segment.count;
@@ -216,7 +203,7 @@ function DiaperReviewChart(){
               return <rect key={segment.type} x={X(i) - segmentWidth / 2} y={segmentTop + 0.8} width={segmentWidth} height={segmentBottom - segmentTop - 1.6} rx={segmentWidth / 2} fill={colors[segment.type]}/>;
             })}
             <line x1={X(i)} y1={y1} x2={X(i)} y2={y1 + 3} stroke="#d8d8dc" strokeWidth="0.7"/>
-            {visibleDateIndexes[i] ? <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e8930f' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text> : null}
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e8930f' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
           </React.Fragment>
         );
       })}
@@ -248,15 +235,15 @@ function DiaperReviewCard({onFullOpen}){
       chart={<DiaperReviewChart/>}
       legend={(
         <>
-          <span className="review-legend-item is-diaper-pee"><i></i>嘘嘘</span>
-          <span className="review-legend-item is-diaper-poop"><i></i>臭臭</span>
-          <span className="review-legend-item is-diaper-both"><i></i>嘘嘘+臭臭</span>
+          <span className="review-legend-item is-diaper-pee"><i></i>嘘嘘次数</span>
+          <span className="review-legend-item is-diaper-poop"><i></i>臭臭次数</span>
+          <span className="review-legend-item is-diaper-both"><i></i>嘘嘘+臭臭次数</span>
         </>
       )}
       metrics={(
         <>
           <DiaperReviewMetric kind="empty" label="最近记录"/>
-          <DiaperReviewMetric kind="average" label="近30天平均"/>
+          <DiaperReviewMetric kind="average" label="近7天平均"/>
         </>
       )}
       metricsClass="is-two-column"
@@ -270,39 +257,32 @@ function DiaperReviewCard({onFullOpen}){
 
 function FoodReviewChart(){
   const days = [
-    {date:'10.15', grams:600},
-    {date:'10.16', grams:500},
-    {date:'10.17', grams:600},
-    {date:'10.18', grams:500},
-    {date:'10.19', grams:600},
-    {date:'10.20', grams:600},
-    {date:'今天', grams:600, highlight:true},
+    {date:'10.15', count:3},
+    {date:'10.16', count:2},
+    {date:'10.17', count:3},
+    {date:'10.18', count:2},
+    {date:'10.19', count:3},
+    {date:'10.20', count:4},
+    {date:'今天', count:3, highlight:true},
   ];
   const W = 340, H = 168, padL = 32, padR = 12, padT = 14, padB = 27;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const yMax = 700;
   const band = (x1 - x0) / days.length;
-  const barWidth = 22;
   const X = i => x0 + band * i + band / 2;
-  const Y = grams => y1 - grams / yMax * (y1 - y0);
+  const YCount = count => y1 - count / 5 * (y1 - y0);
+  const countPoints = days.map((day, i)=>[X(i),YCount(day.count)]);
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天辅食总量柱状图">
-      {[200,400,600].map(tick=>(
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天辅食总次数曲线图">
+      {[1,2,3,4].map(tick=>(
         <React.Fragment key={tick}>
-          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
-          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}g</text>
+          <line x1={x0} y1={YCount(tick)} x2={x1} y2={YCount(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={YCount(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}次</text>
         </React.Fragment>
       ))}
       <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
-      {days.map((day, i)=>{
-        const barY = Y(day.grams);
-        return (
-          <React.Fragment key={day.date}>
-            <rect x={X(i) - barWidth / 2} y={barY} width={barWidth} height={y1 - barY} rx="10" fill="#ff8a4c"/>
-            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#e87635' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
-          </React.Fragment>
-        );
-      })}
+      {days.map((day, i)=><text key={day.date} x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff8a4c' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>)}
+      <path d={reviewSmoothPath(countPoints)} fill="none" stroke="#ff8a4c" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {days.map((day,i)=><circle key={'food-count-'+day.date} cx={X(i)} cy={YCount(day.count)} r={day.highlight?4:3.2} fill={day.highlight?'#ff8a4c':'#fff'} stroke="#ff8a4c" strokeWidth="2"/>)}
     </svg>
   );
 }
@@ -311,7 +291,7 @@ function FoodReviewMetric({kind, label}){
   return (
     <div className="review-metric">
       {kind === 'recent' ? <div className="review-food-amount-value"><b>600</b><span>g</span></div> : null}
-      {kind === 'average' ? <div className="review-food-average-value"><b>600</b><span>g</span></div> : null}
+      {kind === 'average' ? <div className="review-food-average-value"><b>2</b><span>次</span></div> : null}
       {kind === 'trend' ? <div className="review-food-trend-value"><span>→</span><b>平稳</b></div> : null}
       <div className="review-metric-label">{label}</div>
     </div>
@@ -325,7 +305,11 @@ function FoodReviewCard({onFullOpen}){
       iconClass="is-food-review"
       icon={<ReviewBabyIcon kind="food"/>}
       chart={<FoodReviewChart/>}
-      legend={<span className="review-legend-item is-food-review"><i></i>辅食总量</span>}
+      legend={(
+        <>
+          <span className="review-legend-item is-food-count"><i></i>辅食次数</span>
+        </>
+      )}
       metrics={(
         <>
           <FoodReviewMetric kind="recent" label="最近记录"/>
@@ -547,8 +531,8 @@ function FeedingReviewCard({onFullOpen}){
       chart={<FeedingReviewChart/>}
       legend={(
         <>
-          <span className="review-legend-item is-feeding-breast"><i></i>瓶喂母乳</span>
-          <span className="review-legend-item is-feeding-formula"><i></i>瓶喂配方奶</span>
+          <span className="review-legend-item is-feeding-breast"><i></i>瓶喂母乳量</span>
+          <span className="review-legend-item is-feeding-formula"><i></i>配方奶量</span>
           <span className="review-legend-item is-feeding-direct"><i></i>亲喂时长</span>
         </>
       )}
@@ -564,6 +548,227 @@ function FeedingReviewCard({onFullOpen}){
       onOpen={onFullOpen}
       onMore={onFullOpen}
     />
+  );
+}
+
+function FeedingRhythmChart(){
+  const current = [
+    {hour:1.15,size:4.2},{hour:4.7,size:5.1},{hour:8.0,size:4.5},{hour:10.75,size:5.5},
+    {hour:13.45,size:4.4},{hour:16.35,size:5.2},{hour:19.15,size:4.7},{hour:22.7,size:5.4},
+  ];
+  const W = 340, H = 94, padL = 9, padR = 9;
+  const x0 = padL, x1 = W - padR;
+  const X = hour=>x0 + hour / 24 * (x1 - x0);
+  return (
+    <svg viewBox="0 0 340 94" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天24小时喂奶节律">
+      <rect x={x0} y="10" width={X(6)-x0} height="53" rx="6" fill="rgba(89,99,139,.07)"/>
+      <rect x={X(21)} y="10" width={x1-X(21)} height="53" rx="6" fill="rgba(89,99,139,.07)"/>
+      <text x={X(3)} y="20" textAnchor="middle" fontSize="8.5" fill="#a2a5b3" fontFamily="PingFang SC">夜间</text>
+      <text x={X(22.5)} y="20" textAnchor="middle" fontSize="8.5" fill="#a2a5b3" fontFamily="PingFang SC">夜间</text>
+      <line x1={x0} y1="48" x2={x1} y2="48" stroke="#e5e5e9" strokeWidth="1"/>
+      {current.map((event,index)=><circle key={'current-'+index} cx={X(event.hour)} cy="46" r={event.size} fill="#ff5b91" stroke="#fff" strokeWidth="1.5"/>)}
+      {[0,6,12,18,24].map(hour=>(
+        <React.Fragment key={hour}>
+          <line x1={X(hour)} y1="63" x2={X(hour)} y2="67" stroke="#d2d2d7" strokeWidth="1"/>
+          <text x={X(hour)} y="82" textAnchor={hour===0?'start':(hour===24?'end':'middle')} fontSize="9" fill="#a8a8ae" fontFamily="PingFang SC">{hour}</text>
+        </React.Fragment>
+      ))}
+    </svg>
+  );
+}
+
+function FeedingRhythmCard({onOpen}){
+  return (
+    <section className="feeding-rhythm-card" aria-label="喂奶规律 VIP">
+      <div className="feeding-rhythm-pad">
+        <header className="feeding-rhythm-head">
+          <h2>喂奶规律 <span>VIP</span></h2>
+          <FeedingCardBabyInfo/>
+        </header>
+        <div className="feeding-rhythm-chart"><FeedingRhythmChart/></div>
+        <div className="review-legend feeding-rhythm-legend" aria-label="图例">
+          <span className="review-legend-item is-feeding-rhythm"><i></i>喂奶时间</span>
+          <span className="review-legend-item is-feeding-night"><i></i>夜间</span>
+        </div>
+        <div className="review-metrics feeding-rhythm-metrics is-two-column">
+          <div className="review-metric review-feeding-metric">
+            <div className="review-feeding-average-value"><b>2</b><i>小时</i><b>45</b><i>分</i></div>
+            <div className="review-metric-label">白天间隔时长</div>
+          </div>
+          <div className="review-metric review-feeding-metric">
+            <div className="review-feeding-average-value"><b>3</b><i>次</i></div>
+            <div className="review-metric-label">夜奶次数</div>
+          </div>
+        </div>
+      </div>
+      <button type="button" className="feeding-rhythm-more" onClick={onOpen}>
+        <span className="review-card-more-main">查看完整喂奶规律</span><ReviewChevron/>
+      </button>
+    </section>
+  );
+}
+
+function FeedingRhythmInsightCard({onOpen}){
+  return (
+    <section className="feeding-rhythm-insight-card is-actionable" role="button" tabIndex="0" aria-label="喂奶分析 VIP" onClick={onOpen} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpen();}}}>
+      <header className="feeding-rhythm-insight-head">
+        <span className="feeding-rhythm-ai" aria-hidden="true">Ai</span>
+        <h2>喂奶分析</h2>
+        <span className="feeding-rhythm-insight-vip">VIP</span>
+        <FeedingCardBabyInfo/>
+      </header>
+      <div className="feeding-rhythm-insight-body">
+        <div className="feeding-rhythm-week-card">
+          <strong>每日喝奶</strong>
+          <div><b>10</b><span>次</span></div>
+          <small>第24周</small>
+        </div>
+        <div className="feeding-rhythm-status">
+          <dl>
+            <div><dt>喂奶次数</dt><dd className="is-normal">符合参考值</dd></div>
+            <div><dt>白天规律</dt><dd className="is-attention">建议关注</dd></div>
+            <div><dt>夜奶规律</dt><dd className="is-empty">未记录</dd></div>
+          </dl>
+        </div>
+      </div>
+      <button type="button" className="feeding-rhythm-insight-more" onClick={onOpen}>
+        <span className="review-card-more-main">查看完整喂奶分析</span><ReviewChevron/>
+      </button>
+    </section>
+  );
+}
+
+function SleepAnalysisCard({onOpen}){
+  return (
+    <section className="feeding-rhythm-insight-card sleep-analysis-card is-actionable" role="button" tabIndex="0" aria-label="睡眠分析 VIP" onClick={onOpen} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpen();}}}>
+      <header className="feeding-rhythm-insight-head">
+        <span className="feeding-rhythm-ai sleep-analysis-ai" aria-hidden="true">Ai</span>
+        <h2>睡眠分析</h2>
+        <span className="feeding-rhythm-insight-vip">VIP</span>
+        <FeedingCardBabyInfo/>
+      </header>
+      <div className="feeding-rhythm-insight-body">
+        <div className="feeding-rhythm-week-card sleep-analysis-week-card">
+          <strong>每日睡觉</strong>
+          <div><b>10</b><span>h</span><em>34min</em></div>
+          <small>第24周</small>
+        </div>
+        <div className="feeding-rhythm-status">
+          <dl>
+            <div><dt>睡眠量</dt><dd className="is-normal">符合参考值</dd></div>
+            <div><dt>白天小睡</dt><dd className="is-attention">建议关注</dd></div>
+            <div><dt>夜间睡眠</dt><dd className="is-empty">未记录</dd></div>
+          </dl>
+        </div>
+      </div>
+      <button type="button" className="feeding-rhythm-insight-more" onClick={onOpen}>
+        <span className="review-card-more-main">查看完整睡眠分析</span><ReviewChevron/>
+      </button>
+    </section>
+  );
+}
+
+function VipAnalysisWeekNav(){
+  return (
+    <div className="vip-analysis-weeks" aria-label="选择宝宝周龄">
+      {[20,21,22,23,24].map(week=><button type="button" key={week} className={week===24?'is-active':''}>第{week}周</button>)}
+    </div>
+  );
+}
+
+function VipAnalysisShell({open,type,onClose,onChange}){
+  const [activeBaby,setActiveBaby] = useState('小豆苗');
+  React.useEffect(()=>{
+    const phone=document.querySelector('.phone');
+    phone?.classList.toggle('is-vip-analysis-open',open);
+    return ()=>phone?.classList.remove('is-vip-analysis-open');
+  },[open]);
+  return (
+    <section className={'vip-analysis-page is-'+type+(open?' is-open':'')} aria-hidden={!open} aria-label={type==='sleep'?'睡眠分析页':'喂奶分析页'}>
+      <header className="vip-analysis-nav">
+        <button type="button" className="vip-analysis-back" aria-label="返回回顾" onClick={onClose}><ReviewBackIcon/></button>
+        <div className="shared-feeding-detail-title vip-analysis-baby-title">
+          <div className="shared-feeding-baby-switch" role="group" aria-label="切换宝宝">
+            {['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={activeBaby===name?'is-active':''} aria-pressed={activeBaby===name} onClick={()=>setActiveBaby(name)}>{name}</button>)}
+          </div>
+          <span>{activeBaby==='小豆芽'?'5位':'3位'}亲友共享</span>
+        </div>
+      </header>
+      <div className="vip-analysis-tabs" role="tablist" aria-label="分析类型">
+        <button type="button" role="tab" aria-selected={type==='feeding'} className={type==='feeding'?'is-active':''} onClick={()=>onChange('feeding')}>喂奶</button>
+        <button type="button" role="tab" aria-selected={type==='sleep'} className={type==='sleep'?'is-active':''} onClick={()=>onChange('sleep')}>睡眠</button>
+      </div>
+      <VipAnalysisWeekNav/>
+      <div className="vip-analysis-scroll" key={activeBaby+'-'+type} aria-label={activeBaby+(type==='sleep'?'睡眠分析内容':'喂奶分析内容')}>
+        {type==='sleep'?<VipSleepAnalysisContent babyName={activeBaby}/>:<VipFeedingAnalysisContent babyName={activeBaby}/>}
+      </div>
+    </section>
+  );
+}
+
+function VipFeedingAnalysisContent({babyName}){
+  const dates=[19,20,21,22,23,24,'今天'];
+  const dots=[1,1,2,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,1,2,1,1];
+  return (
+    <>
+      <article className="vip-analysis-card vip-feeding-report">
+        <header className="vip-report-title">
+          <span className="vip-report-icon">▮</span><b>喂养日报</b><small>{babyName}第24周（3月19日–3月25日）</small>
+        </header>
+        <div className="vip-date-rings">
+          {dates.map((date,index)=><span key={date} className={date==='今天'?'is-today':''}><b>{date}</b><i className={index===4?'has-star':''}>{index===4?'★':''}</i></span>)}
+        </div>
+        <div className="vip-feeding-overview">
+          <div className="vip-feeding-score"><span>🍼</span></div>
+          <div><b>喂奶次数　<strong>10</strong>次</b><small>参考次数　12–14次</small></div>
+          <ReviewChevron/>
+        </div>
+        <div className="vip-feeding-timeline" aria-label="全天喂奶时间分布">
+          <div>{dots.map((n,index)=><i key={index} className={n===2?'is-hot':''}>{n===2&&index%3===0?<em>{index===6?'3':'2'}</em>:null}</i>)}</div>
+          <p><span>06:00</span><span>12:00</span><span>18:00</span><span>次日00:00</span></p>
+        </div>
+        <div className="vip-feeding-metric-grid">
+          <section className="is-day"><span>白天单次时长</span><b>11.5小时</b><i>›</i><div className="vip-mini-bars">{[16,12,18,24,10,20,17,22,9,20].map((h,i)=><em key={i} style={{height:h}}/>)}</div></section>
+          <section className="is-day"><span>白天间隔时长</span><b>2.4小时</b><i>›</i><div className="vip-mini-blocks">{Array.from({length:10},(_,i)=><em key={i}/>)}</div></section>
+          <section className="is-night"><span>夜奶次数</span><b>3次 <small>次日00:00–06:00</small></b><i>›</i><div className="vip-mini-dots"><em/><em/><em className="is-hot"/><em/></div></section>
+          <section className="is-night"><span>夜奶间隔时长</span><b>2.5小时</b><i>›</i><div className="vip-mini-purple"><em/><em/><em/></div></section>
+        </div>
+        <p className="vip-stat-period">统计周期：每日6:00–次日6:00 <span>?</span></p>
+      </article>
+      <article className="vip-analysis-card vip-weekly-analysis">
+        <header><span className="vip-report-icon">Ai</span><b>周规律分析</b></header>
+        <p>统计周期：8月11日6:00–8月13日6:00，已记录2天数据</p>
+        <h3><i/>混合喂养重点关注</h3>
+        <h4>0–1月龄喂养规律</h4>
+        <p>本周喂奶次数与间隔存在一定波动，建议继续记录并关注宝宝的饥饿和满足信号。</p>
+      </article>
+    </>
+  );
+}
+
+function VipSleepAnalysisContent({babyName}){
+  return (
+    <>
+      <article className="vip-analysis-card vip-sleep-rules">
+        <header><span className="vip-report-icon is-purple">Ai</span><b>睡眠规律</b></header>
+        <p className="vip-sleep-range">8月30日–9月5日，已记录7天</p>
+        <div className="vip-sleep-table" role="table" aria-label={babyName+'睡眠规律与参考值'}>
+          <div className="is-head"><b>指标(日均)</b><b>{babyName}的记录</b><b>参考值</b></div>
+          <div><span>总次数</span><span>12h30min</span><span>14–17h</span></div>
+          <div><span>白天小睡总次数</span><span>4次</span><span>6–7次</span></div>
+          <div><span>白天小睡间隔</span><span className="is-alert">0.5–4h</span><span>45–60min</span></div>
+          <div><span>夜间最长睡眠</span><span>5h</span><span>3–6h</span></div>
+        </div>
+        <h2>规律解读和建议</h2>
+        <section className="vip-sleep-advice"><h3><i/>白天规律</h3><p>上周喂奶间隔和单次喂奶量都不太规律，间隔时长忽长忽短，有时候2小时喂一次，有时候4小时喂一次，单次喂奶量有时候也少于30ml。<br/>上周喂奶间隔和单次喂奶量都不太规律，需要注意奶量均衡。</p></section>
+        <section className="vip-sleep-advice"><h3><i/>夜间规律</h3><p>根据你上周已有的记录数据来看，{babyName}上周完全没吃夜奶，如果数据准确的话，最好还是能让宝宝至少吃一次夜奶哦。因为新生儿宝宝的胃容量很小，需要“少吃多餐”来满足营养需求。</p></section>
+      </article>
+      <article className="vip-analysis-card vip-day-nap">
+        <header><span className="vip-report-icon is-purple">✿</span><b>白天小睡</b><small>ⓘ</small></header>
+        <h3><i/>白天小睡次数和总时长</h3>
+        <div className="vip-nap-placeholder">{[2,2,2,2,2,2,2].map((v,i)=><span key={i}>{v}次</span>)}</div>
+      </article>
+    </>
   );
 }
 
@@ -1517,7 +1722,10 @@ function ReviewPage({timelineBlocks}){
   const [sharedFeedingOpen, setSharedFeedingOpen] = useState(false);
   const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
   const [feedingDetailTab, setFeedingDetailTab] = useState('feeding');
+  const [vipAnalysisType, setVipAnalysisType] = useState('feeding');
+  const [vipAnalysisOpen, setVipAnalysisOpen] = useState(false);
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
+  const openVipAnalysis = type=>{ setVipAnalysisType(type); setVipAnalysisOpen(true); };
   const sharedFeedingDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
   const babyReviewTypeByRecord = {
     '配方奶':'feeding','母乳':'feeding','瓶喂母乳':'feeding',
@@ -1573,6 +1781,12 @@ function ReviewPage({timelineBlocks}){
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
 
       <SharedFeedingReviewCard day={sharedFeedingDays[0]} onOpen={()=>setSharedFeedingOpen(true)}/>
+
+      <FeedingRhythmCard onOpen={()=>openFeedingDetail('feeding')}/>
+
+      <FeedingRhythmInsightCard onOpen={()=>openVipAnalysis('feeding')}/>
+
+      <SleepAnalysisCard onOpen={()=>openVipAnalysis('sleep')}/>
 
       {orderedBabyReviewCards.map(card=><React.Fragment key={card.id}>{card.node}</React.Fragment>)}
 
@@ -1664,6 +1878,7 @@ function ReviewPage({timelineBlocks}){
       <SharedFeedingTimelinePage open={sharedFeedingOpen} timelineBlocks={timelineBlocks} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>
+      <VipAnalysisShell open={vipAnalysisOpen} type={vipAnalysisType} onClose={()=>setVipAnalysisOpen(false)} onChange={setVipAnalysisType}/>
     </main>
   );
 }
