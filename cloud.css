@@ -1345,6 +1345,13 @@
 .dock-feeding-quick-item:active{
   transform:scale(0.96);
 }
+.dock-feeding-quick-item.is-just-created .dock-feeding-quick-art{
+  animation:customQuickCreated 1.2s ease-in-out 2;
+}
+@keyframes customQuickCreated{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,77,136,0)}
+  45%{box-shadow:0 0 0 5px rgba(255,77,136,.2)}
+}
 .dock-feeding-quick-icon{
   position:relative;
   width:42px;
@@ -1435,6 +1442,15 @@
 .dock-feeding-quick-item.is-mine .dock-feeding-quick-icon{
   width:40px;
   height:40px;
+}
+.dock-feeding-groups.is-unified .dock-feeding-quick-icon{
+  width:44px;
+  height:44px;
+}
+.dock-feeding-quick-item.is-create-entry .dock-feeding-quick-art{
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
 }
 .dock-fan{
   flex-shrink:0;

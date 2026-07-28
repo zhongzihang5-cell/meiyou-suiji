@@ -459,6 +459,12 @@ function DockPublisher({
     if(dy > 18) setFeedingExpanded(false);
   };
 
+  React.useEffect(()=>{
+    const openPanel=()=>setFeedingExpanded(true);
+    window.addEventListener('open-custom-quick-panel',openPanel);
+    return ()=>window.removeEventListener('open-custom-quick-panel',openPanel);
+  },[]);
+
   const handleGroupedQuickSelect = (item, buttonEl)=>{
     if(!item) return;
     setFeedingExpanded(false);
@@ -497,7 +503,7 @@ function DockPublisher({
     <button
       key={item.id}
       type="button"
-      className={'dock-feeding-quick-item is-' + (item.group === 'mine' ? 'mine' : 'baby')+(item.customDefinition?' is-custom-created':'')+(item.isCreateEntry?' is-create-entry':'')}
+      className={'dock-feeding-quick-item is-' + (item.group === 'mine' ? 'mine' : 'baby')+(item.customDefinition?' is-custom-created':'')+(item.isCreateEntry?' is-create-entry':'')+(item.isJustCreated?' is-just-created':'')}
       onClick={(event)=>handleGroupedQuickSelect(item, event.currentTarget)}
     >
       <span className="dock-feeding-quick-icon" aria-hidden="true">

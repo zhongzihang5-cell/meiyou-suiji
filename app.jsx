@@ -493,7 +493,7 @@ function BabyOtherRecordDetailPage({entry, onClose, onSave}){
   </section>;
 }
 
-function CustomRecordStructureSheet({draft, onClose, onSave}){
+function CustomRecordStructureSheet({draft, onClose, onSave, createOnly=false}){
   const [name,setName]=useState(draft.name || '跳绳');
   const [owner,setOwner]=useState(draft.owner || '自己');
   const [structure,setStructure]=useState(draft.structure || 'duration');
@@ -507,9 +507,14 @@ function CustomRecordStructureSheet({draft, onClose, onSave}){
   });
   const selectStructure=(next)=>{
     setStructure(next);
-    if(next==='duration'){setName('阅读');setOwner('自己');setUnit('分钟');setValue('30');setNote('知识进入了我的脑子');}
+    if(next==='duration'){setName('阅读');setOwner('小豆芽');setUnit('分钟');setValue('30');setNote('知识进入了我的脑子');}
     if(next==='number'){setName('跳绳');setOwner('自己');setUnit('');setValue('100');setNote('燃烧我的卡路里');}
     if(next==='event'){setName('晒太阳');setOwner('小豆苗');setUnit('');setValue('');setNote('黄疸消退中');}
+  };
+  const selectOwner=(next)=>{
+    if(next==='自己') selectStructure('number');
+    if(next==='小豆苗') selectStructure('event');
+    if(next==='小豆芽') selectStructure('duration');
   };
   const structureOptions=[
     ['event','只记发生','仅记录这件事发生了','✓'],
@@ -517,24 +522,24 @@ function CustomRecordStructureSheet({draft, onClose, onSave}){
     ['duration','记录时长','记录持续了多少分钟','◷'],
   ];
   return <div className="custom-record-overlay" role="presentation">
-    <section className="custom-record-sheet" role="dialog" aria-modal="true" aria-label="创建自定义记录">
-      <header className="custom-record-head"><button type="button" onClick={onClose} aria-label="关闭">×</button><div><h1>自定义</h1></div><span/></header>
+    <section className={'custom-record-sheet'+(createOnly?' is-create-only':'')} role="dialog" aria-modal="true" aria-label="创建自定义记录">
+      <header className="custom-record-head"><button type="button" onClick={onClose} aria-label="关闭">×</button><div><h1>{createOnly?'创建自定义记录项':'自定义'}</h1></div><span/></header>
       <main className="custom-record-body">
         <section className="custom-record-section custom-record-basic">
-          <div className="custom-record-field"><span>记录对象</span><div className="custom-record-segments">{['自己','小豆苗','小豆芽'].map(v=><button type="button" key={v} className={owner===v?'is-active':''} onClick={()=>setOwner(v)}>{v}</button>)}</div></div>
+          <div className="custom-record-field"><span>记录谁</span><div className="custom-record-segments">{['自己','小豆苗','小豆芽'].map(v=><button type="button" key={v} className={owner===v?'is-active':''} onClick={()=>selectOwner(v)}>{v}</button>)}</div></div>
           <h2 className="custom-record-name-title">记录什么</h2>
           <label className="custom-record-name"><span className="custom-record-name-icon">＋</span><input value={name} onChange={e=>setName(e.target.value)} maxLength="10" placeholder="输入记录项名称"/><small>{name.length}/10</small></label>
           <div className="custom-record-section-divider" aria-hidden="true" />
           <div className="custom-record-structure">
-          <label className="custom-record-time-row"><span>记录时间</span><div><em>{Number(recordDate.slice(5,7))}月{Number(recordDate.slice(8,10))}日&nbsp; {recordTime}</em><i>›</i></div><input className="custom-record-datetime-input" type="datetime-local" value={`${recordDate}T${recordTime}`} onChange={e=>{const [date,time]=(e.target.value||'T').split('T');if(date)setRecordDate(date);if(time)setRecordTime(time.slice(0,5))}}/></label>
-          <h2 className="custom-record-content-title">记录什么信息</h2>
+          {!createOnly?<label className="custom-record-time-row"><span>记录时间</span><div><em>{Number(recordDate.slice(5,7))}月{Number(recordDate.slice(8,10))}日&nbsp; {recordTime}</em><i>›</i></div><input className="custom-record-datetime-input" type="datetime-local" value={`${recordDate}T${recordTime}`} onChange={e=>{const [date,time]=(e.target.value||'T').split('T');if(date)setRecordDate(date);if(time)setRecordTime(time.slice(0,5))}}/></label>:null}
+          <h2 className="custom-record-content-title">记录信息</h2>
           <div className="custom-record-types">{structureOptions.map(([id,label,,icon])=><button type="button" key={id} className={structure===id?'is-active':''} onClick={()=>selectStructure(id)}><b>{icon}</b><span>{label}</span></button>)}</div>
-          {structure==='number'||structure==='duration'?<div className={`custom-record-value custom-record-content-value is-${structure}`}><input value={value} onChange={e=>setValue(e.target.value.replace(/[^\d.]/g,''))} inputMode="decimal"/>{structure==='duration'?<span>分钟</span>:null}</div>:null}
+          {!createOnly&&(structure==='number'||structure==='duration')?<div className={`custom-record-value custom-record-content-value is-${structure}`}><input value={value} onChange={e=>setValue(e.target.value.replace(/[^\d.]/g,''))} inputMode="decimal"/>{structure==='duration'?<span>分钟</span>:null}</div>:null}
           </div>
         </section>
-        <section className="custom-record-section custom-record-note-section"><h2>备注</h2><textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="添加备注（选填）"/><button type="button" aria-label="添加图片">▣</button></section>
+        {!createOnly?<section className="custom-record-section custom-record-note-section"><h2>备注</h2><textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="添加备注（选填）"/><button type="button" aria-label="添加图片">▣</button></section>:null}
       </main>
-      <footer className="custom-record-foot"><button type="button" disabled={!name.trim() || ((structure==='number'||structure==='duration')&&!value)} onClick={()=>onSave({name:name.trim(),owner,structure,unit,value,note,recordTime,recordDate})}>保存</button></footer>
+      <footer className="custom-record-foot"><button type="button" disabled={!name.trim() || (!createOnly&&(structure==='number'||structure==='duration')&&!value)} onClick={()=>onSave({name:name.trim(),owner,structure,unit,value:createOnly?'':value,note:createOnly?'':note,recordTime:createOnly?'':recordTime,recordDate})}>{createOnly?'创建':'保存'}</button></footer>
     </section>
   </div>;
 }
@@ -553,7 +558,7 @@ function CustomQuickRecordSheet({item,onClose,onSave}){
         <div className="custom-repeat-summary"><span className="custom-record-name-icon">＋</span><div><strong>{item.label}</strong>{definition.owner!=='自己'?<small>{definition.owner}</small>:null}</div></div>
         <label className="custom-record-time-row"><span>记录时间</span><div><em>今天&nbsp; {recordTime}</em><i>›</i></div><input className="custom-record-datetime-input" type="time" value={recordTime} onChange={e=>setRecordTime(e.target.value)}/></label>
         {!isEvent?<React.Fragment><h2>{definition.structure==='duration'?'本次时长':'本次数值'}</h2>
-        <div className={`custom-record-value custom-record-content-value is-${definition.structure}`}><input value={value} onChange={e=>setValue(e.target.value.replace(/[^\d.]/g,''))} inputMode="decimal"/>{definition.structure==='duration'?<span>分钟</span>:null}</div></React.Fragment>:null}
+        <div className={`custom-record-value custom-record-content-value is-${definition.structure}`}><input value={value} placeholder="填写数值" onChange={e=>setValue(e.target.value.replace(/[^\d.]/g,''))} inputMode="decimal"/>{definition.structure==='duration'?<span>分钟</span>:null}</div></React.Fragment>:null}
       </section>
       <section className="custom-record-section custom-record-note-section"><h2>备注</h2><textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="添加备注（选填）"/><button type="button" aria-label="添加图片">▣</button></section>
     </main>
@@ -3185,14 +3190,11 @@ function App(){
         </div>
       ) : null}
 
-      {customRecordDraft ? <CustomRecordStructureSheet draft={customRecordDraft} onClose={()=>setCustomRecordDraft(null)} onSave={(payload)=>{
-        const time=payload.recordTime || window.formatNowTime?.() || new Date().toTimeString().slice(0,5);
-        const entry={id:`custom-record-${Date.now()}`,kind:'custom-record-card',time,recordName:payload.name,owner:payload.owner,structure:payload.structure,unit:payload.unit,value:payload.value,noteText:payload.note,railDot:payload.owner==='自己'?undefined:'baby',isNew:true};
-        setTimeline(blocks=>window.appendTimelineEntry(blocks,entry,{dayId:resolveBabyFeedingTargetDayId(blocks)}));
-        setCustomQuickItems(items=>[...items.filter(item=>item.label!==payload.name),{id:`custom-quick-${Date.now()}`,group:payload.owner==='自己'?'mine':'baby',label:payload.name,customDefinition:{owner:payload.owner,structure:payload.structure,unit:payload.unit,defaultValue:payload.value}}]);
+      {customRecordDraft ? <CustomRecordStructureSheet createOnly draft={customRecordDraft} onClose={()=>setCustomRecordDraft(null)} onSave={(payload)=>{
+        setCustomQuickItems(items=>[...items.filter(item=>item.label!==payload.name),{id:`custom-quick-${Date.now()}`,group:payload.owner==='自己'?'mine':'baby',label:payload.name,isJustCreated:true,customDefinition:{owner:payload.owner,structure:payload.structure,unit:payload.unit,defaultValue:payload.value}}]);
         setCustomRecordDraft(null);
-        pushToast({text:`“${payload.name}”已添加到快捷记录`,placement:'center'});
-        setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+        pushToast({text:`已创建“${payload.name}”，点击快捷项开始记录`,placement:'center'});
+        setTimeout(()=>window.dispatchEvent(new Event('open-custom-quick-panel')),80);
       }}/>:null}
       {customRepeatDraft ? <CustomQuickRecordSheet item={customRepeatDraft} onClose={()=>setCustomRepeatDraft(null)} onSave={({value,note,recordTime})=>{
         const definition=customRepeatDraft.customDefinition;
