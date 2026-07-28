@@ -701,6 +701,7 @@ function XhsStyleSearchPage({
   variant = 'default',
   recordSpace = 'personal',
   activeFilter = null,
+  activeFilters = [],
   onClose,
   onSearch,
   onFilterSelect,
@@ -743,14 +744,19 @@ function XhsStyleSearchPage({
   const [query, setQuery] = React.useState(isBabyFeeding ? '' : '已经那个格兰云天');
   const [activeTab, setActiveTab] = React.useState('全部');
   const [filtersExpanded, setFiltersExpanded] = React.useState(true);
-  const [selections, setSelections] = React.useState(() => {
+  const createInitialSelections = () => {
+    const appliedFilters = activeFilters.length ? activeFilters : (activeFilter ? [activeFilter] : []);
     const init = {};
-    sections.forEach((section) => { init[section.id] = section.default; });
-    if(activeFilter?.personId){
-      init[activeFilter.personId] = activeFilter.option;
-    }
+    sections.forEach((section) => {
+      const appliedOptions = appliedFilters
+        .filter((filter) => filter.personId === section.id)
+        .map((filter) => filter.option);
+      init[section.id] = appliedOptions.length ? appliedOptions : [section.default];
+    });
     return init;
-  });
+  };
+  const [selections, setSelections] = React.useState(createInitialSelections);
+  const selectionsRef = React.useRef(selections);
   const inputRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -760,19 +766,38 @@ function XhsStyleSearchPage({
   }, [intent, showSearchTop]);
 
   const pickOption = (sectionId, option) => {
-    setSelections((prev) => ({ ...prev, [sectionId]: option }));
-    if(isBabyFeeding && onFilterSelect){
+    const currentSelections = selectionsRef.current;
+    const current = currentSelections[sectionId] || [];
+    let nextSelections;
+    if(!isFilterOnly){
+      nextSelections = { ...currentSelections, [sectionId]: [option] };
+    }else if(option === '全部'){
+      nextSelections = { ...currentSelections, [sectionId]: ['全部'] };
+    }else{
+      const withoutAll = current.filter((item) => item !== '全部');
+      const next = withoutAll.includes(option)
+        ? withoutAll.filter((item) => item !== option)
+        : [...withoutAll, option];
+      nextSelections = { ...currentSelections, [sectionId]: next.length ? next : ['全部'] };
+    }
+    selectionsRef.current = nextSelections;
+    setSelections(nextSelections);
+    if(isBabyFeeding && !isFilterOnly && onFilterSelect){
       onFilterSelect({ personId: sectionId, option });
     }
   };
 
   const resetFilters = () => {
     const init = {};
-    sections.forEach((section) => { init[section.id] = section.default; });
+    sections.forEach((section) => { init[section.id] = [section.default]; });
+    selectionsRef.current = init;
     setSelections(init);
     setActiveTab('全部');
     if(isBabyFeeding){
       onFilterClear?.();
+    }
+    if(isFilterOnly){
+      onClose?.();
     }
   };
 
@@ -861,11 +886,13 @@ function XhsStyleSearchPage({
               <h3 className={'xhs-filter-title' + (isBabyFeeding ? ' is-person' : '')}>{section.title}</h3>
               <div className={'xhs-filter-options' + (section.grid ? ' is-grid' : '')}>
                 {section.options.map((option) => {
-                  const active = selections[section.id] === option;
+                  const active = (selections[section.id] || []).includes(option);
                   return (
                     <button
                       key={option}
                       type="button"
+                      data-person-id={section.id}
+                      data-filter-option={option}
                       className={'xhs-filter-chip' + (active ? ' is-active' : '')}
                       aria-pressed={active}
                       onClick={() => pickOption(section.id, option)}
@@ -881,23 +908,40 @@ function XhsStyleSearchPage({
       ) : null}
 
       <div className="xhs-search-foot">
-        <button type="button" className="xhs-search-foot-btn" onClick={resetFilters}>
-          <span className="xhs-search-foot-ico" aria-hidden="true">↺</span>
-          重置
+        <button type="button" className="xhs-search-foot-btn is-clear" onClick={resetFilters}>
+          {!isFilterOnly ? <span className="xhs-search-foot-ico" aria-hidden="true">↺</span> : null}
+          {isFilterOnly ? '不筛选' : '重置'}
         </button>
         <button
           type="button"
-          className="xhs-search-foot-btn"
-          onClick={() => {
+          className="xhs-search-foot-btn is-confirm"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             if(isFilterOnly){
-              onClose?.();
+              const filters = [...event.currentTarget.closest('.xhs-search-page')
+                .querySelectorAll('.xhs-filter-chip[aria-pressed="true"]')]
+                .filter((chip) => chip.dataset.filterOption !== '全部')
+                .map((chip) => ({
+                  personId:chip.dataset.personId,
+                  option:chip.dataset.filterOption,
+                }));
+              if(filters.length){
+                window.dispatchEvent(new CustomEvent('baby-filter-title-change', {
+                  detail:{ filters },
+                }));
+                setTimeout(() => onClose?.(), 0);
+              }else{
+                onFilterClear?.();
+                setTimeout(() => onClose?.(), 0);
+              }
               return;
             }
             setFiltersExpanded((v) => !v);
           }}
         >
-          <span className="xhs-search-foot-ico" aria-hidden="true">{isFilterOnly ? '⌃' : (filtersExpanded ? '⌃' : '⌄')}</span>
-          收起
+          {!isFilterOnly ? <span className="xhs-search-foot-ico" aria-hidden="true">{filtersExpanded ? '⌃' : '⌄'}</span> : null}
+          {isFilterOnly ? '确定' : '收起'}
         </button>
       </div>
     </div>

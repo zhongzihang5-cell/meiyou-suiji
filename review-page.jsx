@@ -1782,13 +1782,17 @@ function ReviewPage({timelineBlocks}){
 
       <SharedFeedingReviewCard day={sharedFeedingDays[0]} onOpen={()=>setSharedFeedingOpen(true)}/>
 
-      <FeedingRhythmCard onOpen={()=>openFeedingDetail('feeding')}/>
-
       <FeedingRhythmInsightCard onOpen={()=>openVipAnalysis('feeding')}/>
+
+      <FeedingReviewCard onFullOpen={()=>openFeedingDetail('feeding')}/>
 
       <SleepAnalysisCard onOpen={()=>openVipAnalysis('sleep')}/>
 
-      {orderedBabyReviewCards.map(card=><React.Fragment key={card.id}>{card.node}</React.Fragment>)}
+      <SleepReviewCard onFullOpen={()=>openFeedingDetail('sleep')}/>
+
+      {orderedBabyReviewCards
+        .filter(card=>card.id !== 'feeding' && card.id !== 'sleep')
+        .map(card=><React.Fragment key={card.id}>{card.node}</React.Fragment>)}
 
       <ReviewCard
         title="月经周期"

@@ -55,8 +55,10 @@
 .review-card + .review-card{margin-top:16px}
 .shared-feeding-review-card + .review-card{margin-top:16px}
 .shared-feeding-review-card + .feeding-rhythm-card,
+.shared-feeding-review-card + .feeding-rhythm-insight-card,
 .feeding-rhythm-card + .feeding-rhythm-insight-card,
 .feeding-rhythm-insight-card + .sleep-analysis-card,
+.review-card + .feeding-rhythm-insight-card,
 .feeding-rhythm-insight-card + .review-card{margin-top:16px}
 .review-card.is-sample{position:relative}
 .review-card.is-actionable{

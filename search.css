@@ -15,11 +15,11 @@
 }
 .suiji-shell.is-filter-panel-open .dock-wrap,
 .suiji-shell.is-filter-panel-open .baby-feeding-quick-strip{
-  opacity:0.35;
+  opacity:0;
   pointer-events:none;
 }
 .suiji-shell.is-filter-panel-open .stream-header{
-  z-index:27;
+  z-index:121;
   position:relative;
 }
 
@@ -34,6 +34,7 @@
   overflow:hidden;
 }
 .xhs-search-page.is-filter-only{
+  z-index:120;
   top:60px;
   bottom:auto;
   height:68%;
@@ -44,6 +45,30 @@
 .xhs-search-page.is-filter-only .xhs-search-body{
   padding-top:16px;
   min-height:0;
+}
+.xhs-search-page.is-filter-only .xhs-search-foot{
+  gap:8px;
+  justify-content:stretch;
+  padding:10px 18px 14px;
+  border-top:0;
+}
+.xhs-search-page.is-filter-only .xhs-search-foot-btn{
+  flex:1;
+  justify-content:center;
+  height:42px;
+  padding:0;
+  border:1px solid #ff4d88;
+  border-radius:22px;
+  font-size:16px;
+  line-height:1;
+}
+.xhs-search-page.is-filter-only .xhs-search-foot-btn.is-clear{
+  background:#fff;
+  color:#ff4d88;
+}
+.xhs-search-page.is-filter-only .xhs-search-foot-btn.is-confirm{
+  background:#ff4d88;
+  color:#fff;
 }
 .xhs-search-top{
   display:flex;

@@ -662,6 +662,7 @@ function App(){
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
+  const [babyFeedingActiveFilters, setBabyFeedingActiveFilters] = useState([]);
   const [recordSpace, setRecordSpace] = useState('personal');
   const [relationshipScheme, setRelationshipScheme] = useState('without-family');
   const [relationshipSchemeOpen, setRelationshipSchemeOpen] = useState(false);
@@ -2454,8 +2455,15 @@ function App(){
       setSharedFeedingHistoryBaby(event.detail?.babyName || '小豆苗');
       setSharedFeedingHistoryOpen(true);
     };
+    const updateBabyFilterTitle = (event)=>{
+      setBabyFeedingActiveFilters(event.detail?.filters || []);
+    };
     window.addEventListener('open-shared-feeding-history', openSharedFeedingHistory);
-    return ()=>window.removeEventListener('open-shared-feeding-history', openSharedFeedingHistory);
+    window.addEventListener('baby-filter-title-change', updateBabyFilterTitle);
+    return ()=>{
+      window.removeEventListener('open-shared-feeding-history', openSharedFeedingHistory);
+      window.removeEventListener('baby-filter-title-change', updateBabyFilterTitle);
+    };
   },[]);
 
   const toggleSearchPage = ()=>{
@@ -2467,18 +2475,16 @@ function App(){
   const closeBabyFeedingPanel = ()=>{
     setBabyFeedingPanelMode(null);
   };
-  const handleBabyFeedingFilterSelect = ({ personId, option })=>{
-    setSearchCriteria({
-      personPanelFilter: { personId, option },
-      query: '',
-      filterId: null,
-    });
+  const handleBabyFeedingFilterSelect = ({ personId, option, filters })=>{
+    const nextFilters = filters || [{ personId, option }];
+    setBabyFeedingActiveFilters(nextFilters);
     setBabyFeedingPanelMode(null);
     requestAnimationFrame(()=>{
       setTimeout(()=>scrollTimelineToFirstItem('smooth'), 80);
     });
   };
   const handleBabyFeedingFilterClear = ()=>{
+    setBabyFeedingActiveFilters([]);
     setSearchCriteria(null);
   };
   const scrollTimelineToFirstItem = (behavior='smooth')=>{
@@ -2602,7 +2608,9 @@ function App(){
     searchCriteria.query?.trim()
     || searchCriteria.filterId
     || searchCriteria.personPanelFilter
+    || searchCriteria.personPanelFilters?.length
   ));
+  const babyFeedingFilterTitle = babyFeedingActiveFilters.length ? '已筛选' : '全部';
   const displayTimeline = React.useMemo(()=>{
     let source = timeline;
     if(recordLifeMode === '育儿' && babyFeedingEntryActive){
@@ -2937,7 +2945,7 @@ function App(){
                 aria-expanded={babyFeedingPanelMode === 'all'}
                 onClick={toggleBabyFeedingFilterPanel}
               >
-                <span>全部</span>
+                <span>{babyFeedingFilterTitle}</span>
                 <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
                   <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -3099,6 +3107,7 @@ function App(){
             variant="baby-feeding"
             recordSpace={relationshipScheme === 'without-family' || relationshipScheme === 'with-family-2' ? 'combined' : recordSpace}
             activeFilter={searchCriteria?.personPanelFilter}
+            activeFilters={babyFeedingActiveFilters}
             onClose={closeBabyFeedingPanel}
             onSearch={handleTimelineSearch}
             onFilterSelect={handleBabyFeedingFilterSelect}
