@@ -1040,6 +1040,7 @@
 .shared-feeding-more-picker>button:active{background:rgba(0,0,0,.045)}
 .shared-feeding-more-icon{display:grid;width:24px;height:24px;place-items:center;color:#454145;font-size:23px;line-height:1}
 .shared-feeding-more-icon>svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.shared-feeding-timeline-page.is-record-filter-open .shared-feeding-detail-scroll{filter:brightness(.72);pointer-events:none}
 .shared-feeding-day{margin-top:7px}
 .shared-feeding-day>header h2 small{color:#555}
 .shared-feeding-ledger-row p{white-space:normal;line-height:17px}.shared-feeding-ledger-row p small{white-space:nowrap}

@@ -1651,12 +1651,16 @@ function SharedFeedingReviewCard({onOpen,day}){
 function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='page',babyName='小豆苗'}){
   const [activeBaby, setActiveBaby] = useState(babyName);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [recordFilterOpen, setRecordFilterOpen] = useState(false);
+  const [recordFilters, setRecordFilters] = useState([]);
+  const XhsStyleSearchPage = window.XhsStyleSearchPage;
   const liveDays = buildSharedFeedingDaysFromTimeline(timelineBlocks,activeBaby);
   const days = liveDays;
   const isSheet = presentation === 'sheet';
   useEffect(()=>{
     setActiveBaby(babyName);
     setMoreOpen(false);
+    setRecordFilterOpen(false);
   },[babyName,open]);
   useEffect(()=>{
     const phone = document.querySelector('.phone');
@@ -1664,7 +1668,7 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
     return ()=>phone?.classList.remove('is-shared-feeding-open');
   },[open]);
   return (
-    <section className={'shared-feeding-timeline-page'+(isSheet?' is-point-sheet':'')+(open?' is-open':'')} aria-hidden={!open} aria-label={activeBaby+'共享喂养时间轴'}>
+    <section className={'shared-feeding-timeline-page'+(isSheet?' is-point-sheet':'')+(open?' is-open':'')+(recordFilterOpen?' is-record-filter-open':'')} aria-hidden={!open} aria-label={activeBaby+'共享喂养时间轴'}>
       <header className="shared-feeding-detail-nav">
         <button type="button" aria-label={isSheet?'关闭':'返回回顾'} onClick={onClose}>
           {isSheet ? <span className="shared-feeding-close-icon" aria-hidden="true">×</span> : <ReviewBackIcon/>}
@@ -1687,6 +1691,12 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
         <>
           <button type="button" className="shared-feeding-more-scrim" aria-label="关闭更多菜单" onClick={()=>setMoreOpen(false)}/>
           <div className="shared-feeding-more-picker" role="menu" aria-label="更多功能">
+            <button type="button" role="menuitem" onClick={()=>{setMoreOpen(false);setRecordFilterOpen(true);}}>
+              <span className="shared-feeding-more-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              </span>
+              <span>按记录查找</span>
+            </button>
             <button type="button" role="menuitem" onClick={()=>setMoreOpen(false)}>
               <span className="shared-feeding-more-icon" aria-hidden="true">☾</span>
               <span>深色模式</span>
@@ -1697,8 +1707,30 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
               </span>
               <span>按日期查找</span>
             </button>
+            <button type="button" role="menuitem" onClick={()=>setMoreOpen(false)}>
+              <span className="shared-feeding-more-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="4"/>
+                  <rect x="7" y="7" width="4" height="4" rx="1"/>
+                  <rect x="13" y="7" width="4" height="4" rx="1"/>
+                  <rect x="7" y="13" width="10" height="4" rx="1"/>
+                </svg>
+              </span>
+              <span>桌面小组件</span>
+            </button>
           </div>
         </>
+      ) : null}
+      {recordFilterOpen && XhsStyleSearchPage ? (
+        <XhsStyleSearchPage
+          intent="all"
+          variant="baby-feeding"
+          recordSpace="babies"
+          activeFilters={recordFilters}
+          onClose={()=>setRecordFilterOpen(false)}
+          onFilterConfirm={setRecordFilters}
+          onFilterClear={()=>setRecordFilters([])}
+        />
       ) : null}
       <div className="shared-feeding-detail-scroll">
         {days.length ? days.map(day=><section className="shared-feeding-day" key={day.date}>

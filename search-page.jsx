@@ -706,6 +706,7 @@ function XhsStyleSearchPage({
   onSearch,
   onFilterSelect,
   onFilterClear,
+  onFilterConfirm,
 }) {
   const I = window.Icon;
   const isBabyFeeding = variant === 'baby-feeding';
@@ -713,7 +714,24 @@ function XhsStyleSearchPage({
   const showSearchTop = !isFilterOnly;
   const tabs = XHS_SEARCH_TABS;
   const sections = isBabyFeeding
-    ? (recordSpace === 'combined'
+    ? (recordSpace === 'babies'
+      ? [
+          {
+            id:'elder',
+            title:'小豆苗',
+            options:BABY_FEEDING_PERSON_OPTIONS,
+            default:'全部',
+            grid:true,
+          },
+          {
+            id:'younger',
+            title:'小豆芽',
+            options:BABY_FEEDING_PERSON_OPTIONS,
+            default:'全部',
+            grid:true,
+          },
+        ]
+      : recordSpace === 'combined'
       ? [
           {
             id:'self',
@@ -927,9 +945,13 @@ function XhsStyleSearchPage({
                   option:chip.dataset.filterOption,
                 }));
               if(filters.length){
-                window.dispatchEvent(new CustomEvent('baby-filter-title-change', {
-                  detail:{ filters },
-                }));
+                if(onFilterConfirm){
+                  onFilterConfirm(filters);
+                }else{
+                  window.dispatchEvent(new CustomEvent('baby-filter-title-change', {
+                    detail:{ filters },
+                  }));
+                }
                 setTimeout(() => onClose?.(), 0);
               }else{
                 onFilterClear?.();

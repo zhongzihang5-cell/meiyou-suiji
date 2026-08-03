@@ -3207,18 +3207,7 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
-              <button
-                type="button"
-                className={'stream-title stream-filter-title' + (babyFeedingPanelMode === 'all' ? ' is-open' : '')}
-                aria-label="筛选全部记录"
-                aria-expanded={babyFeedingPanelMode === 'all'}
-                onClick={toggleBabyFeedingFilterPanel}
-              >
-                <span>{babyFeedingFilterTitle}</span>
-                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              <h1 className="stream-title">点滴</h1>
               <div className="stream-actions">
                 {relationshipScheme === 'with-family-2' ? (
                   <button className={'stream-action stream-share-action' + (babyShareSyncNotice ? ' is-sync-target' : '')} aria-label={familyShareUnread ? `打开小豆苗共享时间轴，${familyShareUnread}条新记录` : '打开小豆苗共享时间轴'} type="button" onClick={openPlan2SharedTimeline}>
@@ -3262,15 +3251,7 @@ function App(){
                 </button>
               </div>
               <div className="stream-actions">
-                <button
-                  className={'stream-action' + (isSearchActive ? ' is-active' : '')}
-                  aria-label="筛选记录项"
-                  aria-pressed={babyFeedingPanelMode === 'all'}
-                  type="button"
-                  onClick={toggleBabyFeedingFilterPanel}
-                >
-                  <I name="filter" size={20} stroke={1.7}/>
-                </button>
+                <span className="stream-header-side" aria-hidden="true"/>
               </div>
             </>
             )
@@ -3370,19 +3351,6 @@ function App(){
           isDemoRunning={isDemoRunning}
         />
         )}
-        {babyFeedingPanelMode === 'all' && XhsStyleSearchPage ? (
-          <XhsStyleSearchPage
-            intent={babyFeedingPanelMode}
-            variant="baby-feeding"
-            recordSpace={relationshipScheme === 'without-family' || relationshipScheme === 'with-family-2' ? 'combined' : recordSpace}
-            activeFilter={searchCriteria?.personPanelFilter}
-            activeFilters={babyFeedingActiveFilters}
-            onClose={closeBabyFeedingPanel}
-            onSearch={handleTimelineSearch}
-            onFilterSelect={handleBabyFeedingFilterSelect}
-            onFilterClear={handleBabyFeedingFilterClear}
-          />
-        ) : null}
         {showSearchPage && !showBabyFeedingHeader && StreamSearchOverlay ? (
           <StreamSearchOverlay
             timeline={timeline}
