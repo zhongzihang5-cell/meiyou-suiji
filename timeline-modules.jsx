@@ -96,7 +96,7 @@ function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, d
   const RecordBlankAxisDropAnim = window.RecordBlankAxisDropAnim;
   const isDrop = !!dropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(nodeKind==='ai-record-processing'?' is-ai-record-processing':'')+(isDrop?' is-axis-drop':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(nodeKind==='ai-record-processing'?' is-ai-record-processing':'')+(nodeKind==='inline-record-confirm'?' is-inline-record-confirm':'')+(isDrop?' is-axis-drop':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
         {isDrop && RecordBlankAxisDropAnim ? (
           <RecordBlankAxisDropAnim onLand={onDropLand} onComplete={onDropComplete}/>
@@ -958,6 +958,59 @@ function BabyFeedingTimelineCard({item, isNew}){
   );
 }
 
+function InlineRecordConfirmCard({item}){
+  const [feedingType, setFeedingType] = React.useState('');
+  const [customValue, setCustomValue] = React.useState('');
+  const subjectOptions = [
+    {id:'自己', mark:'我'},
+    {id:'小豆苗', mark:'苗'},
+    {id:'小豆芽', mark:'芽'},
+  ];
+  const feedingOptions = [
+    {id:'配方奶', iconSrc:'assets/baby-feeding-icons/formula.png'},
+    {id:'母乳', iconSrc:'assets/baby-feeding-icons/breast.png'},
+    {id:'瓶喂母乳', iconSrc:'assets/baby-feeding-icons/bottle-breast.png'},
+  ];
+  const isDuration = feedingType === '母乳';
+  const quickValues = isDuration ? [10,20,30] : [90,120,150];
+  const unit = isDuration ? '分钟' : 'ml';
+  const resolve = detail=>window.dispatchEvent(new CustomEvent('resolve-inline-record-confirm',{detail:{entryId:item.id,...detail}}));
+  if(item.confirmType === 'subject'){
+    return (
+      <article className="tl-inline-confirm-card is-subject" aria-labelledby={`${item.id}-title`}>
+        <header className="tl-inline-confirm-head">
+          <span className="tl-inline-confirm-ai" aria-hidden="true">✦</span>
+          <span><b id={`${item.id}-title`}>这条记录是谁的？</b><em>{item.recordType}　{item.value}{item.unit} · {item.timeLabel}</em></span>
+        </header>
+        <p className="tl-inline-confirm-source">“{item.text}”</p>
+        <div className="tl-inline-confirm-subjects" aria-label="选择记录对象">
+          {subjectOptions.map(subject=><button key={subject.id} type="button" onClick={()=>resolve({action:'confirm-subject',subject:subject.id})}><i aria-hidden="true">{subject.mark}</i><span>{subject.id}</span></button>)}
+        </div>
+        <button className="tl-inline-confirm-keep" type="button" onClick={()=>resolve({action:'keep-original'})}>仅保留原文</button>
+      </article>
+    );
+  }
+  const saveFeeding = value=>feedingType && resolve({action:'confirm-feeding',feedingType,value:Number(value),unit,babyName:item.babyName || '小豆苗'});
+  return (
+    <article className="tl-inline-confirm-card is-feeding" aria-labelledby={`${item.id}-title`}>
+      <header className="tl-inline-confirm-head">
+        <span className="tl-inline-confirm-ai is-baby" aria-hidden="true"><img src="assets/feeding-review-icon.png" alt=""/></span>
+        <span><b id={`${item.id}-title`}>补充一下喂奶信息</b><em>{item.babyName || '小豆苗'} · {item.timeLabel}</em></span>
+      </header>
+      <p className="tl-inline-confirm-source">“{item.text}”</p>
+      <div className="tl-inline-confirm-feed-types" aria-label="选择喂奶方式">
+        {feedingOptions.map(option=><button key={option.id} type="button" className={feedingType===option.id?'is-selected':''} onClick={()=>{setFeedingType(option.id);setCustomValue('')}}><img src={option.iconSrc} alt=""/><span>{option.id}</span></button>)}
+      </div>
+      {feedingType ? <div className="tl-inline-confirm-values" aria-label={`选择${isDuration?'喂奶时长':'奶量'}`}>
+        <span>{isDuration?'喂了多久':'喝了多少'}</span>
+        <div>{quickValues.map(value=><button key={value} type="button" onClick={()=>saveFeeding(value)}>{value}<small>{unit}</small></button>)}</div>
+        <label><input inputMode="decimal" value={customValue} placeholder="其他" onChange={event=>setCustomValue(event.target.value.replace(/[^\d.]/g,''))}/><em>{unit}</em><button type="button" disabled={!customValue} onClick={()=>saveFeeding(customValue)}>确定</button></label>
+      </div> : <p className="tl-inline-confirm-tip">选择喂奶方式后补充核心信息</p>}
+      <button className="tl-inline-confirm-keep" type="button" onClick={()=>resolve({action:'keep-original'})}>仅保留原文</button>
+    </article>
+  );
+}
+
 function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && !item.noAnimate && (
@@ -977,6 +1030,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
         <span className="tl-ai-record-processing-dots" aria-hidden="true"><i/><i/><i/></span>
       </div>
     );
+  } else if(item.kind === 'inline-record-confirm'){
+    body = <InlineRecordConfirmCard item={item}/>;
   } else if(item.kind === 'diet-photo-feedback'){
     const DietPhotoFeedbackCard = window.DietPhotoFeedbackCard;
     const card = DietPhotoFeedbackCard
