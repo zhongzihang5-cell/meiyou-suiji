@@ -302,8 +302,12 @@ function formatWeightValueText(value, unit){
 
 function buildWeightAnalysisNote(value, unit){
   const todayKg = toWeightKg(value, unit);
-  const yesterdayKg = todayKg + 0.5;
-  const tailBase = '属正常波动，黄体期受孕激素影响身体容易潴留水分。';
+  const yesterdayKg = todayKg - 2;
+  const feedback = {
+    tail: '，体重',
+    highlight: '增长偏快',
+    suffix: '，先不要着急，试试增加运动量，比如饭后多散步，可能管用哦。',
+  };
 
   if(unit === 'jin'){
     const deltaJin = +(value - yesterdayKg * 2).toFixed(1);
@@ -312,16 +316,17 @@ function buildWeightAnalysisNote(value, unit){
         prefix: '比昨天持平，变化',
         delta: '',
         emphasize: false,
-        tail: `${tailBase}`,
+        ...feedback,
       };
     }
     const sign = deltaJin > 0 ? '+' : '-';
     const trend = deltaJin > 0 ? '上升' : '下降';
     return {
       prefix: '比昨天 ',
-      delta: `${sign}${Math.abs(deltaJin).toFixed(1)} 斤`,
+      delta: `${sign}${Math.abs(deltaJin).toFixed(1)}`,
+      deltaUnit: ' 斤',
       emphasize: deltaJin < 0,
-      tail: `，${trend}${tailBase}`,
+      ...feedback,
     };
   }
 
@@ -331,16 +336,17 @@ function buildWeightAnalysisNote(value, unit){
       prefix: '比昨天持平，变化',
       delta: '',
       emphasize: false,
-      tail: tailBase,
+      ...feedback,
     };
   }
   const sign = deltaKg > 0 ? '+' : '-';
   const trend = deltaKg > 0 ? '上升' : '下降';
   return {
     prefix: '比昨天 ',
-    delta: `${sign}${Math.abs(deltaKg).toFixed(1)} 公斤`,
+    delta: `${sign}${Math.abs(deltaKg).toFixed(1)}`,
+    deltaUnit: ' 公斤',
     emphasize: deltaKg < 0,
-    tail: `，${trend}${tailBase}`,
+    ...feedback,
   };
 }
 
@@ -356,6 +362,15 @@ function buildWeightWeekChartData(todayKg, unit){
       isToday: i === days.length - 1,
     };
   });
+}
+
+function buildWeightEventScatterData(){
+  return [
+    { dayIndex:1, type:'压力', color:'#e5a33d' },
+    { dayIndex:3, type:'情绪低落', color:'#8b7ad6' },
+    { dayIndex:5, type:'暴食冲动', color:'#ef6f91' },
+    { dayIndex:6, type:'压力', color:'#e5a33d', isToday:true },
+  ];
 }
 
 function parseWeightFromText(text){
@@ -383,23 +398,26 @@ function parseWeightFromText(text){
   return null;
 }
 
-function buildWeightAiBlock(value, unit){
+function buildWeightAiBlock(value, unit, { withEvents = false } = {}){
   const todayKg = toWeightKg(value, unit);
   const gid = 'e-'+Date.now();
   const time = window.formatNowTime();
+  const weights = buildWeightWeekChartData(todayKg, unit);
   return {
     id:gid+'-ai',
     time,
     kind:'chart',
-    chartType:'weightTrend',
-    title:'近7天体重变化',
-    chartData: buildWeightWeekChartData(todayKg, unit),
+    chartType:withEvents ? 'weightEventCombo' : 'weightTrend',
+    title:withEvents ? '近7天体重变化 + 事件' : '近7天体重变化',
+    chartData:withEvents
+      ? { weights, events:buildWeightEventScatterData() }
+      : weights,
     weightUnit: unit,
     noteParts: buildWeightAnalysisNote(value, unit),
   };
 }
 
-function createWeightRecordEntry({value, unit}){
+function createWeightRecordEntry({value, unit}, { withEvents = false } = {}){
   const gid = 'e-'+Date.now();
   const time = window.formatNowTime();
   return {
@@ -417,7 +435,7 @@ function createWeightRecordEntry({value, unit}){
       weightUnit:unit,
       tags:[],
     },
-    ai: buildWeightAiBlock(value, unit),
+    ai: buildWeightAiBlock(value, unit, { withEvents }),
     aiDefaultOpen:true,
   };
 }
@@ -444,7 +462,7 @@ function createWeightRecordEntryFromText(text, opts = {}){
       tags:[{ cat:'体重', val: valText, icon:'weight' }],
       voice: opts.voice || null,
     },
-    ai: buildWeightAiBlock(parsed.value, parsed.unit),
+    ai: buildWeightAiBlock(parsed.value, parsed.unit, { withEvents:!!opts.withEvents }),
     aiDefaultOpen:true,
   };
 }
@@ -480,6 +498,9 @@ const MOOD_QUICK_OPTIONS = [
   { id:'normal', icon:'assets/mood-normal.png', label:'一般', color:'#f2b705', mood: QUICK_MOOD_LEVELS[2] },
   { id:'unhappy', icon:'assets/mood-unhappy.png', label:'不开心', color:'#f08a3c', mood: QUICK_MOOD_LEVELS[1] },
   { id:'very-sad', icon:'assets/mood-very-sad.png', label:'好伤心', color:'#5b8def', mood: QUICK_MOOD_LEVELS[0] },
+  { id:'anxious', label:'焦虑', color:'#79a85f', mood:{ id:'anxious', label:'焦虑', face:'anxious', bg:'#C8E8A8' } },
+  { id:'anticipating', label:'期待', color:'#d89c00', mood:{ id:'anticipating', label:'期待', face:'excited', bg:'#FFE875' } },
+  { id:'tired', label:'疲惫', color:'#8278b8', mood:{ id:'tired', label:'疲惫', face:'normal', bg:'#D9D5F4' } },
 ];
 
 function QuickMoodFace({ level, color, size = 28 }) {
@@ -561,19 +582,14 @@ function QuickMoodPicker({ onSubmit }) {
 }
 
 function MoodQuickOverlay({ open, onSubmit, onClose }) {
-  const [choosing, setChoosing] = React.useState(false);
-  const [selected, setSelected] = React.useState(null);
-  const [toastText, setToastText] = React.useState('');
-  const [toastShow, setToastShow] = React.useState(false);
+  const [selectedIds, setSelectedIds] = React.useState([]);
   const [ready, setReady] = React.useState(false);
-  const busyRef = React.useRef(false);
+  const MoodFace = window.MoodFace;
+  const selected = MOOD_QUICK_OPTIONS.filter(opt=>selectedIds.includes(opt.id));
 
   React.useEffect(()=>{
     if(!open){
-      setChoosing(false);
-      setSelected(null);
-      setToastShow(false);
-      busyRef.current = false;
+      setSelectedIds([]);
       setReady(false);
       return;
     }
@@ -581,44 +597,52 @@ function MoodQuickOverlay({ open, onSubmit, onClose }) {
     return ()=>window.clearTimeout(tm);
   }, [open]);
 
-  const pick = (opt)=>{
-    if(busyRef.current) return;
-    busyRef.current = true;
-    setChoosing(true);
-    setSelected(opt.id);
-    setToastText('心情已记录 · ' + opt.label);
-    setToastShow(true);
-    window.setTimeout(()=>{
-      onSubmit?.([opt.mood]);
-      setToastShow(false);
-    }, 600);
+  const toggle = (id)=>{
+    setSelectedIds(ids=>ids.includes(id) ? ids.filter(item=>item !== id) : [...ids, id]);
   };
 
   return (
-    <>
-      <div
-        className={'mood-quick'+(open ? ' show' : '')+(choosing ? ' choosing' : '')}
-        aria-hidden={!open}
-      >
-        <div className="mood-quick-card" style={{pointerEvents: ready ? 'auto' : 'none'}}>
+    <div
+      className={'mood-quick'+(open ? ' show' : '')}
+      aria-hidden={!open}
+    >
+      <div className="mood-quick-card" style={{pointerEvents: ready ? 'auto' : 'none'}}>
+        <div className="mood-quick-head">
+          <div><strong>记录心情</strong><span>可多选</span></div>
+          <button type="button" className="mood-quick-close" onClick={onClose} aria-label="关闭心情选择">×</button>
+        </div>
+        <div className="mood-quick-grid">
           {MOOD_QUICK_OPTIONS.map((opt, i)=>(
             <button
               key={opt.id}
               type="button"
-              className={'mood-quick-opt'+(selected === opt.id ? ' sel' : '')}
+              className={'mood-quick-opt'+(selectedIds.includes(opt.id) ? ' sel' : '')}
               style={{'--mc': opt.color, '--d': (i * 0.035).toFixed(3) + 's'}}
-              onClick={()=>pick(opt)}
+              onClick={()=>toggle(opt.id)}
+              aria-pressed={selectedIds.includes(opt.id)}
             >
               <span className="mood-quick-icon">
-                <img src={opt.icon} alt="" draggable={false}/>
+                {opt.icon
+                  ? <img src={opt.icon} alt="" draggable={false}/>
+                  : MoodFace
+                    ? <MoodFace face={opt.mood.face} bg={opt.mood.bg}/>
+                    : null}
+                {selectedIds.includes(opt.id) ? <i aria-hidden="true">✓</i> : null}
               </span>
               <span className="mood-quick-lbl">{opt.label}</span>
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          className="mood-quick-submit"
+          disabled={selected.length === 0}
+          onClick={()=>selected.length > 0 && onSubmit?.(selected.map(opt=>opt.mood))}
+        >
+          {selected.length > 0 ? `记录 ${selected.length} 个情绪` : '请选择情绪'}
+        </button>
       </div>
-      <div className={'mood-quick-toast'+(toastShow ? ' show' : '')}>{toastText}</div>
-    </>
+    </div>
   );
 }
 

@@ -238,13 +238,10 @@ function DockPublisher({
   const [moodPickerOpen, setMoodPickerOpen] = React.useState(false);
   const [symptomPickerOpen, setSymptomPickerOpen] = React.useState(false);
   const [dockSheet, setDockSheet] = React.useState(null);
-  const [recording, setRecording] = React.useState(false);
-  const [recSec, setRecSec] = React.useState(0);
   const [inputFocused, setInputFocused] = React.useState(false);
   const [cameraOpen, setCameraOpen] = React.useState(false);
   const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
   const [feedingExpanded, setFeedingExpanded] = React.useState(false);
-  const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
   const containerRef = React.useRef(null);
   const feedingDragStartY = React.useRef(null);
@@ -345,23 +342,6 @@ function DockPublisher({
     if(emptyPreviewGuideStep === 1 || emptyPreviewGuideStep === 2) onEmptyPreviewGuideDismiss?.();
   };
 
-
-  React.useEffect(()=>{
-    if(recording){
-      recTimer.current = setInterval(()=>setRecSec(s=>s+1), 1000);
-    } else {
-      clearInterval(recTimer.current);
-      setRecSec(0);
-    }
-    return ()=>clearInterval(recTimer.current);
-  }, [recording]);
-
-  const startRec = ()=> setRecording(true);
-  const stopRec = ()=>{
-    if(!recording) return;
-    setRecording(false);
-    onVoiceDone(DEMO_VOICE_LINE, Math.max(recSec, 3));
-  };
 
   const toggleMode = ()=>{
     setInputMode(m=>m==='text' ? 'voice' : 'text');
@@ -492,6 +472,10 @@ function DockPublisher({
     }
     if(item.id === 'diet'){
       handleDietFanTap(buttonEl);
+      return;
+    }
+    if(item.id === 'prenatal-report'){
+      onFeedingQuickSelect?.(item);
       return;
     }
     if(item.id === 'temperature'){
@@ -673,16 +657,14 @@ function DockPublisher({
                   />
                 </div>
               ) : (
-                <div className={'dock-voice-wrap'+(recording?' is-recording':'')}>
+                <div className="dock-voice-wrap">
                   {/* 演示浮层指示器 */}
-                  {(recording || demoPhase === 'recognizing') && (
-                    <div className={'dock-voice-float'+(demoPhase === 'recognizing' ? ' is-recognizing' : '')}>
+                  {demoPhase === 'recognizing' && (
+                    <div className="dock-voice-float is-recognizing">
                       <span className="dock-voice-float-text">
-                        {demoPhase === 'recognizing' ? '识别中...' : '正在听...'}
+                        识别中...
                       </span>
-                      {demoPhase === 'recognizing' && (
-                        <span className="dock-voice-float-spinner"/>
-                      )}
+                      <span className="dock-voice-float-spinner"/>
                     </div>
                   )}
                   <div className="dock-voice-stage" aria-hidden="true">
@@ -690,21 +672,9 @@ function DockPublisher({
                   </div>
                   <button
                     type="button"
-                    className={'dock-voice-btn'+(recording?' recording':'')}
-                    onPointerDown={(e)=>{ e.preventDefault(); if(isDemoRunning) return; dismissGuideForVoice(); startRec(); }}
-                    onPointerUp={stopRec}
-                    onPointerLeave={recording ? stopRec : undefined}
+                    className="dock-voice-btn"
                   >
-                    {recording ? (
-                      <>
-                        <span className="dock-voice-waves" aria-hidden="true">
-                          {[4,8,12,8,6,10,7].map((h,j)=><span key={j} style={{height:h+'px'}}/>)}
-                        </span>
-                        <span>松开 结束{recSec > 0 ? ' '+recSec+'s' : ''}</span>
-                      </>
-                    ) : (
-                      <span className="dock-voice-label">按住 说话</span>
-                    )}
+                    <span className="dock-voice-label">按住 说话</span>
                   </button>
                 </div>
               )}

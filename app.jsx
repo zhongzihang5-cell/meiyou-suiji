@@ -207,6 +207,7 @@ const BABY_FEEDING_QUICK_ITEMS = [
   { id: 'mood', group:'mine', label: '心情', iconSrc:'assets/quick-icon-mood.png' },
   { id: 'weight', group:'mine', label: '体重', iconSrc:'assets/quick-icon-weight.png' },
   { id: 'diet', group:'mine', label: '饮食', iconSrc:'assets/quick-icon-diet.png' },
+  { id: 'prenatal-report', group:'mine', label: '产检单', cardIcon:'📋', color:'#FF4D88' },
   { id: 'temperature', group:'mine', label: '体温', iconSrc:'assets/record-temp.png' },
   { id: 'symptom', group:'mine', label: '症状', iconSrc:'assets/quick-icon-symptom.png' },
   { id: 'custom', group:'mine', label: '自定义', cardIcon:'＋', color:'#FF4D88', isCreateEntry:true },
@@ -222,6 +223,17 @@ function CustomQuickItemIcon({label}){
 }
 
 function BabyFeedingQuickIcon({type}){
+  if(type === 'prenatal-report'){
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="bf-prenatal-report" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd9e7"/><stop offset="100%" stopColor="#ff76a4"/></linearGradient></defs>
+        <rect width="48" height="48" rx="24" fill="url(#bf-prenatal-report)"/>
+        <rect x="15" y="10" width="20" height="28" rx="4" fill="#fff"/>
+        <path d="M20 18h10M20 23h10M20 28h6" fill="none" stroke="#ff76a4" strokeWidth="2" strokeLinecap="round"/>
+        <path d="m27 31 1.5 1.5 3-3" fill="none" stroke="#ff4d88" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+  }
   if(type === 'custom'){
     return (
       <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -694,6 +706,8 @@ function App(){
   const [breastDetailEntry, setBreastDetailEntry] = useState(null);
   const [sleepDetailEntry, setSleepDetailEntry] = useState(null);
   const [otherBabyDetailEntry, setOtherBabyDetailEntry] = useState(null);
+  const [prenatalReportOpen, setPrenatalReportOpen] = useState(false);
+  const [prenatalReportEditEntry, setPrenatalReportEditEntry] = useState(null);
   const [customRecordDraft, setCustomRecordDraft] = useState(null);
   const [customQuickItems, setCustomQuickItems] = useState([]);
   const [customRepeatDraft, setCustomRepeatDraft] = useState(null);
@@ -775,6 +789,11 @@ function App(){
   React.useEffect(()=>{
     window.openCustomRecordEditor=(entry)=>setCustomEditEntry(entry);
     return ()=>{delete window.openCustomRecordEditor;};
+  },[]);
+  React.useEffect(()=>{
+    const openPrenatalReportEdit=event=>setPrenatalReportEditEntry(event.detail || null);
+    window.addEventListener('open-prenatal-report-edit',openPrenatalReportEdit);
+    return ()=>window.removeEventListener('open-prenatal-report-edit',openPrenatalReportEdit);
   },[]);
   const babyRecordCountRef = useRef((initial.timeline || []).reduce((count, block)=>(
     count + (block.type === 'day' ? (block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card').length : 0)
@@ -1579,6 +1598,49 @@ function App(){
     return `${String(Math.floor(next / 60)).padStart(2, '0')}:${String(next % 60).padStart(2, '0')}`;
   };
 
+  const buildBabySleepWeekComboData = (todayEntries, currentEntry)=>{
+    const durationOf = (item)=>{
+      if(Number.isFinite(item?.statDurationMinutes)) return item.statDurationMinutes;
+      const hourMatch = String(item?.value || '').match(/(\d+(?:\.\d+)?)小时(?:(\d+)分钟)?/);
+      if(hourMatch) return Math.round(Number(hourMatch[1])*60 + Number(hourMatch[2] || 0));
+      return 0;
+    };
+    const recordedMinutes = [...(todayEntries || []),currentEntry].reduce((sum,item)=>sum+durationOf(item),0);
+    const todayHours = +(Math.min(720,Math.max(recordedMinutes,480))/60).toFixed(1);
+    const todayNote = String(currentEntry.noteText || currentEntry.voiceQuote || '');
+    const todayEvents = [];
+    if(/醒|翻身|哼唧/.test(todayNote)) todayEvents.push({dayIndex:6,type:'夜醒',color:'#8E70D6',isToday:true});
+    if(/哭|闹|难哄/.test(todayNote)) todayEvents.push({dayIndex:6,type:'哭闹',color:'#E8759A',isToday:true});
+    if(/鼻塞|咳嗽|发热|发烧/.test(todayNote)) todayEvents.push({dayIndex:6,type:'鼻塞',color:'#F0AA3C',isToday:true});
+    return {
+      durations:[
+        {label:'周五',hours:9.2},{label:'周六',hours:10.1},{label:'周日',hours:9.6},
+        {label:'周一',hours:8.4},{label:'周二',hours:10.3},{label:'昨天',hours:9.1},
+        {label:'今天',hours:todayHours,isToday:true},
+      ],
+      symptoms:[
+        {dayIndex:1,type:'夜醒',color:'#8E70D6'},
+        {dayIndex:3,type:'哭闹',color:'#E8759A'},
+        {dayIndex:5,type:'鼻塞',color:'#F0AA3C'},
+        ...todayEvents,
+      ],
+    };
+  };
+
+  const withBabySleepWeekFeedback = (blocks, dayId, entry)=>{
+    if(entry?.feedType !== '睡眠' || entry.sleeping) return entry;
+    const targetDay = (blocks || []).find(block=>block.type==='day' && block.id===dayId);
+    const previous = (targetDay?.items || targetDay?.entries || []).filter(item=>(
+      item.kind==='baby-feeding-card'
+      && item.feedType==='睡眠'
+      && !item.sleeping
+      && item.id!==entry.id
+      && (item.babyName || '小豆苗') === (entry.babyName || '小豆苗')
+    ));
+    // Prototype feedback uses the agreed example values.
+    return {...entry, sleepWeekCombo:undefined, sleepFeedback:'ended'};
+  };
+
   const buildBabyFeedingDetailLines = (item, time)=>{
     if(item.label === '母乳'){
       const left = item.leftMinutes || 10;
@@ -1883,7 +1945,8 @@ function App(){
     };
     setTimeline(blocks=>{
       const dayId = resolveBabyFeedingTargetDayId(blocks);
-      const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), entry, {dayId});
+      const decoratedEntry = withBabySleepWeekFeedback(blocks, dayId, entry);
+      const next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks), decoratedEntry, {dayId});
       return refreshBabyFeedingLatestMarks(next, dayId);
     });
     notifyBabyShareSync();
@@ -1960,7 +2023,8 @@ function App(){
     delete sourceEntry.aiNote;
     setTimeline(blocks=>{
       const dayId = resolveBabyFeedingTargetDayId(blocks);
-      let next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),sleepEntry,{dayId});
+      const decoratedSleepEntry = withBabySleepWeekFeedback(blocks, dayId, sleepEntry);
+      let next = window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),decoratedSleepEntry,{dayId});
       next = window.appendTimelineEntry(next,moodEntry,{dayId});
       next = window.appendTimelineEntry(next,sourceEntry,{dayId});
       return refreshBabyFeedingLatestMarks(next,dayId);
@@ -1990,6 +2054,10 @@ function App(){
         value:'',
         note:'黄疸消退中',
       });
+      return;
+    }
+    if(item.id === 'prenatal-report'){
+      setPrenatalReportOpen(true);
       return;
     }
     const time = window.formatNowTime?.() || '08:15';
@@ -2196,7 +2264,10 @@ function App(){
       return;
     }
 
-    const weightEntry = window.tryCreateWeightTextEntry?.(text, opts);
+    const weightEntry = window.tryCreateWeightTextEntry?.(text, {
+      ...opts,
+      withEvents:collectTodayWeightHistory().length > 0,
+    });
     if (weightEntry) {
       setDraft('');
       markUserRecorded();
@@ -2266,6 +2337,12 @@ function App(){
   const submitText = (textOverride, opts={})=>{
     const text = (textOverride || draft).trim();
     if(!text || aiRecordProcessingRef.current) return;
+    if(/^月经[。！!]?$/.test(text)){
+      setDraft('');
+      markUserRecorded();
+      clearDemoCards(()=>runDemoFlow());
+      return;
+    }
     if(recordLifeMode !== '育儿'){
       commitText(text, opts);
       return;
@@ -2443,6 +2520,16 @@ function App(){
       .map(it=>it.quickMood);
   };
 
+  const collectTodayWeightHistory = ()=>{
+    const today = timeline.find(b=>b.type === 'day' && b.isToday);
+    if(!today) return [];
+    const items = today.items || today.entries || [];
+    return items.filter(item=>{
+      const kind = item?.primary?.kind;
+      return item?.weightSource || kind === 'weight' || kind === 'weight-text';
+    });
+  };
+
   const appendMoodGuide = (guideText, dayId)=>{
     moodGuideQueueRef.current = ()=>{
       const guide = {
@@ -2513,7 +2600,9 @@ function App(){
 
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
-    const entry = window.createWeightRecordEntry(payload);
+    const entry = window.createWeightRecordEntry(payload, {
+      withEvents:collectTodayWeightHistory().length > 0,
+    });
     const entryText = entry.primary?.weightValue || entry.primary?.text || entry.body || '';
     if(recordFeedback && tryStartFirstDrop(entry, entryText)) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
@@ -2718,6 +2807,8 @@ function App(){
   const HomePage = window.HomePage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
   const SharedFeedingTimelinePage = window.SharedFeedingTimelinePage;
+  const PrenatalReportFlow = window.PrenatalReportFlow;
+  const PrenatalReportEditPage = window.PrenatalReportEditPage;
 
   React.useEffect(()=>{
     const openSharedFeedingHistory = (event)=>{
@@ -3035,7 +3126,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
-  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || otherBabyDetailEntry || customRecordDraft || customRepeatDraft || customEditEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen || feedingMigrationGuideOpen);
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || otherBabyDetailEntry || prenatalReportOpen || prenatalReportEditEntry || customRecordDraft || customRepeatDraft || customEditEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen || feedingMigrationGuideOpen);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? [...BABY_FEEDING_QUICK_ITEMS.filter(item=>item.id!=='custom'),...customQuickItems,...BABY_FEEDING_QUICK_ITEMS.filter(item=>item.id==='custom')].map(item=>({
@@ -3544,6 +3635,7 @@ function App(){
           detailLines:null,
           statDurationMinutes:undefined,
           sleeping:true,
+          sleepFeedback:'started',
           elapsedSeconds:seconds,
           noteText:note || undefined,
           isNew:true,
@@ -3574,7 +3666,8 @@ function App(){
           const {isQuickDraft, sleepMode, ...draftEntry}=finalEntry;
           setTimeline(blocks=>{
             const dayId=resolveBabyFeedingTargetDayId(blocks);
-            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),draftEntry,{dayId});
+            const decoratedEntry=withBabySleepWeekFeedback(blocks,dayId,draftEntry);
+            const next=window.appendTimelineEntry(clearBabyFeedingLatestMarks(blocks),decoratedEntry,{dayId});
             return refreshBabyFeedingLatestMarks(next,dayId);
           });
           notifyBabyShareSync();
@@ -3583,11 +3676,15 @@ function App(){
           setTimeout(()=>scrollTimelineToBottom('smooth'),80);
           return;
         }
-        setTimeline(blocks=>refreshBabyFeedingLatestMarks(blocks.map(block=>{
-          if(block.type!=='day') return block;
-          const items=(block.items||block.entries||[]).map(item=>item.id===sleepDetailEntry.id?finalEntry:item);
-          return {...block,items,entries:undefined};
-        })));
+        setTimeline(blocks=>{
+          const dayId=resolveBabyFeedingTargetDayId(blocks);
+          const decoratedEntry=withBabySleepWeekFeedback(blocks,dayId,finalEntry);
+          return refreshBabyFeedingLatestMarks(blocks.map(block=>{
+            if(block.type!=='day') return block;
+            const items=(block.items||block.entries||[]).map(item=>item.id===sleepDetailEntry.id?decoratedEntry:item);
+            return {...block,items,entries:undefined};
+          }));
+        });
         if(sleepDetailEntry.sleeping) notifyBabyShareSync();
         setSleepDetailEntry(null);
         if(relationshipScheme !== 'with-family-2' || !sleepDetailEntry.sleeping) pushToast({text:'已保存',placement:'center'});
@@ -3606,7 +3703,7 @@ function App(){
         }else if(config.kind === 'diaper'){
           value=`${payload.diaperState}${payload.redBottom?'，红屁屁':''}`;
           text=`换尿布：${value}`;
-          extra={diaperState:payload.diaperState,redBottom:payload.redBottom};
+          extra={diaperState:payload.diaperState,redBottom:payload.redBottom,diaperFeedback:true};
         }else if(config.kind === 'food'){
           value=`${payload.foodName}，${payload.foodWeight}g`;
           text=`辅食：${value}`;
@@ -3640,6 +3737,57 @@ function App(){
         if(relationshipScheme !== 'with-family-2') pushToast({text:'已保存',placement:'center'});
         setTimeout(()=>scrollTimelineToBottom('smooth'),80);
       }}/>:null}
+
+      {PrenatalReportFlow ? <PrenatalReportFlow
+        open={prenatalReportOpen}
+        onClose={()=>setPrenatalReportOpen(false)}
+        onSave={(report)=>{
+          const entry={
+            id:'prenatal-report-'+Date.now(),
+            kind:'prenatal-report-card',
+            time:window.formatNowTime?.() || '10:28',
+            date:report.date,
+            hospital:report.hospital,
+            week:report.week,
+            examType:report.examType,
+            creator:'妈妈',
+            creatorId:'self',
+            isOwnRecord:true,
+            isNew:true,
+          };
+          setTimeline(blocks=>{
+            const dayId=blocks.find(block=>block.type==='day'&&block.isToday)?.id || window.resolveEntryDayId?.('',blocks);
+            return window.appendTimelineEntry(blocks,entry,{dayId});
+          });
+          setPrenatalReportOpen(false);
+          setTimeout(()=>scrollTimelineToBottom('smooth'),80);
+        }}
+      />:null}
+
+      {PrenatalReportEditPage && prenatalReportEditEntry ? <PrenatalReportEditPage
+        item={prenatalReportEditEntry}
+        onClose={()=>setPrenatalReportEditEntry(null)}
+        onSave={(draft)=>{
+          if(!prenatalReportEditEntry) return;
+          setTimeline(blocks=>blocks.map(block=>{
+            if(block.type!=='day') return block;
+            const items=(block.items||block.entries||[]).map(item=>item.id===prenatalReportEditEntry.id?{...item,...draft}:item);
+            return {...block,items,entries:undefined};
+          }));
+          setPrenatalReportEditEntry(null);
+          pushToast({text:'记录已保存',placement:'center'});
+        }}
+        onDelete={()=>{
+          if(!prenatalReportEditEntry) return;
+          setTimeline(blocks=>blocks.map(block=>{
+            if(block.type!=='day') return block;
+            const items=(block.items||block.entries||[]).filter(item=>item.id!==prenatalReportEditEntry.id);
+            return {...block,items,entries:undefined};
+          }));
+          setPrenatalReportEditEntry(null);
+          pushToast({text:'记录已删除',placement:'center'});
+        }}
+      />:null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
         <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>

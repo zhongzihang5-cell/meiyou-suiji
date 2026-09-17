@@ -17,6 +17,8 @@ const MOOD_OPTIONS = [
   { id:'temper', label:'易怒', face:'temper', bg:'#FFC8DC' },
   { id:'angry', label:'生气', face:'angry', bg:'#FF9898' },
   { id:'anxious', label:'焦虑', face:'anxious', bg:'#C8E8A8' },
+  { id:'anticipating', label:'期待', face:'excited', bg:'#FFE875' },
+  { id:'tired', label:'疲惫', face:'normal', bg:'#D9D5F4' },
   { id:'overthink', label:'内耗', face:'overthink', bg:'#FFC8DC' },
   { id:'stressed', label:'压力', face:'stressed', bg:'#FFE875' },
   { id:'scared', label:'害怕', face:'scared', bg:'#FFC8DC' },
@@ -304,17 +306,101 @@ function createMoodRecordEntry(moods){
       label: primary?.label || '',
       score,
       time,
+      moods: list.map(mood=>({ id:mood.id, label:mood.label })),
     },
   };
 }
 
 const MOOD_SCORE_MAP = {
   'super-happy':5,'excited':5,'surprised':5,'satisfied':5,'heart-flutter':5,'confident':5,
-  'happy':4,'relaxed':4,
+  'happy':4,'relaxed':4,'anticipating':4,
   'normal':3,'calm':3,'indifferent':3,
-  'unhappy':2,'irritable':2,'temper':2,'anxious':2,'overthink':2,'stressed':2,'scared':2,
+  'unhappy':2,'irritable':2,'temper':2,'anxious':2,'tired':2,'overthink':2,'stressed':2,'scared':2,
   'very-sad':1,'angry':1,
 };
+
+// 二维情绪坐标：x 由愉快到不愉快，y 由激动到平静。
+const MOOD_SCATTER_POSITION_MAP = {
+  'super-happy':{x:0.08,y:0.24},
+  happy:{x:0.18,y:0.44},
+  normal:{x:0.50,y:0.64},
+  unhappy:{x:0.76,y:0.62},
+  'very-sad':{x:0.90,y:0.82},
+  excited:{x:0.13,y:0.10},
+  surprised:{x:0.31,y:0.16},
+  satisfied:{x:0.25,y:0.64},
+  'heart-flutter':{x:0.20,y:0.24},
+  confident:{x:0.24,y:0.38},
+  relaxed:{x:0.20,y:0.84},
+  calm:{x:0.43,y:0.90},
+  irritable:{x:0.78,y:0.32},
+  temper:{x:0.88,y:0.20},
+  angry:{x:0.94,y:0.10},
+  anxious:{x:0.77,y:0.22},
+  anticipating:{x:0.32,y:0.28},
+  tired:{x:0.68,y:0.84},
+  overthink:{x:0.72,y:0.46},
+  stressed:{x:0.76,y:0.36},
+  scared:{x:0.88,y:0.30},
+  indifferent:{x:0.67,y:0.90},
+};
+
+const MOOD_SCATTER_BASELINE = [
+  { id:'relaxed', label:'放松' },
+  { id:'calm', label:'平静' },
+  { id:'satisfied', label:'满足' },
+  { id:'irritable', label:'烦躁' },
+  { id:'confident', label:'自信' },
+  { id:'overthink', label:'内耗' },
+];
+
+function moodScatterPoint(mood, meta = {}){
+  const position = MOOD_SCATTER_POSITION_MAP[mood?.id]
+    || (moodScoreOf(mood) >= 4 ? {x:0.24,y:0.48} : moodScoreOf(mood) <= 2 ? {x:0.76,y:0.52} : {x:0.50,y:0.68});
+  return {
+    id: mood?.id || meta.id || 'mood',
+    label: mood?.label || meta.label || '一般',
+    x: position.x,
+    y: position.y,
+    ...meta,
+  };
+}
+
+function buildMoodScatterData(history, currentMoods){
+  const historyList = Array.isArray(history) ? history : [];
+  const currentList = Array.isArray(currentMoods) ? currentMoods : [currentMoods].filter(Boolean);
+  const recordedIds = new Set([
+    ...historyList.flatMap(record=>(record.moods || []).map(mood=>mood.id)),
+    ...currentList.map(mood=>mood.id),
+  ].filter(Boolean));
+  const baseline = MOOD_SCATTER_BASELINE
+    .filter(mood=>!recordedIds.has(mood.id))
+    .slice(0, 5)
+    .map((mood, index)=>moodScatterPoint(mood, {
+      recordId:'week-' + index,
+      isCurrent:false,
+      isToday:false,
+    }));
+  const earlierToday = historyList.flatMap((record, recordIndex)=>{
+    const moods = record.moods?.length
+      ? record.moods
+      : [{ id:record.id, label:record.label, score:record.score }];
+    return moods.map((mood, moodIndex)=>moodScatterPoint(mood, {
+      recordId:'today-history-' + recordIndex,
+      pointId:'today-history-' + recordIndex + '-' + moodIndex,
+      time:record.time,
+      isCurrent:false,
+      isToday:true,
+    }));
+  });
+  const current = currentList.map((mood, index)=>moodScatterPoint(mood, {
+    recordId:'current',
+    pointId:'current-' + index,
+    isCurrent:true,
+    isToday:true,
+  }));
+  return [...baseline, ...earlierToday, ...current];
+}
 
 const MOOD_WEEK_BASELINE = [
   { d:'周一', v:3 },
@@ -422,22 +508,27 @@ function createMoodQuickEntry(moods, history){
   const stamp = Date.now();
 
   return {
-    kind:'record-group',
     id:'e-mood-quick-'+stamp,
+    kind:'mood-insight',
+    time,
     isNew: true,
     skipExtractLabel: true,
-    isQuickMood: true,
-    primary:{
-      id:'e-mood-quick-p-'+stamp,
-      kind:'mood-face',
-      time,
-      text: label,
-      primaryMood: primary,
+    moods:list,
+    primaryMood:primary,
+    copy:buildMoodCopy(primary),
+    phaseCopy:buildPhaseCopy(primary),
+    analysisCopy:buildMoodAnalysisCopy(primary),
+    followUp:buildFollowUp(primary),
+    chart:{
+      type:'scatter',
+      title:'近7天情绪散点图',
+      data:buildMoodScatterData(history, list),
     },
     quickMood: {
       label,
       score,
       time,
+      moods:list.map(mood=>({ id:mood.id, label:mood.label })),
     },
   };
 }
@@ -465,6 +556,7 @@ Object.assign(window, {
   createMoodQuickEntry,
   moodScoreOf,
   buildMoodTrend,
+  buildMoodScatterData,
   buildMoodCopy,
   buildPhaseCopy,
   buildTodayMoodPoints,

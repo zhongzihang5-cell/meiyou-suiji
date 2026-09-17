@@ -29,6 +29,265 @@ function ReviewScaleIcon(){
   return <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="4"/><path d="M12 8.5v3l2.4-1.6"/><path d="M8.5 16.5h7"/></svg>;
 }
 
+function PrenatalReviewIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M7 3.5h7l3 3V20H7z"/><path d="M14 3.5V7h3M9.5 11h5M9.5 14h5M9.5 17h3"/></svg>;
+}
+
+function parsePrenatalWeek(value){
+  const matched=String(value || '').match(/(\d+)周/);
+  return matched ? Number(matched[1]) : null;
+}
+
+function PrenatalReviewCard({records=[],onOpen}){
+  const sample=[
+    {week:'12周3天',examType:'NT检查'},
+    {week:'16周',examType:'唐氏筛查'},
+    {week:'20周',examType:'大排畸'},
+    {week:'24周',examType:'糖耐'},
+    {week:'24周5天',examType:'常规产检'},
+  ];
+  const source=records.length ? records : sample;
+  const weekCounts=source.reduce((result,record)=>{
+    const week=parsePrenatalWeek(record.week);
+    if(week!=null) result[week]=(result[week] || 0)+1;
+    return result;
+  },{});
+  const weeks=Object.keys(weekCounts).map(Number).sort((a,b)=>a-b);
+  const typeCount=new Set(source.map(record=>record.examType).filter(Boolean)).size;
+  const maxCount=Math.max(1,...weeks.map(week=>weekCounts[week]));
+  const handleKeyDown=event=>{
+    if(event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      onOpen?.();
+    }
+  };
+  return (
+    <section className="pregnancy-prenatal-review-card" role="button" tabIndex="0" aria-label={`打开孕期产检时间表，已记录${source.length}次，覆盖${typeCount}种产检`} onClick={onOpen} onKeyDown={handleKeyDown}>
+      <header><span className="review-card-icon is-prenatal-review" aria-hidden="true"><PrenatalReviewIcon/></span><h2>孕期产检</h2><ReviewChevron/></header>
+      <div className="prenatal-review-body">
+        <div className="prenatal-review-summary">
+          <span>孕期已记录</span>
+          <strong><b>{source.length}</b><small>次产检</small></strong>
+        </div>
+        <div className="prenatal-review-trend">
+          <div><span>整个孕期</span><strong>完成 {typeCount} 种产检</strong></div>
+          <div className="prenatal-review-chart" role="img" aria-label={weeks.map(week=>`孕${week}周${weekCounts[week]}次`).join('，')}>
+            {weeks.map(week=><div className="prenatal-review-bar" key={week}>
+              <span>{weekCounts[week]}次</span>
+              <i style={{height:(13+weekCounts[week]/maxCount*12)+'px'}}/>
+              <small>{week}周</small>
+            </div>)}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PrenatalScheduleReportIcon(){
+  return <svg viewBox="0 0 28 30"><rect x="5" y="4" width="18" height="23" rx="3"/><path d="M10 10h8M10 15h8M10 20h5"/></svg>;
+}
+
+function PrenatalScheduleBellIcon(){
+  return <svg viewBox="0 0 28 30"><path d="M7 22h14l-2-3V12a5 5 0 0 0-10 0v7z"/><path d="M12 25h4M14 5V2"/><circle cx="14" cy="22" r="10" opacity=".28"/></svg>;
+}
+
+function PrenatalScheduleEditIcon(){
+  return <svg viewBox="0 0 20 20"><path d="M4 14.8V17h2.2L15 8.2 11.8 5zM10.8 6l3.2 3.2M12.8 4l1.3-1.3a1.2 1.2 0 0 1 1.7 0l1.5 1.5a1.2 1.2 0 0 1 0 1.7L16 7.2"/></svg>;
+}
+
+function PrenatalSchedulePage({open,onClose}){
+  const stages=[
+    {label:'5–8周',state:'current',count:'当前',height:28},
+    {label:'9–13周',state:'future',count:'',height:38},
+    {label:'14–20周',state:'future',count:'',height:34},
+    {label:'21–24周',state:'future',count:'',height:25},
+    {label:'25–28周',state:'future',count:'',height:22},
+    {label:'29–36周',state:'future',count:'',height:31},
+    {label:'37–40周',state:'future',count:'',height:36},
+  ];
+  React.useEffect(()=>{
+    const phone=document.querySelector('.phone');
+    phone?.classList.toggle('is-prenatal-schedule-open',open);
+    return ()=>phone?.classList.remove('is-prenatal-schedule-open');
+  },[open]);
+  return (
+    <section className={'prenatal-schedule-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="产检时间表">
+      <div className="prenatal-schedule-hero">
+        <header>
+          <button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+          <h1>产检时间表</h1>
+          <div aria-hidden="true">
+            <span className="is-report"><PrenatalScheduleReportIcon/><em>AI解读</em><small>产检单</small></span>
+            <span><PrenatalScheduleBellIcon/><small>提醒</small></span>
+          </div>
+        </header>
+        <div className="prenatal-schedule-week"><strong>孕6周4天</strong><span>预产期 2027.4.10 <PrenatalScheduleEditIcon/></span></div>
+      </div>
+      <div className="prenatal-schedule-scroll">
+        <section className="prenatal-schedule-progress-card" aria-label="孕期产检进度，当前5到8周，已完成0次，已上传0份产检单">
+          <header><h2>孕期产检进度</h2><strong>当前 5–8周</strong></header>
+          <div className="prenatal-schedule-stats">
+            <div><b>0</b><span>已完成</span></div>
+            <div><b>0</b><span>已上传产检单</span></div>
+          </div>
+          <div className="prenatal-schedule-stage-chart" role="img" aria-label="孕期产检阶段进度：当前处于5到8周，尚未完成产检">
+            {stages.map(stage=><div className={'prenatal-schedule-stage is-'+stage.state} key={stage.label}>
+              <span>{stage.count}</span><i style={{height:stage.height+'px'}}></i><small>{stage.label}</small>
+            </div>)}
+          </div>
+        </section>
+
+        <section className="prenatal-schedule-next">
+          <h2><i></i>下次：孕5–8周产检</h2>
+          <div className="prenatal-schedule-plan-card">
+            <p><b>重点项目</b><span>建卡、早孕超声 <em>憋尿</em></span><ReviewChevron/></p>
+            <p><b>产检时间</b><span>预计 2026年8月15日（周六） <PrenatalScheduleEditIcon/></span></p>
+            <p><b>完成检查</b><button type="button" aria-label="标记完成"></button></p>
+            <p><b>产检单</b><button type="button" className="prenatal-upload-btn">＋ 去上传解读</button></p>
+          </div>
+        </section>
+
+        <section className="prenatal-schedule-next is-later">
+          <h2><i></i>孕9–13周产检</h2>
+          <div className="prenatal-schedule-plan-card">
+            <p><b>重点项目</b><span>建档、NT检查、早期唐筛 <em>空腹</em></span><ReviewChevron/></p>
+            <p><b>产检时间</b><span>预计 2026年9月19日（周六） <PrenatalScheduleEditIcon/></span></p>
+            <p><b>完成检查</b><button type="button" aria-label="标记完成"></button></p>
+            <p><b>产检单</b><button type="button" className="prenatal-upload-btn">＋ 去上传解读</button></p>
+          </div>
+        </section>
+      </div>
+      <button type="button" className="prenatal-schedule-add"><span>＋</span>新增产检</button>
+    </section>
+  );
+}
+
+function PregnancyWeightReviewChart(){
+  const values = [52.1,52.2,52.2,52.3,52.4,52.4,52.5,52.6,52.7,52.7,52.8,52.9,53.0,53.0,53.1,53.2,53.2,53.3,53.4,53.5,53.5,53.6,53.7,53.7,53.8,53.9,54.0,54.0,54.1,54.1];
+  const W = 190, H = 54, padX = 5, padTop = 5, padBottom = 5;
+  const min = Math.min(...values) - 0.15;
+  const max = Math.max(...values) + 0.15;
+  const points = values.map((value,index)=>[
+    padX + index * (W - padX * 2) / (values.length - 1),
+    padTop + (max - value) * (H - padTop - padBottom) / (max - min),
+  ]);
+  const path = reviewSmoothPath(points);
+  return (
+    <svg viewBox={'0 0 '+W+' '+H} preserveAspectRatio="none" role="img" aria-label="近30天体重折线图，趋势正常">
+      <defs>
+        <linearGradient id="pregnancyWeightArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ff5b91" stopOpacity=".20"/>
+          <stop offset="1" stopColor="#ff5b91" stopOpacity=".04"/>
+        </linearGradient>
+      </defs>
+      <path d={path+'L '+points[points.length-1][0]+' '+(H-padBottom)+' L '+points[0][0]+' '+(H-padBottom)+' Z'} fill="url(#pregnancyWeightArea)"/>
+      <path d={path} fill="none" stroke="#ff5b91" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke"/>
+      <circle cx={points[points.length-1][0]} cy={points[points.length-1][1]} r="3" fill="#fff" stroke="#ff5b91" strokeWidth="2"/>
+    </svg>
+  );
+}
+
+function PregnancyWeightReviewCard({onOpen}){
+  const handleKeyDown = event=>{
+    if(event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      onOpen?.();
+    }
+  };
+  return (
+    <section className="pregnancy-weight-review-card" role="button" tabIndex="0" aria-label="打开孕期体重回顾" onClick={onOpen} onKeyDown={handleKeyDown}>
+      <header>
+        <span className="review-card-icon is-pregnancy-weight" aria-hidden="true"><ReviewScaleIcon/></span>
+        <h2>孕期体重</h2>
+        <ReviewChevron/>
+      </header>
+      <div className="pregnancy-weight-review-body">
+        <div className="pregnancy-weight-summary">
+          <span>距上次体重</span>
+          <strong><b>+2.0</b><small>公斤</small></strong>
+        </div>
+        <div className="pregnancy-weight-trend">
+          <div><span>近30天趋势</span><strong>正常</strong></div>
+          <PregnancyWeightReviewChart/>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PregnancyWeightDetailChart(){
+  const labels = [
+    ['8/9','5周1天'],['8/10','5周2天'],['8/11','5周3天'],['8/12','5周4天'],['今天','5周5天'],['8/14','5周6天'],['8/15','6周'],
+  ];
+  const W = 350, H = 238, x0 = 42, x1 = 338, y0 = 24, y1 = 184;
+  const yMin = 59.2, yMax = 63.2;
+  const X = index=>x0 + index * (x1 - x0) / (labels.length - 1);
+  const Y = value=>y1 - (value - yMin) * (y1 - y0) / (yMax - yMin);
+  const normalTop = [60.75,60.75,60.75,60.75,60.75,60.88,60.88];
+  const normalBottom = [59.9,59.9,59.9,59.9,59.9,59.9,59.9];
+  const topPoints = normalTop.map((value,index)=>[X(index),Y(value)]);
+  const bottomPoints = normalBottom.map((value,index)=>[X(index),Y(value)]).reverse();
+  const bandPath = 'M'+topPoints.map(point=>point.join(' ')).join(' L')+' L'+bottomPoints.map(point=>point.join(' ')).join(' L')+' Z';
+  const weightPoints = [[X(0),Y(61.85)],[X(3),Y(62.0)],[X(4),Y(62.0)]];
+  const weightPath = reviewSmoothPath(weightPoints);
+  return (
+    <svg viewBox={'0 0 '+W+' '+H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="孕期体重曲线，当前62.0公斤，高于建议范围">
+      {[59.2,60.2,61.2,62.2,63.2].map(value=><React.Fragment key={value}>
+        <line x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="#ececef" strokeWidth="1" strokeDasharray="3 3"/>
+        <text x={x0-9} y={Y(value)+4} textAnchor="end" fontSize="11" fill="#aaa" fontFamily="PingFang SC">{value.toFixed(1)}</text>
+      </React.Fragment>)}
+      {labels.map((label,index)=><line key={label[0]} x1={X(index)} y1={y0} x2={X(index)} y2={y1} stroke="#ececef" strokeWidth="1" strokeDasharray="3 3"/>)}
+      <path d={bandPath} fill="rgba(60,202,160,.16)"/>
+      <path d={'M'+topPoints.map(point=>point.join(' ')).join(' L')} fill="none" stroke="#36cda2" strokeWidth="1" strokeDasharray="4 3"/>
+      <path d={'M'+normalBottom.slice().map((value,index)=>[X(index),Y(value)]).map(point=>point.join(' ')).join(' L')} fill="none" stroke="#36cda2" strokeWidth="1" strokeDasharray="4 3"/>
+      <path d={weightPath} fill="none" stroke="#ffa62b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx={X(3)} cy={Y(62)} r="4" fill="#ffa62b"/>
+      <text x={X(3)} y={Y(62)-10} textAnchor="middle" fontSize="12" fill="#333" fontFamily="PingFang SC">62.0</text>
+      <circle cx={X(4)} cy={Y(62)} r="7" fill="#fff" stroke="#ffa62b" strokeWidth="4"/>
+      <text x={X(4)} y={Y(62)-12} textAnchor="middle" fontSize="14" fontWeight="600" fill="#ffa62b" fontFamily="PingFang SC">62.0<tspan fontSize="10">公斤</tspan></text>
+      {labels.map((label,index)=><React.Fragment key={label[0]+'-label'}>
+        <text x={X(index)} y="205" textAnchor="middle" fontSize="10" fill="#999" fontFamily="PingFang SC">{label[0]}</text>
+        <text x={X(index)} y="222" textAnchor="middle" fontSize="9" fill="#aaa" fontFamily="PingFang SC">{label[1]}</text>
+      </React.Fragment>)}
+    </svg>
+  );
+}
+
+function PregnancyWeightDetailPage({open,onClose}){
+  React.useEffect(()=>{
+    const phone = document.querySelector('.phone');
+    phone?.classList.toggle('is-pregnancy-weight-detail-open',open);
+    return ()=>phone?.classList.remove('is-pregnancy-weight-detail-open');
+  },[open]);
+  return (
+    <section className={'pregnancy-weight-detail-page'+(open?' is-open':'')} aria-hidden={!open} aria-label="孕期体重详情">
+      <header className="pregnancy-weight-detail-nav">
+        <button type="button" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <span>所有记录</span>
+      </header>
+      <div className="pregnancy-weight-detail-scroll">
+        <section className="pregnancy-weight-hero">
+          <h1>今日体重</h1>
+          <strong>62.0<small>公斤</small></strong>
+          <div>比上次 <b>+2.0</b> 公斤</div>
+        </section>
+        <section className="pregnancy-weight-analysis-card">
+          <p>分析：体重<strong>增长偏快</strong>，试试少食多餐的办法来“管住嘴”，但也别给自己太大压力哦～</p>
+          <button type="button"><span>☎</span>如何科学控制体重？为你量身定制每日食谱<ReviewChevron/></button>
+          <footer><div>孕 5 周建议范围: 60.00-60.71公斤<br/>孕前体重：60.0 公斤</div><button type="button">我的增长表</button></footer>
+        </section>
+        <section className="pregnancy-weight-chart-card">
+          <header><h2>体重曲线</h2><div><b>日</b><span>孕周</span><i></i><span>仅看有记录</span></div></header>
+          <PregnancyWeightDetailChart/>
+          <footer><span className="is-low"><i></i>偏低</span><span className="is-normal"><i></i>正常</span><span className="is-high"><i></i>偏高</span></footer>
+        </section>
+        <section className="pregnancy-weight-advice-card"><h2>体重管理建议</h2><p>保持规律饮食和适量运动，关注体重变化趋势，无需因单次波动过度紧张。</p></section>
+      </div>
+    </section>
+  );
+}
+
 function ReviewMoodIcon(){
   return <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><path d="M9 9.5h.01M15 9.5h.01"/></svg>;
 }
@@ -1750,6 +2009,8 @@ function SharedFeedingTimelinePage({open,onClose,timelineBlocks,presentation='pa
 }
 
 function ReviewPage({timelineBlocks}){
+  const [pregnancyWeightOpen, setPregnancyWeightOpen] = useState(false);
+  const [prenatalScheduleOpen, setPrenatalScheduleOpen] = useState(false);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [sharedFeedingOpen, setSharedFeedingOpen] = useState(false);
   const [feedingDetailOpen, setFeedingDetailOpen] = useState(false);
@@ -1759,6 +2020,13 @@ function ReviewPage({timelineBlocks}){
   const openFeedingDetail = tab=>{ setFeedingDetailTab(tab); setFeedingDetailOpen(true); };
   const openVipAnalysis = type=>{ setVipAnalysisType(type); setVipAnalysisOpen(true); };
   const sharedFeedingDays = buildSharedFeedingDaysFromTimeline(timelineBlocks);
+  const prenatalReviewRecords=[];
+  (timelineBlocks || []).forEach(block=>{
+    if(block?.type !== 'day') return;
+    (block.items || block.entries || []).forEach(item=>{
+      if(item?.kind === 'prenatal-report-card') prenatalReviewRecords.push(item);
+    });
+  });
   const babyReviewTypeByRecord = {
     '配方奶':'feeding','母乳':'feeding','瓶喂母乳':'feeding',
     '睡眠':'sleep','换尿布':'diaper','辅食':'food','营养补剂':'supplement','吸奶':'pump',
@@ -1810,7 +2078,11 @@ function ReviewPage({timelineBlocks}){
         </div>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>4 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>6 项</b>可回顾</p>
+
+      <PregnancyWeightReviewCard onOpen={()=>setPregnancyWeightOpen(true)}/>
+
+      <PrenatalReviewCard records={prenatalReviewRecords} onOpen={()=>setPrenatalScheduleOpen(true)}/>
 
       <SharedFeedingReviewCard day={sharedFeedingDays[0]} onOpen={()=>setSharedFeedingOpen(true)}/>
 
@@ -1911,6 +2183,8 @@ function ReviewPage({timelineBlocks}){
       />
 
       </div>
+      <PregnancyWeightDetailPage open={pregnancyWeightOpen} onClose={()=>setPregnancyWeightOpen(false)}/>
+      <PrenatalSchedulePage open={prenatalScheduleOpen} onClose={()=>setPrenatalScheduleOpen(false)}/>
       <SharedFeedingTimelinePage open={sharedFeedingOpen} timelineBlocks={timelineBlocks} onClose={()=>setSharedFeedingOpen(false)}/>
       <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
       <FeedingDetailPage open={feedingDetailOpen} onClose={()=>setFeedingDetailOpen(false)} activeTab={feedingDetailTab} onTabChange={setFeedingDetailTab}/>

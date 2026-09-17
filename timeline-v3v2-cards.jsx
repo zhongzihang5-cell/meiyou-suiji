@@ -364,6 +364,138 @@ function ChartWeightTrend({compact = false, data, unit = 'kg'}){
   );
 }
 
+function ChartWeightEventCombo({data, unit = 'kg'}){
+  const weights = Array.isArray(data?.weights) ? data.weights : [];
+  const events = Array.isArray(data?.events) ? data.events : [];
+  const fallbackWeights = [
+    { d:'周六', v:52.8 }, { d:'周日', v:52.0 }, { d:'周一', v:52.2 },
+    { d:'周二', v:52.5 }, { d:'周三', v:53.4 }, { d:'周四', v:52.8 },
+    { d:'今天', v:52.3, isToday:true },
+  ];
+  const series = weights.length ? weights : fallbackWeights;
+  const values = series.map(point=>point.v);
+  const minV = Math.min(...values);
+  const maxV = Math.max(...values);
+  const { yMin, yMax, ticks:allTicks } = computeWeightTicks(minV, maxV, 4);
+  const ticks = allTicks.length > 4
+    ? [allTicks[0], allTicks[Math.round((allTicks.length - 1) / 2)], allTicks[allTicks.length - 1]]
+    : allTicks;
+  const yRange = yMax - yMin || 1;
+  const W = 320;
+  const H = 214;
+  const plotLeft = 60;
+  const plotRight = 308;
+  const plotTop = 18;
+  const plotBottom = 96;
+  const innerW = plotRight - plotLeft;
+  const innerH = plotBottom - plotTop;
+  const eventRows = ['压力','情绪低落','暴食冲动'];
+  const eventRowY = label=>136 + eventRows.indexOf(label) * 23;
+  const xForIndex = index=>plotLeft + (innerW * index) / Math.max(1, series.length - 1);
+  const yForWeight = value=>plotBottom - ((value - yMin) / yRange) * innerH;
+  const points = series.map((point, index)=>({
+    ...point,
+    index,
+    x:xForIndex(index),
+    y:yForWeight(point.v),
+  }));
+  const linePath = points.map((point,index)=>`${index === 0 ? 'M' : 'L'}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
+  const formatAxis = value=>Number.isInteger(value) ? String(value) : value.toFixed(1);
+  const formatValue = value=>unit === 'jin' ? `${value.toFixed(1)}斤` : `${value.toFixed(1)}公斤`;
+
+  return (
+    <div className="v3-weight-event-combo">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width="100%"
+        height={H}
+        role="img"
+        aria-label={'近7天体重折线与事件散点组合图。同期事件包括：' + [...new Set(events.map(event=>event.type))].join('、')}
+      >
+        <text className="v3-weight-event-section-label" x={plotLeft} y="11">体重</text>
+        {ticks.map(tick=>{
+          const y = yForWeight(tick);
+          return (
+            <g key={tick}>
+              <line x1={plotLeft} x2={plotRight} y1={y} y2={y} className="v3-weight-event-gridline"/>
+              <text className="v3-weight-event-axis-label" x={plotLeft - 8} y={y + 3.5} textAnchor="end">{formatAxis(tick)}</text>
+            </g>
+          );
+        })}
+
+        {events.map((event,index)=>{
+          const point = points[Math.max(0, Math.min(event.dayIndex, points.length - 1))];
+          const eventY = eventRowY(event.type);
+          if(!point || eventY == null) return null;
+          return (
+            <line
+              key={'guide-' + index}
+              x1={point.x}
+              x2={point.x}
+              y1={point.y + 6}
+              y2={eventY - 6}
+              className="v3-weight-event-sync-guide"
+            />
+          );
+        })}
+
+        {linePath ? <path d={linePath} className="v3-weight-event-line"/> : null}
+        {points.map(point=>(
+          <g key={'weight-' + point.index}>
+            {point.isToday ? (
+              <text className="v3-weight-event-today-value" x={point.x} y={Math.max(point.y - 9, 12)} textAnchor={point.index === series.length - 1 ? 'end' : 'middle'}>
+                {formatValue(point.v)}
+              </text>
+            ) : null}
+            <circle className={'v3-weight-event-weight-dot' + (point.isToday ? ' is-today' : '')} cx={point.x} cy={point.y} r={point.isToday ? 4.8 : 3.8}/>
+          </g>
+        ))}
+
+        <line x1={plotLeft} x2={plotRight} y1="108" y2="108" className="v3-weight-event-divider"/>
+        <text className="v3-weight-event-section-label" x={plotLeft} y="120">同期事件</text>
+        {eventRows.map(label=>{
+          const y = eventRowY(label);
+          return (
+            <g key={label}>
+              <text className="v3-weight-event-row-label" x={plotLeft - 8} y={y + 3.5} textAnchor="end">{label}</text>
+              <line x1={plotLeft} x2={plotRight} y1={y} y2={y} className="v3-weight-event-rowline"/>
+            </g>
+          );
+        })}
+        {events.map((event,index)=>{
+          const x = xForIndex(Math.max(0, Math.min(event.dayIndex, series.length - 1)));
+          const y = eventRowY(event.type);
+          if(y == null) return null;
+          return (
+            <circle
+              key={'event-' + index}
+              cx={x}
+              cy={y}
+              r={event.isToday ? 5.2 : 4.3}
+              fill={event.color || '#8b7ad6'}
+              stroke="#fff"
+              strokeWidth="1.7"
+            >
+              <title>{event.type}</title>
+            </circle>
+          );
+        })}
+        {series.map((point,index)=>(
+          <text
+            key={'day-' + index}
+            className={'v3-weight-event-day' + (point.isToday ? ' is-today' : '')}
+            x={xForIndex(index)}
+            y="207"
+            textAnchor="middle"
+          >
+            {point.d}
+          </text>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 function ChartCaloriePanel({compact = false}){
   const consumed = 1126;
   const target = 1800;
@@ -480,9 +612,18 @@ function WeightAnalysisNote({ noteParts, note }){
       <div className="v3-weight-curve-note">
         {noteParts.prefix}
         {noteParts.delta ? (
-          <span className={noteParts.emphasize ? 'is-down' : undefined}>{noteParts.delta}</span>
+          noteParts.deltaUnit ? (
+            <React.Fragment>
+              <span className={noteParts.emphasize ? 'is-down' : undefined}>{noteParts.delta}</span>
+              {noteParts.deltaUnit}
+            </React.Fragment>
+          ) : (
+            <span className={noteParts.emphasize ? 'is-down' : undefined}>{noteParts.delta}</span>
+          )
         ) : null}
         {noteParts.tail}
+        {noteParts.highlight ? <span className="is-down">{noteParts.highlight}</span> : null}
+        {noteParts.suffix}
       </div>
     );
   }
@@ -643,6 +784,7 @@ function ChartSymptomDots({data}){
 function TLChart({type, compact = false, data, weightUnit}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
   if(type === 'weightTrend') return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
+  if(type === 'weightEventCombo') return <ChartWeightEventCombo data={data} unit={weightUnit}/>;
   if(type === 'caloriePanel') return <ChartCaloriePanel compact={compact}/>;
   if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;

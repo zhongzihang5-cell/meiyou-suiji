@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>宝宝新增记录后的反馈演示</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="demo-shell">
+    <header class="page-intro">
+      <div class="eyebrow"><span class="brand-mark" aria-hidden="true">点</span> 宝宝记录 · 反馈文案演示</div>
+      <h1>记下一次，看到有用的变化。</h1>
+      <p>切换记录项，查看新增记录后用户能收到的反馈。</p>
+      <div class="meta-row"><span>基于本轮调研讨论</span><span>全部为演示数据</span><span>2026.09.11</span></div>
+    </header>
+
+    <nav class="module-tabs" aria-label="选择记录项" id="module-tabs"></nav>
+
+    <div class="workspace">
+      <section class="research" aria-labelledby="research-title">
+        <div class="section-kicker">调研结论</div>
+        <div class="heading-row"><h2 id="research-title">喂奶</h2><span id="module-status" class="status-badge"></span></div>
+        <p id="conclusion" class="conclusion"></p>
+        <div class="research-block"><h3>替用户省去什么</h3><p id="need"></p></div>
+        <div class="research-block"><h3>新增后反馈什么</h3><ul id="outputs"></ul></div>
+        <div class="research-block boundary-block"><h3>输出边界</h3><p id="boundary"></p></div>
+      </section>
+
+      <section class="preview-column" aria-labelledby="preview-title">
+        <div class="preview-heading"><div><div class="section-kicker">新增记录后</div><h2 id="preview-title">用户看到的反馈</h2></div><span class="preview-tag">文案 Demo</span></div>
+        <label class="scene-picker" id="scene-picker">演示场景<select id="scene-select"></select></label>
+        <p class="candidate-note" id="candidate-note" hidden>候选方案 · 遗漏核对的触发规则与准确性待验证</p>
+
+        <div class="product-surface">
+          <div class="input-record">
+            <span id="record-symbol" class="record-symbol" aria-hidden="true"></span>
+            <div class="record-information"><div class="record-label">新增的示例记录</div><strong id="record-input"></strong></div>
+            <time id="record-time"></time>
+          </div>
+
+          <div class="feedback-zone" id="feedback-zone" aria-live="polite" aria-atomic="true">
+            <div class="receipt"><span class="success-icon" aria-hidden="true">✓</span><span id="receipt"></span></div>
+            <div class="feedback-copy" id="feedback-copy"></div>
+            <details class="history-detail" id="history-detail"><summary>展开回顾 <span aria-hidden="true">⌄</span></summary><div id="history-copy"></div></details>
+          </div>
+          <div class="saving-state" id="saving-state" role="status" hidden>正在新增这条示例记录…</div>
+        </div>
+
+        <div class="preview-actions"><button type="button" id="replay" class="replay-button">重新演示新增</button><button type="button" id="copy" class="copy-button">复制反馈文案</button></div>
+        <p class="copy-status" id="copy-status" role="status"></p>
+        <p class="preview-note" id="scene-note"></p>
+
+        <details class="source-detail"><summary>核对示例记录与计算依据</summary><p id="source"></p></details>
+      </section>
+    </div>
+
+    <section class="common-section" aria-label="共用口径"><details><summary>共用口径与待验证事项 <span aria-hidden="true">＋</span></summary><ol id="common-rules"></ol></details></section>
+    <footer><span>示例仅展示反馈表达，不代表推荐喂养或补充方案。</span><a href="宝宝新增记录反馈调研结论.docx" download>下载调研文档 <span aria-hidden="true">↗</span></a></footer>
+  </main>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

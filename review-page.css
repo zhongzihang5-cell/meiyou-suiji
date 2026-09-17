@@ -94,6 +94,147 @@
   background:rgba(79,124,174,0.10);
   color:var(--my-link);
 }
+.review-card-icon.is-pregnancy-weight{width:20px;height:20px;flex-basis:20px;border:2px solid #ff5b91;border-radius:6px;background:#fff;color:#ff5b91}
+.review-card-icon.is-pregnancy-weight svg{width:12px;height:12px;stroke-width:2}
+.pregnancy-weight-review-card{overflow:hidden;border-radius:var(--r-md);background:var(--my-surface);box-shadow:var(--shadow-1);cursor:pointer}
+.pregnancy-weight-review-card:focus-visible{outline:2px solid rgba(255,77,136,.38);outline-offset:2px}
+.pregnancy-weight-review-card+ .shared-feeding-review-card{margin-top:16px}
+.pregnancy-weight-review-card+ .pregnancy-prenatal-review-card{margin-top:16px}.pregnancy-prenatal-review-card+ .shared-feeding-review-card{margin-top:16px}
+.pregnancy-prenatal-review-card{overflow:hidden;border-radius:var(--r-md);background:var(--my-surface);box-shadow:var(--shadow-1);cursor:pointer}
+.pregnancy-prenatal-review-card:focus-visible{outline:2px solid rgba(255,77,136,.38);outline-offset:2px}
+.pregnancy-prenatal-review-card>header{height:45px;padding:0 14px;display:flex;align-items:center;gap:7px}
+.pregnancy-prenatal-review-card>header h2{margin:0;color:var(--my-text-primary);font-size:15px;line-height:21px;font-weight:600}
+.pregnancy-prenatal-review-card>header>svg{width:17px;height:17px;margin-left:auto;fill:none;stroke:var(--my-text-tertiary);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.review-card-icon.is-prenatal-review{width:20px;height:20px;flex-basis:20px;border-radius:6px;background:rgba(255,77,136,.11);color:#ff4d88}
+.review-card-icon.is-prenatal-review svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.prenatal-review-body{height:96px;padding:0 14px 12px;display:grid;grid-template-columns:minmax(118px,.82fr) minmax(0,1.45fr);align-items:end;gap:10px}
+.prenatal-review-summary{align-self:center}
+.prenatal-review-summary>span{display:block;color:var(--my-text-tertiary);font-size:12px;line-height:18px;white-space:nowrap}
+.prenatal-review-summary>strong{display:flex;margin-top:4px;align-items:baseline;color:var(--my-text-primary);font-weight:400;white-space:nowrap}
+.prenatal-review-summary b{font-size:20px;line-height:28px;font-weight:650;font-variant-numeric:tabular-nums}
+.prenatal-review-summary small{margin-left:3px;color:var(--my-text-primary);font-size:13px;font-weight:500}
+.prenatal-review-trend{min-width:0;align-self:end}
+.prenatal-review-trend>div:first-child{width:max-content;max-width:100%;height:27px;margin:0 auto -1px;padding:0 10px;display:flex;align-items:center;gap:5px;border-radius:14px;background:#fafafb}
+.prenatal-review-trend>div:first-child span{color:var(--my-text-secondary);font-size:11px;white-space:nowrap}
+.prenatal-review-trend>div:first-child strong{color:var(--my-text-primary);font-size:11px;font-weight:600;white-space:nowrap}
+.prenatal-review-chart{height:54px;padding:2px 2px 0;display:flex;align-items:flex-end;justify-content:space-around;gap:5px}
+.prenatal-review-bar{height:52px;min-width:28px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.prenatal-review-bar span{margin-bottom:1px;color:#aaa;font-size:8px;line-height:10px}
+.prenatal-review-bar i{width:13px;min-height:13px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#ff7aa7,#ff4d88)}
+.prenatal-review-bar small{margin-top:2px;color:#777;font-size:8px;line-height:10px;white-space:nowrap}
+
+.phone.is-prenatal-schedule-open .review-page{height:calc(100vh - 44px)}
+.phone.is-prenatal-schedule-open .tabbar{display:none}
+.phone.is-prenatal-schedule-open>.statusbar{background:#ff6398;color:#fff}
+.prenatal-schedule-page{position:absolute;inset:0;z-index:146;display:flex;flex-direction:column;background:linear-gradient(180deg,#ff6398 0,#ff5d94 116px,#ffeaf0 300px,#f4f4f7 334px);visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}
+.prenatal-schedule-page.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
+.prenatal-schedule-hero{height:116px;flex:0 0 116px;padding:0 16px;color:#fff}
+.prenatal-schedule-hero>header{height:59px;position:relative;display:flex;align-items:center;justify-content:center}
+.prenatal-schedule-hero>header>button{position:absolute;left:-15px;width:44px;height:44px;border:0;background:transparent;color:#fff;display:grid;place-items:center}
+.prenatal-schedule-hero>header>button svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.prenatal-schedule-hero h1{margin:0;font-size:20px;line-height:28px;font-weight:600}
+.prenatal-schedule-hero>header>div{position:absolute;right:-9px;top:2px;height:56px;display:flex;gap:5px}
+.prenatal-schedule-hero>header>div>span{position:relative;width:42px;display:flex;flex-direction:column;align-items:center;color:#fff}
+.prenatal-schedule-hero>header>div svg{width:28px;height:30px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+.prenatal-schedule-hero>header small{font-size:10px;line-height:14px;font-weight:400;white-space:nowrap}
+.prenatal-schedule-hero>header em{position:absolute;right:17px;top:-1px;height:15px;padding:0 4px;border:1px solid #fff;border-radius:8px;background:linear-gradient(90deg,#ba7bf3,#7d8cff);color:#fff;font-size:8px;line-height:13px;font-style:normal;white-space:nowrap}
+.prenatal-schedule-week{height:57px;display:flex;align-items:flex-start;justify-content:space-between;padding:11px 0 0}
+.prenatal-schedule-week strong{font-size:22px;line-height:30px;font-weight:600}
+.prenatal-schedule-week span{display:flex;align-items:center;gap:4px;font-size:14px;line-height:28px}
+.prenatal-schedule-week span svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.prenatal-schedule-scroll{flex:1;min-height:0;overflow-y:auto;padding:0 12px 98px;overscroll-behavior:contain;scrollbar-width:none}
+.prenatal-schedule-scroll::-webkit-scrollbar{display:none}
+.prenatal-schedule-progress-card{padding:10px 12px 7px;border-radius:9px;background:#fff;box-shadow:0 3px 12px rgba(112,71,85,.05)}
+.prenatal-schedule-progress-card>header{height:25px;display:flex;align-items:flex-start;justify-content:space-between}
+.prenatal-schedule-progress-card h2{margin:0;color:#333;font-size:15px;line-height:19px;font-weight:600}
+.prenatal-schedule-progress-card header>strong{height:20px;padding:0 8px;border-radius:10px;background:#fff0f5;color:#ff4d88;font-size:9px;line-height:20px;font-weight:500;white-space:nowrap}
+.prenatal-schedule-stats{height:32px;margin-top:4px;display:grid;grid-template-columns:repeat(2,1fr);border-radius:7px;background:#fff8fa}
+.prenatal-schedule-stats>div{position:relative;display:flex;align-items:center;justify-content:center;gap:4px}
+.prenatal-schedule-stats>div+div::before{content:"";position:absolute;left:0;width:1px;height:18px;background:#f1dfe5}
+.prenatal-schedule-stats b{color:#ff4d88;font-size:16px;line-height:21px;font-weight:600}
+.prenatal-schedule-stats span{max-width:52px;color:#888;font-size:8px;line-height:10px}
+.prenatal-schedule-stage-chart{height:50px;margin-top:2px;display:flex;align-items:flex-end;justify-content:space-between;gap:3px}
+.prenatal-schedule-stage{height:49px;min-width:36px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.prenatal-schedule-stage span{height:10px;color:#aaa;font-size:7px;line-height:10px}
+.prenatal-schedule-stage i{width:16px;min-height:15px;max-height:28px;border-radius:5px 5px 2px 2px;background:#ececef}
+.prenatal-schedule-stage small{margin-top:2px;color:#999;font-size:7px;line-height:9px;white-space:nowrap}
+.prenatal-schedule-stage.is-done i{background:linear-gradient(180deg,#ff82aa,#ff4d88)}
+.prenatal-schedule-stage.is-done span{color:#ff4d88}
+.prenatal-schedule-stage.is-current i{border:2px solid #00caa0;background:#e7faf5}
+.prenatal-schedule-stage.is-current span,.prenatal-schedule-stage.is-current small{color:#1eb88c;font-weight:600}
+.prenatal-schedule-next{position:relative;margin-top:14px}
+.prenatal-schedule-next::before{content:"";position:absolute;left:4px;top:35px;bottom:-17px;width:1px;background:#d7d7db}
+.prenatal-schedule-next>h2{height:42px;margin:0;display:flex;align-items:center;gap:9px;color:#00bd91;font-size:17px;line-height:24px;font-weight:600}
+.prenatal-schedule-next>h2 i{z-index:1;width:9px;height:9px;border:3px dotted #00caa0;border-radius:50%;background:#f4f4f7}
+.prenatal-schedule-next.is-later>h2{color:#333}
+.prenatal-schedule-plan-card{margin-left:16px;padding:10px 12px;border-left:3px solid #00caa0;border-radius:9px;background:#fff}
+.prenatal-schedule-next.is-later .prenatal-schedule-plan-card{border-left-color:transparent}
+.prenatal-schedule-plan-card p{min-height:40px;margin:0;display:flex;align-items:center;gap:8px;color:#333;font-size:13px;line-height:19px}
+.prenatal-schedule-plan-card p>b{width:70px;flex:0 0 70px;font-size:15px;font-weight:600}
+.prenatal-schedule-plan-card p>span{min-width:0;color:#999;white-space:nowrap}
+.prenatal-schedule-plan-card p:first-child>span{color:#333}
+.prenatal-schedule-plan-card p>span em{margin-left:3px;padding:2px 5px;border-radius:5px;background:#fff0f5;color:#ff4d88;font-size:9px;font-style:normal}
+.prenatal-schedule-plan-card p>span svg{width:14px;height:14px;margin-left:2px;vertical-align:-2px;fill:none;stroke:#bbb;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.prenatal-schedule-plan-card p>svg{width:16px;height:16px;margin-left:auto;fill:none;stroke:#bbb;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.prenatal-schedule-plan-card p>button:not(.prenatal-upload-btn){width:23px;height:23px;border:2px solid #ddd;border-radius:50%;background:#fff}
+.prenatal-upload-btn{height:30px;padding:0 13px;border:1px solid #ff4d88;border-radius:16px;background:#fff;color:#ff4d88;font:400 13px/28px inherit}
+.prenatal-schedule-add{position:absolute;left:0;right:0;bottom:0;height:76px;border:0;border-top:1px solid #ddd;background:rgba(255,255,255,.98);color:#333;font:500 18px/1 inherit;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 -2px 8px rgba(0,0,0,.02)}
+.prenatal-schedule-add span{width:32px;height:32px;border:2px solid #333;border-radius:50%;display:grid;place-items:center;font-size:25px;line-height:28px;font-weight:300}
+.pregnancy-weight-review-card>header{height:45px;padding:0 14px;display:flex;align-items:center;gap:7px}
+.pregnancy-weight-review-card>header h2{margin:0;color:var(--my-text-primary);font-size:15px;line-height:21px;font-weight:600}
+.pregnancy-weight-review-card>header>svg{width:17px;height:17px;margin-left:auto;fill:none;stroke:var(--my-text-tertiary);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pregnancy-weight-review-body{height:96px;padding:0 14px 12px;display:grid;grid-template-columns:minmax(118px,.82fr) minmax(0,1.45fr);align-items:end;gap:10px}
+.pregnancy-weight-summary{align-self:center}
+.pregnancy-weight-summary>span{display:block;color:var(--my-text-tertiary);font-size:12px;line-height:18px;white-space:nowrap}
+.pregnancy-weight-summary>strong{display:flex;margin-top:4px;align-items:baseline;color:var(--my-text-primary);font-weight:400;white-space:nowrap}
+.pregnancy-weight-summary b{font-size:20px;line-height:28px;font-weight:650;font-variant-numeric:tabular-nums}
+.pregnancy-weight-summary small{margin-left:3px;color:var(--my-text-primary);font-size:13px;font-weight:500}
+.pregnancy-weight-trend{min-width:0;align-self:end}
+.pregnancy-weight-trend>div{width:max-content;max-width:100%;height:27px;margin:0 auto -1px;padding:0 10px;display:flex;align-items:center;gap:5px;border-radius:14px;background:#fafafb}
+.pregnancy-weight-trend>div span{color:var(--my-text-secondary);font-size:11px;white-space:nowrap}
+.pregnancy-weight-trend>div strong{color:var(--my-text-primary);font-size:11px;font-weight:600;white-space:nowrap}
+.pregnancy-weight-trend>svg{display:block;width:100%;height:54px}
+
+.phone.is-pregnancy-weight-detail-open .review-page{height:calc(100vh - 44px)}
+.phone.is-pregnancy-weight-detail-open .tabbar{display:none}
+.pregnancy-weight-detail-page{position:absolute;inset:0;z-index:145;display:flex;flex-direction:column;background:linear-gradient(180deg,#ffe0ee 0,#fff3f7 250px,#f4f4f7 430px);visibility:hidden;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1),visibility 0s linear .3s}
+.pregnancy-weight-detail-page.is-open{visibility:visible;transform:translateX(0);transition:transform .3s cubic-bezier(.2,0,0,1)}
+.pregnancy-weight-detail-nav{height:52px;flex:0 0 52px;padding:0 16px;display:flex;align-items:center;justify-content:flex-end}
+.pregnancy-weight-detail-nav>button{position:absolute;left:4px;width:44px;height:44px;border:0;background:transparent;color:#333;display:grid;place-items:center}
+.pregnancy-weight-detail-nav>button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pregnancy-weight-detail-nav>span{color:#333;font-size:14px}
+.pregnancy-weight-detail-scroll{flex:1;min-height:0;overflow-y:auto;padding:0 12px calc(24px + var(--my-safe-bottom));overscroll-behavior:contain;scrollbar-width:none}
+.pregnancy-weight-detail-scroll::-webkit-scrollbar{display:none}
+.pregnancy-weight-hero{height:150px;display:flex;flex-direction:column;align-items:center}
+.pregnancy-weight-hero h1{margin:4px 0 4px;color:#333;font-size:17px;line-height:25px;font-weight:500}
+.pregnancy-weight-hero>strong{display:flex;align-items:baseline;color:#ff4d88;font-size:34px;line-height:44px;font-weight:500;font-variant-numeric:tabular-nums}
+.pregnancy-weight-hero>strong small{margin-left:4px;font-size:14px;font-weight:400}
+.pregnancy-weight-hero>div{height:30px;margin-top:7px;padding:0 14px;border-radius:15px;background:rgba(255,255,255,.92);color:#777;font-size:14px;line-height:30px}
+.pregnancy-weight-hero>div b{color:#ff4d88;font-size:16px;font-weight:600}
+.pregnancy-weight-analysis-card,.pregnancy-weight-chart-card,.pregnancy-weight-advice-card{border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(68,54,60,.035)}
+.pregnancy-weight-analysis-card{padding:15px 13px 0}
+.pregnancy-weight-analysis-card>p{margin:0;color:#333;font-size:14px;line-height:21px}
+.pregnancy-weight-analysis-card>p strong{color:#ff4d88;font-weight:500}
+.pregnancy-weight-analysis-card>button{width:100%;height:50px;margin-top:12px;padding:0 10px;border:0;border-radius:10px;background:#fafafa;color:#444;display:flex;align-items:center;gap:8px;font:400 13px/18px inherit;text-align:left}
+.pregnancy-weight-analysis-card>button>span{width:20px;height:20px;border-radius:5px;background:#ff5b96;color:#fff;display:grid;place-items:center;font-size:10px}
+.pregnancy-weight-analysis-card>button>svg{width:18px;height:18px;margin-left:auto;fill:none;stroke:#bbb;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pregnancy-weight-analysis-card>footer{min-height:75px;margin-top:12px;border-top:1px solid #eee;display:flex;align-items:center;gap:8px}
+.pregnancy-weight-analysis-card>footer>div{color:#777;font-size:12px;line-height:25px;white-space:nowrap}
+.pregnancy-weight-analysis-card>footer>button{height:28px;margin-left:auto;padding:0 12px;border:1px solid #ff4d88;border-radius:15px;background:#fff;color:#ff4d88;font:400 12px/26px inherit;white-space:nowrap}
+.pregnancy-weight-chart-card{margin-top:10px;padding:13px 12px 12px}
+.pregnancy-weight-chart-card>header{height:35px;display:flex;align-items:flex-start}
+.pregnancy-weight-chart-card h2,.pregnancy-weight-advice-card h2{margin:0;color:#333;font-size:16px;line-height:24px;font-weight:600}
+.pregnancy-weight-chart-card>header>div{height:29px;margin-left:auto;padding:2px 8px 2px 2px;border-radius:15px;background:#f7f7f8;display:flex;align-items:center;gap:8px;color:#888;font-size:11px}
+.pregnancy-weight-chart-card>header b{height:25px;min-width:29px;padding:0 8px;border-radius:13px;background:#fff;color:#333;display:grid;place-items:center;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.pregnancy-weight-chart-card>header i{width:1px;height:13px;background:#ddd}
+.pregnancy-weight-chart-card>svg{display:block;width:100%;height:auto}
+.pregnancy-weight-chart-card>footer{height:28px;padding-left:36px;display:flex;align-items:center;gap:18px;color:#999;font-size:11px}
+.pregnancy-weight-chart-card>footer span{display:flex;align-items:center;gap:5px}
+.pregnancy-weight-chart-card>footer i{width:10px;height:10px;border-radius:50%;background:#4a98ff}
+.pregnancy-weight-chart-card>footer .is-normal i{background:#19c79a}
+.pregnancy-weight-chart-card>footer .is-high i{background:#ffa62b}
+.pregnancy-weight-advice-card{min-height:96px;margin-top:10px;padding:14px 13px}
+.pregnancy-weight-advice-card p{margin:8px 0 0;color:#777;font-size:12px;line-height:20px}
 .review-card-icon.is-mood{
   background:rgba(185,114,255,0.12);
   color:#b972ff;

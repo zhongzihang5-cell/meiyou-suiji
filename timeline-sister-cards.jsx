@@ -527,12 +527,118 @@ function TlVoiceInline({voice, text}){
   );
 }
 
+function PeriodAssociationComboChart(){
+  const chartRef = React.useRef(null);
+  const days = ['5/13','5/14','5/15','5/16','5/17','5/18','5/19'];
+  const colors = [
+    { dayIndex:4, label:'鲜红', color:'#ff526d' },
+    { dayIndex:5, label:'暗红', color:'#b94259' },
+    { dayIndex:6, label:'褐色', color:'#91604f' },
+  ];
+  const flows = [
+    { dayIndex:4, label:'中', value:0.56 },
+    { dayIndex:5, label:'多', value:0.82 },
+    { dayIndex:6, label:'少', value:0.34 },
+  ];
+  const bodyEvents = [
+    { dayIndex:1, label:'疲惫', color:'#8d79bd' },
+    { dayIndex:4, label:'头痛', color:'#5c8fd8' },
+    { dayIndex:6, label:'腹胀', color:'#d98c45' },
+  ];
+  const plotLeft = 58;
+  const plotRight = 310;
+  const xFor = (index)=>plotLeft + (plotRight - plotLeft) * index / (days.length - 1);
+
+  React.useEffect(()=>{
+    const timer = setTimeout(()=>{
+      if(window.scrollFeedContentIntoView && chartRef.current){
+        window.scrollFeedContentIntoView(chartRef.current);
+      }
+    }, 80);
+    return ()=>clearTimeout(timer);
+  }, []);
+
+  return (
+    <section
+      ref={chartRef}
+      className="tl-period-association"
+      aria-label="经期关联组合图：颜色散点、流量柱状和身体表现事件按同一天对齐"
+    >
+      <div className="tl-period-association-head">
+        <strong>关联组合图</strong>
+        <span>按同一天对齐</span>
+      </div>
+      <svg className="tl-period-association-chart" viewBox="0 0 320 216" role="img" aria-hidden="true">
+        <rect x="0" y="0" width="320" height="216" rx="12" fill="#faf9fb"/>
+        <rect x={xFor(4)-16} y="14" width="32" height="174" rx="8" fill="#fff2f6"/>
+
+        {days.map((_, index)=>(
+          <line
+            key={'grid-'+index}
+            x1={xFor(index)} y1="22" x2={xFor(index)} y2="188"
+            stroke={index === 4 ? '#f5b2c7' : '#e9e6eb'}
+            strokeWidth={index === 4 ? '1.2' : '0.8'}
+            strokeDasharray="2 4"
+          />
+        ))}
+
+        <line x1={plotLeft} y1="70" x2={plotRight} y2="70" stroke="#e7e3e8" strokeWidth="0.8"/>
+        <line x1={plotLeft} y1="132" x2={plotRight} y2="132" stroke="#e7e3e8" strokeWidth="0.8"/>
+        <line x1={plotLeft} y1="176" x2={plotRight} y2="176" stroke="#e7e3e8" strokeWidth="0.8"/>
+
+        <text className="tl-period-association-track-label" x="10" y="49">颜色</text>
+        <text className="tl-period-association-track-label" x="10" y="111">流量</text>
+        <text className="tl-period-association-track-label" x="10" y="165">身体表现</text>
+
+        {colors.map((item)=>(
+          <g key={'color-'+item.dayIndex}>
+            <circle cx={xFor(item.dayIndex)} cy="45" r="7" fill={item.color} stroke="#fff" strokeWidth="2"/>
+            <text className="tl-period-association-value" x={xFor(item.dayIndex)} y="31" textAnchor="middle">{item.label}</text>
+          </g>
+        ))}
+
+        {flows.map((item)=>{
+          const barHeight = 38 * item.value;
+          return (
+            <g key={'flow-'+item.dayIndex}>
+              <rect x={xFor(item.dayIndex)-7} y={132-barHeight} width="14" height={barHeight} rx="4" fill="#f0769a" opacity="0.82"/>
+              <text className="tl-period-association-value" x={xFor(item.dayIndex)} y={126-barHeight} textAnchor="middle">{item.label}</text>
+            </g>
+          );
+        })}
+
+        {bodyEvents.map((item)=>{
+          const x = xFor(item.dayIndex);
+          const labelX = item.dayIndex === days.length - 1 ? x - 3 : x;
+          const anchor = item.dayIndex === days.length - 1 ? 'end' : 'middle';
+          return (
+            <g key={'event-'+item.dayIndex}>
+              <line x1={x} y1="154" x2={x} y2="176" stroke={item.color} strokeWidth="1.4"/>
+              <circle cx={x} cy="176" r="4.5" fill={item.color} stroke="#fff" strokeWidth="1.5"/>
+              <text className="tl-period-association-event" x={labelX} y="150" textAnchor={anchor}>{item.label}</text>
+            </g>
+          );
+        })}
+
+        {days.map((day, index)=>(
+          <text
+            key={'day-'+day}
+            className={'tl-period-association-day'+(index === 4 ? ' is-key-day' : '')}
+            x={xFor(index)} y="204" textAnchor="middle"
+          >{day}</text>
+        ))}
+      </svg>
+    </section>
+  );
+}
+
 /** 演示专用：语音原文 + 流式打字 + 标签依次出现 */
 function DemoVoiceCard({entry, isNew}){
   const TLTag = window.TLTag;
   const [typedLen, setTypedLen] = React.useState(0);
   const [typeDone, setTypeDone] = React.useState(false);
   const [showTags, setShowTags] = React.useState([]);
+  const [showAssociationChart, setShowAssociationChart] = React.useState(false);
   const fullText = entry._demoFullText || '';
   const demoTags = entry._demoTags || [];
 
@@ -553,6 +659,7 @@ function DemoVoiceCard({entry, isNew}){
               // 最后一个标签出现后通知阶段 6
               if(idx === demoTags.length - 1){
                 setTimeout(()=>{
+                  setShowAssociationChart(true);
                   window.dispatchEvent(new Event('demoTypewriterDone'));
                 }, 200);
               }
@@ -584,6 +691,7 @@ function DemoVoiceCard({entry, isNew}){
           </div>
         )}
       </EditableRecordArea>
+      {showAssociationChart && <PeriodAssociationComboChart/>}
     </div>
   );
 }

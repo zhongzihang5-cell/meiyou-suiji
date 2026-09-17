@@ -429,9 +429,12 @@ const TIMELINE_BLOCKS = [
           weightUnit:'kg',
           noteParts:{
             prefix:'比昨天 ',
-            delta:'-0.5 公斤',
+            delta:'+2.0',
+            deltaUnit:' 公斤',
             emphasize:true,
-            tail:'，下降属正常波动，黄体期受孕激素影响身体容易潴留水分。',
+            tail:'，体重',
+            highlight:'增长偏快',
+            suffix:'，先不要着急，试试增加运动量，比如饭后多散步，可能管用哦。',
           },
           chartData:[
             { d:'周六', v:52.8 },

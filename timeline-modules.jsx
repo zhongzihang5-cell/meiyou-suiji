@@ -706,6 +706,97 @@ function MoodBandChart({data, animateToday = false, onTodayAnimated}){
   );
 }
 
+function MoodScatterChart({data, animateToday = false, onTodayAnimated}){
+  const allData = data || [];
+  const W = 320;
+  const H = 214;
+  const PAD_L = 42;
+  const PAD_R = 16;
+  const PAD_T = 24;
+  const PAD_B = 34;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+  const wrapRef = React.useRef(null);
+  const doneRef = React.useRef(false);
+  const currentLabels = allData.filter(point=>point.isCurrent).map(point=>point.label);
+  const points = allData.map((point, index)=>({
+    ...point,
+    index,
+    cx:PAD_L + point.x * innerW,
+    cy:PAD_T + point.y * innerH,
+  }));
+
+  React.useEffect(()=>{
+    if(!animateToday) return;
+    doneRef.current = false;
+    requestAnimationFrame(()=>{
+      window.scrollFeedContentIntoView?.(wrapRef.current);
+    });
+    const timer = setTimeout(()=>{
+      if(doneRef.current) return;
+      doneRef.current = true;
+      onTodayAnimated?.();
+    }, 1180);
+    return ()=>clearTimeout(timer);
+  }, [animateToday, onTodayAnimated, allData]);
+
+  const labelBox = point=>{
+    const width = 14 + Math.max(2, point.label.length) * 12;
+    const placeLeft = point.x > 0.62;
+    const placeBelow = point.y < 0.20;
+    const rawX = placeLeft ? point.cx - width - 7 : point.cx + 7;
+    const x = Math.max(PAD_L + 2, Math.min(rawX, W - PAD_R - width - 2));
+    const y = Math.max(PAD_T + 2, Math.min(placeBelow ? point.cy + 7 : point.cy - 23, PAD_T + innerH - 20));
+    return { x, y, width };
+  };
+
+  return (
+    <div ref={wrapRef} className={'tl-mood-scatter' + (animateToday ? ' is-anim' : '')}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width="100%"
+        height={H}
+        role="img"
+        aria-label={'二维情绪散点图，横轴从愉快到不愉快，纵轴从平静到激动。本次记录：' + currentLabels.join('、')}
+      >
+        <rect x={PAD_L} y={PAD_T} width={innerW / 2} height={innerH / 2} fill="#fff8df"/>
+        <rect x={PAD_L + innerW / 2} y={PAD_T} width={innerW / 2} height={innerH / 2} fill="#fff0f4"/>
+        <rect x={PAD_L} y={PAD_T + innerH / 2} width={innerW / 2} height={innerH / 2} fill="#f4f8ff"/>
+        <rect x={PAD_L + innerW / 2} y={PAD_T + innerH / 2} width={innerW / 2} height={innerH / 2} fill="#f7f5fb"/>
+        <rect x={PAD_L} y={PAD_T} width={innerW} height={innerH} rx="8" fill="none" stroke="rgba(50,50,50,0.10)"/>
+        <line x1={PAD_L + innerW / 2} y1={PAD_T} x2={PAD_L + innerW / 2} y2={PAD_T + innerH} stroke="rgba(50,50,50,0.16)" strokeDasharray="3 4"/>
+        <line x1={PAD_L} y1={PAD_T + innerH / 2} x2={PAD_L + innerW} y2={PAD_T + innerH / 2} stroke="rgba(50,50,50,0.16)" strokeDasharray="3 4"/>
+
+        <text className="tl-mood-scatter-axis-label" x={PAD_L - 8} y={PAD_T + 5} textAnchor="end">激动</text>
+        <text className="tl-mood-scatter-axis-label" x={PAD_L - 8} y={PAD_T + innerH} textAnchor="end">平静</text>
+        <text className="tl-mood-scatter-axis-label" x={PAD_L} y={H - 7} textAnchor="start">愉快</text>
+        <text className="tl-mood-scatter-axis-label" x={PAD_L + innerW} y={H - 7} textAnchor="end">不愉快</text>
+
+        {points.map(point=>{
+          const box = labelBox(point);
+          return (
+            <g
+              key={point.pointId || point.recordId || point.id + '-' + point.index}
+              className={'tl-mood-scatter-point' + (point.isCurrent ? ' is-current' : '') + (point.isToday && !point.isCurrent ? ' is-earlier-today' : '')}
+              style={animateToday && point.isCurrent ? {'--scatter-i':point.index} : undefined}
+            >
+              <circle cx={point.cx} cy={point.cy} r={point.isCurrent ? 5.5 : point.isToday ? 4.2 : 3.2}/>
+              <rect className="tl-mood-scatter-label-bg" x={box.x} y={box.y} width={box.width} height="19" rx="9.5"/>
+              <text className="tl-mood-scatter-point-label" x={box.x + box.width / 2} y={box.y + 13} textAnchor="middle">{point.label}</text>
+            </g>
+          );
+        })}
+      </svg>
+      {currentLabels.length > 0 && (
+        <div className="tl-mood-scatter-current-tags" aria-label={'本次记录情绪：' + currentLabels.join('、')}>
+          <span>本次</span>
+          {currentLabels.map((label, index)=><b key={label + index}>{label}</b>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const MOOD_GUIDE_AFTER_CHART_MS = 900;
 
 function MoodInsightCard({item, isNew}){
@@ -717,7 +808,7 @@ function MoodInsightCard({item, isNew}){
   const doneRef = React.useRef(false);
 
   const primary = item.primaryMood || (item.moods && item.moods[0]);
-  const moodLabel = primary?.label || '愉快';
+  const moodLabel = (item.moods || []).map(mood=>mood.label).filter(Boolean).join('、') || primary?.label || '愉快';
   const chart = item.chart || {};
   const analysisCopy = item.analysisCopy || '';
   const hasAi = !!(analysisCopy || chart.data?.length > 0);
@@ -804,7 +895,9 @@ function MoodInsightCard({item, isNew}){
             <span className="tl-mood-insight-ai-badge">
               <span className="tl-period-analysis-spark" aria-hidden="true"/>
             </span>
-            <span className="tl-mood-insight-ai-title">近7天情绪变化曲线</span>
+            <span className="tl-mood-insight-ai-title">
+              {chart.type === 'scatter' ? (chart.title || '近7天情绪散点图') : '近7天情绪变化曲线'}
+            </span>
             <svg
               className="tl-mood-insight-ai-chev"
               width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -819,11 +912,19 @@ function MoodInsightCard({item, isNew}){
             <div className="tl-mood-insight-ai-body">
               {chart.data?.length > 0 && (
                 <div className="tl-mood-insight-chart-block">
-                  <MoodBandChart
-                    data={chart.data}
-                    animateToday={chartAnimatesToday}
-                    onTodayAnimated={handleChartTodayAnimated}
-                  />
+                  {chart.type === 'scatter' ? (
+                    <MoodScatterChart
+                      data={chart.data}
+                      animateToday={chartAnimatesToday}
+                      onTodayAnimated={handleChartTodayAnimated}
+                    />
+                  ) : (
+                    <MoodBandChart
+                      data={chart.data}
+                      animateToday={chartAnimatesToday}
+                      onTodayAnimated={handleChartTodayAnimated}
+                    />
+                  )}
                 </div>
               )}
               {analysisCopy && (
@@ -839,6 +940,56 @@ function MoodInsightCard({item, isNew}){
       )}
     </article>
   );
+}
+
+function BabySleepWeekComboChart({data}){
+  const durations = data?.durations || [];
+  const symptoms = data?.symptoms || [];
+  const width = 318;
+  const height = 238;
+  const left = 49;
+  const right = 306;
+  const barTop = 25;
+  const barBottom = 115;
+  const maxHours = 12;
+  const xAt = index=>left + ((right-left)/Math.max(durations.length-1,1))*index;
+  const yAt = hours=>barBottom - (hours/maxHours)*(barBottom-barTop);
+  const symptomRows = ['夜醒','哭闹','鼻塞'];
+  const symptomY = type=>155 + symptomRows.indexOf(type)*26;
+  return <section className="tl-baby-sleep-combo" aria-label="近7天宝宝睡眠时长和症状" onClick={event=>event.stopPropagation()}>
+    <header className="tl-baby-sleep-combo-head"><strong>近7天宝宝睡眠</strong><span>睡眠时长 + 同期症状</span></header>
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="近7天宝宝睡眠时长柱状图和症状散点图">
+      <text className="tl-baby-sleep-section" x={left} y="12">睡眠时长</text>
+      {[12,8,4].map(tick=>{
+        const y=yAt(tick);
+        return <g key={tick}><line className="tl-baby-sleep-gridline" x1={left} x2={right} y1={y} y2={y}/><text className="tl-baby-sleep-axis" x={left-7} y={y+3} textAnchor="end">{tick}h</text></g>;
+      })}
+      {durations.map((day,index)=>{
+        const x=xAt(index);
+        const y=yAt(day.hours);
+        return <g key={`${day.label}-${index}`}>
+          <rect className={'tl-baby-sleep-bar'+(day.isToday?' is-today':'')} x={x-9} y={y} width="18" height={barBottom-y} rx="7"/>
+          {day.isToday ? <text className="tl-baby-sleep-value" x={x} y={Math.max(y-7,18)} textAnchor="middle">{day.hours.toFixed(1)}h</text> : null}
+        </g>;
+      })}
+      <line className="tl-baby-sleep-divider" x1={left} x2={right} y1="132" y2="132"/>
+      <text className="tl-baby-sleep-section" x={left} y="145">同期症状</text>
+      {symptomRows.map(type=>{
+        const y=symptomY(type);
+        return <g key={type}><text className="tl-baby-sleep-row-label" x={left-7} y={y+3} textAnchor="end">{type}</text><line className="tl-baby-sleep-rowline" x1={left} x2={right} y1={y} y2={y}/></g>;
+      })}
+      {symptoms.map((event,index)=>{
+        const x=xAt(event.dayIndex);
+        const y=symptomY(event.type);
+        if(y<155) return null;
+        return <g key={`${event.type}-${event.dayIndex}-${index}`}>
+          <line className="tl-baby-sleep-sync" x1={x} x2={x} y1={barBottom+3} y2={y-6}/>
+          <circle className={'tl-baby-sleep-symptom'+(event.isToday?' is-today':'')} cx={x} cy={y} r={event.isToday?5:4.3} fill={event.color}/>
+        </g>;
+      })}
+      {durations.map((day,index)=><text key={day.label} className={'tl-baby-sleep-day'+(day.isToday?' is-today':'')} x={xAt(index)} y="231" textAnchor="middle">{day.label}</text>)}
+    </svg>
+  </section>;
 }
 
 function BabyFeedingTimelineCard({item, isNew}){
@@ -949,6 +1100,73 @@ function BabyFeedingTimelineCard({item, isNew}){
         ) : null}
         {item.relativeTime ? <span className="tl-baby-feed-chip is-ago">{item.relativeTime}</span> : null}
       </div>
+      {showTodayFeedingOverview && item.babyName === '小豆芽' ? (
+        <details className="tl-baby-feed-feedback" open onClick={event=>event.stopPropagation()} onKeyDown={event=>event.stopPropagation()}>
+          <summary><span className="tl-baby-feedback-spark" aria-hidden="true">✦<small>✦</small></span><span>关于这条点滴</span><i aria-hidden="true"/></summary>
+          <p>距上次喂奶<em>2小时30分钟</em>，今天已喂奶<em>5次</em>，奶量<em>360毫升</em>，亲喂<em>40分钟</em>。</p>
+          <svg viewBox="0 24 626 306" role="img" aria-label="喂养趋势示意图，10月15日至今天，奶量柱状图与亲喂时长折线，标注50分和今天42分">
+            {[83,148,212,277].map((y,i)=><g key={y}><line x1="67" x2="609" y1={y} y2={y} stroke="#f1f1f3" strokeWidth="2"/>{i<3 ? <text x="59" y={y+6} textAnchor="end" fill="#bcbcc4" fontSize="16">{600-i*200}ml</text> : null}</g>)}
+            {[
+              [106,180,97,109,67,'10.15'],[183,164,113,80,80,'10.16'],
+              [261,186,91,125,57,'10.17'],[338,154,123,61,89,'10.18'],
+              [415,180,97,103,73,'10.19'],[493,154,123,60,90,'10.20'],
+              [570,238,39,51,183,'今天']
+            ].map(([x,y,h,py,ph,label])=><g key={label}>
+              <rect x={x-20} y={y} width="40" height={h} rx="17" fill="#ff9b3e"/>
+              <rect x={x-20} y={py} width="40" height={ph} rx="17" fill="#ff88b2"/>
+              <text x={x} y="313" textAnchor="middle" fill={label==='今天'?'#ff4789':'#bcbcc4'} fontSize="16">{label}</text>
+            </g>)}
+            <path d="M106 91 C132 99 158 107 183 114 S235 139 261 134 S312 91 338 83 S389 102 415 106 S467 128 493 126 S545 117 570 114" fill="none" stroke="#ff4789" strokeWidth="4"/>
+            {[[106,91],[183,114],[261,134],[338,83],[415,106],[493,126],[570,114]].map(([x,y],i)=><circle key={x} cx={x} cy={y} r={i===6?7:6} fill={i===6?'#ff4789':'white'} stroke="#ff4789" strokeWidth="4"/>)}
+            {[[338,43,'50分'],[570,75,'42分']].map(([x,y,label])=><g key={label}><rect x={x-28} y={y} width="56" height="27" rx="13.5" fill="white" stroke="#ff4789"/><text x={x} y={y+19} textAnchor="middle" fill="#ff2877" fontSize="17">{label}</text></g>)}
+          </svg>
+        </details>
+      ) : null}
+      {item.diaperFeedback ? (
+        <details className="tl-baby-feed-feedback" open onClick={event=>event.stopPropagation()} onKeyDown={event=>event.stopPropagation()}>
+          <summary><span className="tl-baby-feedback-spark" aria-hidden="true">✦<small>✦</small></span><span>关于这条点滴</span><i aria-hidden="true"/></summary>
+          <p>距上次换尿布<em>1小时30分钟</em>，今天已换<em>5次</em>，其中嘘嘘<em>4次</em>、臭臭<em>2次</em>。</p>
+          <svg viewBox="0 28 340 187" role="img" aria-label="近7天换尿布堆叠柱状图。今天仅嘘嘘3次、仅臭臭1次、嘘嘘加臭臭1次，共5次。">
+            {[0,2,4,6,8].map(count=><g key={count}>
+              <line x1="32" x2="334" y1={158-count*14} y2={158-count*14} stroke="#efedf2"/>
+              <text x="27" y={162-count*14} textAnchor="end" fontSize="10" fill="#aaa6b0">{count}次</text>
+            </g>)}
+            {/* Prototype example: exclusive categories keep the stack total equal to diaper changes. */}
+            {[[4,1,1],[3,1,2],[4,2,1],[3,1,1],[4,1,2],[3,2,1],[3,1,1]].map((counts,index)=>{
+              const date=new Date(); date.setDate(date.getDate()-6+index);
+              return <g key={index}>
+                {counts.map((count,part)=><rect key={part} x={43+index*42} y={158-counts.slice(0,part+1).reduce((sum,n)=>sum+n,0)*14} width="24" height={count*14} fill={['#8ec8ef','#ffc16f','#d3b4ef'][part]}/>)}
+                <text x={55+index*42} y="177" textAnchor="middle" fontSize="10" fill={index===6?'#ff4d88':'#aaa6b0'}>{index===6?'今天':`${date.getMonth()+1}.${date.getDate()}`}</text>
+              </g>;
+            })}
+            {['仅嘘嘘','仅臭臭','嘘嘘＋臭臭'].map((label,index)=><g key={label}>
+              <rect x={42+index*91} y="197" width="8" height="8" rx="2" fill={['#8ec8ef','#ffc16f','#d3b4ef'][index]}/>
+              <text x={54+index*91} y="205" fontSize="10" fill="#999">{label}</text>
+            </g>)}
+          </svg>
+        </details>
+      ) : null}
+      {item.sleepFeedback ? (
+        <details className="tl-baby-feed-feedback" open onClick={event=>event.stopPropagation()} onKeyDown={event=>event.stopPropagation()}>
+          <summary><span className="tl-baby-feedback-spark" aria-hidden="true">✦<small>✦</small></span><span>关于这条点滴</span><i aria-hidden="true"/></summary>
+          <p>{item.sleeping ? <>已开始记录，入睡前清醒了<em>2小时10分钟</em>。</> : <>今天已睡<em>3次</em>，累计睡眠<em>9小时40分钟</em>。</>}</p>
+          {!item.sleeping ? <div className="tl-baby-sleep-feedback-chart">
+            <svg viewBox="0 12 340 178" role="img" aria-label="近7天睡眠时长柱状图，今天9小时40分钟">
+              {[0,4,8,12].map(hours=><g key={hours}>
+                <line x1="32" x2="334" y1={150-hours*10} y2={150-hours*10} stroke="#efedf2"/>
+                <text x="27" y={154-hours*10} textAnchor="end" fontSize="10" fill="#aaa6b0">{hours}h</text>
+              </g>)}
+              {[9.2,10.1,9.6,8.4,10.3,9.1,9+40/60].map((hours,index)=>{
+                const date=new Date(); date.setDate(date.getDate()-6+index);
+                return <g key={index}>
+                  <rect x={43+index*42} y={150-hours*10} width="24" height={hours*10} rx="6" fill={index===6?'#a56cf4':'#d7bdf5'}/>
+                  <text x={55+index*42} y="173" textAnchor="middle" fontSize="10" fill={index===6?'#9558dc':'#aaa6b0'}>{index===6?'今天':`${date.getMonth()+1}.${date.getDate()}`}</text>
+                </g>;
+              })}
+            </svg>
+          </div> : null}
+        </details>
+      ) : item.sleepWeekCombo ? <BabySleepWeekComboChart data={item.sleepWeekCombo}/> : null}
       {showTodayFeedingOverview ? (
         <button className="tl-baby-feed-overview-link" type="button" onClick={openTodayFeedingOverview}>
           <span>进入{item.babyName || '小豆苗'}的喂养记录</span><i aria-hidden="true">›</i>
@@ -1086,6 +1304,9 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       <div className="tl-custom-record-main"><span className="tl-custom-record-icon">✦</span><div><p><b>{item.recordName}{item.structure==='event'?'':'：'}</b>{result}</p>{item.noteText?<small>{item.noteText}</small>:null}</div></div>
       {item.owner && item.owner !== '自己' ? <div className="tl-baby-feed-tags"><span className="tl-baby-feed-tag-main">{item.owner}</span></div> : null}
     </article>;
+  } else if(item.kind === 'prenatal-report-card'){
+    const PrenatalReportTimelineCard=window.PrenatalReportTimelineCard;
+    body=PrenatalReportTimelineCard?<PrenatalReportTimelineCard item={item}/>:null;
   } else if(item.kind === 'baby-feeding-card'){
     body = <BabyFeedingTimelineCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'weekly' || item.kind === 'wellness'){
@@ -1150,5 +1371,5 @@ Object.assign(window, {
   CycleDayHeader, TimelineRailNode, TlNodeCaption, summarizeDayItems,
   resolveDayTitleLabel, formatDayMeta,
   ModulePlaceholder, TodayGuideCard, WeeklyTrendCard, TimelineItem,
-  MoodInsightCard, MoodCurveChart, MoodBandChart, BabyFeedingTimelineCard,
+  MoodInsightCard, MoodCurveChart, MoodBandChart, MoodScatterChart, BabySleepWeekComboChart, BabyFeedingTimelineCard,
 });
