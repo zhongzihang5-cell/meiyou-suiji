@@ -167,6 +167,11 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
         <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>
       </svg>
     );
+    case 'message-circle': return (
+      <svg {...common}>
+        <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.3 9.3 0 0 1-3.8-.8L3 21l1.7-5a8.3 8.3 0 0 1-1.2-4.3A8.4 8.4 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z"/>
+      </svg>
+    );
     default: return null;
   }
 };

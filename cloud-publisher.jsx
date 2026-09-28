@@ -674,7 +674,7 @@ function DockPublisher({
                     type="button"
                     className="dock-voice-btn"
                   >
-                    <span className="dock-voice-label">按住 说话</span>
+                    <span className="dock-voice-label">按住 语音记录</span>
                   </button>
                 </div>
               )}

@@ -32,6 +32,85 @@ const BABY_REVIEW_UPDATE_GUIDES = {
   '换尿布': {key:'diaper', title:'换尿布回顾已更新', description:'可查看记录次数和排便变化'},
   '辅食': {key:'solid-food', title:'辅食回顾已更新', description:'可查看辅食记录和摄入变化'},
 };
+const QA_DEMO_QUESTION = '为什么宝宝这两天夜里总醒？';
+const QA_RECORD_DEMO_TEXT = '小豆苗昨晚睡了4小时52分钟';
+const QA_QUESTION_PATTERN = /[?？]|为什么|怎么回事|怎么办|正常吗|可以吗|会不会|什么时候|多久|多少|分析一下|总结一下|回顾一下|盘点一下|解读一下|评估一下|帮我看看|有什么规律|有关系吗/;
+
+function isQuestionInput(text){
+  const source = String(text || '').trim();
+  if(!source) return false;
+  return QA_QUESTION_PATTERN.test(source);
+}
+
+function buildQaResponse(question){
+  const source = String(question || '').trim();
+  if(/夜里|夜醒|总醒|睡眠/.test(source)){
+    return {
+      eyebrow:'结合近3天睡眠记录',
+      answer:'夜醒次数从1次增加到3次，单次连续睡眠也有所缩短。仅凭记录还不能判断具体原因，可以继续观察夜间喂养间隔和白天小睡。',
+      metrics:[{value:'1 → 3次',label:'夜醒次数'},{value:'-42分钟',label:'连续睡眠'}],
+      caution:'若伴随发热、持续哭闹或精神状态异常，建议及时咨询医生。',
+    };
+  }
+  if(/月经|周期|推迟/.test(source)){
+    return {
+      eyebrow:'结合最近3次周期',
+      answer:'本次较近3次平均周期晚2天，目前仍可能属于常见波动。近期作息、压力等都可能影响周期。',
+      metrics:[{value:'29–31天',label:'近3次周期'},{value:'第33天',label:'本次周期'}],
+      caution:'若持续推迟或伴随明显不适，建议进一步咨询医生。',
+    };
+  }
+  return {
+    eyebrow:'结合你的可见记录',
+    answer:'我已结合最近的结构化记录整理了变化。当前信息可以作为观察线索，但不足以替代专业判断。',
+    metrics:[{value:'近7天',label:'分析范围'},{value:'4类',label:'相关记录'}],
+    caution:'继续记录后，我会用更完整的数据帮你发现规律。',
+  };
+}
+
+function QaConversationPage({session,onClose}){
+  const [messages,setMessages] = useState(session?.messages || []);
+  const [value,setValue] = useState('');
+  const send = ()=>{
+    const text=value.trim();
+    if(!text) return;
+    const response=buildQaResponse(text);
+    setMessages(current=>[...current,{role:'user',text},{role:'assistant',...response}]);
+    setValue('');
+  };
+  return (
+    <section className="qa-detail-page" role="dialog" aria-modal="true" aria-label="点滴助手对话">
+        <header className="qa-detail-header">
+          <button type="button" aria-label="返回时间轴" onClick={onClose}>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+          <div><h2>点滴助手</h2><p>基于你的记录和美柚数据</p></div>
+          <span aria-hidden="true"/>
+        </header>
+        {session?.sourceText ? <div className={'qa-detail-source is-'+(session.sourceType || 'question')}>
+          <span>{session.sourceType === 'record' ? '本次记录' : '你的问题'}</span>
+          <p>{session.sourceText}</p>
+        </div> : null}
+        <div className="qa-detail-messages">
+          {messages.map((message,index)=>message.role==='user' ? (
+            <div className="qa-message is-user" key={index}>{message.text}</div>
+          ) : (
+            <article className="qa-message is-assistant" key={index}>
+              <p>{message.answer}</p>
+              <div className="qa-message-metrics">
+                {(message.metrics||[]).map(metric=><span key={metric.label}><strong>{metric.value}</strong><small>{metric.label}</small></span>)}
+              </div>
+              {message.caution?<em>{message.caution}</em>:null}
+            </article>
+          ))}
+        </div>
+        <footer className="qa-detail-composer">
+          <input value={value} onChange={event=>setValue(event.target.value)} onKeyDown={event=>{if(event.key==='Enter') send();}} placeholder="继续问" aria-label="继续提问"/>
+          <button type="button" onClick={send} disabled={!value.trim()} aria-label="发送">↑</button>
+        </footer>
+    </section>
+  );
+}
 const IS_BABY_FEEDING_DEMO = typeof window !== 'undefined' && (
   window.__BABY_FEEDING_MODE === true
   || new URLSearchParams(location.search).get('feeding') === '1'
@@ -761,9 +840,12 @@ function App(){
   const [relationshipTransitionOpen, setRelationshipTransitionOpen] = useState(false);
   const [relationshipPlan2TransitionOpen, setRelationshipPlan2TransitionOpen] = useState(false);
   const [feedingMigrationGuideOpen, setFeedingMigrationGuideOpen] = useState(false);
+  const [feedingMigrationVoiceRect, setFeedingMigrationVoiceRect] = useState(null);
   const [sharedTimelineView, setSharedTimelineView] = useState(false);
   const [babyShareSyncNotice, setBabyShareSyncNotice] = useState(0);
   const [familyShareUnread, setFamilyShareUnread] = useState(3);
+  const [qaSheet, setQaSheet] = useState(null);
+  const qaDemoSeededRef = useRef(false);
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -1418,6 +1500,39 @@ function App(){
     }
   };
 
+  useEffect(()=>{
+    if(!feedingMigrationGuideOpen){
+      setFeedingMigrationVoiceRect(null);
+      return undefined;
+    }
+    let rafId = 0;
+    let retryId = 0;
+    const measureVoiceInput = ()=>{
+      const phone = document.querySelector('.phone');
+      const voiceInput = phone?.querySelector('.dock-voice-wrap');
+      if(!phone || !voiceInput){
+        retryId = window.setTimeout(measureVoiceInput, 60);
+        return;
+      }
+      const phoneRect = phone.getBoundingClientRect();
+      const targetRect = voiceInput.getBoundingClientRect();
+      setFeedingMigrationVoiceRect({
+        left: targetRect.left - phoneRect.left,
+        top: targetRect.top - phoneRect.top,
+        width: targetRect.width,
+        height: targetRect.height,
+        phoneHeight: phoneRect.height,
+      });
+    };
+    rafId = window.requestAnimationFrame(()=>window.requestAnimationFrame(measureVoiceInput));
+    window.addEventListener('resize', measureVoiceInput);
+    return ()=>{
+      window.cancelAnimationFrame(rafId);
+      window.clearTimeout(retryId);
+      window.removeEventListener('resize', measureVoiceInput);
+    };
+  }, [feedingMigrationGuideOpen]);
+
   const handleEmptyPreviewEnter = React.useCallback((mode) => {
     setEmptyPreviewGuideStep(0);
     const withData = mode === 'with-data';
@@ -1729,12 +1844,141 @@ function App(){
     };
   };
 
+  const getBabyFeedingItemType = (item)=>item.feedType || String(item.text || '').split('：')[0] || '';
+
+  const parseBabyFeedingTimeMinutes = (timeText)=>{
+    const match = String(timeText || '').match(/^(\d{1,2}):(\d{2})$/);
+    return match ? Number(match[1]) * 60 + Number(match[2]) : 0;
+  };
+
+  const getBabyFeedingDurationMinutes = (item)=>{
+    if(item.statDurationMinutes) return Number(item.statDurationMinutes) || 0;
+    if(item.durationMinutes) return Number(item.durationMinutes) || 0;
+    const measure = readBabyFeedingMeasure(item);
+    return measure?.kind === 'duration' ? measure.value : 0;
+  };
+
+  const getBabyFeedingVolume = (item)=>{
+    const measure = readBabyFeedingMeasure(item);
+    return measure?.kind === 'volume' ? measure.value : 0;
+  };
+
+  const buildBabyFeedingFeedback = (latestItem, dayItems, blocks)=>{
+    const babyName = latestItem.babyName || '小豆苗';
+    const type = getBabyFeedingItemType(latestItem);
+    const babyItems = (dayItems || []).filter(item=>item.kind === 'baby-feeding-card' && (item.babyName || '小豆苗') === babyName);
+    const sameTypeItems = babyItems.filter(item=>getBabyFeedingItemType(item) === type);
+    const milkTypes = ['母乳','配方奶','瓶喂母乳'];
+
+    if(milkTypes.includes(type)){
+      const metrics = milkTypes.map(label=>{
+        const rows = babyItems.filter(item=>getBabyFeedingItemType(item) === label);
+        const volume = rows.reduce((sum,item)=>sum + getBabyFeedingVolume(item),0);
+        const duration = rows.reduce((sum,item)=>sum + getBabyFeedingDurationMinutes(item),0);
+        if(!rows.length) return null;
+        return {
+          label,
+          value:[`${rows.length}次`, volume ? `${Math.round(volume)}ml` : '', duration ? formatBabyFeedingDuration(duration) : ''].filter(Boolean).join(' · '),
+          color:babyFeedingStatColors[label],
+        };
+      }).filter(Boolean);
+      return {
+        kind:'milk',
+        title:'今日喂养概览',
+        subtitle:`${babyName}今天已记录${metrics.reduce((sum,row)=>sum + Number.parseInt(row.value,10),0)}次`,
+        metrics,
+        timeline:babyItems.filter(item=>milkTypes.includes(getBabyFeedingItemType(item))).map(item=>({
+          time:item.time,
+          minute:parseBabyFeedingTimeMinutes(item.time),
+          label:getBabyFeedingItemType(item),
+          color:babyFeedingStatColors[getBabyFeedingItemType(item)],
+        })),
+      };
+    }
+
+    if(type === '睡眠'){
+      const total = sameTypeItems.reduce((sum,item)=>sum + getBabyFeedingDurationMinutes(item),0);
+      return {
+        kind:'sleep',
+        title:'今日睡眠节奏',
+        subtitle:`共${sameTypeItems.length}段 · ${formatBabyFeedingDurationText(total) || '刚开始记录'}`,
+        metrics:[
+          {label:'睡眠次数',value:`${sameTypeItems.length}次`},
+          {label:'累计时长',value:formatBabyFeedingDurationText(total) || '--'},
+        ],
+        segments:sameTypeItems.map(item=>({
+          start:parseBabyFeedingTimeMinutes(item.time),
+          duration:Math.max(getBabyFeedingDurationMinutes(item),10),
+        })),
+      };
+    }
+
+    if(type === '换尿布'){
+      const poopCount = sameTypeItems.filter(item=>/臭臭|便便|粑粑/.test([item.value,item.text,item.noteText].filter(Boolean).join(' '))).length;
+      const wetCount = sameTypeItems.filter(item=>/嘘嘘|尿|湿/.test([item.value,item.text,item.noteText].filter(Boolean).join(' '))).length;
+      return {
+        kind:'diaper',
+        title:'今日排泄记录',
+        subtitle:`今天已换${sameTypeItems.length}片`,
+        metrics:[
+          {label:'换尿布',value:`${sameTypeItems.length}次`,color:babyFeedingStatColors['换尿布']},
+          {label:'臭臭',value:`${poopCount}次`,color:'#6f9f78'},
+          {label:'嘘嘘',value:`${wetCount}次`,color:'#64b5f6'},
+        ],
+        composition:{total:sameTypeItems.length,poop:poopCount,wet:wetCount},
+      };
+    }
+
+    if(type === '营养补剂'){
+      const days = Array.from({length:7},(_,index)=>{
+        const offset = 6 - index;
+        const block = (blocks || []).find(row=>row.type === 'day' && (offset === 0 ? row.isToday : Number(row.relativeDaysAgo) === offset));
+        const records = block ? (block.items || block.entries || []) : [];
+        const recorded = records.some(item=>item.kind === 'baby-feeding-card' && (item.babyName || '小豆苗') === babyName && getBabyFeedingItemType(item) === '营养补剂');
+        const date = new Date();
+        date.setDate(date.getDate() - offset);
+        return {label:['日','一','二','三','四','五','六'][date.getDay()],recorded,isToday:offset === 0};
+      });
+      const supplement = String(latestItem.value || '').split(/[，,]/)[0] || '营养补剂';
+      return {
+        kind:'supplement',
+        title:'近7日补剂记录',
+        subtitle:`${supplement} · 已记录${days.filter(day=>day.recorded).length}天`,
+        days,
+      };
+    }
+
+    if(type === '喝水'){
+      const volume = sameTypeItems.reduce((sum,item)=>sum + getBabyFeedingVolume(item),0);
+      return {kind:'water',title:'今日喝水记录',subtitle:`${sameTypeItems.length}次 · ${Math.round(volume)}ml`,metrics:[{label:'记录次数',value:`${sameTypeItems.length}次`},{label:'累计饮水',value:`${Math.round(volume)}ml`}],level:Math.min(6,sameTypeItems.length)};
+    }
+
+    if(type === '吸奶'){
+      const volume = sameTypeItems.reduce((sum,item)=>sum + getBabyFeedingVolume(item),0);
+      return {kind:'pump',title:'今日吸奶概览',subtitle:`${sameTypeItems.length}次 · ${Math.round(volume)}ml`,metrics:[{label:'吸奶次数',value:`${sameTypeItems.length}次`},{label:'累计奶量',value:`${Math.round(volume)}ml`}],timeline:sameTypeItems.map(item=>({time:item.time,minute:parseBabyFeedingTimeMinutes(item.time),color:babyFeedingStatColors['吸奶']}))};
+    }
+
+    if(type === '辅食'){
+      const foods = [...new Set(sameTypeItems.flatMap(item=>String(item.value || '').split(/[，,、]/).map(value=>value.trim()).filter(Boolean)))].slice(0,4);
+      return {kind:'solid',title:'今日辅食记录',subtitle:`已记录${sameTypeItems.length}次`,foods,metrics:[{label:'辅食次数',value:`${sameTypeItems.length}次`},{label:'食材种类',value:`${foods.length}种`}]};
+    }
+
+    if(['洗澡','玩耍','游泳'].includes(type)){
+      const weeklyItems = (blocks || []).flatMap(block=>(block.items || block.entries || []).filter(item=>item.kind === 'baby-feeding-card' && (item.babyName || '小豆苗') === babyName && getBabyFeedingItemType(item) === type));
+      const total = weeklyItems.reduce((sum,item)=>sum + getBabyFeedingDurationMinutes(item),0);
+      return {kind:'activity',title:`近7日${type}记录`,subtitle:`共${weeklyItems.length}次${total ? ` · ${formatBabyFeedingDurationText(total)}` : ''}`,metrics:[{label:'记录次数',value:`${weeklyItems.length}次`},{label:'累计时长',value:total ? formatBabyFeedingDurationText(total) : '--'}],activityType:type};
+    }
+
+    return null;
+  };
+
   const clearBabyFeedingLatestMarks = (blocks)=>blocks.map(block=>{
     if(block.type !== 'day') return block;
     const items = (block.items || block.entries || []).map(item=>{
-      if(item.kind !== 'baby-feeding-card' || (!item.summary && !item.relativeTime && !item.showFeedingHistoryEntry)) return item;
+      if(item.kind !== 'baby-feeding-card' || (!item.summary && !item.feedback && !item.relativeTime && !item.showFeedingHistoryEntry)) return item;
       const next = {...item};
       delete next.summary;
+      delete next.feedback;
       delete next.relativeTime;
       delete next.showFeedingHistoryEntry;
       return next;
@@ -1823,6 +2067,7 @@ function App(){
           return {
             ...item,
             ...(index === latestIndex ? {summary} : {}),
+            ...(isLatestForBaby ? {feedback:buildBabyFeedingFeedback(item, items, cleaned)} : {}),
             ...(isLatestForBaby ? {showFeedingHistoryEntry:true} : {}),
           };
         }),
@@ -2190,6 +2435,105 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  const createQaEntry = (question, isDemo=false)=>{
+    const response=buildQaResponse(question);
+    return {
+      id:`qa-answer-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      kind:'ai-question-card',
+      time:window.formatNowTime?.() || new Date().toTimeString().slice(0,5),
+      question,
+      ...response,
+      assistantTitle:'点滴助手',
+      contextLabel:response.eyebrow,
+      answer:'近3天夜醒次数从1次增至3次，连续睡眠有所缩短，建议结合夜间喂养继续观察。',
+      fullResponse:response,
+      actionLabel:'继续问',
+      railDot:'ai',
+      isNew:!isDemo,
+      isQaDemo:isDemo,
+    };
+  };
+
+  const createRecordFeedbackEntry = (isDemo=false)=>{
+    const response=buildQaResponse('宝宝最近睡眠有什么变化？');
+    return {
+      id:`qa-record-feedback-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      kind:'ai-record-feedback-card',
+      time:window.formatNowTime?.() || new Date().toTimeString().slice(0,5),
+      recordTitle:'睡眠',
+      recordValue:'睡了4小时52分钟',
+      recordRange:'18:42–23:34',
+      babyName:'小豆苗',
+      relativeTime:'刚刚',
+      iconSrc:'assets/baby-feeding-icons/sleep.png',
+      sourceText:QA_RECORD_DEMO_TEXT,
+      feedbackTitle:'近3天睡眠变化',
+      feedbackSummary:'夜醒次数从1次增至3次，连续睡眠较前3天缩短42分钟。',
+      feedbackOpen:true,
+      question:'宝宝最近睡眠有什么变化？',
+      fullResponse:response,
+      actionLabel:'继续问',
+      railDot:'baby',
+      isNew:!isDemo,
+      isQaDemo:isDemo,
+    };
+  };
+
+  const appendQaTimelineCard = (question, isDemo=false)=>{
+    const entry=createQaEntry(question,isDemo);
+    setTimeline(blocks=>{
+      const dayId=blocks.find(block=>block.type==='day'&&block.isToday)?.id || window.resolveEntryDayId('',blocks);
+      const cleaned=isDemo ? blocks.map(block=>block.type==='day'?{...block,items:(block.items||block.entries||[]).filter(item=>!item.isQaDemo),entries:undefined}:block) : blocks;
+      return window.appendTimelineEntry(cleaned,entry,{dayId});
+    });
+    setTimeout(()=>scrollTimelineToBottom('smooth'),100);
+  };
+
+  const appendQaRecordFeedbackCard = (isDemo=false)=>{
+    const entry=createRecordFeedbackEntry(isDemo);
+    setTimeline(blocks=>{
+      const dayId=blocks.find(block=>block.type==='day'&&block.isToday)?.id || window.resolveEntryDayId('',blocks);
+      const cleaned=isDemo ? blocks.map(block=>block.type==='day'?{...block,items:(block.items||block.entries||[]).filter(item=>!item.isQaDemo),entries:undefined}:block) : blocks;
+      return window.appendTimelineEntry(cleaned,entry,{dayId});
+    });
+    setTimeout(()=>scrollTimelineToBottom('smooth'),100);
+  };
+
+  const appendQaDemoPair = ()=>{
+    const recordEntry=createRecordFeedbackEntry(true);
+    const questionEntry=createQaEntry(QA_DEMO_QUESTION,true);
+    setTimeline(blocks=>{
+      const dayId=blocks.find(block=>block.type==='day'&&block.isToday)?.id || window.resolveEntryDayId('',blocks);
+      const cleaned=blocks.map(block=>block.type==='day'?{...block,items:(block.items||block.entries||[]).filter(item=>!item.isQaDemo),entries:undefined}:block);
+      const withRecord=window.appendTimelineEntry(cleaned,recordEntry,{dayId});
+      return window.appendTimelineEntry(withRecord,questionEntry,{dayId});
+    });
+    setTimeout(()=>scrollTimelineToBottom('smooth'),100);
+  };
+
+  const openQaConversation = (payload=QA_DEMO_QUESTION)=>{
+    const detail=typeof payload==='string' ? {sourceType:'question',sourceText:payload,question:payload} : (payload || {});
+    const question=detail.question || QA_DEMO_QUESTION;
+    const response=detail.fullResponse || buildQaResponse(question);
+    setQaSheet({
+      id:`qa-detail-${Date.now()}`,
+      sourceType:detail.sourceType || 'question',
+      sourceText:detail.sourceText || question,
+      messages:[{role:'assistant',...response}],
+    });
+  };
+
+  const handleQuestionInput = (question)=>{
+    setDraft('');
+    appendQaTimelineCard(question,false);
+  };
+
+  React.useEffect(()=>{
+    const handler=event=>openQaConversation(event.detail || QA_DEMO_QUESTION);
+    window.addEventListener('open-qa-conversation',handler);
+    return ()=>window.removeEventListener('open-qa-conversation',handler);
+  },[]);
+
   const appendInlineConfirmEntry = (entry, source='text', voiceDuration='6″')=>{
     if(!entry) return;
     setTimeline(blocks=>{
@@ -2341,6 +2685,10 @@ function App(){
       setDraft('');
       markUserRecorded();
       clearDemoCards(()=>runDemoFlow());
+      return;
+    }
+    if(isQuestionInput(text)){
+      handleQuestionInput(text);
       return;
     }
     if(recordLifeMode !== '育儿'){
@@ -3126,7 +3474,7 @@ function App(){
     && !showRecordBlank
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
-  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || otherBabyDetailEntry || prenatalReportOpen || prenatalReportEditEntry || customRecordDraft || customRepeatDraft || customEditEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen || feedingMigrationGuideOpen);
+  const babyFeedingDetailOpen = !!(formulaDetailEntry || breastDetailEntry || sleepDetailEntry || otherBabyDetailEntry || prenatalReportOpen || prenatalReportEditEntry || customRecordDraft || customRepeatDraft || customEditEntry || relationshipTransitionOpen || relationshipPlan2TransitionOpen || feedingMigrationGuideOpen || qaSheet);
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? [...BABY_FEEDING_QUICK_ITEMS.filter(item=>item.id!=='custom'),...customQuickItems,...BABY_FEEDING_QUICK_ITEMS.filter(item=>item.id==='custom')].map(item=>({
@@ -3138,6 +3486,12 @@ function App(){
             : <BabyFeedingQuickIcon type={item.id}/>,
       }))
     : null;
+
+  React.useEffect(()=>{
+    if(!showRecordShell || showRecordEmpty || showRecordBlank || qaDemoSeededRef.current) return;
+    qaDemoSeededRef.current=true;
+    appendQaDemoPair();
+  },[showRecordShell,showRecordEmpty,showRecordBlank]);
 
   return (
     <>
@@ -3208,6 +3562,7 @@ function App(){
       )}
 
       {sharedFeedingHistoryOpen && SharedFeedingTimelinePage ? <div className="point-feeding-history-host"><SharedFeedingTimelinePage open presentation="sheet" babyName={sharedFeedingHistoryBaby} timelineBlocks={timeline} onClose={()=>setSharedFeedingHistoryOpen(false)}/></div> : null}
+      {qaSheet ? <QaConversationPage key={qaSheet.id} session={qaSheet} onClose={()=>setQaSheet(null)}/> : null}
 
       <div
         className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(isSearchActive?' is-search-filtered':'')}
@@ -3456,20 +3811,38 @@ function App(){
       </div>
 
       {feedingMigrationGuideOpen ? (
-        <div className="feeding-migration-overlay" role="presentation">
-          <section className="feeding-migration-sheet" role="dialog" aria-modal="true" aria-labelledby="feeding-migration-title">
-            <div className="feeding-migration-handle" aria-hidden="true" />
-            <button type="button" className="feeding-migration-close" aria-label="关闭" onClick={()=>setFeedingMigrationGuideOpen(false)}><span aria-hidden="true">×</span></button>
-            <header className="feeding-migration-header">
-              <span className="feeding-migration-icon" aria-hidden="true"><img src="assets/feeding-review-icon.png" alt="" /></span>
-              <h2 id="feeding-migration-title">喂养记录升级到点滴</h2>
-            </header>
-            <div className="feeding-migration-features">
-              <div className="feeding-migration-feature"><span className="feeding-migration-feature-icon" aria-hidden="true"><I name="gift" size={23} stroke={1.8}/></span><div><strong>快捷记录继续使用</strong></div></div>
-              <div className="feeding-migration-feature"><span className="feeding-migration-feature-icon" aria-hidden="true"><I name="mic" size={23} stroke={1.8}/></span><div><strong>说一句话，AI帮你整理</strong></div></div>
-              <div className="feeding-migration-feature"><span className="feeding-migration-feature-icon is-review" aria-hidden="true"><I name="line-chart" size={23} stroke={1.8}/></span><div><strong>喂养统计和规律在「回顾」中查看</strong></div></div>
-            </div>
-            <button type="button" className="feeding-migration-confirm" onClick={()=>setFeedingMigrationGuideOpen(false)}>开始记录</button>
+        <div className={'feeding-migration-overlay is-voice-guide' + (feedingMigrationVoiceRect ? ' is-ready' : '')} role="presentation">
+          {feedingMigrationVoiceRect ? (
+            <button
+              type="button"
+              className="feeding-migration-voice-spotlight"
+              style={{
+                left:feedingMigrationVoiceRect.left - 6,
+                top:feedingMigrationVoiceRect.top - 6,
+                width:feedingMigrationVoiceRect.width + 12,
+                height:feedingMigrationVoiceRect.height + 12,
+              }}
+              aria-label="关闭语音记录引导"
+              onClick={()=>setFeedingMigrationGuideOpen(false)}
+            />
+          ) : null}
+          <section
+            className="feeding-migration-voice-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="feeding-migration-title"
+            style={feedingMigrationVoiceRect ? {
+              bottom:Math.max(240, feedingMigrationVoiceRect.phoneHeight - feedingMigrationVoiceRect.top + 145),
+            } : undefined}
+          >
+            <button type="button" className="feeding-migration-close" aria-label="关闭" onClick={()=>setFeedingMigrationGuideOpen(false)}>
+              <span aria-hidden="true">×</span>
+            </button>
+            <span className="feeding-migration-voice-icon" aria-hidden="true">🎙</span>
+            <h2 id="feeding-migration-title">喂养支持语音记录啦</h2>
+            <p>按住下方说一句，AI自动整理成宝宝记录</p>
+            <span className="feeding-migration-example">比如：“小豆苗刚喝了130ml配方奶”</span>
+            <span className="feeding-migration-pointer" aria-hidden="true"><i/></span>
           </section>
         </div>
       ) : null}

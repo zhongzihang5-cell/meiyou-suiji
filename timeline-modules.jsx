@@ -992,9 +992,86 @@ function BabySleepWeekComboChart({data}){
   </section>;
 }
 
+function BabyFeedingFeedbackModule({feedback, open}){
+  if(!feedback) return null;
+  const renderMetrics = ()=>feedback.metrics?.length ? (
+    <div className="tl-baby-feedback-metrics">
+      {feedback.metrics.map((metric,index)=>(
+        <span className="tl-baby-feedback-metric" key={`${metric.label}-${index}`}>
+          <i style={{background:metric.color || undefined}} aria-hidden="true" />
+          <em>{metric.label}</em><b>{metric.value}</b>
+        </span>
+      ))}
+    </div>
+  ) : null;
+  const renderVisual = ()=>{
+    if(feedback.kind === 'milk' || feedback.kind === 'pump'){
+      return (
+        <div className="tl-baby-feedback-clock" aria-label="24小时记录分布">
+          <div className="tl-baby-feedback-clock-labels"><span>0</span><span>6</span><span>12</span><span>18</span><span>24时</span></div>
+          <div className="tl-baby-feedback-clock-track">
+            {(feedback.timeline || []).map((point,index)=><i key={`${point.time}-${index}`} style={{left:`${Math.max(1,Math.min(99,(point.minute || 0) / 14.4))}%`,background:point.color}} title={`${point.time} ${point.label || ''}`} />)}
+          </div>
+        </div>
+      );
+    }
+    if(feedback.kind === 'sleep'){
+      return (
+        <div className="tl-baby-feedback-sleep" aria-label="24小时睡眠分布">
+          <div className="tl-baby-feedback-clock-labels"><span>0</span><span>6</span><span>12</span><span>18</span><span>24时</span></div>
+          <div className="tl-baby-feedback-sleep-track">
+            {(feedback.segments || []).map((segment,index)=><i key={index} style={{left:`${Math.max(0,Math.min(99,segment.start / 14.4))}%`,width:`${Math.max(2,Math.min(100-segment.start/14.4,segment.duration / 14.4))}%`}} />)}
+          </div>
+        </div>
+      );
+    }
+    if(feedback.kind === 'diaper'){
+      const total = Math.max(feedback.composition?.total || 0,1);
+      const poop = Math.round(((feedback.composition?.poop || 0) / total) * 100);
+      const wet = Math.round(((feedback.composition?.wet || 0) / total) * 100);
+      return (
+        <div className="tl-baby-feedback-composition">
+          <div className="tl-baby-feedback-composition-track"><i style={{width:`${poop}%`}}/><i className="is-wet" style={{width:`${wet}%`}}/></div>
+          <span>每次记录都已汇总到今日排泄情况</span>
+        </div>
+      );
+    }
+    if(feedback.kind === 'supplement'){
+      return (
+        <div className="tl-baby-feedback-week" aria-label="近7日补剂记录">
+          {(feedback.days || []).map((day,index)=><span key={index} className={(day.recorded ? 'is-recorded ' : '')+(day.isToday ? 'is-today' : '')}><i>{day.recorded ? '✓' : ''}</i><em>{day.label}</em></span>)}
+        </div>
+      );
+    }
+    if(feedback.kind === 'water'){
+      return <div className="tl-baby-feedback-drops">{Array.from({length:6},(_,index)=><i key={index} className={index < (feedback.level || 0) ? 'is-filled' : ''} />)}</div>;
+    }
+    if(feedback.kind === 'solid'){
+      return <div className="tl-baby-feedback-foods">{(feedback.foods || []).map(food=><span key={food}>{food}</span>)}</div>;
+    }
+    if(feedback.kind === 'activity'){
+      return <div className="tl-baby-feedback-activity"><i aria-hidden="true">{feedback.activityType === '洗澡' ? '♨' : feedback.activityType === '游泳' ? '≈' : '●'}</i><span>持续记录后，可在回顾查看变化</span></div>;
+    }
+    return null;
+  };
+  return (
+    <section className={`tl-baby-feedback is-${feedback.kind}`+(open ? ' is-open' : '')} onClick={event=>event.stopPropagation()}>
+      <div className="tl-baby-feedback-toggle">
+        <span className="tl-baby-feedback-heading"><b>{feedback.title}</b><em>{feedback.subtitle}</em></span>
+      </div>
+      <div className={'tl-baby-feedback-panel'+(open ? ' is-open' : '')}>
+        <div className="tl-baby-feedback-panel-inner">
+          {renderMetrics()}
+          {renderVisual()}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function BabyFeedingTimelineCard({item, isNew}){
   const TypewriterText = window.TypewriterText;
-  const [summaryOpen, setSummaryOpen] = React.useState(item.summaryOpen !== false);
+  const [summaryOpen, setSummaryOpen] = React.useState(item.feedbackOpen !== false);
   const iconSrcByType = {
     配方奶:'assets/baby-feeding-icons/formula.png',
     母乳:'assets/baby-feeding-icons/breast.png',
@@ -1020,15 +1097,15 @@ function BabyFeedingTimelineCard({item, isNew}){
   const icon = item.icon || '🍼';
   const iconSrc = item.iconSrc || iconSrcByType[title];
   const color = item.color || '#FF7A66';
-  const summary = item.summary;
+  const feedback = item.feedback;
   const creator = item.creator || '妈妈';
   const detailLines = Array.isArray(item.detailLines) ? item.detailLines.filter(Boolean) : [];
   const hasDetail = detailLines.length > 0;
   const notePreview = item.noteText || item.voiceQuote || '';
 
   React.useEffect(()=>{
-    setSummaryOpen(item.summaryOpen !== false);
-  }, [item.id, item.summaryOpen]);
+    setSummaryOpen(item.feedbackOpen !== false);
+  }, [item.id, item.feedbackOpen]);
 
   const editableFeedingTypes = ['配方奶','母乳','睡眠','瓶喂母乳','换尿布','吸奶','辅食','洗澡','玩耍','游泳','营养补剂','喝水'];
   const canOpenFeedingDetail = !item.readOnly && editableFeedingTypes.includes(title);
@@ -1048,6 +1125,13 @@ function BabyFeedingTimelineCard({item, isNew}){
     window.dispatchEvent(new CustomEvent('open-shared-feeding-history', {detail:{babyName:item.babyName || '小豆苗'}}));
   };
   const showTodayFeedingOverview = item.showFeedingHistoryEntry === true;
+  const hasSpecializedFeedback = (
+    (showTodayFeedingOverview && item.babyName === '小豆芽')
+    || item.diaperFeedback
+    || item.sleepFeedback
+    || item.sleepWeekCombo
+  );
+  const showGenericFeedback = !!feedback && !hasSpecializedFeedback;
 
   return (
     <article
@@ -1094,6 +1178,19 @@ function BabyFeedingTimelineCard({item, isNew}){
         </div>
       ) : null}
       <div className="tl-baby-feed-tags">
+        {showGenericFeedback ? (
+          <button
+            className={`tl-baby-feedback-entry is-${feedback.kind}`+(summaryOpen ? ' is-open' : '')}
+            type="button"
+            aria-label={`${summaryOpen ? '收起' : '展开'}${feedback.title}`}
+            aria-expanded={summaryOpen}
+            onClick={event=>{event.stopPropagation();setSummaryOpen(value=>!value);}}
+          >
+            <span className="tl-baby-feedback-entry-mark" aria-hidden="true">✦</span>
+            <span className="tl-baby-feedback-entry-label">AI<span className="tl-baby-feedback-entry-label-suffix">反馈</span></span>
+            <i className="tl-baby-feedback-entry-caret" aria-hidden="true">⌄</i>
+          </button>
+        ) : null}
         {item.showBabyTag !== false ? <span className="tl-baby-feed-tag-main">{item.babyName || '小豆苗'}</span> : null}
         {item.showCreator ? (
           <span className={'tl-baby-feed-creator' + (item.creatorId === 'family' ? ' is-family' : '')}>{creator}记录</span>
@@ -1167,6 +1264,7 @@ function BabyFeedingTimelineCard({item, isNew}){
           </div> : null}
         </details>
       ) : item.sleepWeekCombo ? <BabySleepWeekComboChart data={item.sleepWeekCombo}/> : null}
+      {showGenericFeedback ? <BabyFeedingFeedbackModule feedback={feedback} open={summaryOpen} /> : null}
       {showTodayFeedingOverview ? (
         <button className="tl-baby-feed-overview-link" type="button" onClick={openTodayFeedingOverview}>
           <span>进入{item.babyName || '小豆苗'}的喂养记录</span><i aria-hidden="true">›</i>
@@ -1229,6 +1327,88 @@ function InlineRecordConfirmCard({item}){
   );
 }
 
+function AiQuestionCard({item}){
+  const I=window.Icon;
+  const [feedbackOpen,setFeedbackOpen]=React.useState(item.feedbackOpen !== false);
+  React.useEffect(()=>setFeedbackOpen(item.feedbackOpen !== false),[item.id,item.feedbackOpen]);
+  const continueQuestion=()=>window.dispatchEvent(new CustomEvent('open-qa-conversation',{detail:{
+    sourceType:'question',
+    sourceText:item.question,
+    question:item.question,
+    fullResponse:item.fullResponse,
+  }}));
+  const answerContent=<>
+    <header><b>{item.assistantTitle || '点滴助手'}</b><span className="tl-ai-feedback-chat" aria-hidden="true"><I name="message-circle" size={17} stroke={1.8}/></span></header>
+    <p>{item.contextLabel ? <><span className="tl-ai-question-context">{item.contextLabel}</span>，</> : null}{item.answer}</p>
+  </>;
+  return (
+    <article className="tl-ai-question-card">
+      <time>{item.time}</time>
+      <div className="tl-ai-question-prompt"><span aria-hidden="true">?</span><p>{item.question}</p></div>
+      <div className="tl-ai-question-feedback-entry-row">
+        <button
+          className={`tl-baby-feedback-entry is-ai-question${feedbackOpen?' is-open':''}`}
+          type="button"
+          aria-label={`${feedbackOpen?'收起':'展开'}点滴助手反馈`}
+          aria-expanded={feedbackOpen}
+          onClick={()=>setFeedbackOpen(open=>!open)}
+        >
+          <span className="tl-baby-feedback-entry-mark" aria-hidden="true">✦</span>
+          <span className="tl-baby-feedback-entry-label">AI<span className="tl-baby-feedback-entry-label-suffix">反馈</span></span>
+          <i className="tl-baby-feedback-entry-caret" aria-hidden="true">⌄</i>
+        </button>
+      </div>
+      {feedbackOpen ? <button className="tl-ai-question-answer is-whole-action" type="button" aria-label={`${item.assistantTitle || '点滴助手'}，继续问`} onClick={continueQuestion}>{answerContent}</button> : null}
+    </article>
+  );
+}
+
+function AiRecordFeedbackCard({item}){
+  const I=window.Icon;
+  const [feedbackOpen,setFeedbackOpen]=React.useState(item.feedbackOpen !== false);
+  React.useEffect(()=>setFeedbackOpen(item.feedbackOpen !== false),[item.id,item.feedbackOpen]);
+  const continueQuestion=()=>window.dispatchEvent(new CustomEvent('open-qa-conversation',{detail:{
+    sourceType:'record',
+    sourceText:item.sourceText,
+    question:item.question,
+    fullResponse:item.fullResponse,
+  }}));
+  const openFeedingHistory=()=>window.dispatchEvent(new CustomEvent('open-shared-feeding-history',{detail:{babyName:item.babyName || '小豆苗'}}));
+  const feedbackContent=<>
+    <header><b>{item.feedbackTitle}</b><span className="tl-ai-feedback-chat" aria-hidden="true"><I name="message-circle" size={17} stroke={1.8}/></span></header>
+    <p>{item.feedbackSummary}</p>
+  </>;
+  return (
+    <article className="tl-ai-record-feedback-card">
+      <div className="tl-baby-feed-head"><span className="tl-baby-feed-time">{item.time}</span></div>
+      <div className="tl-ai-record-main">
+        <span className="tl-ai-record-icon" aria-hidden="true"><img src={item.iconSrc} alt=""/></span>
+        <span className="tl-ai-record-copy">
+          <b>{item.recordTitle}：<strong>{item.recordValue}</strong></b>
+          <em>{item.recordRange}</em>
+        </span>
+      </div>
+      <div className="tl-baby-feed-tags">
+        <button
+          className={'tl-baby-feedback-entry is-sleep'+(feedbackOpen ? ' is-open' : '')}
+          type="button"
+          aria-label={`${feedbackOpen ? '收起' : '展开'}${item.feedbackTitle}`}
+          aria-expanded={feedbackOpen}
+          onClick={()=>setFeedbackOpen(value=>!value)}
+        >
+          <span className="tl-baby-feedback-entry-mark" aria-hidden="true">✦</span>
+          <span className="tl-baby-feedback-entry-label">AI<span className="tl-baby-feedback-entry-label-suffix">反馈</span></span>
+          <i className="tl-baby-feedback-entry-caret" aria-hidden="true">⌄</i>
+        </button>
+        <span className="tl-baby-feed-tag-main">{item.babyName || '小豆苗'}</span>
+        <span className="tl-baby-feed-chip is-ago">{item.relativeTime || '刚刚'}</span>
+      </div>
+      {feedbackOpen ? <button className="tl-ai-record-feedback is-whole-action" type="button" aria-label={`${item.feedbackTitle}，继续问`} onClick={continueQuestion}>{feedbackContent}</button> : null}
+      <footer><button type="button" onClick={openFeedingHistory}><span>进入{item.babyName || '小豆苗'}的喂养记录</span><i aria-hidden="true">›</i></button></footer>
+    </article>
+  );
+}
+
 function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && !item.noAnimate && (
@@ -1248,6 +1428,10 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
         <span className="tl-ai-record-processing-dots" aria-hidden="true"><i/><i/><i/></span>
       </div>
     );
+  } else if(item.kind === 'ai-question-card'){
+    body = <AiQuestionCard item={item}/>;
+  } else if(item.kind === 'ai-record-feedback-card'){
+    body = <AiRecordFeedbackCard item={item}/>;
   } else if(item.kind === 'inline-record-confirm'){
     body = <InlineRecordConfirmCard item={item}/>;
   } else if(item.kind === 'diet-photo-feedback'){
@@ -1371,5 +1555,7 @@ Object.assign(window, {
   CycleDayHeader, TimelineRailNode, TlNodeCaption, summarizeDayItems,
   resolveDayTitleLabel, formatDayMeta,
   ModulePlaceholder, TodayGuideCard, WeeklyTrendCard, TimelineItem,
-  MoodInsightCard, MoodCurveChart, MoodBandChart, MoodScatterChart, BabySleepWeekComboChart, BabyFeedingTimelineCard,
+  MoodInsightCard, MoodCurveChart, MoodBandChart, MoodScatterChart,
+  BabySleepWeekComboChart, BabyFeedingFeedbackModule, BabyFeedingTimelineCard,
+  AiQuestionCard, AiRecordFeedbackCard,
 });

@@ -109,7 +109,7 @@ function VoiceTranscribeBar({
               </span>
             </>
           ) : (
-            <span className="vt-hold-label">按住&nbsp;说话</span>
+            <span className="vt-hold-label">按住&nbsp;语音记录</span>
           )}
         </button>
 

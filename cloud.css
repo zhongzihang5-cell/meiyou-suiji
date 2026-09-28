@@ -20,12 +20,20 @@
   padding-bottom:420px;
 }
 .suiji-stream{
+  width:100%;
+  box-sizing:border-box;
+  background:var(--my-bg);
   padding:0 16px calc(200px + var(--my-safe-bottom));
   padding-top:52px;
   max-height:calc(100vh - 44px);
   max-height:calc(100dvh - 44px);
+  overflow-x:hidden;
   overflow-y:auto;
+  scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
+}
+.suiji-stream::-webkit-scrollbar{
+  display:none;
 }
 .stream-health{margin-bottom:14px}
 
