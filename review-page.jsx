@@ -1870,7 +1870,7 @@ function buildSharedFeedingDaysFromTimeline(blocks,babyName){
       if(Array.isArray(item.detailLines) && item.detailLines.length){
         core = item.detailLines.map(line=>String(line).replace(new RegExp(`^${label}：?`),'')).join('｜');
       }
-      return [item.time || '--:--',getSharedFeedingKind(label),label,core,item.creator || '妈妈',item.noteText || item.voiceQuote || ''];
+      return [item.time || '--:--',getSharedFeedingKind(label),label,core,item.creator || '妈妈',item.noteText || ''];
     });
     const rawDate = block.isToday ? '今天' : (block.relativeLabel || block.date || '');
     const date = /^\d{1,2}\/\d{1,2}$/.test(rawDate) ? rawDate.replace('/', '月')+'日' : rawDate;

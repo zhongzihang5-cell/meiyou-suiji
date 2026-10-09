@@ -439,19 +439,20 @@ function BabyFormulaDetailPage({entry, onClose, onSave}){
   const [amount, setAmount] = useState(initialAmount);
   const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
   const [noteOpen, setNoteOpen] = useState(true);
-  const [note, setNote] = useState(entry?.voiceQuote || entry?.noteText || '');
+  const [note, setNote] = useState(entry?.noteText || '');
   const now = new Date();
   const options = [amount - 15, amount - 10, amount - 5, amount, amount + 5, amount + 10, amount + 15].filter(value=>value > 0);
   const lastRecordByBaby = {'小豆苗':entry?.lastRecordLabel || '3小时47分钟前','小豆芽':'1小时12分钟前'};
-  useEffect(()=>{ setAmount(Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130); setBabyName(entry?.babyName || '小豆苗'); setNote(entry?.voiceQuote || entry?.noteText || ''); setNoteOpen(true); }, [entry?.id]);
+  useEffect(()=>{ setAmount(Number(String(entry?.value || '130').replace(/[^\d]/g, '')) || 130); setBabyName(entry?.babyName || '小豆苗'); setNote(entry?.noteText || ''); setNoteOpen(true); }, [entry?.id]);
   return <section className="baby-formula-detail" role="dialog" aria-modal="true" aria-label="配方奶记录详情">
-    <header className="baby-formula-detail-nav"><button type="button" className="baby-formula-close" aria-label="关闭" onClick={onClose}>×</button><div><h1>配方奶</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></div><span/></header>
+    <header className="baby-formula-detail-nav"><button type="button" className="baby-formula-close" aria-label="返回" onClick={onClose}>‹</button><div><h1>配方奶</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></div><span/></header>
     <main className="baby-formula-detail-body"><section className="baby-formula-form">
       <div className="baby-formula-row"><span>开始时间</span><button type="button" className="baby-formula-value">{now.getMonth()+1}月{now.getDate()}日 {entry?.time || '13:35'}<b>›</b></button></div>
       <div className="baby-formula-amount-head"><span>奶量</span><button type="button" className="baby-formula-keyboard"><span>⠿</span>键盘输入</button></div>
       <div className="baby-formula-picker"><div className="baby-formula-bottle"/><div className="baby-formula-values">{options.map(value=><button key={value} type="button" className={value===amount?'is-selected':''} onClick={()=>setAmount(value)}>{value} ml</button>)}</div></div>
       <div className="baby-formula-row"><span>结束时间</span><button type="button" className="baby-formula-value is-placeholder">请选择<b>›</b></button></div>
       <div className="baby-formula-note"><button type="button" className="baby-formula-note-toggle" aria-expanded={noteOpen} onClick={()=>setNoteOpen(open=>!open)}><span>备注</span><b>{noteOpen?'⌃':'⌄'}</b></button>{noteOpen?<textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/>:null}</div>
+      <InputProvenance entry={entry} expanded/>
     </section></main>
     <footer className="baby-formula-detail-foot"><button type="button" onClick={()=>onSave({amount,note,babyName})}>保存</button></footer>
   </section>;
@@ -465,9 +466,9 @@ function BabyBreastDetailPage({entry, onClose, onSave}){
   const [running, setRunning] = useState('');
   const [seconds, setSeconds] = useState({left:0,right:0});
   const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
-  const [note, setNote] = useState(entry?.noteText || entry?.voiceQuote || '');
+  const [note, setNote] = useState(entry?.noteText || '');
   const lastRecordByBaby = {'小豆苗':'3小时47分钟前','小豆芽':'2小时18分钟前'};
-  useEffect(()=>{ setMode(lockedManual ? 'manual' : 'timer'); setLeft(entry?.leftMinutes || 10); setRight(entry?.rightMinutes || 10); setRunning(''); setSeconds({left:0,right:0}); setBabyName(entry?.babyName || '小豆苗'); setNote(entry?.noteText || entry?.voiceQuote || ''); }, [entry?.id]);
+  useEffect(()=>{ setMode(lockedManual ? 'manual' : 'timer'); setLeft(entry?.leftMinutes || 10); setRight(entry?.rightMinutes || 10); setRunning(''); setSeconds({left:0,right:0}); setBabyName(entry?.babyName || '小豆苗'); setNote(entry?.noteText || ''); }, [entry?.id]);
   useEffect(()=>{
     if(!running) return undefined;
     const timer=setInterval(()=>setSeconds(value=>({...value,[running]:value[running]+1})),1000);
@@ -477,7 +478,7 @@ function BabyBreastDetailPage({entry, onClose, onSave}){
   const now=new Date();
   const manual=mode==='manual';
   return <section className="baby-breast-detail" role="dialog" aria-modal="true" aria-label="母乳记录详情">
-    <header className="baby-breast-nav"><button type="button" aria-label="关闭" onClick={onClose}>×</button><div><h1>母乳</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></div><span/></header>
+    <header className="baby-breast-nav"><button type="button" aria-label="返回" onClick={onClose}>‹</button><div><h1>母乳</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></div><span/></header>
     <main className="baby-breast-body"><section className="baby-breast-form">
       {!lockedManual ? <div className="baby-breast-mode"><button type="button" className={!manual?'is-active':''} onClick={()=>setMode('timer')}>计时</button><button type="button" className={manual?'is-active':''} onClick={()=>setMode('manual')}>手动输入</button></div> : null}
       {!manual ? <div className="baby-breast-timer">
@@ -488,20 +489,21 @@ function BabyBreastDetailPage({entry, onClose, onSave}){
         <div className="baby-breast-row"><span>最后使用</span><div className="baby-breast-side-chips"><b>左</b><b>右</b></div></div><div className="baby-breast-row"><span>结束时间</span><em>请选择 ›</em></div>
       </div>}
       <div className="baby-breast-note"><label>备注</label><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/></div>
+      <InputProvenance entry={entry} expanded/>
     </section></main>
     <footer className="baby-breast-foot"><button type="button" onClick={()=>onSave({left:manual?left:Math.max(1,Math.ceil(seconds.left/60)),right:manual?right:Math.max(1,Math.ceil(seconds.right/60)),note,babyName})}>保存</button></footer>
   </section>;
 }
 
 function BabySleepDetailPage({entry, onClose, onStart, onSave}){
-  const [mode, setMode] = useState(entry?.sleepMode || 'timer');
-  const [seconds, setSeconds] = useState(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
+  const [mode, setMode] = useState(entry?.sleepMode || (entry?.isQuickDraft?'timer':'manual'));
+  const [seconds, setSeconds] = useState(entry?.elapsedSeconds || (entry?.durationMinutes || entry?.statDurationMinutes || 0)*60 || (entry?.sleeping ? 60 : 0));
   const [running, setRunning] = useState(false);
   const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
   const [note, setNote] = useState(entry?.noteText || '');
   useEffect(()=>{
-    setMode(entry?.sleepMode || 'timer');
-    setSeconds(entry?.elapsedSeconds || (entry?.sleeping ? 60 : 0));
+    setMode(entry?.sleepMode || (entry?.isQuickDraft?'timer':'manual'));
+    setSeconds(entry?.elapsedSeconds || (entry?.durationMinutes || entry?.statDurationMinutes || 0)*60 || (entry?.sleeping ? 60 : 0));
     setRunning(false);
     setBabyName(entry?.babyName || '小豆苗');
     setNote(entry?.noteText || '');
@@ -522,7 +524,7 @@ function BabySleepDetailPage({entry, onClose, onStart, onSave}){
   const handleSave = ()=>onSave?.({minutes, seconds:Math.max(seconds, 60), note, mode, babyName});
   return <section className="baby-sleep-detail" role="dialog" aria-modal="true" aria-label="睡眠记录详情">
     <header className="baby-sleep-nav">
-      <button type="button" aria-label={activeTimer ? '收起' : '关闭'} onClick={onClose}>{activeTimer ? '收起' : '×'}</button>
+      <button type="button" aria-label="返回" onClick={onClose}>‹</button>
       <div><h1>睡眠</h1><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{activeTimer ? `${babyName} · 妈妈 今天 ${timeText} 创建` : `${babyName}上次：${lastRecordByBaby[babyName]}`}</p></div><span/>
     </header>
     <main className="baby-sleep-body"><section className="baby-sleep-form">
@@ -535,7 +537,7 @@ function BabySleepDetailPage({entry, onClose, onStart, onSave}){
           <div className="baby-sleep-moon" aria-hidden="true"><span>Z</span></div>
           <div className="baby-sleep-row"><span>开始时间</span><em>请选择 ›</em></div>
           <div className="baby-sleep-row"><span>结束时间</span><em>请选择 ›</em></div>
-          <div className="baby-sleep-note is-compact"><button type="button"><span>▣</span>备注</button></div>
+          <label className="input-time-field">睡眠时长（分钟）<input type="number" min="1" value={Math.ceil(seconds/60)} onChange={e=>setSeconds(Math.max(1,Number(e.target.value))*60)}/></label><div className="baby-sleep-note"><textarea aria-label="备注" value={note} onChange={e=>setNote(e.target.value)} placeholder="添加备注"/></div>
         </div>
       ) : activeTimer ? (
         <div className="baby-sleep-running">
@@ -552,6 +554,7 @@ function BabySleepDetailPage({entry, onClose, onStart, onSave}){
           <div className="baby-sleep-note"><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="输入备注内容"/><span>▣</span></div>
         </div>
       )}
+      <InputProvenance entry={entry} expanded/>
     </section></main>
     <footer className="baby-sleep-foot"><button type="button" onClick={activeTimer ? handleSave : (manual ? handleSave : handleStart)}>{activeTimer ? '结束并保存' : '保存'}</button></footer>
   </section>;
@@ -574,7 +577,7 @@ function BabyOtherRecordDetailPage({entry, onClose, onSave}){
   const [babyName, setBabyName] = useState(entry?.babyName || '小豆苗');
   const [note, setNote] = useState(entry?.noteText || '');
   const [amount, setAmount] = useState(Number(String(entry?.value || config.defaultAmount || 50).match(/\d+/)?.[0]) || config.defaultAmount || 50);
-  const [diaperState, setDiaperState] = useState(entry?.diaperState || (String(entry?.value || '').includes('嘘嘘') ? '嘘嘘' : '臭臭'));
+  const [diaperState, setDiaperState] = useState(entry?.diaperState ?? (String(entry?.value || '').includes('嘘嘘') ? '嘘嘘' : '臭臭'));
   const [redBottom, setRedBottom] = useState(!!entry?.redBottom);
   const [foodName, setFoodName] = useState(entry?.foodName || (entry?.isQuickDraft ? '' : '米粉，菠菜'));
   const [foodWeight, setFoodWeight] = useState(entry?.foodWeight || (entry?.isQuickDraft ? '' : '20'));
@@ -609,7 +612,7 @@ function BabyOtherRecordDetailPage({entry, onClose, onSave}){
   const renderNote = ()=> <div className="baby-other-note"><textarea aria-label="备注" value={note} onChange={event=>setNote(event.target.value)} placeholder="添加备注"/><span>▣</span></div>;
   return <section className="baby-other-detail" style={{'--baby-accent':config.accent,'--baby-soft':config.soft}} role="dialog" aria-modal="true" aria-label={`${entry?.feedType || '宝宝'}记录详情`}>
     <header className="baby-other-nav">
-      <button type="button" aria-label="关闭" onClick={onClose}>×</button>
+      <button type="button" aria-label="返回" onClick={onClose}>‹</button>
       <div><h1>{entry?.feedType}</h1>{showBabySwitcher ? <><div className="baby-record-baby-switch" role="group" aria-label="选择宝宝">{['小豆苗','小豆芽'].map(name=><button key={name} type="button" className={babyName===name?'is-active':''} aria-pressed={babyName===name} onClick={()=>setBabyName(name)}>{name}</button>)}</div><p>{babyName}上次：{lastRecordByBaby[babyName]}</p></> : null}</div><span/>
     </header>
     <main className="baby-other-body"><section className={`baby-other-card is-${config.kind}`}>
@@ -656,6 +659,7 @@ function BabyOtherRecordDetailPage({entry, onClose, onSave}){
         {mode === 'timer' ? <div className="baby-activity-timer"><strong>{timerText}</strong><button type="button" className={running?'is-running':''} onClick={()=>setRunning(value=>!value)}><span>{running?'暂停':'开始'}</span><i>{running?'Ⅱ':'▶'}</i></button></div> : <div className="baby-activity-manual"><label><span>开始时间</span><input type="time" defaultValue={time}/></label><label><span>结束时间</span><input type="time"/></label><label><span>时长</span><input type="number" min="1" value={manualMinutes} onChange={event=>setManualMinutes(event.target.value)}/><em>分钟</em></label></div>}
         {renderNote()}
       </> : null}
+      <InputProvenance entry={entry} expanded/>
     </section></main>
     <footer className="baby-other-foot"><button type="button" onClick={submit}>保存</button></footer>
   </section>;
@@ -713,6 +717,7 @@ function CustomRecordStructureSheet({draft, onClose, onSave, createOnly=false}){
 }
 
 function CustomQuickRecordSheet({item,onClose,onSave}){
+  const {parenting}=React.useContext(InputRecordContext);
   const definition=item.customDefinition || {};
   const isEvent=definition.structure==='event';
   const editEntry=item.editEntry;
@@ -720,7 +725,7 @@ function CustomQuickRecordSheet({item,onClose,onSave}){
   const [note,setNote]=useState(editEntry?.noteText || '');
   const [recordTime,setRecordTime]=useState(editEntry?.time || window.formatNowTime?.() || new Date().toTimeString().slice(0,5));
   return <div className="custom-record-overlay" role="presentation"><section className="custom-record-sheet custom-repeat-sheet" role="dialog" aria-modal="true" aria-label={`记录${item.label}`}>
-    <header className="custom-record-head"><button type="button" onClick={onClose} aria-label="关闭">×</button><div><h1>{item.label}</h1></div><span/></header>
+    <header className="custom-record-head"><button type="button" onClick={onClose} aria-label={parenting?"返回":"关闭"}>{parenting?'‹':'×'}</button><div><h1>{item.label}</h1></div><span/></header>
     <main className="custom-record-body">
       <section className="custom-record-section">
         <div className="custom-repeat-summary"><span className="custom-record-name-icon">＋</span><div><strong>{item.label}</strong>{definition.owner!=='自己'?<small>{definition.owner}</small>:null}</div></div>
@@ -778,6 +783,24 @@ function App(){
   const initial = window.getSceneInitialState(t.demoScene);
   const [draft, setDraft] = useState(initial.draft);
   const [timeline, setTimeline] = useState(initial.timeline);
+  const [inputConfirmId,setInputConfirmId] = useState(null);
+  const [inputEmptyGuide,setInputEmptyGuide] = useState(false);
+  const [inputGuideScheme,setInputGuideScheme] = useState('bubble');
+  const [inputGuideVisible,setInputGuideVisible] = useState(()=>{try{return localStorage.getItem('baby-input-guide-seen')!=='1';}catch{return true;}});
+  const dismissInputGuide=()=>{setInputGuideVisible(false);try{localStorage.setItem('baby-input-guide-seen','1');}catch{}};
+  const [inputScheme,setInputScheme] = useState('independent');
+  const [inputFamilyView,setInputFamilyView] = useState(false);
+  const inputPendingTimers=useRef(new Set());
+  const inputScrollManaged=useRef(false);
+  const inputResultAnchor=useRef(null);
+  React.useLayoutEffect(()=>{
+    const anchor=inputResultAnchor.current,stream=streamRef.current;
+    if(!anchor||!stream)return;
+    inputResultAnchor.current=null;
+    const node=stream.querySelector(`[data-input-id="${anchor.id}"]`);
+    if(node)stream.scrollTop+=node.getBoundingClientRect().top-stream.getBoundingClientRect().top-anchor.offset;
+  },[timeline]);
+  useEffect(()=>()=>inputPendingTimers.current.forEach(clearTimeout),[]);
   const [toasts, setToasts] = useState([]);
   const [aiRecordProcessing, setAiRecordProcessing] = useState(null);
   const [showPhoto, setShowPhoto] = useState(false);
@@ -898,6 +921,20 @@ function App(){
     window.addEventListener('open-baby-feeding-detail', openFeedingDetail);
     return ()=>window.removeEventListener('open-baby-feeding-detail', openFeedingDetail);
   }, []);
+
+  useEffect(()=>{
+    const remove=event=>{
+      if(inputFamilyView)return;
+      const id=event.detail;
+      setTimeline(blocks=>refreshBabyFeedingLatestMarks(blocks.map(b=>b.type==='day'?{...b,items:(b.items||b.entries||[]).filter(r=>r.id!==id||!r.inputId),entries:undefined}:b)));
+      setFormulaDetailEntry(null);setBreastDetailEntry(null);setSleepDetailEntry(null);setOtherBabyDetailEntry(null);
+    };
+    window.addEventListener('delete-input-result',remove);
+    return ()=>window.removeEventListener('delete-input-result',remove);
+  },[inputFamilyView]);
+  useEffect(()=>{
+    setFormulaDetailEntry(null);setBreastDetailEntry(null);setSleepDetailEntry(null);setOtherBabyDetailEntry(null);
+  },[inputFamilyView]);
 
   const recordFeedback = !!scene.record.recordFeedback;
 
@@ -1593,7 +1630,7 @@ function App(){
 
   useEffect(()=>{
     if(showRecordEmpty || showBlankEmpty) return;
-    if(voiceTranscribe) return;
+    if(voiceTranscribe || (recordLifeMode==='育儿' && inputScrollManaged.current)) return;
     scrollTimelineToEnd('smooth');
   }, [timeline, showRecordEmpty, showBlankEmpty, voiceTranscribe]);
 
@@ -2349,32 +2386,9 @@ function App(){
     setTimeout(()=>scrollTimelineToBottom('smooth'), 60);
   };
 
-  const submitBabyFeedingVoice = (transcript, durSec)=>{
-    if(aiRecordProcessingRef.current) return;
-    const sequenceStep = VOICE_DEMO_SEQUENCE[voiceDemoSequenceRef.current % VOICE_DEMO_SEQUENCE.length];
-    const demoText = VOICE_DEMO_TEXTS[sequenceStep] || String(transcript || '').trim();
-    voiceDemoSequenceRef.current += 1;
-    setRecordSpace('shared');
-    setBabyFeedingPanelMode(null);
-    setSearchCriteria(null);
-    setBabyDiscoverVisible(false);
-    clearTimeout(babyVoiceSuccessTimerRef.current);
-    setBabyVoiceSuccess({show:false});
-    setNoteTabUnread(false);
-    runAiRecordProcessing('voice',()=>{
-      if(sequenceStep === 'multi-baby-feeding') appendMultiBabyFeedingVoiceDemo(durSec);
-      else if(sequenceStep === 'baby-sleep-mood') appendBabySleepMoodVoiceDemo(durSec);
-      else if(sequenceStep === 'ambiguous-water'){
-        const parsed = parseAmbiguousCrossObjectRecord(demoText);
-        if(parsed) appendInlineConfirmEntry(parsed,'voice',`${durSec || 6}″`);
-      }
-      else if(sequenceStep === 'incomplete-feeding'){
-        const parsed = parseIncompleteFeedingRecord(demoText);
-        if(parsed) appendInlineConfirmEntry(parsed,'voice',`${durSec || 6}″`);
-      }
-      else appendBabyFeedingTimelineCard(sequenceStep);
-      setTimeout(()=>scrollTimelineToBottom('smooth'), 120);
-    });
+  const submitBabyFeedingVoice = (transcript,durSec)=>{
+    const step=VOICE_DEMO_SEQUENCE[voiceDemoSequenceRef.current++ % VOICE_DEMO_SEQUENCE.length];
+    submitInputRecord(transcript || VOICE_DEMO_TEXTS[step],{seconds:durSec||10,demo:true});
   };
 
   const endBabyVoiceHold = ()=>{
@@ -2405,7 +2419,7 @@ function App(){
       setBabyFeedingPanelMode(null);
       setSearchCriteria(null);
       setBabyDiscoverVisible(false);
-      appendBabyFeedingTimelineCard();
+      submitBabyFeedingVoice(babyVoiceSession.demoText,10);
       setBabyVoiceSuccess({show:true});
       if(activeTab !== 'note') setNoteTabUnread(true);
       // 提示保持展示，直到用户点击进入点滴 tab 时一并消失
@@ -2678,35 +2692,91 @@ function App(){
     return ()=>window.removeEventListener('resolve-inline-record-confirm',resolveInlineRecordConfirm);
   },[resolveInlineRecordConfirm]);
 
-  const submitText = (textOverride, opts={})=>{
-    const text = (textOverride || draft).trim();
-    if(!text || aiRecordProcessingRef.current) return;
-    if(/^月经[。！!]?$/.test(text)){
-      setDraft('');
-      markUserRecorded();
-      clearDemoCards(()=>runDemoFlow());
-      return;
-    }
-    if(isQuestionInput(text)){
-      handleQuestionInput(text);
-      return;
-    }
-    if(recordLifeMode !== '育儿'){
-      commitText(text, opts);
-      return;
-    }
-    setDraft('');
-    const ambiguousRecord = parseAmbiguousCrossObjectRecord(text);
-    const incompleteFeeding = parseIncompleteFeedingRecord(text);
-    runAiRecordProcessing('text',()=>{
-      if(ambiguousRecord) appendInlineConfirmEntry(ambiguousRecord,'text');
-      else if(incompleteFeeding){
-        setRecordSpace('shared');
-        appendInlineConfirmEntry(incompleteFeeding,'text');
-      }
-      else commitText(text, opts);
-    });
+  const finishInputRecord = (source,records,failed=false,scenario='success')=>{
+      const stream=streamRef.current,node=stream?.querySelector(`[data-input-id="${source.id}"]`);
+      if(node&&stream){const offset=node.getBoundingClientRect().top-stream.getBoundingClientRect().top;if(offset>=0&&offset<stream.clientHeight-100)inputResultAnchor.current={id:source.id,offset};}
+      const resolved={...source,status:failed?'failed':'done',feedbackStatus:scenario==='analysis-failed'?'failed':'done',feedbackRecord:window.InputRecords.feedbackRecord(records)};
+      setTimeline(blocks=>{
+        const currentSource=window.InputRecords.all(blocks).find(r=>r.id===source.id);
+        if(!currentSource)return blocks;
+        records=records.map(r=>({...r,inputSource:{...r.inputSource,text:currentSource.originalText,time:currentSource.time}}));
+        let next=blocks.map(b=>b.type==='day'?{...b,items:(b.items||b.entries||[]).map(r=>r.id===source.id?{...currentSource,pendingRecords:undefined,status:resolved.status,feedbackStatus:resolved.feedbackStatus,feedbackRecord:resolved.feedbackRecord}:r),entries:undefined}:b);
+        const todayId=next.find(b=>b.type==='day'&&b.isToday)?.id||'d-today';
+        records.forEach(record=>{
+          let dayId=todayId;
+          if(record.dateOffset){
+            const date=new Date();date.setDate(date.getDate()-record.dateOffset);
+            const label=`${date.getMonth()+1}/${date.getDate()}`;
+            let day=next.find(b=>b.type==='day'&&(b.relativeDaysAgo===record.dateOffset||b.relativeLabel==='昨天'||b.date===label));
+            if(!day){day={type:'day',id:'input-day-'+label,date:label,relativeDaysAgo:record.dateOffset,relativeLabel:'昨天',weekday:['周日','周一','周二','周三','周四','周五','周六'][date.getDay()],items:[]};const at=next.findIndex(b=>b.id===todayId);next=[...next.slice(0,at<0?next.length:at),day,...next.slice(at<0?next.length:at)];}
+            dayId=day.id;
+          }
+          next=window.appendTimelineEntry(next,record,{dayId});
+        });
+        return refreshBabyFeedingLatestMarks(next);
+      });
   };
+  useEffect(()=>{
+    const open=e=>setInputConfirmId(e.detail);
+    window.addEventListener('confirm-input-records',open);
+    return ()=>window.removeEventListener('confirm-input-records',open);
+  },[]);
+
+  const submitInputRecord = (text, voice=null, scenario='success')=>{
+    text=String(text||'').trim();
+    if(recordLifeMode!=='育儿'||!text||inputFamilyView)return;
+    setInputEmptyGuide(false);
+    setDraft('');setSearchCriteria(null);setBabyDiscoverVisible(false);markUserRecorded();
+    inputScrollManaged.current=true;
+    const now=new Date();
+    const date=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const source={date,id:'input-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),kind:'input-source',originalText:text,voice,time:window.formatNowTime(),status:'processing',creatorId:'self',isOwnRecord:true};
+    const mode=recordLifeMode;
+    setTimeline(blocks=>window.appendTimelineEntry(blocks,source,{dayId:blocks.find(b=>b.type==='day'&&b.isToday)?.id||'d-today'}));
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const stream=streamRef.current, node=stream?.querySelector(`[data-input-id="${source.id}"]`);
+      if(stream&&node) stream.scrollTo({top:stream.scrollTop+node.getBoundingClientRect().top-stream.getBoundingClientRect().top-64,behavior:'smooth'});
+    }));
+    const timer=setTimeout(()=>{
+      inputPendingTimers.current.delete(timer);
+      let records=[],failed=scenario==='failed';
+      try{if(!failed)records=window.InputRecords.extract(source,mode,BABY_FEEDING_QUICK_ITEMS);}catch(error){failed=true;}
+      if(!failed && records.some(r=>r.confirmationFields?.length)){
+        setTimeline(blocks=>blocks.map(b=>b.type==='day'?{...b,items:(b.items||b.entries||[]).map(r=>r.id===source.id?{...r,status:'pending',pendingRecords:records,pendingScenario:scenario}:r),entries:undefined}:b));
+        setInputConfirmId(source.id);
+      }else finishInputRecord(source,records,failed,scenario);
+    },3000);
+    inputPendingTimers.current.add(timer);
+  };
+
+  const submitText = (textOverride, opts={})=>{
+    const input=String(textOverride || draft).trim();
+    if(isQuestionInput(input)){handleQuestionInput(input);return;}
+    if(recordLifeMode==='育儿')return submitInputRecord(input,opts.voice || null);
+    const text=(textOverride || draft).trim();
+    if(!text || aiRecordProcessingRef.current)return;
+    if(/^月经[。！!]?$/.test(text)){
+      setDraft('');markUserRecorded();clearDemoCards(()=>runDemoFlow());return;
+    }
+    commitText(text,opts);
+  };
+
+  // Wire the existing voice button without changing the locked dock component.
+  useEffect(()=>{
+    if(recordLifeMode!=='育儿')return;
+    let held=null;
+    const down=e=>{if(!e.target.closest?.('.dock-voice-btn'))return;held={at:Date.now(),y:e.clientY};};
+    const up=e=>{
+      if(!held)return;
+      const current=held;held=null;
+      if(current.y-e.clientY>64||Date.now()-current.at<250)return;
+      const text=BABY_MULTI_EVENT_DEMO_TEXT;
+      submitInputRecord(text,{seconds:Math.max(8,Math.round((Date.now()-current.at)/1000)),demo:true});
+    };
+    const cancel=()=>{held=null;};
+    document.addEventListener('pointerdown',down);document.addEventListener('pointerup',up);document.addEventListener('pointercancel',cancel);
+    return ()=>{document.removeEventListener('pointerdown',down);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
+  },[recordLifeMode,inputFamilyView]);
 
   // ====== 清除上一轮演示卡片 ======
   const clearDemoCards = (cb)=>{
@@ -2827,6 +2897,7 @@ function App(){
   };
 
   const submitVoice = (transcript, durSec)=>{
+    if(recordLifeMode==='育儿')return submitInputRecord(transcript || BABY_MULTI_EVENT_DEMO_TEXT,{seconds:durSec||8,demo:true});
     const recordScenario = window.readCameraPermissionScenario?.() || 'unauthorized';
     if (window.isDietTextRecordScenario?.(recordScenario)) {
       markUserRecorded();
@@ -3325,7 +3396,7 @@ function App(){
       const normalized = (timeline || []).map(block=>{
           if(block.type !== 'day') return block;
           const items = block.items || block.entries || [];
-          const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
+          const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card' || item.kind === 'input-source');
           if(Number.isInteger(block.relativeDaysAgo) && block.relativeDaysAgo > 0){
             const historicalDate = new Date();
             historicalDate.setDate(historicalDate.getDate() - block.relativeDaysAgo);
@@ -3374,7 +3445,7 @@ function App(){
                 ? {...item, creator:'妈妈', creatorId:'self', isOwnRecord:true, showCreator:false, showBabyTag:true}
                 : item)
           : recordSpace === 'shared'
-            ? items.filter(item=>item.kind === 'baby-feeding-card' || item.kind === 'inline-record-confirm').map(item=>item.kind === 'baby-feeding-card' ? ({...item, showCreator:true, showBabyTag:false}) : item)
+            ? items.filter(item=>item.kind === 'baby-feeding-card' || item.kind === 'inline-record-confirm' || item.kind === 'input-source').map(item=>item.kind === 'baby-feeding-card' ? ({...item, showCreator:true, showBabyTag:false}) : item)
             : items.filter(item=>item.kind !== 'baby-feeding-card');
         if(!visibleItems.length) return null;
         return {...block, items:visibleItems, entries:undefined};
@@ -3412,9 +3483,12 @@ function App(){
         return {...block, items:[...(block.items || block.entries || []), processingItem], entries:undefined};
       });
     }
+    const family=inputFamilyView || (relationshipScheme==='with-family-2' && sharedTimelineView);
+    if(recordLifeMode==='育儿' && inputFamilyView) source=source.map(b=>b.type==='day'?{...b,items:(b.items||b.entries||[]).filter(r=>r.kind==='baby-feeding-card'),entries:undefined}:b);
+    if(recordLifeMode==='育儿')source=window.InputRecords.project(source,inputScheme,family);
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
-  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView, aiRecordProcessing]);
+  }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive, recordSpace, relationshipScheme, sharedTimelineView, aiRecordProcessing, inputScheme, inputFamilyView]);
   const searchResultCount = React.useMemo(()=>{
     if(!isSearchActive || !countTimelineSearchItems) return null;
     return countTimelineSearchItems(displayTimeline);
@@ -3437,6 +3511,7 @@ function App(){
       lastAutoRevealedEntryRef.current = latestVisibleEntryId;
       return;
     }
+    if(recordLifeMode==='育儿' && inputScrollManaged.current){lastAutoRevealedEntryRef.current=latestVisibleEntryId;return;}
     if(lastAutoRevealedEntryRef.current === latestVisibleEntryId) return;
     lastAutoRevealedEntryRef.current = latestVisibleEntryId;
     const timers = [120, 320, 620].map(delay=>setTimeout(()=>{
@@ -3494,9 +3569,10 @@ function App(){
   },[showRecordShell,showRecordEmpty,showRecordBlank]);
 
   return (
-    <>
-      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
+    <InputRecordContext.Provider value={{family:recordLifeMode==='育儿' && (inputFamilyView || isPlan2SharedTimeline),parenting:recordLifeMode==='育儿'}}>
+      <div className={'phone' + (recordLifeMode==='育儿' ? ' is-input-records-mode' : '') + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
         <StatusBar/>
+        {recordLifeMode==='育儿'?<InputRecordEditors timeline={timeline} setTimeline={setTimeline} family={inputFamilyView || isPlan2SharedTimeline}/>:null}
       {showHome && HomePage && (
         <HomePage
           mode={recordLifeMode}
@@ -3720,13 +3796,13 @@ function App(){
           )}
         </div>
         ) : null}
-        {babyShareSyncNotice && !isPlan2SharedTimeline ? (
+        {!inputEmptyGuide && babyShareSyncNotice && !isPlan2SharedTimeline ? (
           <div key={babyShareSyncNotice} className="baby-share-sync-notice" role="status" aria-live="polite">
             <span className="baby-share-sync-notice-icon" aria-hidden="true"><SharedUsersIcon size={18}/></span>
             <span><b>小豆苗的记录已同步</b><em>3位亲友可见</em></span>
           </div>
         ) : null}
-        {relationshipScheme === 'with-family-2' && !isPlan2SharedTimeline && familyShareUnread > 0 && !babyShareSyncNotice ? (
+        {!inputEmptyGuide && relationshipScheme === 'with-family-2' && !isPlan2SharedTimeline && familyShareUnread > 0 && !babyShareSyncNotice ? (
           <button type="button" className="family-share-update-notice" onClick={openPlan2SharedTimeline}>
             <span className="family-share-update-icon" aria-hidden="true"><SharedUsersIcon size={18}/></span>
             <span className="family-share-update-copy"><b>亲友新增{familyShareUnread}条小豆苗记录</b><em>爸爸、奶奶刚刚记录了喂养情况</em></span>
@@ -3744,6 +3820,7 @@ function App(){
           ref={streamRef}
         >
 
+          {inputEmptyGuide&&recordLifeMode==='育儿'?<InputEmptyGuide/>:<>
           {scene.record.showHealthCard && (
             <div className="stream-health">
               <HealthCard scene={sceneForHealth}/>
@@ -3771,6 +3848,7 @@ function App(){
             onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
           )}
+          </>}
         </div>
 
         {!voiceTranscribe && !isPlan2SharedTimeline && (
@@ -3950,7 +4028,6 @@ function App(){
             value:`${amount}ml`,
             text:`配方奶：${amount}ml`,
             babyName,
-            voiceQuote:note || undefined,
             noteText:note || undefined,
           };
           setTimeline(blocks=>{
@@ -3966,7 +4043,7 @@ function App(){
         }
         setTimeline(blocks=>blocks.map(block=>{
           if(block.type !=='day') return block;
-          const items=(block.items||block.entries||[]).map(item=>item.id===formulaDetailEntry.id?{...item,value:`${amount}ml`,text:`配方奶：${amount}ml`,babyName,voiceQuote:note,noteText:note}:item);
+          const items=(block.items||block.entries||[]).map(item=>item.id===formulaDetailEntry.id?{...item,value:`${amount}ml`,text:`配方奶：${amount}ml`,babyName,noteText:note}:item);
           return {...block,items,entries:undefined};
         }));
         setFormulaDetailEntry(null);
@@ -4074,8 +4151,8 @@ function App(){
           value=`${payload.amount}ml`;
           text=`${source.feedType}：${value}`;
         }else if(config.kind === 'diaper'){
-          value=`${payload.diaperState}${payload.redBottom?'，红屁屁':''}`;
-          text=`换尿布：${value}`;
+          value=[payload.diaperState,payload.redBottom?'红屁屁':''].filter(Boolean).join('，');
+          text=value?`换尿布：${value}`:'换尿布';
           extra={diaperState:payload.diaperState,redBottom:payload.redBottom,diaperFeedback:true};
         }else if(config.kind === 'food'){
           value=`${payload.foodName}，${payload.foodWeight}g`;
@@ -4201,8 +4278,17 @@ function App(){
       {recordLifeMode === '育儿' && (
         <BabyVoiceOverlay session={babyVoiceSession} success={babyVoiceSuccess}/>
       )}
-      </div>
 
+      {recordLifeMode==='育儿'&&showRecordShell&&!inputFamilyView&&inputGuideScheme!=='none'&&inputGuideVisible?<InputMethodGuide key={inputGuideScheme} scheme={inputGuideScheme} onDismiss={dismissInputGuide}/>:null}
+      {recordLifeMode==='育儿'&&!inputFamilyView&&inputConfirmId?(()=>{
+        const source=InputRecords.all(timeline).find(r=>r.id===inputConfirmId&&r.status==='pending');
+        return source?<InputConfirmation key={source.id} source={source} onClose={()=>setInputConfirmId(null)} onConfirm={rows=>{
+          const records=rows.map(r=>{const item=BABY_FEEDING_QUICK_ITEMS.find(x=>x.label===r.feedType);return {...r,confirmationFields:[],text:r.feedType+(r.value?'：'+r.value:''),icon:item?.cardIcon||r.icon,iconSrc:item?.iconSrc||r.iconSrc,color:item?.color||r.color};});
+          finishInputRecord(source,records,false,source.pendingScenario);setInputConfirmId(null);
+        }}/>:null;
+      })():null}
+      </div>
+      {recordLifeMode==='育儿'?<InputDemoPanel emptyGuide={inputEmptyGuide} onEmptyGuide={value=>{setInputEmptyGuide(value);setActiveTab('note');setBabyDiscoverVisible(false);setSearchCriteria(null);}} onConfirmDemo={()=>{dismissInputGuide();setActiveTab('note');submitInputRecord('喂了100ml奶');}} guideScheme={inputGuideScheme} onGuideScheme={value=>{setInputGuideScheme(value);setInputGuideVisible(value!=='none');}} onReplayGuide={()=>{if(inputGuideScheme==='none')setInputGuideScheme('bubble');setInputGuideVisible(true);setActiveTab('note');}} scheme={inputScheme} onScheme={setInputScheme} family={inputFamilyView} onFamily={setInputFamilyView} onDemo={(voice,scenario)=>{setActiveTab('note');submitInputRecord(BABY_MULTI_EVENT_DEMO_TEXT,voice?{seconds:12,demo:true}:null,scenario);}}/>:null}
       {!window.__STANDALONE_LOCKED_SCENE && (
         <div className="demo-controls-stack">
           <DemoSceneBar
@@ -4212,7 +4298,7 @@ function App(){
           />
         </div>
       )}
-    </>
+    </InputRecordContext.Provider>
   );
 }
 

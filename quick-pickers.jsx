@@ -585,6 +585,7 @@ function MoodQuickOverlay({ open, onSubmit, onClose }) {
   const [selectedIds, setSelectedIds] = React.useState([]);
   const [ready, setReady] = React.useState(false);
   const MoodFace = window.MoodFace;
+  const {parenting}=React.useContext(window.InputRecordContext);
   const selected = MOOD_QUICK_OPTIONS.filter(opt=>selectedIds.includes(opt.id));
 
   React.useEffect(()=>{
@@ -601,15 +602,15 @@ function MoodQuickOverlay({ open, onSubmit, onClose }) {
     setSelectedIds(ids=>ids.includes(id) ? ids.filter(item=>item !== id) : [...ids, id]);
   };
 
-  return (
+  if(parenting&&!open)return null;
+  const content=(
     <div
       className={'mood-quick'+(open ? ' show' : '')}
       aria-hidden={!open}
     >
       <div className="mood-quick-card" style={{pointerEvents: ready ? 'auto' : 'none'}}>
         <div className="mood-quick-head">
-          <div><strong>记录心情</strong><span>可多选</span></div>
-          <button type="button" className="mood-quick-close" onClick={onClose} aria-label="关闭心情选择">×</button>
+          {parenting?<><button type="button" className="mood-quick-close" onClick={onClose} aria-label="返回">‹</button><div><strong>记录心情</strong><span>可多选</span></div><span/></>:<><div><strong>记录心情</strong><span>可多选</span></div><button type="button" className="mood-quick-close" onClick={onClose} aria-label="关闭心情选择">×</button></>}
         </div>
         <div className="mood-quick-grid">
           {MOOD_QUICK_OPTIONS.map((opt, i)=>(
@@ -644,6 +645,7 @@ function MoodQuickOverlay({ open, onSubmit, onClose }) {
       </div>
     </div>
   );
+  return parenting?ReactDOM.createPortal(content,document.querySelector('.phone') || document.body):content;
 }
 
 const SYMPTOM_QUICK_OPTIONS = [
