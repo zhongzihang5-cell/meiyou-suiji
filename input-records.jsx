@@ -193,8 +193,7 @@ function InputEmptyGuide(){
       <h2>{titles[slide]}</h2><div className="input-empty-rail"><h3>{slide===1?'9月1日':slide===2?'昨天':'今天'}<small>{slide===1?'周一':slide===2?'周二':'周三'}</small></h3>
       {slide===0?<>
         <p className="input-empty-quote"><span>▶ 8″</span>上午10点，宝宝喝了100毫升配方奶，刚换了尿布。</p>
-        <div className="input-empty-baby-row"><img src="assets/baby-feeding-icons/formula.png" alt=""/><div>配方奶：100ml<small>宝宝 · 10:00</small></div></div>
-        <div className="input-empty-baby-row"><img src="assets/baby-feeding-icons/diaper.png" alt=""/><div>换尿布<small>宝宝 · 10:00</small></div></div>
+        <img className="input-empty-feeding-trend" src="assets/input-empty-feeding-trend.png" alt="喂养趋势示例：瓶喂母乳量、配方奶量与亲喂时长"/>
         <p className="input-empty-insight">距上次喂奶<em>2小时30分钟</em>，今天已喂奶<em>3次</em>，奶量<em>230毫升</em></p>
       </>:slide===1?<>
         <p className="input-empty-quote"><span>▶ 8″</span>昨天下班后吃了一顿火锅，非常好吃，心情舒畅感到很快乐。</p>
