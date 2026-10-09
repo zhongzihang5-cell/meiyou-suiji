@@ -160,7 +160,7 @@ function InputMethodGuide({onDismiss,scheme}){
     return ()=>{observer.disconnect();window.removeEventListener('resize',position);document.removeEventListener('pointerdown',interact);document.removeEventListener('input',interact);};
   },[]);
   if(anchor===null)return null;
-  return <><button type="button" className="input-guide-shade" style={{top:0,height:Math.max(0,anchor.top-4)}} aria-label="关闭新手引导" onClick={onDismiss}/><div className="input-guide-shade" style={{top:anchor.bottom+4,bottom:0}} aria-hidden="true" onClick={onDismiss}/><aside className="input-method-guide" style={{bottom:window.innerHeight-anchor.top+12}} aria-label="语音和文字记录新手引导">
+  return <><button type="button" className="input-guide-shade" style={{top:0,height:Math.max(0,anchor.top-4)}} aria-label="关闭新手引导" onClick={onDismiss}/><div className="input-guide-shade" style={{top:anchor.bottom+4,bottom:0}} aria-hidden="true" onClick={onDismiss}/><aside className={'input-method-guide'+(scheme==='both'?' is-both':'')} style={{bottom:window.innerHeight-anchor.top+12}} aria-label="语音和文字记录新手引导">
     {scheme==='both'?<>
       <h2>宝宝的日常，你的状态，都能记</h2>
       <p>说话、打字都可以，试试按住下方说一句。</p>
@@ -168,7 +168,6 @@ function InputMethodGuide({onDismiss,scheme}){
       <section className="input-guide-examples"><p>“上午10点，喂了配方奶100毫升”</p><p>“宝宝今天下午2点睡了一觉，5点醒来”</p></section>
       <h3>记自己</h3>
       <section className="input-guide-examples"><p>“今天月经来了，有点头痛，心情烦躁”</p><p>“早上称了体重，58公斤”</p></section>
-      <div className="input-guide-voice-cue"><span>按住说话，帮你记下来</span></div>
     </>:<>
       <h2>现在，说一句或打字也能记</h2>
       <p>不知道怎么记？看看例子</p>
@@ -193,10 +192,10 @@ function InputEmptyGuide(){
     <article className={'input-empty-card input-empty-slide-'+slide} aria-label={`第${slide+1}张，共4张：${titles[slide]}`}>
       <h2>{titles[slide]}</h2><div className="input-empty-rail"><h3>{slide===1?'9月1日':slide===2?'昨天':'今天'}<small>{slide===1?'周一':slide===2?'周二':'周三'}</small></h3>
       {slide===0?<>
-        <p className="input-empty-quote"><span>▶ 8″</span>上午10点，小豆苗喝了100毫升配方奶，刚换了尿布。</p>
-        <div className="input-empty-baby-row"><img src="assets/baby-feeding-icons/formula.png" alt=""/><div>配方奶：100ml<small>小豆苗 · 10:00</small></div></div>
-        <div className="input-empty-baby-row"><img src="assets/baby-feeding-icons/diaper.png" alt=""/><div>换尿布<small>小豆苗 · 10:00</small></div></div>
-        <div className="input-empty-baby-summary"><b>喂养日常，一句话记下来</b><p>说话、打字都可以<br/>一次也能记录多件事</p></div>
+        <p className="input-empty-quote"><span>▶ 8″</span>上午10点，宝宝喝了100毫升配方奶，刚换了尿布。</p>
+        <div className="input-empty-baby-row"><img src="assets/baby-feeding-icons/formula.png" alt=""/><div>配方奶：100ml<small>宝宝 · 10:00</small></div></div>
+        <div className="input-empty-baby-row"><img src="assets/baby-feeding-icons/diaper.png" alt=""/><div>换尿布<small>宝宝 · 10:00</small></div></div>
+        <p className="input-empty-insight">距上次喂奶<em>2小时30分钟</em>，今天已喂奶<em>3次</em>，奶量<em>230毫升</em></p>
       </>:slide===1?<>
         <p className="input-empty-quote"><span>▶ 8″</span>昨天下班后吃了一顿火锅，非常好吃，心情舒畅感到很快乐。</p>
         <div className="input-empty-chart"><b>✦ 情绪变化曲线</b><svg viewBox="0 0 260 100" role="img" aria-label="情绪变化示例"><rect x="0" y="8" width="260" height="44" rx="10" fill="#fffbe9"/><rect y="58" width="260" height="20" fill="#f0f9fd"/><rect y="84" width="260" height="16" fill="#fff2f5"/><path d="M12 28L53 31L94 31L135 31L176 30L217 23L248 22" fill="none" stroke="#ff70a3" strokeWidth="2"/>{[[12,28],[53,31],[94,31],[135,31],[176,30],[217,23],[248,22]].map(([x,y])=><circle key={x} cx={x} cy={y} r="3.5" fill="#ff70a3"/>)}</svg></div>
