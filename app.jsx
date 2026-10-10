@@ -785,7 +785,8 @@ function App(){
   const [timeline, setTimeline] = useState(initial.timeline);
   const [inputConfirmId,setInputConfirmId] = useState(null);
   const [inputEmptyGuide,setInputEmptyGuide] = useState(false);
-  const [inputGuideScheme,setInputGuideScheme] = useState('bubble');
+  const [inputGuideScheme,setInputGuideScheme] = useState('tour');
+  const [inputGuideKey,setInputGuideKey] = useState(0);
   const [inputGuideVisible,setInputGuideVisible] = useState(()=>{try{return localStorage.getItem('baby-input-guide-seen')!=='1';}catch{return true;}});
   const dismissInputGuide=()=>{setInputGuideVisible(false);try{localStorage.setItem('baby-input-guide-seen','1');}catch{}};
   const [inputScheme,setInputScheme] = useState('independent');
@@ -4279,7 +4280,8 @@ function App(){
         <BabyVoiceOverlay session={babyVoiceSession} success={babyVoiceSuccess}/>
       )}
 
-      {recordLifeMode==='育儿'&&showRecordShell&&!inputFamilyView&&inputGuideScheme!=='none'&&inputGuideVisible?<InputMethodGuide key={inputGuideScheme} scheme={inputGuideScheme} onDismiss={dismissInputGuide}/>:null}
+      {recordLifeMode==='育儿'&&!inputFamilyView&&inputGuideScheme==='tour'&&inputGuideVisible?<BabyDiandiOnboarding key={inputGuideKey} active={showRecordShell&&!inputEmptyGuide&&!isSearchActive&&!showSearchPage&&!babyFeedingDetailOpen&&!inputConfirmId&&!babyVoiceSession.active&&!showPhoto} onDismiss={dismissInputGuide}/>:null}
+      {recordLifeMode==='育儿'&&showRecordShell&&!inputFamilyView&&inputGuideScheme!=='none'&&inputGuideScheme!=='tour'&&inputGuideVisible?<InputMethodGuide key={inputGuideScheme} scheme={inputGuideScheme} onDismiss={dismissInputGuide}/>:null}
       {recordLifeMode==='育儿'&&!inputFamilyView&&inputConfirmId?(()=>{
         const source=InputRecords.all(timeline).find(r=>r.id===inputConfirmId&&r.status==='pending');
         return source?<InputConfirmation key={source.id} source={source} onClose={()=>setInputConfirmId(null)} onConfirm={rows=>{
@@ -4288,7 +4290,7 @@ function App(){
         }}/>:null;
       })():null}
       </div>
-      {recordLifeMode==='育儿'?<InputDemoPanel emptyGuide={inputEmptyGuide} onEmptyGuide={value=>{setInputEmptyGuide(value);setActiveTab('note');setBabyDiscoverVisible(false);setSearchCriteria(null);}} onConfirmDemo={()=>{dismissInputGuide();setActiveTab('note');submitInputRecord('喂了100ml奶');}} guideScheme={inputGuideScheme} onGuideScheme={value=>{setInputGuideScheme(value);setInputGuideVisible(value!=='none');}} onReplayGuide={()=>{if(inputGuideScheme==='none')setInputGuideScheme('bubble');setInputGuideVisible(true);setActiveTab('note');}} scheme={inputScheme} onScheme={setInputScheme} family={inputFamilyView} onFamily={setInputFamilyView} onDemo={(voice,scenario)=>{setActiveTab('note');submitInputRecord(BABY_MULTI_EVENT_DEMO_TEXT,voice?{seconds:12,demo:true}:null,scenario);}}/>:null}
+      {recordLifeMode==='育儿'?<InputDemoPanel emptyGuide={inputEmptyGuide} onEmptyGuide={value=>{setInputEmptyGuide(value);setActiveTab('note');setBabyDiscoverVisible(false);setSearchCriteria(null);}} onConfirmDemo={()=>{dismissInputGuide();setActiveTab('note');submitInputRecord('喂了100ml奶');}} guideScheme={inputGuideScheme} onGuideScheme={value=>{setInputGuideScheme(value);setInputGuideVisible(value!=='none');}} onReplayGuide={()=>{if(inputGuideScheme==='none')setInputGuideScheme('tour');setInputGuideVisible(true);setInputGuideKey(key=>key+1);setActiveTab('note');}} scheme={inputScheme} onScheme={setInputScheme} family={inputFamilyView} onFamily={setInputFamilyView} onDemo={(voice,scenario)=>{setActiveTab('note');submitInputRecord(BABY_MULTI_EVENT_DEMO_TEXT,voice?{seconds:12,demo:true}:null,scenario);}}/>:null}
       {!window.__STANDALONE_LOCKED_SCENE && (
         <div className="demo-controls-stack">
           <DemoSceneBar

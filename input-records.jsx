@@ -177,6 +177,176 @@ function InputMethodGuide({onDismiss,scheme}){
   </aside></>;
 }
 
+const BABY_DIANDI_GUIDE_STEPS = [
+  {
+    title:'宝宝和你，都记在这里',
+    body:'喂奶、睡觉、换尿布，还有你的月经、体重和心情。说一句，就会落在这条时间轴上。',
+  },
+  {
+    title:'按住下方，说一句就行',
+    body:'也可以点左边的键盘打字。宝宝的日常和你自己的状态，放在一句话里就好。',
+    examples:['上午10点，喂了配方奶100毫升','我今天有点头痛，心情烦躁'],
+    hint:'想直接试试，按住高亮区域即可，引导会收起',
+  },
+  {
+    title:'说完，会自动整理好',
+    body:'同一句话里的两件事，会分开保存。',
+  },
+];
+
+function BabyDiandiOnboarding({active, onDismiss}){
+  const [step, setStep] = React.useState(0);
+  const [hole, setHole] = React.useState(null);
+  const dismissRef = React.useRef(onDismiss);
+  dismissRef.current = onDismiss;
+  const nextRef = React.useRef(null);
+
+  React.useLayoutEffect(()=>{
+    if(!active) return undefined;
+    const phone = document.querySelector('.phone');
+    if(!phone) return undefined;
+    const measure = ()=>{
+      const pr = phone.getBoundingClientRect();
+      if(step === 1){
+        const input = phone.querySelector('.dock-input-row');
+        if(!input){ setHole(null); return; }
+        const rect = input.getBoundingClientRect();
+        const pad = 6;
+        setHole({
+          top:rect.top - pr.top - pad,
+          left:Math.max(8, rect.left - pr.left - pad),
+          width:rect.width + pad * 2,
+          height:rect.height + pad * 2,
+          radius:22,
+          phoneHeight:pr.height,
+        });
+        return;
+      }
+      const header = phone.querySelector('.stream-header');
+      const dock = phone.querySelector('.dock-wrap');
+      const top = header ? header.getBoundingClientRect().bottom - pr.top + 8 : 108;
+      const dockTop = dock ? dock.getBoundingClientRect().top - pr.top : pr.height - 200;
+      setHole({
+        top,
+        left:12,
+        width:Math.max(120, pr.width - 24),
+        height:Math.max(120, dockTop - top - 8),
+        radius:16,
+        phoneHeight:pr.height,
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(phone);
+    window.addEventListener('resize', measure);
+    return ()=>{ observer.disconnect(); window.removeEventListener('resize', measure); };
+  }, [active, step]);
+
+  React.useEffect(()=>{
+    if(!active) return undefined;
+    const onKey = (event)=>{ if(event.key === 'Escape') dismissRef.current(); };
+    document.addEventListener('keydown', onKey);
+    return ()=>document.removeEventListener('keydown', onKey);
+  }, [active]);
+
+  React.useEffect(()=>{
+    if(!active || step !== 1) return undefined;
+    const onDown = (event)=>{
+      if(event.target.closest?.('.dock-input-row')) dismissRef.current();
+    };
+    document.addEventListener('pointerdown', onDown);
+    return ()=>document.removeEventListener('pointerdown', onDown);
+  }, [active, step]);
+
+  React.useEffect(()=>{
+    if(active) nextRef.current?.focus();
+  }, [active, step]);
+
+  if(!active) return null;
+  const copy = BABY_DIANDI_GUIDE_STEPS[step];
+  const cardStyle = !hole
+    ? {top:140}
+    : step === 1
+      ? {bottom:Math.max(16, hole.phoneHeight - hole.top + 12)}
+      : step === 2
+        ? {top:hole.top + Math.max(12, (hole.height - 250) / 2)}
+        : {bottom:Math.max(16, hole.phoneHeight - (hole.top + hole.height) + 12)};
+  const shades = hole
+    ? [
+        {top:0, left:0, right:0, height:Math.max(0, hole.top)},
+        {top:hole.top, left:0, width:Math.max(0, hole.left), height:hole.height},
+        {top:hole.top, left:hole.left + hole.width, right:0, height:hole.height},
+        {top:hole.top + hole.height, left:0, right:0, bottom:0},
+      ]
+    : [{inset:0}];
+
+  return (
+    <div className="baby-onboard" role="presentation">
+      {shades.map((style, index)=>(
+        <button
+          key={index}
+          type="button"
+          className="baby-onboard-shade"
+          style={style}
+          aria-label={index === 0 ? '跳过新手引导' : undefined}
+          aria-hidden={index === 0 ? undefined : 'true'}
+          tabIndex={index === 0 ? 0 : -1}
+          onClick={()=>dismissRef.current()}
+        />
+      ))}
+      {hole ? <div className="baby-onboard-ring" style={{top:hole.top, left:hole.left, width:hole.width, height:hole.height, borderRadius:hole.radius}}/> : null}
+      <section
+        className={'baby-onboard-card' + (step === 1 ? ' is-input' : '')}
+        style={cardStyle}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="baby-onboard-title"
+        aria-describedby="baby-onboard-body"
+      >
+        <div className="baby-onboard-top">
+          <span>点滴新手引导</span>
+          <i aria-hidden="true">{[0,1,2].map((item)=><b key={item} className={item === step ? 'is-on' : ''}/>)}</i>
+          <button type="button" aria-label="跳过新手引导" onClick={()=>dismissRef.current()}>×</button>
+        </div>
+        <h2 id="baby-onboard-title">{copy.title}</h2>
+        <p id="baby-onboard-body">{copy.body}</p>
+        {copy.examples ? (
+          <div className="baby-onboard-examples">
+            {copy.examples.map((example)=><p key={example}>“{example}”</p>)}
+          </div>
+        ) : null}
+        {step === 2 ? (
+          <div className="baby-onboard-results" aria-label="整理结果示例">
+            <p>例如，说完一句会变成</p>
+            <div>
+              <img src="assets/baby-feeding-icons/formula.png" alt=""/>
+              <span><b>小豆苗 · 配方奶 100毫升</b><small>宝宝记录，可与亲友一起看</small></span>
+            </div>
+            <div>
+              <em>你</em>
+              <span><b>头痛</b><small>身体状态，只留给自己</small></span>
+            </div>
+          </div>
+        ) : null}
+        {copy.hint ? <p className="baby-onboard-hint">{copy.hint}</p> : null}
+        <div className="baby-onboard-actions">
+          {step === 0
+            ? <button type="button" className="baby-onboard-secondary" onClick={()=>dismissRef.current()}>跳过</button>
+            : <button type="button" className="baby-onboard-secondary" onClick={()=>setStep((value)=>value - 1)}>上一步</button>}
+          <button
+            ref={nextRef}
+            type="button"
+            className="baby-onboard-next"
+            onClick={()=>step === 2 ? dismissRef.current() : setStep((value)=>value + 1)}
+          >
+            {step === 2 ? '开始记录' : '下一步'}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function InputEmptyGuide(){
   const [slide,setSlide]=React.useState(0);
   const [bottom,setBottom]=React.useState(240);
@@ -213,7 +383,7 @@ function InputEmptyGuide(){
 
 function InputDemoPanel({scheme,onScheme,family,onFamily,onDemo,onConfirmDemo,emptyGuide,onEmptyGuide,guideScheme,onGuideScheme,onReplayGuide}){
   const [open,setOpen]=React.useState(false), [scenario,setScenario]=React.useState('success');
-  return <aside className="input-demo-panel"><button className="input-demo-toggle" onClick={()=>setOpen(!open)} aria-expanded={open}>交互方案 {open?'×':'⚙'}</button>{open?<div className="input-demo-body"><h2>点滴交互探索</h2><label>时间轴内容<select aria-label="空值引导" value={emptyGuide?'empty':'records'} onChange={e=>onEmptyGuide(e.target.value==='empty')}><option value="records">显示已有记录</option><option value="empty">空值引导 · 5秒自动轮播</option></select></label><label>输入方式新手引导<select aria-label="新手引导方案" value={guideScheme} onChange={e=>onGuideScheme(e.target.value)}><option value="bubble">方案一 · 输入栏轻提示</option><option value="none">不展示引导</option><option value="both">方案二 · 宝宝和自己都能记</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={onReplayGuide}>重新展示引导</button></div><label>时间轴展示<select aria-label="时间轴展示方案" value={scheme} onChange={e=>onScheme(e.target.value)}><option value="independent">方案一 · 独立卡片</option><option value="grouped">方案二 · 紧凑记录组</option></select></label><label>查看视角<select aria-label="查看视角" value={family?'family':'self'} onChange={e=>onFamily(e.target.value==='family')}><option value="self">本人</option><option value="family">亲友（共享记录）</option></select></label><label>下次演示结果<select aria-label="演示提取结果" value={scenario} onChange={e=>setScenario(e.target.value)}><option value="success">正常提取</option><option value="failed">提取失败</option><option value="analysis-failed">反馈失败</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={()=>onDemo(false,scenario)}>发送文字示例</button><button disabled={family} onClick={()=>onDemo(true,scenario)}>发送语音示例</button></div><label>信息不足时的确认</label><div className="input-demo-actions"><button disabled={family} onClick={()=>{setOpen(false);onConfirmDemo();}}>体验信息补充确认</button></div><p>发送“喂了100ml奶”，提取后选择奶类和宝宝，再确认保存。</p><p>本地规则模拟提取，等待 3 秒。语音示例使用文字朗读，不是真实录音。</p></div>:null}</aside>;
+  return <aside className="input-demo-panel"><button className="input-demo-toggle" onClick={()=>setOpen(!open)} aria-expanded={open}>交互方案 {open?'×':'⚙'}</button>{open?<div className="input-demo-body"><h2>点滴交互探索</h2><label>时间轴内容<select aria-label="空值引导" value={emptyGuide?'empty':'records'} onChange={e=>onEmptyGuide(e.target.value==='empty')}><option value="records">显示已有记录</option><option value="empty">空值引导 · 5秒自动轮播</option></select></label><label>新手引导<select aria-label="新手引导方案" value={guideScheme} onChange={e=>onGuideScheme(e.target.value)}><option value="tour">方案三 · 点滴新手引导</option><option value="bubble">方案一 · 输入栏轻提示</option><option value="both">方案二 · 宝宝和自己都能记</option><option value="none">不展示引导</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={onReplayGuide}>重新展示引导</button></div><label>时间轴展示<select aria-label="时间轴展示方案" value={scheme} onChange={e=>onScheme(e.target.value)}><option value="independent">方案一 · 独立卡片</option><option value="grouped">方案二 · 紧凑记录组</option></select></label><label>查看视角<select aria-label="查看视角" value={family?'family':'self'} onChange={e=>onFamily(e.target.value==='family')}><option value="self">本人</option><option value="family">亲友（共享记录）</option></select></label><label>下次演示结果<select aria-label="演示提取结果" value={scenario} onChange={e=>setScenario(e.target.value)}><option value="success">正常提取</option><option value="failed">提取失败</option><option value="analysis-failed">反馈失败</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={()=>onDemo(false,scenario)}>发送文字示例</button><button disabled={family} onClick={()=>onDemo(true,scenario)}>发送语音示例</button></div><label>信息不足时的确认</label><div className="input-demo-actions"><button disabled={family} onClick={()=>{setOpen(false);onConfirmDemo();}}>体验信息补充确认</button></div><p>发送“喂了100ml奶”，提取后选择奶类和宝宝，再确认保存。</p><p>点滴新手引导分三步：认识时间轴、按住说话、看记录如何分成宝宝和自己。点输入栏会收起引导。</p><p>本地规则模拟提取，等待 3 秒。语音示例使用文字朗读，不是真实录音。</p></div>:null}</aside>;
 }
 
-Object.assign(window,{InputSourceCard,InputProvenance,InputRecordEditors,InputDemoPanel,InputRecordContext,InputConfirmation,InputMethodGuide,InputEmptyGuide});
+Object.assign(window,{InputSourceCard,InputProvenance,InputRecordEditors,InputDemoPanel,InputRecordContext,InputConfirmation,InputMethodGuide,InputEmptyGuide,BabyDiandiOnboarding});
