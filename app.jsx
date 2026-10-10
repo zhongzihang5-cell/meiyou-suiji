@@ -786,6 +786,7 @@ function App(){
   const [inputConfirmId,setInputConfirmId] = useState(null);
   const [inputEmptyGuide,setInputEmptyGuide] = useState(false);
   const [inputGuideScheme,setInputGuideScheme] = useState('bubble');
+  const [feedingHistoryGuide,setFeedingHistoryGuide] = useState(false);
   const [inputGuideVisible,setInputGuideVisible] = useState(()=>{try{return localStorage.getItem('baby-input-guide-seen')!=='1';}catch{return true;}});
   const dismissInputGuide=()=>{setInputGuideVisible(false);try{localStorage.setItem('baby-input-guide-seen','1');}catch{}};
   const [inputScheme,setInputScheme] = useState('independent');
@@ -2695,7 +2696,8 @@ function App(){
   const finishInputRecord = (source,records,failed=false,scenario='success')=>{
       const stream=streamRef.current,node=stream?.querySelector(`[data-input-id="${source.id}"]`);
       if(node&&stream){const offset=node.getBoundingClientRect().top-stream.getBoundingClientRect().top;if(offset>=0&&offset<stream.clientHeight-100)inputResultAnchor.current={id:source.id,offset};}
-      const resolved={...source,status:failed?'failed':'done',feedbackStatus:scenario==='analysis-failed'?'failed':'done',feedbackRecord:window.InputRecords.feedbackRecord(records)};
+      const feedbackRecord=!failed&&scenario!=='no-analysis'?window.InputRecords.feedbackRecord(records):null;
+      const resolved={...source,status:failed?'failed':'done',feedbackStatus:feedbackRecord?'processing':'none',feedbackRecord};
       setTimeline(blocks=>{
         const currentSource=window.InputRecords.all(blocks).find(r=>r.id===source.id);
         if(!currentSource)return blocks;
@@ -2715,6 +2717,13 @@ function App(){
         });
         return refreshBabyFeedingLatestMarks(next);
       });
+      if(feedbackRecord){
+        const timer=setTimeout(()=>{
+          inputPendingTimers.current.delete(timer);
+          setTimeline(blocks=>blocks.map(b=>b.type==='day'?{...b,items:(b.items||b.entries||[]).map(r=>r.id===source.id&&r.feedbackStatus==='processing'?{...r,feedbackStatus:scenario==='analysis-failed'?'failed':'done'}:r),entries:undefined}:b));
+        },3000);
+        inputPendingTimers.current.add(timer);
+      }
   };
   useEffect(()=>{
     const open=e=>setInputConfirmId(e.detail);
@@ -4280,6 +4289,7 @@ function App(){
       )}
 
       {recordLifeMode==='育儿'&&showRecordShell&&!inputFamilyView&&inputGuideScheme!=='none'&&inputGuideVisible?<InputMethodGuide key={inputGuideScheme} scheme={inputGuideScheme} onDismiss={dismissInputGuide}/>:null}
+      {recordLifeMode==='育儿'&&showRecordShell&&!inputFamilyView&&feedingHistoryGuide&&!(inputGuideVisible&&inputGuideScheme!=='none')&&!babyFeedingDetailOpen&&!sharedFeedingHistoryOpen&&!showSearchPage&&!inputConfirmId?<FeedingHistoryGuide onDismiss={()=>setFeedingHistoryGuide(false)}/>:null}
       {recordLifeMode==='育儿'&&!inputFamilyView&&inputConfirmId?(()=>{
         const source=InputRecords.all(timeline).find(r=>r.id===inputConfirmId&&r.status==='pending');
         return source?<InputConfirmation key={source.id} source={source} onClose={()=>setInputConfirmId(null)} onConfirm={rows=>{
@@ -4288,7 +4298,7 @@ function App(){
         }}/>:null;
       })():null}
       </div>
-      {recordLifeMode==='育儿'?<InputDemoPanel emptyGuide={inputEmptyGuide} onEmptyGuide={value=>{setInputEmptyGuide(value);setActiveTab('note');setBabyDiscoverVisible(false);setSearchCriteria(null);}} onConfirmDemo={()=>{dismissInputGuide();setActiveTab('note');submitInputRecord('喂了100ml奶');}} guideScheme={inputGuideScheme} onGuideScheme={value=>{setInputGuideScheme(value);setInputGuideVisible(value!=='none');}} onReplayGuide={()=>{if(inputGuideScheme==='none')setInputGuideScheme('bubble');setInputGuideVisible(true);setActiveTab('note');}} scheme={inputScheme} onScheme={setInputScheme} family={inputFamilyView} onFamily={setInputFamilyView} onDemo={(voice,scenario)=>{setActiveTab('note');submitInputRecord(BABY_MULTI_EVENT_DEMO_TEXT,voice?{seconds:12,demo:true}:null,scenario);}}/>:null}
+      {recordLifeMode==='育儿'?<InputDemoPanel historyGuide={feedingHistoryGuide} onHistoryGuide={value=>{setFeedingHistoryGuide(value);if(value){dismissInputGuide();setReviewUpdateGuide(null);setFeedingMigrationGuideOpen(false);setActiveTab('note');}}} emptyGuide={inputEmptyGuide} onEmptyGuide={value=>{setInputEmptyGuide(value);setActiveTab('note');setBabyDiscoverVisible(false);setSearchCriteria(null);}} onConfirmDemo={()=>{dismissInputGuide();setActiveTab('note');submitInputRecord('喂了100ml奶');}} guideScheme={inputGuideScheme} onGuideScheme={value=>{setInputGuideScheme(value);setInputGuideVisible(value!=='none');}} onReplayGuide={()=>{if(inputGuideScheme==='none')setInputGuideScheme('bubble');setInputGuideVisible(true);setActiveTab('note');}} scheme={inputScheme} onScheme={setInputScheme} family={inputFamilyView} onFamily={setInputFamilyView} onDemo={(voice,scenario)=>{setActiveTab('note');submitInputRecord(BABY_MULTI_EVENT_DEMO_TEXT,voice?{seconds:12,demo:true}:null,scenario);}}/>:null}
       {!window.__STANDALONE_LOCKED_SCENE && (
         <div className="demo-controls-stack">
           <DemoSceneBar

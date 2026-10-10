@@ -60,15 +60,21 @@ function InputResultRow({record,showHistory=true}){
 function InputSourceCard({item}){
   const related=item.relatedRecords||[];
   const tags=InputRecords.subjectTags(related);
+  const analyzing=item.feedbackStatus==='processing';
+  const analysisFinished=item.feedbackStatus==='done'||item.feedbackStatus==='failed';
+  const statusText=item.status==='processing'?'正在识别记录…'
+    :item.status==='failed'||!related.length?'未识别出记录，输入内容已保留'
+    :analyzing?`已生成${related.length}条记录 · AI分析中…`
+    :analysisFinished?'':`已生成${related.length}条记录`;
   return <article className={'input-source-card'+(item.grouped?' is-grouped':'')} data-input-id={item.id}>
     <div className="input-source-heading"><time>{item.time}</time></div>
     <div className="input-source-content" role="button" tabIndex="0" aria-label="编辑原始输入" onClick={()=>window.dispatchEvent(new CustomEvent('open-input-source',{detail:item.id}))} onKeyDown={e=>{if(e.target===e.currentTarget&&(e.key==='Enter'||e.key===' ')){e.preventDefault();window.dispatchEvent(new CustomEvent('open-input-source',{detail:item.id}));}}}>
       <p className="input-original-copy">{item.voice?<InputVoice source={{...item,text:item.originalText}}/>:null}<span>{item.originalText}</span></p>
       {tags.length?<div className="input-tags">{tags.map(group=><div className="input-tag-row" key={group.subject}><span className="input-subject-tag">{group.subject}</span>{group.labels.map(label=><span key={label}>{label}</span>)}</div>)}</div>:null}
     </div>
-    {item.status==='pending'?<button className="input-confirm-resume" onClick={()=>window.dispatchEvent(new CustomEvent('confirm-input-records',{detail:item.id}))}>待确认 · 补充信息后保存 ›</button>:item.status==='processing'?<div className="input-extract-status" role="status"><span className="input-ai-spin">✦</span>记录提取中<span className="input-extract-dots">···</span></div>:related.length&&item.status!=='failed'?null:<div className="input-extract-status" role="status">{item.status==='failed'?'已保存':'原文已保存，未提取出记录'}</div>}
+    {item.status==='pending'?<button className="input-confirm-resume" onClick={()=>window.dispatchEvent(new CustomEvent('confirm-input-records',{detail:item.id}))}>待确认 · 补充信息后保存 ›</button>:statusText?<div className="input-extract-status" role="status">{item.status==='processing'||analyzing?<span className="input-ai-spin" aria-hidden="true">✦</span>:null}<span>{statusText}</span></div>:null}
     {item.grouped&&related.length?<div className="input-results">{related.map(r=><InputResultRow key={r.id} record={r}/>)}</div>:null}
-    {item.status==='done'&&item.feedbackStatus!=='failed'&&item.feedbackRecord?<BabyRecordFeedback item={item.feedbackRecord} showFeedingFeedback={['配方奶','母乳','瓶喂母乳'].includes(item.feedbackRecord.feedType)}/>:null}
+    {item.status==='done'&&item.feedbackStatus==='done'&&item.feedbackRecord?<BabyRecordFeedback item={item.feedbackRecord} showFeedingFeedback={['配方奶','母乳','瓶喂母乳'].includes(item.feedbackRecord.feedType)}/>:null}
   </article>;
 }
 
@@ -83,7 +89,7 @@ function InputSourceEditor({source,records,onClose,onSave,onDelete}){
       <section className="input-editor-section input-source-time"><label><span>记录时间</span><span className="input-source-time-value">{dateLabel} {time}<i>›</i></span><input aria-label="记录时间" type="time" value={time} onChange={e=>setTime(e.target.value)}/></label></section>
       <section className="input-editor-section input-source-copy"><h2>记录内容</h2>{source.voice?<div className="input-original-copy"><InputVoice source={{...source,text:source.originalText}}/></div>:null}<textarea aria-label="原始输入内容" value={text} onChange={e=>setText(e.target.value)}/></section>
       <p className="input-editor-hint">修改文字不会修改识别内容</p>
-      <section className="input-editor-section input-source-recognized"><h2>识别内容</h2>{records.length?records.map(r=><InputResultRow record={r} key={r.id} showHistory={false}/>):<p className="input-editor-hint">{source.status==='processing'?'记录提取中':source.status==='pending'?'待确认记录信息':'暂无识别内容'}</p>}</section>
+      <section className="input-editor-section input-source-recognized"><h2>识别内容</h2>{records.length?records.map(r=><InputResultRow record={r} key={r.id} showHistory={false}/>):<p className="input-editor-hint">{source.status==='processing'?'正在识别记录…':source.status==='pending'?'待确认记录信息':'暂无识别内容'}</p>}</section>
       <button className="input-source-delete" onClick={onDelete}>删除这条记录</button>
     </main>
   </section>;
@@ -145,13 +151,14 @@ function InputConfirmation({source,onClose,onConfirm}){
 
 function InputMethodGuide({onDismiss,scheme}){
   const [anchor,setAnchor]=React.useState(null);
+  const showBoth=scheme==='both'||scheme==='both-two';
   const dismissRef=React.useRef(onDismiss);dismissRef.current=onDismiss;
   React.useLayoutEffect(()=>{
     const dock=document.querySelector('.phone .dock-wrap');
     if(!dock)return;
     const input=dock.querySelector('.dock-input-row');
     if(!input)return;
-    if(scheme==='both')input.querySelector('[aria-label="切换语音"]')?.click();
+    if(showBoth)input.querySelector('[aria-label="切换语音"]')?.click();
     const position=()=>{const rect=input.getBoundingClientRect();setAnchor({top:rect.top,bottom:rect.bottom});};
     position();const observer=new ResizeObserver(position);observer.observe(dock);observer.observe(input);
     window.addEventListener('resize',position);
@@ -160,21 +167,73 @@ function InputMethodGuide({onDismiss,scheme}){
     return ()=>{observer.disconnect();window.removeEventListener('resize',position);document.removeEventListener('pointerdown',interact);document.removeEventListener('input',interact);};
   },[]);
   if(anchor===null)return null;
-  return <><button type="button" className="input-guide-shade" style={{top:0,height:Math.max(0,anchor.top-4)}} aria-label="关闭新手引导" onClick={onDismiss}/><div className="input-guide-shade" style={{top:anchor.bottom+4,bottom:0}} aria-hidden="true" onClick={onDismiss}/><aside className={'input-method-guide'+(scheme==='both'?' is-both':'')} style={{bottom:window.innerHeight-anchor.top+12}} aria-label="语音和文字记录新手引导">
-    {scheme==='both'?<>
-      <h2>宝宝的日常，你的状态，都能记</h2>
-      <p>说话、打字都可以，试试按住下方说一句。</p>
+  return <><button type="button" className="input-guide-shade" style={{top:0,height:Math.max(0,anchor.top-4)}} aria-label="关闭新手引导" onClick={onDismiss}/><div className="input-guide-shade" style={{top:anchor.bottom+4,bottom:0}} aria-hidden="true" onClick={onDismiss}/><aside className={'input-method-guide'+(showBoth?' is-both':'')} style={{bottom:window.innerHeight-anchor.top+12}} aria-label="语音和文字记录新手引导">
+    {showBoth?<>
+      <h2>说一说，就能记下来</h2>
+      <p>试试用语音或文字记录宝宝的日常和自己的状态，帮你自动整理成记录</p>
       <h3>记宝宝</h3>
-      <section className="input-guide-examples"><p>“上午10点，喂了配方奶100毫升”</p><p>“宝宝今天下午2点睡了一觉，5点醒来”</p></section>
+      <section className="input-guide-examples"><p>“上午10点，喂了配方奶100毫升”</p>{scheme==='both'?<p>“宝宝今天下午2点睡了一觉，5点醒来”</p>:null}</section>
       <h3>记自己</h3>
-      <section className="input-guide-examples"><p>“今天月经来了，有点头痛，心情烦躁”</p><p>“早上称了体重，58公斤”</p></section>
+      <section className="input-guide-examples"><p>“今天月经来了，有点头痛，心情烦躁”</p>{scheme==='both'?<p>“早上称了体重，58公斤”</p>:null}</section>
     </>:<>
-      <h2>现在，说一句或打字也能记</h2>
+      <h2>喂养记录有新方式啦</h2>
+      <p>现在可以直接说出或输入宝宝的喂养情况，帮你自动整理成记录。</p>
       <p>不知道怎么记？看看例子</p>
       <section className="input-guide-examples"><p>“上午10点，喂了配方奶100毫升”</p><p>“宝宝今天下午2点睡了一觉，5点醒来”</p></section>
       <div><span>按住说话，也可以点键盘输入</span></div>
     </>}
   </aside></>;
+}
+
+function FeedingHistoryGuide({onDismiss}){
+  const [anchor,setAnchor]=React.useState(null);
+  const targetRef=React.useRef(null);
+  const dismissRef=React.useRef(onDismiss);dismissRef.current=onDismiss;
+  React.useLayoutEffect(()=>{
+    const phone=document.querySelector('.phone');
+    const stream=phone?.querySelector('.suiji-stream');
+    if(!stream)return;
+    let frame=0;
+    const measure=()=>{
+      const phoneRect=phone.getBoundingClientRect(),streamRect=stream.getBoundingClientRect();
+      const header=phone.querySelector('.stream-header')?.getBoundingClientRect();
+      const dock=phone.querySelector('.dock-wrap')?.getBoundingClientRect();
+      const top=Math.max(8,streamRect.top,header?.bottom||0);
+      const bottom=Math.min(window.innerHeight-8,streamRect.bottom,dock?.top||window.innerHeight);
+      const entries=[...stream.querySelectorAll('.tl-baby-feed-overview-link,.tl-ai-record-feedback-card footer button,.input-history-link')].reverse();
+      const target=entries.find(el=>{
+        const r=el.getBoundingClientRect();
+        return r.width>0&&r.height>0&&r.top>=top+4&&r.bottom<=bottom-4&&r.left>=phoneRect.left&&r.right<=phoneRect.right;
+      });
+      targetRef.current=target||null;
+      if(!target){setAnchor(null);return;}
+      const r=target.getBoundingClientRect();
+      setAnchor({left:r.left-phoneRect.left,top:r.top,width:r.width,height:r.height,phoneLeft:phoneRect.left,phoneWidth:phoneRect.width,above:r.top-top>=160,baby:(target.textContent.match(/(?:进入|查看)(.+?)的/)||[])[1]||'宝宝'});
+    };
+    const schedule=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(measure);};
+    const observer=new MutationObserver(schedule);observer.observe(stream,{childList:true,subtree:true,characterData:true,attributes:true});
+    const resize=new ResizeObserver(schedule);resize.observe(phone);resize.observe(stream);
+    const onKey=e=>{if(e.key==='Escape')dismissRef.current();};
+    document.addEventListener('scroll',schedule,true);window.addEventListener('resize',schedule);document.addEventListener('keydown',onKey);
+    schedule();
+    return ()=>{cancelAnimationFrame(frame);observer.disconnect();resize.disconnect();document.removeEventListener('scroll',schedule,true);window.removeEventListener('resize',schedule);document.removeEventListener('keydown',onKey);};
+  },[]);
+  if(!anchor)return null;
+  const {left,top,width,height,phoneLeft,phoneWidth,above,baby}=anchor;
+  const hole={left:Math.max(0,left-4),top:top-4,width:Math.min(phoneWidth,width+8),height:height+8};
+  const close=()=>onDismiss();
+  const open=()=>{const target=targetRef.current;onDismiss();target?.click();};
+  return <div className="feeding-history-guide" style={{left:phoneLeft,width:phoneWidth}} aria-label="喂养入口新手引导">
+    <button className="feeding-history-shade" style={{top:0,left:0,right:0,height:hole.top}} aria-label="关闭喂养入口引导" onClick={close}/>
+    <div className="feeding-history-shade" style={{top:hole.top+hole.height,left:0,right:0,bottom:0}} onClick={close}/>
+    <div className="feeding-history-shade" style={{top:hole.top,left:0,width:hole.left,height:hole.height}} onClick={close}/>
+    <div className="feeding-history-shade" style={{top:hole.top,left:hole.left+hole.width,right:0,height:hole.height}} onClick={close}/>
+    <button className="feeding-history-spotlight" style={hole} aria-label={'查看'+baby+'的喂养历史'} onClick={open}/>
+    <section className={'feeding-history-bubble'+(above?' is-above':' is-below')} style={above?{bottom:window.innerHeight-hole.top+12}:{top:hole.top+hole.height+12}} role="dialog" aria-label="历史喂养记录提示" onClick={close}>
+      <h2>历史喂养记录在这里</h2>
+      <p>点击{above?'下方':'上方'}入口，查看{baby}之前的喂养记录。</p>
+    </section>
+  </div>;
 }
 
 function InputEmptyGuide(){
@@ -211,9 +270,9 @@ function InputEmptyGuide(){
   </section>;
 }
 
-function InputDemoPanel({scheme,onScheme,family,onFamily,onDemo,onConfirmDemo,emptyGuide,onEmptyGuide,guideScheme,onGuideScheme,onReplayGuide}){
+function InputDemoPanel({scheme,onScheme,family,onFamily,onDemo,onConfirmDemo,emptyGuide,onEmptyGuide,guideScheme,onGuideScheme,onReplayGuide,historyGuide,onHistoryGuide}){
   const [open,setOpen]=React.useState(false), [scenario,setScenario]=React.useState('success');
-  return <aside className="input-demo-panel"><button className="input-demo-toggle" onClick={()=>setOpen(!open)} aria-expanded={open}>交互方案 {open?'×':'⚙'}</button>{open?<div className="input-demo-body"><h2>点滴交互探索</h2><label>时间轴内容<select aria-label="空值引导" value={emptyGuide?'empty':'records'} onChange={e=>onEmptyGuide(e.target.value==='empty')}><option value="records">显示已有记录</option><option value="empty">空值引导 · 5秒自动轮播</option></select></label><label>输入方式新手引导<select aria-label="新手引导方案" value={guideScheme} onChange={e=>onGuideScheme(e.target.value)}><option value="bubble">方案一 · 输入栏轻提示</option><option value="none">不展示引导</option><option value="both">方案二 · 宝宝和自己都能记</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={onReplayGuide}>重新展示引导</button></div><label>时间轴展示<select aria-label="时间轴展示方案" value={scheme} onChange={e=>onScheme(e.target.value)}><option value="independent">方案一 · 独立卡片</option><option value="grouped">方案二 · 紧凑记录组</option></select></label><label>查看视角<select aria-label="查看视角" value={family?'family':'self'} onChange={e=>onFamily(e.target.value==='family')}><option value="self">本人</option><option value="family">亲友（共享记录）</option></select></label><label>下次演示结果<select aria-label="演示提取结果" value={scenario} onChange={e=>setScenario(e.target.value)}><option value="success">正常提取</option><option value="failed">提取失败</option><option value="analysis-failed">反馈失败</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={()=>onDemo(false,scenario)}>发送文字示例</button><button disabled={family} onClick={()=>onDemo(true,scenario)}>发送语音示例</button></div><label>信息不足时的确认</label><div className="input-demo-actions"><button disabled={family} onClick={()=>{setOpen(false);onConfirmDemo();}}>体验信息补充确认</button></div><p>发送“喂了100ml奶”，提取后选择奶类和宝宝，再确认保存。</p><p>本地规则模拟提取，等待 3 秒。语音示例使用文字朗读，不是真实录音。</p></div>:null}</aside>;
+  return <aside className="input-demo-panel"><button className="input-demo-toggle" onClick={()=>setOpen(!open)} aria-expanded={open}>交互方案 {open?'×':'⚙'}</button>{open?<div className="input-demo-body"><h2>点滴交互探索</h2><label>时间轴内容<select aria-label="空值引导" value={emptyGuide?'empty':'records'} onChange={e=>onEmptyGuide(e.target.value==='empty')}><option value="records">显示已有记录</option><option value="empty">空值引导 · 5秒自动轮播</option></select></label><label>输入方式新手引导<select aria-label="新手引导方案" value={guideScheme} onChange={e=>onGuideScheme(e.target.value)}><option value="none">不展示引导</option><option value="bubble">方案一 · 只记宝宝</option><option value="both-two">方案二 · 宝宝和自己都能记示例2条</option><option value="both">方案三 · 宝宝和自己都能记示例4条</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={onReplayGuide}>重新展示引导</button></div><label>喂养入口引导<select aria-label="喂养入口引导方案" value={historyGuide?'spotlight':'none'} onChange={e=>{onHistoryGuide(e.target.value==='spotlight');setOpen(false);}}><option value="none">不展示引导</option><option value="spotlight">蒙层 + 气泡文字引导</option></select></label><label>时间轴展示<select aria-label="时间轴展示方案" value={scheme} onChange={e=>onScheme(e.target.value)}><option value="independent">方案一 · 独立卡片</option><option value="grouped">方案二 · 紧凑记录组</option></select></label><label>查看视角<select aria-label="查看视角" value={family?'family':'self'} onChange={e=>onFamily(e.target.value==='family')}><option value="self">本人</option><option value="family">亲友（共享记录）</option></select></label><label>下次演示结果<select aria-label="演示提取结果" value={scenario} onChange={e=>setScenario(e.target.value)}><option value="success">有记录 · 有分析</option><option value="no-analysis">有记录 · 无分析</option><option value="failed">未识别出记录</option><option value="analysis-failed">有记录 · 分析失败</option></select></label><div className="input-demo-actions"><button disabled={family} onClick={()=>onDemo(false,scenario)}>发送文字示例</button><button disabled={family} onClick={()=>onDemo(true,scenario)}>发送语音示例</button></div><label>信息不足时的确认</label><div className="input-demo-actions"><button disabled={family} onClick={()=>{setOpen(false);onConfirmDemo();}}>体验信息补充确认</button></div><p>发送“喂了100ml奶”，提取后选择奶类和宝宝，再确认保存。</p><p>本地模拟识别需3秒；有分析时再等待3秒。语音示例使用文字朗读，不是真实录音。</p></div>:null}</aside>;
 }
 
-Object.assign(window,{InputSourceCard,InputProvenance,InputRecordEditors,InputDemoPanel,InputRecordContext,InputConfirmation,InputMethodGuide,InputEmptyGuide});
+Object.assign(window,{InputSourceCard,InputProvenance,InputRecordEditors,InputDemoPanel,InputRecordContext,InputConfirmation,InputMethodGuide,FeedingHistoryGuide,InputEmptyGuide});
